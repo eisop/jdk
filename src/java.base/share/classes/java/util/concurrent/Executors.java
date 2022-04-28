@@ -74,7 +74,7 @@ import sun.security.util.SecurityConstants;
  * @since 1.5
  * @author Doug Lea
  */
-@AnnotatedFor({"interning"})
+@AnnotatedFor({"interning", "nullness"})
 public @UsesObjectEquals class Executors {
 
     /**
@@ -422,7 +422,7 @@ public @UsesObjectEquals class Executors {
      * @return a callable object
      * @throws NullPointerException if task null
      */
-    public static Callable<Object> callable(Runnable task) {
+    public static Callable<@Nullable Object> callable(Runnable task) {
         if (task == null)
             throw new NullPointerException();
         return new RunnableAdapter<Object>(task, null);
@@ -435,7 +435,7 @@ public @UsesObjectEquals class Executors {
      * @return a callable object
      * @throws NullPointerException if action null
      */
-    public static Callable<Object> callable(final PrivilegedAction<?> action) {
+    public static Callable<@Nullable Object> callable(final PrivilegedAction<?> action) {
         if (action == null)
             throw new NullPointerException();
         return new Callable<Object>() {
@@ -450,7 +450,7 @@ public @UsesObjectEquals class Executors {
      * @return a callable object
      * @throws NullPointerException if action null
      */
-    public static Callable<Object> callable(final PrivilegedExceptionAction<?> action) {
+    public static Callable<@Nullable Object> callable(final PrivilegedExceptionAction<?> action) {
         if (action == null)
             throw new NullPointerException();
         return new Callable<Object>() {
