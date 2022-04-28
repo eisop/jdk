@@ -835,7 +835,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1) {
+    static <E extends Object> List<E> of(E e1) {
         return new ImmutableCollections.List12<>(e1);
     }
 
@@ -852,7 +852,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2) {
+    static <E extends Object> List<E> of(E e1, E e2) {
         return new ImmutableCollections.List12<>(e1, e2);
     }
 
@@ -870,7 +870,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3) {
         return new ImmutableCollections.ListN<>(e1, e2, e3);
     }
 
@@ -889,7 +889,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3, E e4) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3, E e4) {
         return new ImmutableCollections.ListN<>(e1, e2, e3, e4);
     }
 
@@ -909,7 +909,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3, E e4, E e5) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3, E e4, E e5) {
         return new ImmutableCollections.ListN<>(e1, e2, e3, e4, e5);
     }
 
@@ -930,7 +930,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6) {
         return new ImmutableCollections.ListN<>(e1, e2, e3, e4, e5,
                                                 e6);
     }
@@ -953,7 +953,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7) {
         return new ImmutableCollections.ListN<>(e1, e2, e3, e4, e5,
                                                 e6, e7);
     }
@@ -977,7 +977,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8) {
         return new ImmutableCollections.ListN<>(e1, e2, e3, e4, e5,
                                                 e6, e7, e8);
     }
@@ -1002,7 +1002,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9) {
         return new ImmutableCollections.ListN<>(e1, e2, e3, e4, e5,
                                                 e6, e7, e8, e9);
     }
@@ -1028,7 +1028,7 @@ public interface List<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9, E e10) {
+    static <E extends Object> List<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9, E e10) {
         return new ImmutableCollections.ListN<>(e1, e2, e3, e4, e5,
                                                 e6, e7, e8, e9, e10);
     }
@@ -1060,7 +1060,7 @@ public interface List<E> extends Collection<E> {
      */
     @SafeVarargs
     @SuppressWarnings("varargs")
-    static <E> List<E> of(E... elements) {
+    static <E extends Object> List<E> of(E... elements) {
         switch (elements.length) { // implicit null check of elements
             case 0:
                 return ImmutableCollections.emptyList();
@@ -1089,7 +1089,7 @@ public interface List<E> extends Collection<E> {
      * @throws NullPointerException if coll is null, or if it contains any nulls
      * @since 10
      */
-    static <E> List<E> copyOf(Collection<? extends E> coll) {
+    static <E extends Object> List<E> copyOf(Collection<? extends E> coll) {
         return ImmutableCollections.listCopy(coll);
     }
 }
