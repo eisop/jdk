@@ -436,7 +436,7 @@ public @UsesObjectEquals class Executors {
      * @return a callable object
      * @throws NullPointerException if action null
      */
-    public static Callable<@Nullable Object> callable(final PrivilegedAction<?> action) {
+    public static Callable<@PolyNull Object> callable(final PrivilegedAction<@PolyNull ?> action) {
         if (action == null)
             throw new NullPointerException();
         return new Callable<Object>() {
