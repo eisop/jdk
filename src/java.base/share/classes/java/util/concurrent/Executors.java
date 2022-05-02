@@ -37,6 +37,7 @@ package java.util.concurrent;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import static java.lang.ref.Reference.reachabilityFence;
@@ -451,7 +452,7 @@ public @UsesObjectEquals class Executors {
      * @return a callable object
      * @throws NullPointerException if action null
      */
-    public static Callable<@Nullable Object> callable(final PrivilegedExceptionAction<?> action) {
+    public static Callable<@PolyNull Object> callable(final PrivilegedExceptionAction<@PolyNull ?> action) {
         if (action == null)
             throw new NullPointerException();
         return new Callable<Object>() {
