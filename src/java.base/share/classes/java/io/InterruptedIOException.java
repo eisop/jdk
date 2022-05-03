@@ -25,6 +25,9 @@
 
 package java.io;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Signals that an I/O operation has been interrupted. An
  * <code>InterruptedIOException</code> is thrown to indicate that an
@@ -39,6 +42,7 @@ package java.io;
  * @see     java.lang.Thread#interrupt()
  * @since   1.0
  */
+@AnnotatedFor({"nullness"})
 public
 class InterruptedIOException extends IOException {
     private static final long serialVersionUID = 4020568460727500567L;
@@ -60,7 +64,7 @@ class InterruptedIOException extends IOException {
      *
      * @param   s   the detail message.
      */
-    public InterruptedIOException(String s) {
+    public InterruptedIOException(@Nullable String s) {
         super(s);
     }
 
