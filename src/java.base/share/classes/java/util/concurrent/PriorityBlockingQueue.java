@@ -1036,7 +1036,7 @@ public class PriorityBlockingQueue<E extends Object> extends AbstractQueue<E>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean removeAll(Collection<? extends @NonNull Object> c) {
+    public boolean removeAll(Collection<?> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> c.contains(e));
     }
@@ -1044,7 +1044,7 @@ public class PriorityBlockingQueue<E extends Object> extends AbstractQueue<E>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean retainAll(Collection<? extends @NonNull Object> c) {
+    public boolean retainAll(Collection<?> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> !c.contains(e));
     }
