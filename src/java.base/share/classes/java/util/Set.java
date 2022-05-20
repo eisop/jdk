@@ -27,6 +27,7 @@ package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.dataflow.qual.Pure;
@@ -483,7 +484,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1) {
+    static <E extends @NonNull Object> Set<E> of(E e1) {
         return new ImmutableCollections.Set12<>(e1);
     }
 
@@ -500,7 +501,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2) {
         return new ImmutableCollections.Set12<>(e1, e2);
     }
 
@@ -518,7 +519,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3) {
         return new ImmutableCollections.SetN<>(e1, e2, e3);
     }
 
@@ -537,7 +538,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3, E e4) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3, E e4) {
         return new ImmutableCollections.SetN<>(e1, e2, e3, e4);
     }
 
@@ -557,7 +558,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3, E e4, E e5) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3, E e4, E e5) {
         return new ImmutableCollections.SetN<>(e1, e2, e3, e4, e5);
     }
 
@@ -578,7 +579,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6) {
         return new ImmutableCollections.SetN<>(e1, e2, e3, e4, e5,
                                                e6);
     }
@@ -601,7 +602,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7) {
         return new ImmutableCollections.SetN<>(e1, e2, e3, e4, e5,
                                                e6, e7);
     }
@@ -625,7 +626,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8) {
         return new ImmutableCollections.SetN<>(e1, e2, e3, e4, e5,
                                                e6, e7, e8);
     }
@@ -650,7 +651,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9) {
         return new ImmutableCollections.SetN<>(e1, e2, e3, e4, e5,
                                                e6, e7, e8, e9);
     }
@@ -676,7 +677,7 @@ public interface Set<E> extends Collection<E> {
      *
      * @since 9
      */
-    static <E extends Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9, E e10) {
+    static <E extends @NonNull Object> Set<E> of(E e1, E e2, E e3, E e4, E e5, E e6, E e7, E e8, E e9, E e10) {
         return new ImmutableCollections.SetN<>(e1, e2, e3, e4, e5,
                                                e6, e7, e8, e9, e10);
     }
@@ -709,7 +710,7 @@ public interface Set<E> extends Collection<E> {
      */
     @SafeVarargs
     @SuppressWarnings("varargs")
-    static <E extends Object> Set<E> of(E... elements) {
+    static <E extends @NonNull Object> Set<E> of(E... elements) {
         switch (elements.length) { // implicit null check of elements
             case 0:
                 return ImmutableCollections.emptySet();
@@ -740,7 +741,7 @@ public interface Set<E> extends Collection<E> {
      * @since 10
      */
     @SuppressWarnings("unchecked")
-    static <E extends Object> Set<E> copyOf(Collection<? extends E> coll) {
+    static <E extends @NonNull Object> Set<E> copyOf(Collection<? extends E> coll) {
         if (coll instanceof ImmutableCollections.AbstractImmutableSet) {
             return (Set<E>)coll;
         } else {

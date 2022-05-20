@@ -85,7 +85,7 @@ import java.util.function.Predicate;
  * @param <E> the type of elements held in this queue
  */
 @AnnotatedFor({"nullness"})
-public class LinkedBlockingQueue<E extends Object> extends AbstractQueue<E>
+public class LinkedBlockingQueue<E extends @NonNull Object> extends AbstractQueue<E>
         implements BlockingQueue<E>, java.io.Serializable {
     private static final long serialVersionUID = -6903933977591709194L;
 

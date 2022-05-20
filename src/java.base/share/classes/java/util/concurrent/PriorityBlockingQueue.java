@@ -118,7 +118,7 @@ import jdk.internal.misc.SharedSecrets;
  */
 @AnnotatedFor({"nullness"})
 @SuppressWarnings("unchecked")
-public class PriorityBlockingQueue<E extends Object> extends AbstractQueue<E>
+public class PriorityBlockingQueue<E extends @NonNull Object> extends AbstractQueue<E>
     implements BlockingQueue<E>, java.io.Serializable {
     private static final long serialVersionUID = 5595510919245408276L;
 

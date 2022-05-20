@@ -82,7 +82,7 @@ import java.util.function.Predicate;
  * @param <E> the type of elements held in this deque
  */
 @AnnotatedFor({"nullness"})
-public class LinkedBlockingDeque<E extends Object>
+public class LinkedBlockingDeque<E extends @NonNull Object>
     extends AbstractQueue<E>
     implements BlockingDeque<E>, java.io.Serializable {
 

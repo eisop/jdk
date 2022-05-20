@@ -90,7 +90,7 @@ import java.util.function.Predicate;
  * @param <E> the type of elements held in this queue
  */
 @AnnotatedFor({"nullness"})
-public class ArrayBlockingQueue<E extends Object> extends AbstractQueue<E>
+public class ArrayBlockingQueue<E extends @NonNull Object> extends AbstractQueue<E>
         implements BlockingQueue<E>, java.io.Serializable {
 
     /*
