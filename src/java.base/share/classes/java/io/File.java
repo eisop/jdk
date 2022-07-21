@@ -844,6 +844,7 @@ public class File
      *          java.lang.SecurityManager#checkRead(java.lang.String)}
      *          method denies read access to the file or directory
      */
+    @SideEffectFree 
     public boolean exists() {
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
