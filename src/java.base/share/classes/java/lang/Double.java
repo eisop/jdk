@@ -817,6 +817,7 @@ public final class Double extends Number implements Comparable<Double> {
      * @return a hash code value for a {@code double} value.
      * @since 1.8
      */
+    @Pure
     @StaticallyExecutable
     public static int hashCode(double value) {
         long bits = doubleToLongBits(value);
