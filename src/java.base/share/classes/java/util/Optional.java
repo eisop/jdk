@@ -415,7 +415,7 @@ public final @NonNull class Optional<T> {
      */
     @Pure
     @EnsuresQualifier(expression = "this", qualifier = Present.class)
-    public T orElseThrow(@Present Optional<T> this) {
+    public @NonNull T orElseThrow(@Present Optional<T> this) {
         if (value == null) {
             throw new NoSuchElementException("No value present");
         }
@@ -440,7 +440,7 @@ public final @NonNull class Optional<T> {
      *          supplying function is {@code null}
      */
     @EnsuresQualifier(expression = "this", qualifier = Present.class)
-    public <X extends Throwable> T orElseThrow(@Present Optional<T> this, Supplier<? extends X> exceptionSupplier) throws X {
+    public <X extends Throwable> @NonNull T orElseThrow(@Present Optional<T> this, Supplier<? extends X> exceptionSupplier) throws X {
         if (value != null) {
             return value;
         } else {
