@@ -583,7 +583,7 @@ public class LinkedBlockingDeque<E extends Object>
         }
     }
 
-    public boolean removeFirstOccurrence(Object o) {
+    public boolean removeFirstOccurrence(@Nullable Object o) {
         if (o == null) return false;
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -600,7 +600,7 @@ public class LinkedBlockingDeque<E extends Object>
         }
     }
 
-    public boolean removeLastOccurrence(Object o) {
+    public boolean removeLastOccurrence(@Nullable Object o) {
         if (o == null) return false;
         final ReentrantLock lock = this.lock;
         lock.lock();
@@ -792,7 +792,7 @@ public class LinkedBlockingDeque<E extends Object>
      * @param o element to be removed from this deque, if present
      * @return {@code true} if this deque changed as a result of the call
      */
-    public boolean remove(Object o) {
+    public boolean remove(@Nullable Object o) {
         return removeFirstOccurrence(o);
     }
 
@@ -1346,7 +1346,7 @@ public class LinkedBlockingDeque<E extends Object>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean removeAll(Collection<? extends @NonNull Object> c) {
+    public boolean removeAll(Collection<?> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> c.contains(e));
     }
@@ -1354,7 +1354,7 @@ public class LinkedBlockingDeque<E extends Object>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean retainAll(Collection<? extends @NonNull Object> c) {
+    public boolean retainAll(Collection<?> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> !c.contains(e));
     }
