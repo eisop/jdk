@@ -27,6 +27,7 @@ package java.util;
 
 import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.checkerframework.checker.mustcall.qual.MustCallAlias;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -2007,7 +2008,7 @@ public final class Formatter implements Closeable, Flushable {
      *         Destination for the formatted output.  If {@code a} is
      *         {@code null} then a {@link StringBuilder} will be created.
      */
-    public @MustCallAlias Formatter(@MustCallAlias Appendable a) {
+    public @MustCallAlias Formatter(@MustCallAlias @Nullable Appendable a) {
         this(Locale.getDefault(Locale.Category.FORMAT), nonNullAppendable(a));
     }
 
@@ -2024,7 +2025,7 @@ public final class Formatter implements Closeable, Flushable {
      *         formatting.  If {@code l} is {@code null} then no localization
      *         is applied.
      */
-    public Formatter(Locale l) {
+    public Formatter(@Nullable Locale l) {
         this(l, new StringBuilder());
     }
 
@@ -2040,7 +2041,7 @@ public final class Formatter implements Closeable, Flushable {
      *         formatting.  If {@code l} is {@code null} then no localization
      *         is applied.
      */
-    public @MustCallAlias Formatter(@MustCallAlias Appendable a, Locale l) {
+    public @MustCallAlias Formatter(@MustCallAlias @Nullable Appendable a, @Nullable Locale l) {
         this(l, nonNullAppendable(a));
     }
 
@@ -2149,7 +2150,7 @@ public final class Formatter implements Closeable, Flushable {
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      */
-    public Formatter(String fileName, String csn, Locale l)
+    public Formatter(String fileName, String csn, @Nullable Locale l)
         throws FileNotFoundException, UnsupportedEncodingException
     {
         this(toCharset(csn), l, new File(fileName));
@@ -2184,7 +2185,7 @@ public final class Formatter implements Closeable, Flushable {
      * @throws NullPointerException
      *         if {@code fileName} or {@code charset} is {@code null}.
      */
-    public Formatter(String fileName, Charset charset, Locale l) throws IOException {
+    public Formatter(String fileName, Charset charset, @Nullable Locale l) throws IOException {
         this(Objects.requireNonNull(charset, "charset"), l, new File(fileName));
     }
 
@@ -2293,7 +2294,7 @@ public final class Formatter implements Closeable, Flushable {
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      */
-    public Formatter(File file, String csn, Locale l)
+    public Formatter(File file, String csn, @Nullable Locale l)
         throws FileNotFoundException, UnsupportedEncodingException
     {
         this(toCharset(csn), l, file);
@@ -2328,7 +2329,7 @@ public final class Formatter implements Closeable, Flushable {
      * @throws NullPointerException
      *         if {@code file} or {@code charset} is {@code null}.
      */
-    public Formatter(File file, Charset charset, Locale l) throws IOException {
+    public Formatter(File file, Charset charset, @Nullable Locale l) throws IOException {
         this(Objects.requireNonNull(charset, "charset"), l, file);
     }
 
@@ -2420,7 +2421,7 @@ public final class Formatter implements Closeable, Flushable {
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      */
-    public @MustCallAlias Formatter(@MustCallAlias OutputStream os, String csn, Locale l)
+    public @MustCallAlias Formatter(@MustCallAlias OutputStream os, String csn, @Nullable Locale l)
         throws UnsupportedEncodingException
     {
         this(l, new BufferedWriter(new OutputStreamWriter(os, csn)));
@@ -2445,7 +2446,7 @@ public final class Formatter implements Closeable, Flushable {
      * @throws NullPointerException
      *         if {@code os} or {@code charset} is {@code null}.
      */
-    public @MustCallAlias Formatter(@MustCallAlias OutputStream os, Charset charset, Locale l) {
+    public @MustCallAlias Formatter(@MustCallAlias OutputStream os, Charset charset, @Nullable Locale l) {
         this(l, new BufferedWriter(new OutputStreamWriter(os, charset)));
     }
 
@@ -2476,7 +2477,7 @@ public final class Formatter implements Closeable, Flushable {
      *          If this formatter has been closed by invoking its {@link
      *          #close()} method
      */
-    public Locale locale() {
+    public @Nullable Locale locale() {
         ensureOpen();
         return l;
     }
@@ -2593,7 +2594,7 @@ public final class Formatter implements Closeable, Flushable {
      * @return  The last exception thrown by the Appendable or {@code null} if
      *          no such exception exists.
      */
-    public IOException ioException() {
+    public @Nullable IOException ioException() {
         return lastException;
     }
 
@@ -2628,7 +2629,7 @@ public final class Formatter implements Closeable, Flushable {
      * @return  This formatter
      */
     @FormatMethod
-    public @MustCallAlias Formatter format(@MustCallAlias Formatter this, String format, Object ... args) {
+    public @MustCallAlias Formatter format(@MustCallAlias Formatter this, String format, @Nullable Object ... args) {
         return format(l, format, args);
     }
 
@@ -2668,7 +2669,7 @@ public final class Formatter implements Closeable, Flushable {
      * @return  This formatter
      */
     @FormatMethod
-    public @MustCallAlias Formatter format(@MustCallAlias Formatter this, Locale l, String format, Object ... args) {
+    public @MustCallAlias Formatter format(@MustCallAlias Formatter this, @Nullable Locale l, String format, @Nullable Object ... args) {
         ensureOpen();
 
         // index of last argument referenced
