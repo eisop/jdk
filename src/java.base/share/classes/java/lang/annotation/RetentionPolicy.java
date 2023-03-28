@@ -25,6 +25,8 @@
 
 package java.lang.annotation;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Annotation retention policy.  The constants of this enumerated class
  * describe the various policies for retaining annotations.  They are used
@@ -34,6 +36,7 @@ package java.lang.annotation;
  * @author  Joshua Bloch
  * @since 1.5
  */
+@AnnotatedFor("nullness")
 public enum RetentionPolicy {
     /**
      * Annotations are to be discarded by the compiler.

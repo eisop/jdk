@@ -25,6 +25,8 @@
 
 package java.lang.annotation;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Indicates the contexts in which an annotation interface is applicable. The
  * declaration contexts and type contexts in which an annotation interface may
@@ -78,6 +80,7 @@ package java.lang.annotation;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
+@AnnotatedFor("nullness")
 public @interface Target {
     /**
      * Returns an array of the kinds of elements an annotation interface

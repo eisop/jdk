@@ -25,6 +25,8 @@
 
 package java.lang.annotation;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * The annotation interface {@code java.lang.annotation.Repeatable} is
  * used to indicate that the annotation interface whose declaration it
@@ -39,6 +41,7 @@ package java.lang.annotation;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
+@AnnotatedFor("nullness")
 public @interface Repeatable {
     /**
      * Indicates the <em>containing annotation interface</em> for the

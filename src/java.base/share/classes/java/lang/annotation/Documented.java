@@ -25,6 +25,8 @@
 
 package java.lang.annotation;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * If the annotation {@code @Documented} is present on the declaration
  * of an annotation interface <i>A</i>, then any {@code @A} annotation on
@@ -51,5 +53,6 @@ package java.lang.annotation;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
+@AnnotatedFor("nullness")
 public @interface Documented {
 }

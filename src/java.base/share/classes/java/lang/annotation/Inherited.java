@@ -25,6 +25,8 @@
 
 package java.lang.annotation;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Indicates that an annotation interface is automatically inherited.  If
  * an Inherited meta-annotation is present on an annotation interface
@@ -49,5 +51,6 @@ package java.lang.annotation;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
+@AnnotatedFor("nullness")
 public @interface Inherited {
 }

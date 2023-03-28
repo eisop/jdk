@@ -25,6 +25,8 @@
 
 package java.lang.annotation;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * The constants of this enumerated class provide a simple classification of the
  * syntactic locations where annotations may appear in a Java program. These
@@ -72,6 +74,7 @@ package java.lang.annotation;
  * @jls 9.6.4.1 @Target
  * @jls 4.1 The Kinds of Types and Values
  */
+@AnnotatedFor("nullness")
 public enum ElementType {
     /** Class, interface (including annotation interface), enum, or record
      * declaration */

@@ -25,6 +25,8 @@
 
 package java.lang.annotation;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown to indicate that a program has attempted to access an element of
  * an annotation interface that was added to the annotation interface definition
@@ -38,6 +40,7 @@ package java.lang.annotation;
  * @see     java.lang.reflect.AnnotatedElement
  * @since 1.5
  */
+@AnnotatedFor("nullness")
 public class IncompleteAnnotationException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = 8445097402741811912L;
