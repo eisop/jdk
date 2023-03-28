@@ -25,8 +25,8 @@
 
 package java.lang.annotation;
 import java.lang.reflect.Method;
-import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
  * Thrown to indicate that a program has attempted to access an element of
