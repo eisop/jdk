@@ -1419,7 +1419,7 @@ public interface Stream<T> extends BaseStream<T, Stream<T>> {
      *         is non-null, otherwise an empty stream
      * @since 9
      */
-    public static<T> Stream<T> ofNullable(T t) {
+    public static<T> Stream<T> ofNullable(@Nullable T t) {
         return t == null ? Stream.empty()
                          : StreamSupport.stream(new Streams.StreamBuilderImpl<>(t), false);
     }
