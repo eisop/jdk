@@ -3,7 +3,7 @@ jobs:
 - job: build_jdk
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk17-plus:latest
+  container: wmdietl/cf-ubuntu-jdk17-plus:latest
   steps:
   - bash: |
       whoami
@@ -12,7 +12,12 @@ jobs:
       ls -al
       env | sort
     displayName: show environment
-  - bash: pwd && ls && bash ./configure --with-jtreg=/usr/share/jtreg --disable-warnings-as-errors
+  - bash: |
+      wget https://builds.shipilev.net/jtreg/jtreg-6.2%2B1.zip -O /tmp/$USER/jtreg.zip
+      unzip /tmp/$USER/jtreg.zip -d /tmp/$USER/
+      chmod +x /tmp/$USER/jtreg/bin/jtdiff /tmp/$USER/jtreg/bin/jtreg
+    displayName: download jtreg
+  - bash: pwd && ls && bash ./configure --with-jtreg=/tmp/$USER/jtreg --disable-warnings-as-errors
     displayName: configure
   - bash: make jdk
     timeoutInMinutes: 90
@@ -27,7 +32,7 @@ jobs:
 - job: build_jdk17u
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk17-plus:latest
+  container: wmdietl/cf-ubuntu-jdk17-plus:latest
   timeoutInMinutes: 0
   steps:
   - bash: |
@@ -37,6 +42,11 @@ jobs:
       ls -al
       env | sort
     displayName: show environment
+  - bash: |
+      wget https://builds.shipilev.net/jtreg/jtreg-6.2%2B1.zip -O /tmp/$USER/jtreg.zip
+      unzip /tmp/$USER/jtreg.zip -d /tmp/$USER/
+      chmod +x /tmp/$USER/jtreg/bin/jtdiff /tmp/$USER/jtreg/bin/jtreg
+    displayName: download jtreg
   - bash: |
       set -ex
       if [ -d /tmp/$USER/plume-scripts ]; \
@@ -48,16 +58,18 @@ jobs:
   # If the depth is too small, the merge will fail.
   - bash: |
       set -ex
-      /tmp/$USER/plume-scripts/git-clone-related eisop jdk17u ../jdk17u -q --depth 99
+      /tmp/$USER/plume-scripts/git-clone-related typetools jdk17u ../jdk17u -q --depth 999
     displayName: clone-related-jdk17u
   - bash: |
       set -ex
       git config --global user.email "you@example.com"
       git config --global user.name "Your Name"
+      git config --global pull.ff true
+      git config --global pull.rebase false
       eval `/tmp/$USER/plume-scripts/ci-info eisop`
-      cd ../jdk17u && git pull --no-edit https://github.com/${CI_ORGANIZATION}/jdk ${CI_BRANCH} || (echo "Merge failed; see 'Pull request merge conflicts' at https://github.com/eisop/jdk/blob/master/README" && false)
+      cd ../jdk17u && git pull --no-edit https://github.com/${CI_ORGANIZATION}/jdk ${CI_BRANCH} || (git --version && git show && echo "Merge failed; see 'Pull request merge conflicts' at https://github.com/eisop/jdk/blob/master/README" && false)
     displayName: git merge
-  - bash: cd ../jdk17u && export JT_HOME=/usr/share/jtreg && bash ./configure --with-jtreg --disable-warnings-as-errors
+  - bash: cd ../jdk17u && export JT_HOME=/tmp/$USER/jtreg && bash ./configure --with-jtreg=/tmp/$USER/jtreg --disable-warnings-as-errors
     displayName: configure
   - bash: cd ../jdk17u && make jdk
     displayName: make jdk
@@ -77,7 +89,7 @@ jobs:
   timeoutInMinutes: 105
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk8:latest
+  container: wmdietl/cf-ubuntu-jdk8:latest
   steps:
   - checkout: self
     fetchDepth: 25
@@ -92,7 +104,7 @@ jobs:
   timeoutInMinutes: 105
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk11:latest
+  container: wmdietl/cf-ubuntu-jdk11:latest
   steps:
   - checkout: self
     fetchDepth: 25
@@ -124,7 +136,7 @@ jobs:
   timeoutInMinutes: 105
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk17:latest
+  container: wmdietl/cf-ubuntu-jdk17:latest
   steps:
   - checkout: self
     fetchDepth: 25
@@ -135,11 +147,11 @@ jobs:
   - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
     displayName: test-cftests-all.sh
 
-- job: test_cftests_all_jdk19
+- job: test_cftests_all_jdk_latest
   timeoutInMinutes: 105
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk19:latest
+  container: wmdietl/cf-ubuntu-jdk-latest:latest
   steps:
   - checkout: self
     fetchDepth: 25
@@ -153,7 +165,7 @@ jobs:
 - job: test_daikon
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk17:latest
+  container: wmdietl/cf-ubuntu-jdk17:latest
   timeoutInMinutes: 70
   steps:
   - checkout: self
@@ -168,7 +180,7 @@ jobs:
 - job: test_plume_lib
   pool:
     vmImage: 'ubuntu-latest'
-  container: mdernst/cf-ubuntu-jdk17:latest
+  container: wmdietl/cf-ubuntu-jdk17:latest
   steps:
   - checkout: self
     fetchDepth: 25
