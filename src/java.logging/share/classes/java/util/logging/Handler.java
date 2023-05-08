@@ -27,7 +27,9 @@
 package java.util.logging;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.CFComment;
 
 import java.util.Objects;
 import java.io.UnsupportedEncodingException;
@@ -52,7 +54,7 @@ import java.security.PrivilegedAction;
  * @since 1.4
  */
 
-@AnnotatedFor({"interning"})
+@AnnotatedFor({"interning", "nullness"})
 public abstract @UsesObjectEquals class Handler {
     private static final int offValue = Level.OFF.intValue();
     private final LogManager manager = LogManager.getLogManager();
@@ -138,6 +140,8 @@ public abstract @UsesObjectEquals class Handler {
      * @param  record  description of the log event. A null record is
      *                 silently ignored and is not published
      */
+    @CFComment({"nullness: The doc says null is permitted, but JDK11 has a bug in isLoggable that "
+        + "rejects it, so Handler implementations that call isLoggable would reject null"})
     public abstract void publish(LogRecord record);
 
     /**
@@ -178,7 +182,7 @@ public abstract @UsesObjectEquals class Handler {
      * Return the {@code Formatter} for this {@code Handler}.
      * @return the {@code Formatter} (may be null).
      */
-    public Formatter getFormatter() {
+    public @Nullable Formatter getFormatter() {
         return formatter;
     }
 
@@ -195,7 +199,7 @@ public abstract @UsesObjectEquals class Handler {
      * @throws  UnsupportedEncodingException if the named encoding is
      *          not supported.
      */
-    public synchronized void setEncoding(String encoding)
+    public synchronized void setEncoding(@Nullable String encoding)
                         throws SecurityException, java.io.UnsupportedEncodingException {
         checkPermission();
         if (encoding != null) {
@@ -216,7 +220,7 @@ public abstract @UsesObjectEquals class Handler {
      * @return  The encoding name.  May be null, which indicates the
      *          default encoding should be used.
      */
-    public String getEncoding() {
+    public @Nullable String getEncoding() {
         return encoding;
     }
 
@@ -231,7 +235,7 @@ public abstract @UsesObjectEquals class Handler {
      * @throws  SecurityException  if a security manager exists and if
      *             the caller does not have {@code LoggingPermission("control")}.
      */
-    public synchronized void setFilter(Filter newFilter) throws SecurityException {
+    public synchronized void setFilter(@Nullable Filter newFilter) throws SecurityException {
         checkPermission();
         filter = newFilter;
     }
@@ -241,7 +245,7 @@ public abstract @UsesObjectEquals class Handler {
      *
      * @return  a {@code Filter} object (may be null)
      */
-    public Filter getFilter() {
+    public @Nullable Filter getFilter() {
         return filter;
     }
 
@@ -285,7 +289,7 @@ public abstract @UsesObjectEquals class Handler {
      * @param ex     an exception (may be null)
      * @param code   an error code defined in ErrorManager
      */
-    protected void reportError(String msg, Exception ex, int code) {
+    protected void reportError(@Nullable String msg, @Nullable Exception ex, int code) {
         try {
             errorManager.error(msg, ex, code);
         } catch (Exception ex2) {
@@ -338,6 +342,7 @@ public abstract @UsesObjectEquals class Handler {
      * @return true if the {@code LogRecord} would be logged.
      *
      */
+    @CFComment({"nullness: The doc says null is permitted, but JDK11 has a bug that rejects it"})
     public boolean isLoggable(LogRecord record) {
         final int levelValue = getLevel().intValue();
         if (record == null) return false;
