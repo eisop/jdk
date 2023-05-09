@@ -99,7 +99,7 @@ import sun.nio.fs.AbstractFileSystemProvider;
  * @since 1.7
  */
 
-@AnnotatedFor({"interning", "mustcall", "signedness"})
+@AnnotatedFor({"interning", "mustcall", "nullness", "signedness"})
 public final @UsesObjectEquals class Files {
     // buffer size used for reading and writing
     private static final int BUFFER_SIZE = 8192;
