@@ -95,7 +95,7 @@ jobs:
     fetchDepth: 25
   - bash: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
     displayName: clone plume-scripts
-  - bash: /tmp/$USER/plume-scripts/git-clone-related eisop checker-framework
+  - bash: /tmp/$USER/plume-scripts/git-clone-related Ao-senXiong checker-framework polyinitialized
     displayName: clone checker-framework
   - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
     displayName: test-cftests-all.sh
@@ -110,7 +110,7 @@ jobs:
     fetchDepth: 25
   - bash: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
     displayName: clone plume-scripts
-  - bash: /tmp/$USER/plume-scripts/git-clone-related eisop checker-framework
+  - bash: /tmp/$USER/plume-scripts/git-clone-related Ao-senXiong checker-framework polyinitialized
     displayName: clone checker-framework
 # test-cftests-all.sh sometimes runs out of memory, but running its component parts in sequence does not.
 #   - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
@@ -142,7 +142,7 @@ jobs:
     fetchDepth: 25
   - bash: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
     displayName: clone plume-scripts
-  - bash: /tmp/$USER/plume-scripts/git-clone-related eisop checker-framework
+  - bash: /tmp/$USER/plume-scripts/git-clone-related Ao-senXiong checker-framework polyinitialized
     displayName: clone checker-framework
   - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
     displayName: test-cftests-all.sh
@@ -157,7 +157,7 @@ jobs:
     fetchDepth: 25
   - bash: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
     displayName: clone plume-scripts
-  - bash: /tmp/$USER/plume-scripts/git-clone-related eisop checker-framework
+  - bash: /tmp/$USER/plume-scripts/git-clone-related Ao-senXiong checker-framework polyinitialized
     displayName: clone checker-framework
   - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
     displayName: test-cftests-all.sh
@@ -172,7 +172,7 @@ jobs:
     fetchDepth: 25
   - bash: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
     displayName: clone plume-scripts
-  - bash: /tmp/$USER/plume-scripts/git-clone-related eisop checker-framework
+  - bash: /tmp/$USER/plume-scripts/git-clone-related Ao-senXiong checker-framework polyinitialized
     displayName: clone checker-framework
   - bash: (cd ../checker-framework && checker/bin-devel/test-daikon.sh)
     displayName: test-daikon.sh
@@ -186,7 +186,7 @@ jobs:
     fetchDepth: 25
   - bash: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
     displayName: clone plume-scripts
-  - bash: /tmp/$USER/plume-scripts/git-clone-related eisop checker-framework
+  - bash: /tmp/$USER/plume-scripts/git-clone-related Ao-senXiong checker-framework polyinitialized
     displayName: clone checker-framework
   - bash: (cd ../checker-framework && checker/bin-devel/test-plume-lib.sh)
     displayName: test-plume-lib.sh
