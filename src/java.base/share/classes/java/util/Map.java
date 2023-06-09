@@ -1350,7 +1350,7 @@ public interface Map<K, V> {
      * @since 1.8
      */
     default @PolyNull V merge(K key, @NonNull V value,
-            BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+            BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         Objects.requireNonNull(value);
         V oldValue = get(key);

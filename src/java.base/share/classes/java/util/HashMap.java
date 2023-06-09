@@ -1389,7 +1389,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      */
     @Override
     public @PolyNull V merge(K key, @NonNull V value,
-                   BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+                   BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         if (value == null || remappingFunction == null)
             throw new NullPointerException();
         int hash = hash(key);

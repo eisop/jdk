@@ -1637,7 +1637,7 @@ public class Collections {
 
         @Override
         public @PolyNull V merge(K key, @NonNull V value,
-                BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
             throw new UnsupportedOperationException();
         }
 
@@ -2839,7 +2839,7 @@ public class Collections {
         }
         @Override
         public @PolyNull V merge(K key, @NonNull V value,
-                BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
             synchronized (mutex) {return m.merge(key, value, remappingFunction);}
         }
 
@@ -3923,7 +3923,7 @@ public class Collections {
 
         @Override
         public @PolyNull V merge(K key, @NonNull V value,
-                BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
             Objects.requireNonNull(remappingFunction);
             return m.merge(key, value, (v1, v2) -> {
                 V newValue = remappingFunction.apply(v1, v2);
@@ -4924,7 +4924,7 @@ public class Collections {
 
         @Override
         public @PolyNull V merge(K key, @NonNull V value,
-                BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
             throw new UnsupportedOperationException();
         }
 
@@ -5270,7 +5270,7 @@ public class Collections {
 
         @Override
         public @PolyNull V merge(K key, @NonNull V value,
-                BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
             throw new UnsupportedOperationException();
         }
 
