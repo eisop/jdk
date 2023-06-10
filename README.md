@@ -108,17 +108,16 @@ The java.base module contains a copy of the Checker Framework qualifiers (type a
 To update that copy, run from this directory:
 
 (cd $CHECKERFRAMEWORK && rm -rf checker-qual/build/libs && ./gradlew :checker-qual:sourcesJar) && \
-rm -f checker-qual.jar && \
-cp -p $CHECKERFRAMEWORK/checker-qual/build/libs/checker-qual-*-sources.jar checker-qual.jar && \
+rm -f checker-qual-sources.jar && \
+cp -p $CHECKERFRAMEWORK/checker-qual/build/libs/checker-qual-*-sources.jar checker-qual-sources.jar && \
 (cd src/java.base/share/classes && rm -rf org/checkerframework && \
-  unzip ../../../../checker-qual.jar -x 'META-INF*' && \
-  rm -f org/checkerframework/checker/signedness/SignednessUtilExtra.java && \
+  unzip ../../../../checker-qual-sources.jar -x 'META-INF*' && \
   chmod -R u+w org/checkerframework) && \
-jar tf checker-qual.jar | grep '\.java$' | sed 's/\/[^/]*\.java/;/' | sed 's/\//./g' | sed 's/^/    exports /' | sort | uniq
+jar tf checker-qual-sources.jar | grep '\.java$' | sed 's/\/[^/]*\.java/;/' | sed 's/\//./g' | sed 's/^/    exports /' | sort | uniq
 
-Copy the exports lines that were printed by the last command to
+Copy/update the exports lines that were printed by the last command to
 src/java.base/share/classes/module-info.java .
-Commit the changes, including the changed top-level `checker-qual.jar` file.
+Commit the changes. Do not include the top-level `checker-qual-source.jar` file.
 
 
 ## The typetools/jdk17u repository
