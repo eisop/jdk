@@ -107,23 +107,24 @@ resolve conflicts.  Then, discard the branch in the fork of jdk17u.
 The java.base module contains a copy of the Checker Framework qualifiers (type annotations).
 To update that copy, run from this directory:
 
+```
 (cd $CHECKERFRAMEWORK && rm -rf checker-qual/build/libs && ./gradlew :checker-qual:sourcesJar) && \
-rm -f checker-qual.jar && \
-cp -p $CHECKERFRAMEWORK/checker-qual/build/libs/checker-qual-*-sources.jar checker-qual.jar && \
+rm -f checker-qual-sources.jar && \
+cp -p $CHECKERFRAMEWORK/checker-qual/build/libs/checker-qual-*-sources.jar checker-qual-sources.jar && \
 (cd src/java.base/share/classes && rm -rf org/checkerframework && \
-  unzip ../../../../checker-qual.jar -x 'META-INF*' && \
-  rm -f org/checkerframework/checker/signedness/SignednessUtilExtra.java && \
+  unzip ../../../../checker-qual-sources.jar -x 'META-INF*' && \
   chmod -R u+w org/checkerframework) && \
-jar tf checker-qual.jar | grep '\.java$' | sed 's/\/[^/]*\.java/;/' | sed 's/\//./g' | sed 's/^/    exports /' | sort | uniq
+jar tf checker-qual-sources.jar | grep '\.java$' | sed 's/\/[^/]*\.java/;/' | sed 's/\//./g' | sed 's/^/    exports /' | sort | uniq
+```
 
-Copy the exports lines that were printed by the last command to
-src/java.base/share/classes/module-info.java .
-Commit the changes, including the changed top-level `checker-qual.jar` file.
+Copy/update the exports lines that were printed by the last command to
+`src/java.base/share/classes/module-info.java` .
+Commit the changes. Do not include the top-level `checker-qual-source.jar` file.
 
 
 ## The typetools/jdk17u repository
 
-The typetools/jdk17u repository is a merge of `openjdk/jdk17u` and `typetools/jdk`.
+The `typetools/jdk17u` repository is a merge of `openjdk/jdk17u` and `typetools/jdk`.
 That is, it is a fork of `openjdk/jdk17u`, with Checker Framework type annotations.
 
 **Do not edit the `typetools/jdk17u` repository.**
@@ -150,6 +151,7 @@ Clone jdk${VER}u repositories into, say, $t/libraries/ .
 Determine the last commit in both openjdk:jdk and in openjdk:jdk${VER}u:
 run `git log --graph | tac` on both and find the common prefix.
 
+```
 last_common_commit=d562d3fcbe22a0443037c5b447e1a41401275814
 cd $t/libraries
 git clone -- git@github.com:openjdk/jdk.git jdk-fork-openjdk-commit-${last_common_commit}
@@ -158,7 +160,7 @@ git reset --hard ${last_common_commit}
 
 cd $t/libraries/jdk-fork-${USER}-branch-jdk${VER}
 git pull ../jdk-fork-openjdk-commit-${last_common_commit}
-
+```
 
 
 ## Design

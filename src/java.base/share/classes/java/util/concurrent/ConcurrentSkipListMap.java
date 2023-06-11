@@ -1564,7 +1564,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
      * @since 1.8
      */
     public @PolyNull V merge(K key, @NonNull V value,
-                   BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+                   BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         if (key == null || value == null || remappingFunction == null)
             throw new NullPointerException();
         for (;;) {

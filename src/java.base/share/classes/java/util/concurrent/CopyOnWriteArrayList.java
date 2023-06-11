@@ -897,7 +897,7 @@ public class CopyOnWriteArrayList<E>
         setArray(es);
     }
 
-    public void sort(Comparator<? super E> c) {
+    public void sort(@Nullable Comparator<? super E> c) {
         synchronized (lock) {
             sortRange(c, 0, getArray().length);
         }

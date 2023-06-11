@@ -1413,7 +1413,7 @@ public class Vector<E>
 
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized void sort(Comparator<? super E> c) {
+    public synchronized void sort(@Nullable Comparator<? super E> c) {
         final int expectedModCount = modCount;
         Arrays.sort((E[]) elementData, 0, elementCount, c);
         if (modCount != expectedModCount)
