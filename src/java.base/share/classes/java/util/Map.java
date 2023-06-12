@@ -1166,7 +1166,7 @@ public interface Map<K, V> {
      * @since 1.8
      */
     default @PolyNull V computeIfPresent(K key,
-            BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+            BiFunction<? super K, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue;
         if ((oldValue = get(key)) != null) {

@@ -1290,7 +1290,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      */
     @Override
     public @PolyNull V computeIfPresent(K key,
-                              BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                              BiFunction<? super K, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         if (remappingFunction == null)
             throw new NullPointerException();
         Node<K,V> e; V oldValue;
