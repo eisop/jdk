@@ -1335,7 +1335,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
      * @since 1.8
      */
     @Pure
-    public V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, V defaultValue) {
+    public @PolyNull V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, @PolyNull V defaultValue) {
         V v;
         return (v = doGet(key)) == null ? defaultValue : v;
     }

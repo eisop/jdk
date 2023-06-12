@@ -93,7 +93,7 @@ public interface ConcurrentMap<K extends @NonNull Object,V extends @NonNull Obje
      */
     @Override
     @Pure
-    default V getOrDefault(Object key, V defaultValue) {
+    default @PolyNull V getOrDefault(Object key, @PolyNull V defaultValue) {
         V v;
         return ((v = get(key)) != null) ? v : defaultValue;
     }

@@ -1618,7 +1618,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
      * @throws NullPointerException if the specified key is null
      */
     @Pure
-    public V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, V defaultValue) {
+    public @PolyNull V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, @PolyNull V defaultValue) {
         V v;
         return (v = get(key)) == null ? defaultValue : v;
     }
