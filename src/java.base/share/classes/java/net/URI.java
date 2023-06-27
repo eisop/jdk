@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.File;
 import java.io.IOException;
@@ -502,6 +503,7 @@ import java.lang.NullPointerException;  // for javadoc
  * @see <a href="URISyntaxException.html">URISyntaxException</a>
  */
 
+@AnnotatedFor("nullness")
 public final class URI
     implements Comparable<URI>, Serializable
 {
@@ -852,7 +854,7 @@ public final class URI
      *          If the URI string constructed from the given components
      *          violates RFC&nbsp;2396
      */
-    public URI(String scheme, String ssp, String fragment)
+    public URI(@Nullable String scheme, @Nullable String ssp, @Nullable String fragment)
         throws URISyntaxException
     {
         new Parser(toString(scheme, ssp,
