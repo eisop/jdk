@@ -1434,7 +1434,7 @@ public class Properties extends Hashtable<Object,Object> {
 
     @Override
     @Pure
-    public Object getOrDefault(@GuardSatisfied @Nullable @UnknownSignedness Object key, Object defaultValue) {
+    public @PolyNull Object getOrDefault(@GuardSatisfied @Nullable @UnknownSignedness Object key, @PolyNull Object defaultValue) {
         return map.getOrDefault(key, defaultValue);
     }
 
