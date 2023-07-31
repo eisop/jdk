@@ -1618,7 +1618,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
      * @throws NullPointerException if the specified key is null
      */
     @Pure
-    public V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, V defaultValue) {
+    public @PolyNull V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, @PolyNull V defaultValue) {
         V v;
         return (v = get(key)) == null ? defaultValue : v;
     }
@@ -2052,7 +2052,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
      * @throws RuntimeException or Error if the remappingFunction does so,
      *         in which case the mapping is unchanged
      */
-    public @PolyNull V merge(K key, @NonNull V value, BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
+    public @PolyNull V merge(K key, V value, BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
         if (key == null || value == null || remappingFunction == null)
             throw new NullPointerException();
         int h = spread(key.hashCode());

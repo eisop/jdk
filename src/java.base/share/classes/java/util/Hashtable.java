@@ -917,7 +917,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
 
     @Override
     @Pure
-    public synchronized V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, V defaultValue) {
+    public synchronized @PolyNull V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, @PolyNull V defaultValue) {
         V result = get(key);
         return (null == result) ? defaultValue : result;
     }
@@ -1193,7 +1193,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      * remapping function modified this map
      */
     @Override
-    public synchronized @PolyNull V merge(K key, @NonNull V value, BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
+    public synchronized @PolyNull V merge(K key, V value, BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
 
         Entry<?,?> tab[] = table;

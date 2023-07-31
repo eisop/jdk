@@ -572,7 +572,7 @@ public class TreeMap<K,V>
      * mapping function modified this map
      */
     @Override
-    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    public @PolyNull V computeIfAbsent(K key, Function<? super K, ? extends @PolyNull V> mappingFunction) {
         Objects.requireNonNull(mappingFunction);
         V newValue;
         Entry<K,V> t = root;
@@ -642,7 +642,7 @@ public class TreeMap<K,V>
      * remapping function modified this map
      */
     @Override
-    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    public @PolyNull V computeIfPresent(K key, BiFunction<? super K, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         Entry<K,V> oldEntry = getEntry(key);
         if (oldEntry != null && oldEntry.value != null) {
@@ -663,7 +663,7 @@ public class TreeMap<K,V>
      * remapping function modified this map
      */
     @Override
-    public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    public @PolyNull V compute(K key, BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V newValue;
         Entry<K,V> t = root;

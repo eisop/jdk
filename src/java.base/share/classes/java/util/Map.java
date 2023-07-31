@@ -707,6 +707,9 @@ public interface Map<K, V> {
      * @since 1.8
      */
     @Pure
+    @CFComment("nullness: We can't use @PolyNull V because the output can be null even when"
+        + " defaultValue is not (namely, when the map contains a null value). "
+        + "Map subclasses that forbid null values can use @PolyNull V.")
     default V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, V defaultValue) {
         V v;
         return (((v = get(key)) != null) || containsKey(key))
@@ -1166,7 +1169,7 @@ public interface Map<K, V> {
      * @since 1.8
      */
     default @PolyNull V computeIfPresent(K key,
-            BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+            BiFunction<? super K, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue;
         if ((oldValue = get(key)) != null) {

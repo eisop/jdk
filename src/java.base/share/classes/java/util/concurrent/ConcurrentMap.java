@@ -93,7 +93,7 @@ public interface ConcurrentMap<K extends @NonNull Object,V extends @NonNull Obje
      */
     @Override
     @Pure
-    default V getOrDefault(Object key, V defaultValue) {
+    default @PolyNull V getOrDefault(Object key, @PolyNull V defaultValue) {
         V v;
         return ((v = get(key)) != null) ? v : defaultValue;
     }
@@ -483,8 +483,8 @@ public interface ConcurrentMap<K extends @NonNull Object,V extends @NonNull Obje
      * @since 1.8
      */
     @Override
-    default @PolyNull V merge(K key, @NonNull V value,
-            BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
+    default @PolyNull V merge(K key, V value,
+            BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         Objects.requireNonNull(value);
         retry: for (;;) {
