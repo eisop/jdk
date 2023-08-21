@@ -26,6 +26,7 @@
 package java.lang.ref;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.function.Consumer;
@@ -120,7 +121,7 @@ public @UsesObjectEquals class ReferenceQueue<T> {
      * @return  A reference object, if one was immediately available,
      *          otherwise {@code null}
      */
-    public Reference<? extends T> poll() {
+    public @Nullable Reference<? extends T> poll() {
         if (head == null)
             return null;
         synchronized (lock) {
@@ -148,7 +149,7 @@ public @UsesObjectEquals class ReferenceQueue<T> {
      * @throws  InterruptedException
      *          If the timeout wait is interrupted
      */
-    public Reference<? extends T> remove(long timeout)
+    public @Nullable Reference<? extends T> remove(long timeout)
         throws IllegalArgumentException, InterruptedException
     {
         if (timeout < 0) {
