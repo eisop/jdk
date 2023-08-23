@@ -30,6 +30,7 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -418,7 +419,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(Thread list[]) {
+    public @NonNegative int enumerate(@PolyNull Thread[] list) {
         checkAccess();
         return enumerate(list, 0, true);
     }
@@ -456,7 +457,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(Thread list[], boolean recurse) {
+    public @NonNegative int enumerate(@PolyNull Thread[] list, boolean recurse) {
         checkAccess();
         return enumerate(list, 0, recurse);
     }
@@ -560,7 +561,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(ThreadGroup list[]) {
+    public @NonNegative int enumerate(@PolyNull ThreadGroup[] list) {
         checkAccess();
         return enumerate(list, 0, true);
     }
@@ -598,7 +599,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(ThreadGroup list[], boolean recurse) {
+    public @NonNegative int enumerate(@PolyNull ThreadGroup[] list, boolean recurse) {
         checkAccess();
         return enumerate(list, 0, recurse);
     }
