@@ -1046,7 +1046,7 @@ public @UsesObjectEquals class KeyStore {
      * @throws    UnrecoverableKeyException if the key cannot be recovered
      * (e.g., the given password is wrong).
      */
-    public final @Nullable Key getKey(String alias, char[] password)
+    public final @Nullable Key getKey(String alias, char @Nullable [] password)
         throws KeyStoreException, NoSuchAlgorithmException,
             UnrecoverableKeyException
     {
