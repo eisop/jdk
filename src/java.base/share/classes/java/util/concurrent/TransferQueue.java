@@ -35,6 +35,8 @@
 
 package java.util.concurrent;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * A {@link BlockingQueue} in which producers may wait for consumers
  * to receive elements.  A {@code TransferQueue} may be useful for
@@ -65,7 +67,8 @@ package java.util.concurrent;
  * @author Doug Lea
  * @param <E> the type of elements held in this queue
  */
-public interface TransferQueue<E> extends BlockingQueue<E> {
+@AnnotatedFor("nullness")
+public interface TransferQueue<E extends Object> extends BlockingQueue<E> {
     /**
      * Transfers the element to a waiting consumer immediately, if possible.
      *
