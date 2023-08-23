@@ -54,7 +54,7 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      * @throws    IOException If any of the usual Input/Output
      *            related exceptions occur.
      */
-    public Object readObject()
+    public @Nullable Object readObject()
         throws ClassNotFoundException, IOException;
 
     /**
