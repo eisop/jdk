@@ -24,6 +24,7 @@
  */
 package java.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -57,5 +58,5 @@ public interface Observer {
      * @param   arg   an argument passed to the {@code notifyObservers}
      *                 method.
      */
-    void update(Observable o, Object arg);
+    void update(Observable o, @Nullable Object arg);
 }
