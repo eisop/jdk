@@ -965,7 +965,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
 
     @EnsuresKeyFor(value={"#1"}, map={"this"})
     @Override
-    public synchronized V putIfAbsent(K key, V value) {
+    public synchronized @Nullable V putIfAbsent(K key, V value) {
         Objects.requireNonNull(value);
 
         // Makes sure the key is not already in the hashtable.
@@ -1036,7 +1036,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
     }
 
     @Override
-    public synchronized V replace(K key, V value) {
+    public synchronized @Nullable V replace(K key, V value) {
         Objects.requireNonNull(value);
         Entry<?,?> tab[] = table;
         int hash = key.hashCode();
