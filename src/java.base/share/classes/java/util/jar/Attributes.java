@@ -120,7 +120,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
      * @return the value of the specified attribute name, or null if
      *         not found.
      */
-    public Object get(Object name) {
+    public @Nullable Object get(@Nullable Object name) {
         return map.get(name);
     }
 
@@ -139,7 +139,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
      *         not found.
      * @throws IllegalArgumentException if the attribute name is invalid
      */
-    public String getValue(String name) {
+    public @Nullable String getValue(String name) {
         return (String)get(Name.of(name));
     }
 
@@ -156,7 +156,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
      * @return the String value of the specified Attribute.Name, or null if
      *         not found.
      */
-    public String getValue(Name name) {
+    public @Nullable String getValue(@Nullable Name name) {
         return (String)get(name);
     }
 
@@ -171,7 +171,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
      * @throws    ClassCastException if the name is not a Attributes.Name
      *            or the value is not a String
      */
-    public Object put(Object name, Object value) {
+    public @Nullable Object put(Object name, Object value) {
         return map.put((Attributes.Name)name, (String)value);
     }
 
@@ -191,7 +191,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
      * @return the previous value of the attribute, or null if none
      * @throws    IllegalArgumentException if the attribute name is invalid
      */
-    public String putValue(String name, String value) {
+    public @Nullable String putValue(String name, String value) {
         return (String)put(Name.of(name), value);
     }
 
@@ -202,7 +202,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
      * @param name attribute name
      * @return the previous value of the attribute, or null if none
      */
-    public Object remove(@GuardSatisfied @Nullable @UnknownSignedness Object name) {
+    public @Nullable Object remove(@GuardSatisfied @Nullable @UnknownSignedness Object name) {
         return map.remove(name);
     }
 
@@ -237,7 +237,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
      * @param attr the Attributes to be stored in this map
      * @throws    ClassCastException if attr is not an Attributes
      */
-    public void putAll(Map<?,?> attr) {
+    public void putAll(Map<? extends Object,? extends Object> attr) {
         // ## javac bug?
         if (!Attributes.class.isInstance(attr))
             throw new ClassCastException();
