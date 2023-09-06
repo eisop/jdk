@@ -128,7 +128,7 @@ public class JarInputStream extends ZipInputStream {
      * @throws    SecurityException if any of the jar file entries
      *         are incorrectly signed.
      */
-    public ZipEntry getNextEntry() throws IOException {
+    public @Nullable ZipEntry getNextEntry() throws IOException {
         JarEntry e;
         if (first == null) {
             e = (JarEntry)super.getNextEntry();
