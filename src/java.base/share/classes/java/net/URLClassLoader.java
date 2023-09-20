@@ -120,7 +120,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         this.ucp = new URLClassPath(urls, acc);
     }
 
-    URLClassLoader(String name, URL[] urls, ClassLoader parent,
+    URLClassLoader(@Nullable String name, URL[] urls, @Nullable ClassLoader parent,
                    @SuppressWarnings("removal") AccessControlContext acc) {
         super(name, parent);
         this.acc = acc;
@@ -185,8 +185,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @see SecurityManager#checkCreateClassLoader
      */
     @SuppressWarnings("removal")
-    public URLClassLoader(URL[] urls, ClassLoader parent,
-                          URLStreamHandlerFactory factory) {
+    public URLClassLoader(URL[] urls, @Nullable ClassLoader parent,
+                          @Nullable URLStreamHandlerFactory factory) {
         super(parent);
         this.acc = AccessController.getContext();
         this.ucp = new URLClassPath(urls, factory, acc);
@@ -216,9 +216,9 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @since 9
      */
     @SuppressWarnings("removal")
-    public URLClassLoader(String name,
+    public URLClassLoader(@Nullable String name,
                           URL[] urls,
-                          ClassLoader parent) {
+                          @Nullable ClassLoader parent) {
         super(name, parent);
         this.acc = AccessController.getContext();
         this.ucp = new URLClassPath(urls, acc);
@@ -247,8 +247,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @since 9
      */
     @SuppressWarnings("removal")
-    public URLClassLoader(String name, URL[] urls, ClassLoader parent,
-                          URLStreamHandlerFactory factory) {
+    public URLClassLoader(@Nullable String name, URL[] urls, @Nullable ClassLoader parent,
+                          @Nullable URLStreamHandlerFactory factory) {
         super(name, parent);
         this.acc = AccessController.getContext();
         this.ucp = new URLClassPath(urls, factory, acc);
@@ -792,7 +792,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @return the resulting class loader
      */
     public static URLClassLoader newInstance(final URL[] urls,
-                                             final ClassLoader parent) {
+                                             final @Nullable ClassLoader parent) {
         // Save the caller's context
         @SuppressWarnings("removal")
         final AccessControlContext acc = AccessController.getContext();

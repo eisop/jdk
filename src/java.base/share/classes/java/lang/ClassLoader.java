@@ -437,7 +437,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since  9
      */
-    protected ClassLoader(String name, ClassLoader parent) {
+    protected ClassLoader(@Nullable String name, @Nullable ClassLoader parent) {
         this(checkCreateClassLoader(name), name, parent);
     }
 
@@ -499,7 +499,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since 9
      */
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
