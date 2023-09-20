@@ -29,6 +29,7 @@ import org.checkerframework.checker.index.qual.IndexFor;
 import org.checkerframework.checker.index.qual.LengthOf;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.value.qual.StaticallyExecutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -47,7 +48,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * @author Nakul Saraiya
  * @since 1.1
  */
-@AnnotatedFor({"index", "interning"})
+@AnnotatedFor({"index", "interning", "nullness"})
 public final
 @UsesObjectEquals class Array {
 
@@ -157,7 +158,7 @@ public final
      * length of the specified array
      */
     @Pure
-    public static native Object get(Object array, @IndexFor({"#1"}) int index)
+    public static native @Nullable Object get(Object array, @IndexFor({"#1"}) int index)
         throws IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     /**
