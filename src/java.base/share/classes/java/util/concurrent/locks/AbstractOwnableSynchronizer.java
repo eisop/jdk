@@ -36,6 +36,7 @@
 package java.util.concurrent.locks;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -50,7 +51,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.6
  * @author Doug Lea
  */
-@AnnotatedFor({"interning"})
+@AnnotatedFor({"interning", "nullness"})
 public abstract @UsesObjectEquals class AbstractOwnableSynchronizer
     implements java.io.Serializable {
 
@@ -74,7 +75,7 @@ public abstract @UsesObjectEquals class AbstractOwnableSynchronizer
      * {@code volatile} field accesses.
      * @param thread the owner thread
      */
-    protected final void setExclusiveOwnerThread(Thread thread) {
+    protected final void setExclusiveOwnerThread(@Nullable Thread thread) {
         exclusiveOwnerThread = thread;
     }
 
@@ -84,7 +85,7 @@ public abstract @UsesObjectEquals class AbstractOwnableSynchronizer
      * impose any synchronization or {@code volatile} field accesses.
      * @return the owner thread
      */
-    protected final Thread getExclusiveOwnerThread() {
+    protected final @Nullable Thread getExclusiveOwnerThread() {
         return exclusiveOwnerThread;
     }
 }
