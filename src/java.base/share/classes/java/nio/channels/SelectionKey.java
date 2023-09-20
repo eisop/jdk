@@ -27,6 +27,7 @@ package java.nio.channels;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.invoke.MethodHandles;
@@ -104,7 +105,7 @@ import java.lang.invoke.VarHandle;
  * @see Selector
  */
 
-@AnnotatedFor({"interning", "mustcall"})
+@AnnotatedFor({"interning", "mustcall", "nullness"})
 public abstract @UsesObjectEquals class SelectionKey {
 
     /**
@@ -459,7 +460,7 @@ public abstract @UsesObjectEquals class SelectionKey {
      * @return  The previously-attached object, if any,
      *          otherwise {@code null}
      */
-    public final Object attach(Object ob) {
+    public final @Nullable Object attach(@Nullable Object ob) {
         return ATTACHMENT.getAndSet(this, ob);
     }
 
@@ -469,7 +470,7 @@ public abstract @UsesObjectEquals class SelectionKey {
      * @return  The object currently attached to this key,
      *          or {@code null} if there is no attachment
      */
-    public final Object attachment() {
+    public final @Nullable Object attachment() {
         return attachment;
     }
 
