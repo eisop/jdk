@@ -30,6 +30,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.CFComment;
 
 import java.util.List;
 import java.util.NavigableSet;
@@ -202,6 +204,7 @@ import sun.nio.cs.UTF_8;
  * @see     java.net.InetAddress#getLocalHost()
  * @since 1.0
  */
+@AnnotatedFor({"nullness"})
 public class InetAddress implements java.io.Serializable {
 
     @Native static final int PREFER_IPV4_VALUE = 0;
@@ -544,7 +547,7 @@ public class InetAddress implements java.io.Serializable {
      * @throws IOException if a network error occurs
      * @since 1.5
      */
-    public boolean isReachable(NetworkInterface netif, int ttl,
+    public boolean isReachable(@Nullable NetworkInterface netif, int ttl,
                                int timeout) throws IOException {
         if (ttl < 0)
             throw new IllegalArgumentException("ttl can't be negative");
@@ -713,6 +716,12 @@ public class InetAddress implements java.io.Serializable {
      *
      * @return  the raw IP address of this object.
      */
+    @CFComment("nullness: This return type is probably best *not* annotated @Nullable: InetAddress "
+    + "has a package-private constructor (and is `sealed` in recent releases), so the only "
+    + "subclasses that exist are the 2 in this package, both of which override the method to "
+    + "return a non-null value. While there are obscure parts of the JDK that create a plain "
+    + "InetAddress instance, it is unlikely that any code would choose to call this method on such "
+    + "an instance.")
     public byte[] getAddress() {
         return null;
     }
@@ -723,6 +732,12 @@ public class InetAddress implements java.io.Serializable {
      * @return  the raw IP address in a string format.
      * @since   1.0.2
      */
+    @CFComment("nullness: This return type is probably best *not* annotated @Nullable: InetAddress "
+    + "has a package-private constructor (and is `sealed` in recent releases), so the only "
+    + "subclasses that exist are the 2 in this package, both of which override the method to "
+    + "return a non-null value. While there are obscure parts of the JDK that create a plain "
+    + "InetAddress instance, it is unlikely that any code would choose to call this method on such "
+    + "an instance.")
     public String getHostAddress() {
         return null;
      }
@@ -1196,7 +1211,7 @@ public class InetAddress implements java.io.Serializable {
      * @throws     UnknownHostException  if IP address is of illegal length
      * @since 1.4
      */
-    public static InetAddress getByAddress(String host, byte[] addr)
+    public static InetAddress getByAddress(@Nullable String host, byte[] addr)
         throws UnknownHostException {
         if (host != null && !host.isEmpty() && host.charAt(0) == '[') {
             if (host.charAt(host.length()-1) == ']') {
@@ -1254,7 +1269,7 @@ public class InetAddress implements java.io.Serializable {
      * @throws     SecurityException if a security manager exists
      *             and its checkConnect method doesn't allow the operation
      */
-    public static InetAddress getByName(String host)
+    public static InetAddress getByName(@Nullable String host)
         throws UnknownHostException {
         return InetAddress.getAllByName(host)[0];
     }
@@ -1304,7 +1319,7 @@ public class InetAddress implements java.io.Serializable {
      *
      * @see SecurityManager#checkConnect
      */
-    public static InetAddress[] getAllByName(String host)
+    public static InetAddress[] getAllByName(@Nullable String host)
         throws UnknownHostException {
         return getAllByName(host, null);
     }

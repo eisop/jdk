@@ -91,7 +91,7 @@ import java.io.ObjectStreamException;
  * @since 1.4
  */
 
-@AnnotatedFor({"interning"})
+@AnnotatedFor({"interning", "nullness"})
 public final
 @UsesObjectEquals class Inet4Address extends InetAddress {
     static final int INADDRSZ = 4;
