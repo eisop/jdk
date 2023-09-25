@@ -26,6 +26,7 @@
 package java.net;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.IOException;
@@ -248,7 +249,7 @@ import sun.nio.ch.DefaultSelectorProvider;
  * @see     java.nio.channels.DatagramChannel
  * @since 1.0
  */
-@AnnotatedFor({"interning"})
+@AnnotatedFor({"interning", "nullness"})
 public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
 
     // An instance of DatagramSocketAdaptor, NetMulticastSocket, or null
@@ -330,7 +331,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      * @see SecurityManager#checkListen
      * @since   1.4
      */
-    public DatagramSocket(SocketAddress bindaddr) throws SocketException {
+    public DatagramSocket(@Nullable SocketAddress bindaddr) throws SocketException {
         this(createDelegate(bindaddr, DatagramSocket.class));
     }
 
@@ -389,7 +390,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      * @see SecurityManager#checkListen
      * @since   1.1
      */
-    public DatagramSocket(int port, InetAddress laddr) throws SocketException {
+    public DatagramSocket(int port, @Nullable InetAddress laddr) throws SocketException {
         this(new InetSocketAddress(laddr, port));
     }
 
@@ -408,7 +409,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      *         not supported by this socket.
      * @since 1.4
      */
-    public void bind(SocketAddress addr) throws SocketException {
+    public void bind(@Nullable SocketAddress addr) throws SocketException {
         delegate().bind(addr);
     }
 
@@ -569,7 +570,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      * @return the address to which this socket is connected.
      * @since 1.2
      */
-    public InetAddress getInetAddress() {
+    public @Nullable InetAddress getInetAddress() {
         return delegate().getInetAddress();
     }
 
@@ -604,7 +605,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      * @see #connect(SocketAddress)
      * @since 1.4
      */
-    public SocketAddress getRemoteSocketAddress() {
+    public @Nullable SocketAddress getRemoteSocketAddress() {
         return delegate().getRemoteSocketAddress();
     }
 
@@ -618,7 +619,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      * @see #bind(SocketAddress)
      * @since 1.4
      */
-    public SocketAddress getLocalSocketAddress() {
+    public @Nullable SocketAddress getLocalSocketAddress() {
         return delegate().getLocalSocketAddress();
     }
 
@@ -722,7 +723,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      *          method does not allow the operation
      * @since   1.1
      */
-    public InetAddress getLocalAddress() {
+    public @Nullable InetAddress getLocalAddress() {
         return delegate().getLocalAddress();
     }
 
@@ -1102,7 +1103,7 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
      *
      * @since 1.4
      */
-    public DatagramChannel getChannel() {
+    public @Nullable DatagramChannel getChannel() {
         return null;
     }
 

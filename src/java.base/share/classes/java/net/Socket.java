@@ -237,7 +237,7 @@ public @UsesObjectEquals class Socket implements java.io.Closeable {
      *
      * @since   1.1
      */
-    protected Socket(SocketImpl impl) throws SocketException {
+    protected Socket(@Nullable SocketImpl impl) throws SocketException {
         checkPermission(impl);
         this.impl = impl;
     }

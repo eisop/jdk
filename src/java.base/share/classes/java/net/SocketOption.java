@@ -25,6 +25,8 @@
 
 package java.net;
 
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * A socket option associated with a socket.
  *
@@ -40,7 +42,7 @@ package java.net;
  *
  * @see StandardSocketOptions
  */
-
+@AnnotatedFor({"nullness"})
 public interface SocketOption<T> {
 
     /**

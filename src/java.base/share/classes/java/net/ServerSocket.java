@@ -29,6 +29,7 @@ import org.checkerframework.checker.calledmethods.qual.EnsuresCalledMethodsIf;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.mustcall.qual.CreatesMustCallFor;
 import org.checkerframework.checker.mustcall.qual.MustCallAlias;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.FileDescriptor;
@@ -82,7 +83,7 @@ import sun.net.PlatformSocketImpl;
  * @see     java.nio.channels.ServerSocketChannel
  * @since   1.0
  */
-@AnnotatedFor({"calledmethods", "interning", "mustcall"})
+@AnnotatedFor({"calledmethods", "interning", "mustcall", "nullness"})
 public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
     /**
      * Various states of this socket.
@@ -270,7 +271,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @see SecurityManager#checkListen
      * @since   1.1
      */
-    public ServerSocket(int port, int backlog, InetAddress bindAddr) throws IOException {
+    public ServerSocket(int port, int backlog, @Nullable InetAddress bindAddr) throws IOException {
         setImpl();
         if (port < 0 || port > 0xFFFF)
             throw new IllegalArgumentException(
@@ -346,7 +347,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @since 1.4
      */
     @CreatesMustCallFor
-    public void bind(SocketAddress endpoint) throws IOException {
+    public void bind(@Nullable SocketAddress endpoint) throws IOException {
         bind(endpoint, 50);
     }
 
@@ -376,7 +377,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @since 1.4
      */
     @CreatesMustCallFor
-    public void bind(SocketAddress endpoint, int backlog) throws IOException {
+    public void bind(@Nullable SocketAddress endpoint, int backlog) throws IOException {
         if (isClosed())
             throw new SocketException("Socket is closed");
         if (isBound())
@@ -424,7 +425,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      *
      * @see SecurityManager#checkConnect
      */
-    public InetAddress getInetAddress() {
+    public @Nullable InetAddress getInetAddress() {
         if (!isBound())
             return null;
         try {
@@ -493,7 +494,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @since 1.4
      */
 
-    public SocketAddress getLocalSocketAddress() {
+    public @Nullable SocketAddress getLocalSocketAddress() {
         if (!isBound())
             return null;
         return new InetSocketAddress(getInetAddress(), getLocalPort());
@@ -744,7 +745,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      *
      * @since 1.4
      */
-    public @MustCallAlias ServerSocketChannel getChannel(@MustCallAlias ServerSocket this) {
+    public @MustCallAlias @Nullable ServerSocketChannel getChannel(@MustCallAlias ServerSocket this) {
         return null;
     }
 

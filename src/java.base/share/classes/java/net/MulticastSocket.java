@@ -25,6 +25,10 @@
 
 package java.net;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.CFComment;
+
 import java.io.IOException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MulticastChannel;
@@ -110,6 +114,7 @@ import java.nio.channels.MulticastChannel;
  * @author Pavani Diwanji
  * @since 1.1
  */
+@AnnotatedFor({"nullness"})
 public class MulticastSocket extends DatagramSocket {
 
     @Override
@@ -208,7 +213,7 @@ public class MulticastSocket extends DatagramSocket {
      *
      * @since 1.4
      */
-    public MulticastSocket(SocketAddress bindaddr) throws IOException {
+    public MulticastSocket(@Nullable SocketAddress bindaddr) throws IOException {
         this(createDelegate(bindaddr, MulticastSocket.class));
     }
 
@@ -366,7 +371,7 @@ public class MulticastSocket extends DatagramSocket {
      * @since 1.4
      */
     @Override
-    public void joinGroup(SocketAddress mcastaddr, NetworkInterface netIf)
+    public void joinGroup(SocketAddress mcastaddr, @Nullable NetworkInterface netIf)
             throws IOException {
         super.joinGroup(mcastaddr, netIf);
     }
@@ -382,7 +387,7 @@ public class MulticastSocket extends DatagramSocket {
      * @since 1.4
      */
     @Override
-    public void leaveGroup(SocketAddress mcastaddr, NetworkInterface netIf)
+    public void leaveGroup(SocketAddress mcastaddr, @Nullable NetworkInterface netIf)
             throws IOException {
         super.leaveGroup(mcastaddr, netIf);
     }
@@ -401,6 +406,7 @@ public class MulticastSocket extends DatagramSocket {
      * @see        #getInterface()
      */
     @Deprecated(since="14")
+    @CFComment("nullness: TODO: @Nullable parameter or not?")
     public void setInterface(InetAddress inf) throws SocketException {
         delegate().setInterface(inf);
     }
@@ -440,6 +446,7 @@ public class MulticastSocket extends DatagramSocket {
      * @see StandardSocketOptions#IP_MULTICAST_IF
      * @since 1.4
      */
+    @CFComment("nullness: TODO: @Nullable parameter or not?")
     public void setNetworkInterface(NetworkInterface netIf)
         throws SocketException {
         delegate().setNetworkInterface(netIf);
