@@ -368,7 +368,7 @@ public interface Comparator<T> {
      * @since 1.8
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Comparable<@NonNull ? super @NonNull T>> Comparator<T> naturalOrder() {
+    public static <T extends Comparable<? super T>> Comparator<T> naturalOrder() {
         return (Comparator<T>) Comparators.NaturalOrderComparator.INSTANCE;
     }
 
