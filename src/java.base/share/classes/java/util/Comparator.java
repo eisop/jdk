@@ -389,7 +389,7 @@ public interface Comparator<T> {
      *         {@code Comparator}.
      * @since 1.8
      */
-    public static <T> Comparator<@Nullable T> nullsFirst(@Nullable Comparator<@Nullable ? super T> comparator) {
+    public static <T> Comparator<@Nullable T> nullsFirst(@Nullable Comparator<? super T> comparator) {
         return new Comparators.NullComparator<>(true, comparator);
     }
 
@@ -410,7 +410,7 @@ public interface Comparator<T> {
      *         {@code Comparator}.
      * @since 1.8
      */
-    public static <T> Comparator<@Nullable T> nullsLast(@Nullable Comparator<@Nullable ? super T> comparator) {
+    public static <T> Comparator<@Nullable T> nullsLast(@Nullable Comparator<? super T> comparator) {
         return new Comparators.NullComparator<>(false, comparator);
     }
 
