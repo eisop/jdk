@@ -31,6 +31,10 @@ import jdk.internal.reflect.Reflection;
 import java.lang.invoke.MethodHandle;
 import java.util.Objects;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.CFComment;
+
 /**
  * {@code InvocationHandler} is the interface implemented by
  * the <i>invocation handler</i> of a proxy instance.
@@ -44,6 +48,7 @@ import java.util.Objects;
  * @see         Proxy
  * @since       1.3
  */
+@AnnotatedFor({"nullness"})
 public interface InvocationHandler {
 
     /**
@@ -96,7 +101,10 @@ public interface InvocationHandler {
      *
      * @see     UndeclaredThrowableException
      */
-    public Object invoke(Object proxy, Method method, Object[] args)
+    @CFComment("nullness: A null return is allowed only if the Method points to a method whose"
+        + " return value may be null. We don't know whether it does, so we conservatively omit"
+        + " @Nullable on the return type")
+    public Object invoke(Object proxy, Method method, @Nullable Object @Nullable [] args)
         throws Throwable;
 
     /**
@@ -258,7 +266,10 @@ public interface InvocationHandler {
      * @jvms 5.4.3. Method Resolution
      */
     @CallerSensitive
-    public static Object invokeDefault(Object proxy, Method method, Object... args)
+    @CFComment("nullness: Null arguments are allowed only if the Method points to a method whose"
+        + " parameters may be null. We don't know whether it does, so we conservatively omit"
+        + " @Nullable on the parameter types.")
+    public static @Nullable Object invokeDefault(Object proxy, Method method, Object... args)
             throws Throwable {
         Objects.requireNonNull(proxy);
         Objects.requireNonNull(method);
