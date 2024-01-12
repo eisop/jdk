@@ -27,12 +27,16 @@ package java.net;
 
 import java.io.IOException;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown to indicate that there is an error creating or accessing a Socket.
  *
  * @author  Jonathan Payne
  * @since   1.0
  */
+@AnnotatedFor({"nullness"})
 public class SocketException extends IOException {
     @java.io.Serial
     private static final long serialVersionUID = -5935874303556886934L;
@@ -43,7 +47,7 @@ public class SocketException extends IOException {
      *
      * @param msg the detail message.
      */
-    public SocketException(String msg) {
+    public SocketException(@Nullable String msg) {
         super(msg);
     }
 

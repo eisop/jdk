@@ -27,6 +27,9 @@ package java.net;
 
 import java.io.IOException;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown to indicate that there is an error in the underlying
  * protocol, such as a TCP error.
@@ -34,6 +37,7 @@ import java.io.IOException;
  * @author  Chris Warth
  * @since   1.0
  */
+@AnnotatedFor({"nullness"})
 public class ProtocolException extends IOException {
     @java.io.Serial
     private static final long serialVersionUID = -6098449442062388080L;
@@ -44,7 +48,7 @@ public class ProtocolException extends IOException {
      *
      * @param   message   the detail message.
      */
-    public ProtocolException(String message) {
+    public ProtocolException(@Nullable String message) {
         super(message);
     }
 

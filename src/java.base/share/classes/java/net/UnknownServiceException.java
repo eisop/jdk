@@ -27,6 +27,9 @@ package java.net;
 
 import java.io.IOException;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown to indicate that an unknown service exception has
  * occurred. Either the MIME type returned by a URL connection does
@@ -35,6 +38,7 @@ import java.io.IOException;
  *
  * @since   1.0
  */
+@AnnotatedFor({"nullness"})
 public class UnknownServiceException extends IOException {
     @java.io.Serial
     private static final long serialVersionUID = -4169033248853639508L;
@@ -52,7 +56,7 @@ public class UnknownServiceException extends IOException {
      *
      * @param   msg   the detail message.
      */
-    public UnknownServiceException(String msg) {
+    public UnknownServiceException(@Nullable String msg) {
         super(msg);
     }
 }

@@ -27,6 +27,9 @@ package java.net;
 
 import java.io.IOException;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown to indicate that a malformed URL has occurred. Either no
  * legal protocol could be found in a specification string or the
@@ -35,6 +38,7 @@ import java.io.IOException;
  * @author  Arthur van Hoff
  * @since   1.0
  */
+@AnnotatedFor({"nullness"})
 public class MalformedURLException extends IOException {
     @java.io.Serial
     private static final long serialVersionUID = -182787522200415866L;
@@ -51,7 +55,7 @@ public class MalformedURLException extends IOException {
      *
      * @param   msg   the detail message.
      */
-    public MalformedURLException(String msg) {
+    public MalformedURLException(@Nullable String msg) {
         super(msg);
     }
 }
