@@ -1,11 +1,12 @@
 package org.checkerframework.checker.units.qual;
 
+import org.checkerframework.framework.qual.PolymorphicQualifier;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.checkerframework.framework.qual.PolymorphicQualifier;
 
 /**
  * A polymorphic qualifier for the units-of-measure type system implemented by the Units Checker.
@@ -29,7 +30,7 @@ import org.checkerframework.framework.qual.PolymorphicQualifier;
  *   {@literal @}s int sec1 = 7 * UnitsTools.s;
  *   {@literal @}s int sec2 = triplePolyUnit(sec1);
  *
- *    // :: error: (assignment)
+ *    // :: error: (assignment.type.incompatible)
  *   {@literal @}s int sec3 = triplePolyUnit(m1);
  *  }
  * </code></pre>
