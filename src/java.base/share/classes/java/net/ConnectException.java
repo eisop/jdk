@@ -25,6 +25,9 @@
 
 package java.net;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Signals that an error occurred while attempting to connect a
  * socket to a remote address and port.  Typically, the connection
@@ -33,6 +36,7 @@ package java.net;
  *
  * @since   1.1
  */
+@AnnotatedFor({"nullness"})
 public class ConnectException extends SocketException {
     @java.io.Serial
     private static final long serialVersionUID = 3831404271622369215L;
@@ -44,7 +48,7 @@ public class ConnectException extends SocketException {
      * description of this error.
      * @param msg the detail message
      */
-    public ConnectException(String msg) {
+    public ConnectException(@Nullable String msg) {
         super(msg);
     }
 

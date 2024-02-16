@@ -25,6 +25,9 @@
 
 package java.net;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Signals that an ICMP Port Unreachable message has been
  * received on a connected datagram.
@@ -32,6 +35,7 @@ package java.net;
  * @since   1.4
  */
 
+@AnnotatedFor({"nullness"})
 public class PortUnreachableException extends SocketException {
     @java.io.Serial
     private static final long serialVersionUID = 8462541992376507323L;
@@ -41,7 +45,7 @@ public class PortUnreachableException extends SocketException {
      * detail message.
      * @param msg the detail message
      */
-    public PortUnreachableException(String msg) {
+    public PortUnreachableException(@Nullable String msg) {
         super(msg);
     }
 

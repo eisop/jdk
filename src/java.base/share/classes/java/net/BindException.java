@@ -25,6 +25,9 @@
 
 package java.net;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Signals that an error occurred while attempting to bind a
  * socket to a local address and port.  Typically, the port is
@@ -33,6 +36,7 @@ package java.net;
  * @since   1.1
  */
 
+@AnnotatedFor({"nullness"})
 public class BindException extends SocketException {
     @java.io.Serial
     private static final long serialVersionUID = -5945005768251722951L;
@@ -44,7 +48,7 @@ public class BindException extends SocketException {
      * description of this error.
      * @param msg the detail message
      */
-    public BindException(String msg) {
+    public BindException(@Nullable String msg) {
         super(msg);
     }
 
