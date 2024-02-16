@@ -24,6 +24,7 @@
  */
 package java.lang.invoke;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 
 /**
@@ -81,7 +82,7 @@ public interface TypeDescriptor {
          * @return the component type, or {@code null} if this field descriptor does
          * not describe an array type
          */
-        F componentType();
+        @Nullable F componentType();
 
         /**
          * Return a descriptor for the array type whose component type is described by this
