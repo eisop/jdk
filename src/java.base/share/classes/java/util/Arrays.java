@@ -8559,7 +8559,7 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static int mismatch(@Nullable Object[] a, @Nullable Object[] b) {
+    public static int mismatch(@PolyNull Object[] a, @PolyNull Object[] b) {
         int length = Math.min(a.length, b.length); // Check null array refs
         if (a == b)
             return -1;
