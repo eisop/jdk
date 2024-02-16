@@ -2190,7 +2190,9 @@ public class Arrays {
      * @throws ClassCastException if the search key is not comparable to the
      *         elements of the array.
      */
-    public static @SearchIndexFor({"#1"}) int binarySearch(@PolyInterned Object[] a, @PolyInterned Object key) {
+    @CFComment("nullness: both array component type and key are @PolyNull. This allows calls with an arbitrary array, but also "
+        + "allows searching for a null key in an array of non-null values. This won't cause an NPE, but should maybe be forbidden.")
+    public static @SearchIndexFor({"#1"}) int binarySearch(@PolyInterned @PolyNull Object[] a, @PolyInterned @PolyNull Object key) {
         return binarySearch0(a, 0, a.length, key);
     }
 
@@ -2234,8 +2236,10 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    public static @SearchIndexFor({"#1"}) int binarySearch(@PolyInterned Object[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
-                                   @PolyInterned Object key) {
+    @CFComment("nullness: both array component type and key are @PolyNull. This allows calls with an arbitrary array, but also "
+        + "allows searching for a null key in an array of non-null values. This won't cause an NPE, but should maybe be forbidden.")
+    public static @SearchIndexFor({"#1"}) int binarySearch(@PolyInterned @PolyNull Object[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
+                                   @PolyInterned @PolyNull Object key) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key);
     }
@@ -3047,8 +3051,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(@Nullable Object[] a, int aFromIndex, int aToIndex,
-                                 @Nullable Object[] b, int bFromIndex, int bToIndex) {
+    public static boolean equals(@PolyNull Object[] a, int aFromIndex, int aToIndex,
+                                 @PolyNull Object[] b, int bFromIndex, int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -7237,7 +7241,7 @@ public class Arrays {
      *         lexicographically greater than the second array
      * @since 9
      */
-    public static <T extends Comparable<? super T>> int compare(@Nullable T @Nullable [] a, @Nullable T @Nullable [] b) {
+    public static <T extends Comparable<? super T>> int compare(@PolyNull T @Nullable [] a, @PolyNull T @Nullable [] b) {
         if (a == b)
             return 0;
         // A null array is less than a non-null array
@@ -8630,8 +8634,8 @@ public class Arrays {
      * @since 9
      */
     public static int mismatch(
-            @Nullable Object[] a, int aFromIndex, int aToIndex,
-            @Nullable Object[] b, int bFromIndex, int bToIndex) {
+            @PolyNull Object[] a, int aFromIndex, int aToIndex,
+            @PolyNull Object[] b, int bFromIndex, int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
