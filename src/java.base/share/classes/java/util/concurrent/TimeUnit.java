@@ -74,7 +74,7 @@ import java.util.Objects;
  * @since 1.5
  * @author Doug Lea
  */
-@AnnotatedFor({"lock"})
+@AnnotatedFor({"lock", "nullness"})
 public enum TimeUnit {
     /**
      * Time unit representing one thousandth of a microsecond.
