@@ -919,7 +919,7 @@ public class Arrays {
      */
     @SuppressWarnings("unchecked")
     @CFComment("A particular comparator could allow null elements in the array. In general null is forbidden.")
-    public static <T extends Object> void parallelSort(T[] a, @Nullable Comparator<? super T> cmp) {
+    public static <T extends Object> void parallelSort(@UnknownSignedness T[] a, @Nullable Comparator<? super T> cmp) {
         if (cmp == null)
             cmp = NaturalOrder.INSTANCE;
         int n = a.length, p, g;
@@ -979,7 +979,7 @@ public class Arrays {
      */
     @SuppressWarnings("unchecked")
     @CFComment("A particular comparator could allow null elements in the array. In general null is forbidden.")
-    public static <T extends Object> void parallelSort(T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
+    public static <T extends Object> void parallelSort(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
                                         @Nullable Comparator<? super T> cmp) {
         rangeCheck(a.length, fromIndex, toIndex);
         if (cmp == null)
@@ -1319,7 +1319,7 @@ public class Arrays {
      *         {@code toIndex > a.length}
      */
     @CFComment("A particular comparator could allow null elements in the array. In general null is forbidden.")
-    public static <T extends Object> void sort(T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
+    public static <T extends Object> void sort(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
                                 @Nullable Comparator<? super T> c) {
         if (c == null) {
             sort(a, fromIndex, toIndex);
@@ -2300,7 +2300,7 @@ public class Arrays {
      *         elements of the array using this comparator.
      */
     @CFComment("nullness: array components and key need to be non-null.")
-    public static <T extends Object> @SearchIndexFor({"#1"}) int binarySearch(T[] a, T key, @Nullable Comparator<? super T> c) {
+    public static <T extends Object> @SearchIndexFor({"#1"}) int binarySearch(@UnknownSignedness T[] a, T key, @Nullable Comparator<? super T> c) {
         return binarySearch0(a, 0, a.length, key, c);
     }
 
@@ -2347,7 +2347,7 @@ public class Arrays {
      * @since 1.6
      */
     @CFComment("nullness: array components and key need to be non-null.")
-    public static <T extends Object> @SearchIndexFor({"#1"}) int binarySearch(T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
+    public static <T extends Object> @SearchIndexFor({"#1"}) int binarySearch(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
                                        T key, @Nullable Comparator<? super T> c) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key, c);
