@@ -3462,9 +3462,8 @@ public class Arrays {
      * @throws ArrayStoreException if the specified value is not of a
      *         runtime type that can be stored in the specified array
      */
-    @CFComment("Parameters are not polymorphic, as that would unsoundly allow, e.g. passing an array of non-nullable "
-        + "component type and a null value.")
-    public static void fill(Object[] a, Object val) {
+    @CFComment("array covariance: `val` is not polymorphic to avoid e.g. filling an array of non-null types with null.")
+    public static void fill(@PolyInterned @PolyNull @PolySigned Object[] a, Object val) {
         for (int i = 0, len = a.length; i < len; i++)
             a[i] = val;
     }
@@ -3488,9 +3487,8 @@ public class Arrays {
      * @throws ArrayStoreException if the specified value is not of a
      *         runtime type that can be stored in the specified array
      */
-    @CFComment("Parameters are not polymorphic, as that would unsoundly allow, e.g. passing an array of non-nullable "
-        + "component type and a null value.")
-    public static void fill(Object[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex, Object val) {
+    @CFComment("array covariance: `val` is not polymorphic to avoid e.g. filling an array of non-null types with null.")
+    public static void fill(@PolyInterned @PolyNull @PolySigned Object[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex, Object val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
@@ -4180,6 +4178,8 @@ public class Arrays {
     @SafeVarargs
     @SideEffectFree
     @SuppressWarnings("varargs")
+    @CFComment("array covariance: if a reference to the argument is retained, array covariance could allow",
+        "adding a null value to an array of non-null types.")
     public static <T> List<T> asList(T... a) {
         return new ArrayList<>(a);
     }
