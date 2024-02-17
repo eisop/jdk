@@ -4494,7 +4494,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      */
     @Override
     @Pure
-    public Class<?> componentType() {
+    public @Nullable Class<?> componentType() {
         return isArray() ? componentType : null;
     }
 
