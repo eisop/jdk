@@ -3462,8 +3462,8 @@ public class Arrays {
      * @throws ArrayStoreException if the specified value is not of a
      *         runtime type that can be stored in the specified array
      */
-    @CFComment("array covariance: `val` is not polymorphic to avoid e.g. filling an array of non-null types with null.")
-    public static void fill(@PolyInterned @PolyNull @PolySigned Object[] a, Object val) {
+    @CFComment("array covariance: polymorphism could e.g. allow filling an array of non-null types with null.")
+    public static void fill(@PolyInterned @PolyNull @PolySigned Object[] a, @PolyInterned @PolyNull @PolySigned Object val) {
         for (int i = 0, len = a.length; i < len; i++)
             a[i] = val;
     }
@@ -3487,8 +3487,8 @@ public class Arrays {
      * @throws ArrayStoreException if the specified value is not of a
      *         runtime type that can be stored in the specified array
      */
-    @CFComment("array covariance: `val` is not polymorphic to avoid e.g. filling an array of non-null types with null.")
-    public static void fill(@PolyInterned @PolyNull @PolySigned Object[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex, Object val) {
+    @CFComment("array covariance: polymorphism could e.g. allow filling an array of non-null types with null.")
+    public static void fill(@PolyInterned @PolyNull @PolySigned Object[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex, @PolyInterned @PolyNull @PolySigned Object val) {
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i = fromIndex; i < toIndex; i++)
             a[i] = val;
