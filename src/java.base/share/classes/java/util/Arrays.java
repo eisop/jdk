@@ -4178,8 +4178,8 @@ public class Arrays {
     @SafeVarargs
     @SideEffectFree
     @SuppressWarnings("varargs")
-    @CFComment("array covariance: if a reference to the argument is retained, array covariance could allow",
-        "adding a null value to an array of non-null types.")
+    @CFComment({"array covariance: if a reference to the argument is retained, array covariance could allow",
+        "adding a null value to an array of non-null types."})
     public static <T> List<T> asList(T... a) {
         return new ArrayList<>(a);
     }
