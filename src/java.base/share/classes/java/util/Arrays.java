@@ -918,8 +918,8 @@ public class Arrays {
      * @since 1.8
      */
     @SuppressWarnings("unchecked")
-    @CFComment("A particular comparator could allow null elements in the array. In general null is forbidden.")
-    public static <T extends Object> void parallelSort(@UnknownSignedness T[] a, @Nullable Comparator<? super T> cmp) {
+    @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
+    public static <T> void parallelSort(@UnknownSignedness T[] a, Comparator<? super T> cmp) {
         if (cmp == null)
             cmp = NaturalOrder.INSTANCE;
         int n = a.length, p, g;
@@ -978,9 +978,9 @@ public class Arrays {
      * @since 1.8
      */
     @SuppressWarnings("unchecked")
-    @CFComment("A particular comparator could allow null elements in the array. In general null is forbidden.")
-    public static <T extends Object> void parallelSort(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
-                                        @Nullable Comparator<? super T> cmp) {
+    @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
+    public static <T> void parallelSort(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
+                                        Comparator<? super T> cmp) {
         rangeCheck(a.length, fromIndex, toIndex);
         if (cmp == null)
             cmp = NaturalOrder.INSTANCE;
@@ -1245,8 +1245,8 @@ public class Arrays {
      * @throws IllegalArgumentException (optional) if the comparator is
      *         found to violate the {@link Comparator} contract
      */
-    @CFComment("A particular comparator could allow null elements in the array. In general null is forbidden.")
-    public static <T extends Object> void sort(@UnknownSignedness T[] a, @Nullable Comparator<? super T> c) {
+    @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
+    public static <T> void sort(@UnknownSignedness T[] a, Comparator<? super T> c) {
         if (c == null) {
             sort(a);
         } else {
@@ -1258,7 +1258,7 @@ public class Arrays {
     }
 
     /** To be removed in a future release. */
-    private static <T> void legacyMergeSort(T[] a, @Nullable Comparator<? super T> c) {
+    private static <T> void legacyMergeSort(T[] a, Comparator<? super T> c) {
         T[] aux = a.clone();
         if (c==null)
             mergeSort(aux, a, 0, a.length, 0);
@@ -1318,9 +1318,9 @@ public class Arrays {
      * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or
      *         {@code toIndex > a.length}
      */
-    @CFComment("A particular comparator could allow null elements in the array. In general null is forbidden.")
-    public static <T extends Object> void sort(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
-                                @Nullable Comparator<? super T> c) {
+    @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
+    public static <T> void sort(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
+                                Comparator<? super T> c) {
         if (c == null) {
             sort(a, fromIndex, toIndex);
         } else {
@@ -2299,8 +2299,8 @@ public class Arrays {
      *         or the search key is not comparable to the
      *         elements of the array using this comparator.
      */
-    @CFComment("nullness: array components and key need to be non-null.")
-    public static <T extends Object> @SearchIndexFor({"#1"}) int binarySearch(@UnknownSignedness T[] a, T key, @Nullable Comparator<? super T> c) {
+    @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
+    public static <T> @SearchIndexFor({"#1"}) int binarySearch(@UnknownSignedness T[] a, T key, Comparator<? super T> c) {
         return binarySearch0(a, 0, a.length, key, c);
     }
 
@@ -2346,16 +2346,16 @@ public class Arrays {
      *         if {@code fromIndex < 0 or toIndex > a.length}
      * @since 1.6
      */
-    @CFComment("nullness: array components and key need to be non-null.")
-    public static <T extends Object> @SearchIndexFor({"#1"}) int binarySearch(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
-                                       T key, @Nullable Comparator<? super T> c) {
+    @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
+    public static <T> @SearchIndexFor({"#1"}) int binarySearch(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
+                                       T key, Comparator<? super T> c) {
         rangeCheck(a.length, fromIndex, toIndex);
         return binarySearch0(a, fromIndex, toIndex, key, c);
     }
 
     // Like public version, but without range checks.
     private static <T> int binarySearch0(T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
-                                         T key, @Nullable Comparator<? super T> c) {
+                                         T key, Comparator<? super T> c) {
         if (c == null) {
             return binarySearch0(a, fromIndex, toIndex, key);
         }
