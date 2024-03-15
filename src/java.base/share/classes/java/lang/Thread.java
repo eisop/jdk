@@ -31,6 +31,7 @@ import org.checkerframework.checker.lock.qual.EnsuresLockHeldIf;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.lock.qual.ReleasesNoLocks;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -1261,7 +1262,7 @@ public
      *          if {@link java.lang.ThreadGroup#checkAccess} determines that
      *          the current thread cannot access its thread group
      */
-    public static int enumerate(Thread tarray[]) {
+    public static int enumerate(@PolyNull Thread[] tarray) {
         return currentThread().getThreadGroup().enumerate(tarray);
     }
 
