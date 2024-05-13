@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -49,6 +50,7 @@ import java.util.stream.StreamSupport;
  *
  * @since 1.4
  */
+@AnnotatedFor("nullness")
 public final class NetworkInterface {
     private String name;
     private String displayName;
@@ -225,7 +227,7 @@ public final class NetworkInterface {
      * @return The {@code NetworkInterface} this interface is attached to.
      * @since 1.6
      */
-    public NetworkInterface getParent() {
+    public @Nullable NetworkInterface getParent() {
         return parent;
     }
 
@@ -252,7 +254,7 @@ public final class NetworkInterface {
      * @return a non-empty string representing the display name of this network
      *         interface, or null if no display name is available.
      */
-    public String getDisplayName() {
+    public @Nullable String getDisplayName() {
         /* strict TCK conformance */
         return "".equals(displayName) ? null : displayName;
     }
@@ -273,7 +275,7 @@ public final class NetworkInterface {
      * @throws  NullPointerException
      *          If the specified name is {@code null}.
      */
-    public static NetworkInterface getByName(String name) throws SocketException {
+    public static @Nullable NetworkInterface getByName(String name) throws SocketException {
         if (name == null)
             throw new NullPointerException();
         return getByName0(name);
@@ -290,7 +292,7 @@ public final class NetworkInterface {
      * @see #getIndex()
      * @since 1.7
      */
-    public static NetworkInterface getByIndex(int index) throws SocketException {
+    public static @Nullable NetworkInterface getByIndex(int index) throws SocketException {
         if (index < 0)
             throw new IllegalArgumentException("Interface index can't be negative");
         return getByIndex0(index);
@@ -318,7 +320,7 @@ public final class NetworkInterface {
      * @throws  NullPointerException
      *          If the specified address is {@code null}.
      */
-    public static NetworkInterface getByInetAddress(InetAddress addr) throws SocketException {
+    public static @Nullable NetworkInterface getByInetAddress(InetAddress addr) throws SocketException {
         if (addr == null) {
             throw new NullPointerException();
         }
@@ -519,7 +521,7 @@ public final class NetworkInterface {
      * @throws          SocketException if an I/O error occurs.
      * @since 1.6
      */
-    public byte[] getHardwareAddress() throws SocketException {
+    public byte @Nullable [] getHardwareAddress() throws SocketException {
         @SuppressWarnings("removal")
         SecurityManager sec = System.getSecurityManager();
         if (sec != null) {
