@@ -53,7 +53,7 @@ import java.nio.charset.Charset;
  * @since       1.1
  */
 
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"nullness", "initialization"})
 public class FileWriter extends OutputStreamWriter {
 
     /**

@@ -41,7 +41,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.io.File#list(java.io.FilenameFilter)
  * @since   1.0
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"nullness", "initialization"})
 @FunctionalInterface
 public interface FilenameFilter {
     /**

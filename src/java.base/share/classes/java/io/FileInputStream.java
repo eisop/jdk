@@ -69,7 +69,7 @@ import sun.nio.ch.FileChannelImpl;
  * @see     java.nio.file.Files#newInputStream
  * @since   1.0
  */
-@AnnotatedFor({"index", "mustcall", "nullness"})
+@AnnotatedFor({"index", "mustcall", "nullness", "initialization",})
 public class FileInputStream extends InputStream
 {
     private static final int DEFAULT_BUFFER_SIZE = 8192;

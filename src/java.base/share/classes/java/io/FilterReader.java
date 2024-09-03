@@ -45,7 +45,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since       1.1
  */
 
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"nullness", "initialization", "index"})
 public abstract class FilterReader extends Reader {
 
     /**

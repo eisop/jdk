@@ -149,7 +149,7 @@ import java.io.InputStream;
  * @since 1.1
  */
 
-@AnnotatedFor("nullness")
+@AnnotatedFor({"nullness", "initialization"})
 public interface ResultSet extends Wrapper, AutoCloseable {
 
     /**

@@ -43,7 +43,7 @@ import java.util.Objects;
  * @author      Herb Jellinek
  * @since       1.1
  */
-@AnnotatedFor({"index", "mustcall", "nullness"})
+@AnnotatedFor({"index", "mustcall", "nullness", "initialization"})
 @InheritableMustCall({})
 public class CharArrayReader extends Reader {
     /** The character buffer. */

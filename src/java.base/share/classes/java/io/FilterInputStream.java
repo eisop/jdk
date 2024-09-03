@@ -51,7 +51,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author  Jonathan Payne
  * @since   1.0
  */
-@AnnotatedFor({"index", "mustcall", "nullness"})
+@AnnotatedFor({"index", "mustcall", "nullness", "initialization"})
 public class FilterInputStream extends InputStream {
     /**
      * The input stream to be filtered.

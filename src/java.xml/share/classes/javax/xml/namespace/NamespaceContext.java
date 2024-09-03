@@ -81,7 +81,7 @@ import java.util.Iterator;
  * @since 1.5
  */
 
-@AnnotatedFor("nullness")
+@AnnotatedFor({"nullness", "initialization"})
 public interface NamespaceContext {
 
     /**

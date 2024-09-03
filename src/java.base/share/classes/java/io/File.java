@@ -41,7 +41,9 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,7 +162,7 @@ import sun.security.action.GetPropertyAction;
 "return null in the case of an IO error (instead of throwing IOException).",
 "EnsuresNonNullIf(expression={\"list()\",\"list(FilenameFilter)\",\"listFiles()\",\"listFiles(FilenameFilter)\",\"listFiles(FileFilter)\"}, result=true)\""
 })
-@AnnotatedFor({"index", "interning", "lock", "nullness"})
+@AnnotatedFor({"index", "interning", "lock", "nullness", "initialization"})
 public class File
     implements Serializable, Comparable<File>
 {

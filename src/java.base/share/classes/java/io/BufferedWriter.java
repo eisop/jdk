@@ -70,7 +70,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since       1.1
  */
 
-@AnnotatedFor({"index", "mustcall", "nullness"})
+@AnnotatedFor({"index", "mustcall", "nullness", "initialization"})
 public class BufferedWriter extends Writer {
 
     private Writer out;

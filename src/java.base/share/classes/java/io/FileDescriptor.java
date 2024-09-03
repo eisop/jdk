@@ -47,7 +47,7 @@ import jdk.internal.ref.PhantomCleanable;
  * @author  Pavani Diwanji
  * @since   1.0
  */
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"nullness", "initialization", "index"})
 public final class FileDescriptor {
 
     private int fd;

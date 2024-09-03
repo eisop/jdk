@@ -42,7 +42,7 @@ import java.util.Objects;
  * @since       1.1
  */
 
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"nullness", "initialization", "index"})
 public class PipedReader extends Reader {
     boolean closedByWriter = false;
     boolean closedByReader = false;

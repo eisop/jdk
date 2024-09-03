@@ -38,7 +38,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since       1.1
  */
 
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"nullness", "initialization", "index"})
 public class PipedWriter extends Writer {
 
     /* REMIND: identification of the read and write sides needs to be

@@ -43,7 +43,7 @@ import java.util.Objects;
  * @since       1.1
  */
 
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"nullness", "initialization", "index"})
 public class PushbackReader extends FilterReader {
 
     /** Pushback buffer */

@@ -73,7 +73,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @since 1.1
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"nullness", "initialization"})
 public interface DatabaseMetaData extends Wrapper {
 
     //----------------------------------------------------------------------

@@ -75,7 +75,7 @@ import java.io.InputStream;
  * @see java.io.InputStream
  * @see java.io.Reader
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"nullness", "initialization"})
 public class InputSource {
 
     /**

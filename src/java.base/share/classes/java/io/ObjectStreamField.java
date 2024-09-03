@@ -47,7 +47,7 @@ import sun.reflect.misc.ReflectUtil;
  * @see ObjectStreamClass
  * @since 1.2
  */
-@AnnotatedFor({"interning", "lock", "nullness"})
+@AnnotatedFor({"interning", "lock", "nullness", "initialization"})
 public @UsesObjectEquals class ObjectStreamField
     implements Comparable<Object>
 {

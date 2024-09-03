@@ -103,7 +103,7 @@ import sun.security.action.GetPropertyAction;
  * @since   1.6
  */
 
-@AnnotatedFor({"formatter", "index", "interning", "nullness"})
+@AnnotatedFor({"formatter", "index", "interning", "nullness", "initialization"})
 public final @UsesObjectEquals class Console implements Flushable
 {
    /**

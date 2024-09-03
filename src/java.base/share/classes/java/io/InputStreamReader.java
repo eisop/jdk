@@ -69,7 +69,7 @@ import sun.nio.cs.StreamDecoder;
  * @since       1.1
  */
 
-@AnnotatedFor({"index", "mustcall", "nullness"})
+@AnnotatedFor({"index", "mustcall", "nullness", "initialization"})
 public class InputStreamReader extends Reader {
 
     private final StreamDecoder sd;

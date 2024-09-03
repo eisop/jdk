@@ -51,7 +51,7 @@ import java.util.Objects;
  * @see     java.io.StringBufferInputStream
  * @since   1.0
  */
-@AnnotatedFor({"index", "mustcall", "nullness"})
+@AnnotatedFor({"index", "mustcall", "nullness", "initialization"})
 @InheritableMustCall({})
 public class ByteArrayInputStream extends InputStream {
 
