@@ -31,6 +31,7 @@
 #include "memory/resourceArea.hpp"
 #include "memory/universe.hpp"
 #include "oops/oop.inline.hpp"
+#include "runtime/atomic.hpp"
 #include "runtime/perfData.hpp"
 #include "runtime/thread.inline.hpp"
 #include "runtime/threadSMR.hpp"
@@ -212,9 +213,11 @@ void ThreadLocalAllocBuffer::initialize() {
   set_desired_size(initial_desired_size());
 
   size_t capacity = Universe::heap()->tlab_capacity(thread()) / HeapWordSize;
-  // Keep alloc_frac as float and not double to avoid the double to float conversion
-  float alloc_frac = desired_size() * target_refills() / (float) capacity;
-  _allocation_fraction.sample(alloc_frac);
+  if (capacity > 0) {
+    // Keep alloc_frac as float and not double to avoid the double to float conversion
+    float alloc_frac = desired_size() * target_refills() / (float)capacity;
+    _allocation_fraction.sample(alloc_frac);
+  }
 
   set_refill_waste_limit(initial_refill_waste_limit());
 
@@ -472,4 +475,12 @@ void ThreadLocalAllocStats::publish() {
 size_t ThreadLocalAllocBuffer::end_reserve() {
   size_t reserve_size = Universe::heap()->tlab_alloc_reserve();
   return MAX2(reserve_size, (size_t)_reserve_for_allocation_prefetch);
+}
+
+const HeapWord* ThreadLocalAllocBuffer::start_relaxed() const {
+  return Atomic::load(&_start);
+}
+
+const HeapWord* ThreadLocalAllocBuffer::top_relaxed() const {
+  return Atomic::load(&_top);
 }

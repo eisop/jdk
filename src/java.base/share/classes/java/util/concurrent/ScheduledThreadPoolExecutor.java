@@ -35,11 +35,15 @@
 
 package java.util.concurrent;
 
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -1039,6 +1043,7 @@ public class ScheduledThreadPoolExecutor
         }
 
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object x) {
             final ReentrantLock lock = this.lock;
             lock.lock();
@@ -1084,6 +1089,7 @@ public class ScheduledThreadPoolExecutor
         }
 
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() {
             return size() == 0;
         }
@@ -1133,6 +1139,7 @@ public class ScheduledThreadPoolExecutor
             offer(e);
         }
 
+        @EnsuresNonEmpty("this")
         public boolean add(Runnable e) {
             return offer(e);
         }
@@ -1339,11 +1346,14 @@ public class ScheduledThreadPoolExecutor
                 this.array = array;
             }
 
+            @Pure
+            @EnsuresNonEmptyIf(result = true, expression = "this")
             public boolean hasNext() {
                 return cursor < array.length;
             }
 
-            public Runnable next() {
+            @SideEffectsOnly("this")
+            public Runnable next(@NonEmpty Itr this) {
                 if (cursor >= array.length)
                     throw new NoSuchElementException();
                 return array[lastRet = cursor++];

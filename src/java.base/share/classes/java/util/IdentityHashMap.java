@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,6 +27,8 @@ package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyFor;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyForIf;
 import org.checkerframework.checker.nullness.qual.KeyFor;
@@ -35,9 +37,12 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -303,6 +308,7 @@ public class IdentityHashMap<K,V>
      *         mappings
      */
     @Pure
+    @EnsuresNonEmptyIf(result = false, expression = "this")
     public boolean isEmpty(@GuardSatisfied IdentityHashMap<K, V> this) {
         return size == 0;
     }
@@ -742,6 +748,8 @@ public class IdentityHashMap<K,V>
         boolean indexValid; // To avoid unnecessary next computation
         Object[] traversalTable = table; // reference to main table or copy
 
+        @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean hasNext() {
             Object[] tab = traversalTable;
             for (int i = index; i < tab.length; i+=2) {
@@ -755,7 +763,8 @@ public class IdentityHashMap<K,V>
             return false;
         }
 
-        protected int nextIndex() {
+        @SideEffectsOnly("this")
+        protected int nextIndex(@NonEmpty IdentityHashMapIterator<T> this) {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             if (!indexValid && !hasNext())
@@ -847,14 +856,14 @@ public class IdentityHashMap<K,V>
 
     private class KeyIterator extends IdentityHashMapIterator<K> {
         @SuppressWarnings("unchecked")
-        public K next() {
+        public K next(@NonEmpty KeyIterator this) {
             return (K) unmaskNull(traversalTable[nextIndex()]);
         }
     }
 
     private class ValueIterator extends IdentityHashMapIterator<V> {
         @SuppressWarnings("unchecked")
-        public V next() {
+        public V next(@NonEmpty ValueIterator this) {
             return (V) traversalTable[nextIndex() + 1];
         }
     }
@@ -864,7 +873,7 @@ public class IdentityHashMap<K,V>
     {
         private Entry lastReturnedEntry;
 
-        public Map.Entry<K,V> next() {
+        public Map.Entry<K,V> next(@NonEmpty EntryIterator this) {
             lastReturnedEntry = new Entry(nextIndex());
             return lastReturnedEntry;
         }
@@ -1006,6 +1015,7 @@ public class IdentityHashMap<K,V>
             return size;
         }
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@Nullable @UnknownSignedness Object o) {
             return containsKey(o);
         }
@@ -1119,6 +1129,7 @@ public class IdentityHashMap<K,V>
             return size;
         }
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@Nullable @UnknownSignedness Object o) {
             return containsValue(o);
         }
@@ -1226,6 +1237,7 @@ public class IdentityHashMap<K,V>
             return new EntryIterator();
         }
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@Nullable @UnknownSignedness Object o) {
             return o instanceof Entry<?, ?> entry
                     && containsMapping(entry.getKey(), entry.getValue());
@@ -1313,12 +1325,12 @@ public class IdentityHashMap<K,V>
      *          particular order.
      */
     @java.io.Serial
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject(ObjectOutputStream s)
         throws java.io.IOException  {
-        // Write out and any hidden stuff
+        // Write out size (number of mappings) and any hidden stuff
         s.defaultWriteObject();
 
-        // Write out size (number of Mappings)
+        // Write out size again (maintained for backward compatibility)
         s.writeInt(size);
 
         // Write out keys and values (alternating)
@@ -1337,18 +1349,20 @@ public class IdentityHashMap<K,V>
      * deserializes it).
      */
     @java.io.Serial
-    private void readObject(java.io.ObjectInputStream s)
+    private void readObject(ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException  {
-        // Read in any hidden stuff
-        s.defaultReadObject();
+        // Size (number of mappings) is written to the stream twice
+        // Read first size value and ignore it
+        s.readFields();
 
-        // Read in size (number of Mappings)
+        // Read second size value, validate and assign to size field
         int size = s.readInt();
         if (size < 0)
             throw new java.io.StreamCorruptedException
                 ("Illegal mappings count: " + size);
         int cap = capacity(size);
-        SharedSecrets.getJavaObjectInputStreamAccess().checkArray(s, Object[].class, cap);
+        SharedSecrets.getJavaObjectInputStreamAccess().checkArray(s, Object[].class, cap*2);
+        this.size = size;
         init(cap);
 
         // Read the keys and values, and put the mappings in the table

@@ -28,7 +28,9 @@
 #include "runtime/safepointMechanism.hpp"
 
 #include "runtime/atomic.hpp"
+#include "runtime/handshake.hpp"
 #include "runtime/safepoint.hpp"
+#include "runtime/stackWatermarkSet.hpp"
 #include "runtime/thread.inline.hpp"
 
 // Caller is responsible for using a memory barrier if needed.
@@ -61,11 +63,32 @@ bool SafepointMechanism::global_poll() {
   return (SafepointSynchronize::_state != SafepointSynchronize::_not_synchronized);
 }
 
-bool SafepointMechanism::should_process(JavaThread* thread) {
-  return local_poll_armed(thread);
+bool SafepointMechanism::should_process(JavaThread* thread, bool allow_suspend) {
+  if (!local_poll_armed(thread)) {
+    return false;
+  } else if (allow_suspend) {
+    return true;
+  }
+  //  We are armed but we should ignore suspend operations.
+  if (global_poll() || // Safepoint
+      thread->handshake_state()->has_a_non_suspend_operation() || // Non-suspend handshake
+      !StackWatermarkSet::processing_started(thread)) { // StackWatermark processing is not started
+    return true;
+  }
+
+  // It has boiled down to two possibilities:
+  // 1: We have nothing to process, this just a disarm poll.
+  // 2: We have a suspend handshake, which cannot be processed.
+  // We update the poll value in case of a disarm, to reduce false positives.
+  update_poll_values(thread);
+
+  // We are now about to avoid processing and thus no cross modify fence will be executed.
+  // In case a safepoint happened, while being blocked, we execute it here.
+  OrderAccess::cross_modify_fence();
+  return false;
 }
 
-void SafepointMechanism::process_if_requested(JavaThread* thread) {
+void SafepointMechanism::process_if_requested(JavaThread* thread, bool allow_suspend) {
 
   // Macos/aarch64 should be in the right state for safepoint (e.g.
   // deoptimization needs WXWrite).  Crashes caused by the wrong state rarely
@@ -77,7 +100,7 @@ void SafepointMechanism::process_if_requested(JavaThread* thread) {
 #endif
 
   if (local_poll_armed(thread)) {
-    process_if_requested_slow(thread);
+    process(thread, allow_suspend);
   }
 }
 

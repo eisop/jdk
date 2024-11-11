@@ -41,6 +41,8 @@
 #include "prims/jvmtiExport.hpp"
 #include "runtime/handles.inline.hpp"
 #include "runtime/interfaceSupport.inline.hpp"
+#include "runtime/javaFrameAnchor.hpp"
+#include "runtime/jniHandles.hpp"
 #include "runtime/mutexLocker.hpp"
 #include "runtime/safepoint.hpp"
 #include "runtime/sharedRuntime.hpp"
@@ -187,7 +189,8 @@ void RuntimeBlob::trace_new_stub(RuntimeBlob* stub, const char* name1, const cha
     if (PrintStubCode) {
       ttyLocker ttyl;
       tty->print_cr("- - - [BEGIN] - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
-      tty->print_cr("Decoding %s " INTPTR_FORMAT, stub_id, (intptr_t) stub);
+      tty->print_cr("Decoding %s " PTR_FORMAT " [" PTR_FORMAT ", " PTR_FORMAT "] (%d bytes)",
+                    stub_id, p2i(stub), p2i(stub->code_begin()), p2i(stub->code_end()), stub->code_size());
       Disassembler::decode(stub->code_begin(), stub->code_end(), tty);
       if ((stub->oop_maps() != NULL) && AbstractDisassembler::show_structs()) {
         tty->print_cr("- - - [OOP MAPS]- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
@@ -651,7 +654,12 @@ void CodeBlob::dump_for_addr(address addr, outputStream* st, bool verbose) const
       nm->method()->print_value_on(st);
     }
     st->cr();
-    nm->print_nmethod(verbose);
+    if (verbose && st == tty) {
+      // verbose is only ever true when called from findpc in debug.cpp
+      nm->print_nmethod(true);
+    } else {
+      nm->print(st);
+    }
     return;
   }
   st->print_cr(INTPTR_FORMAT " is at code_begin+%d in ", p2i(addr), (int)(addr - code_begin()));
@@ -713,26 +721,34 @@ void DeoptimizationBlob::print_value_on(outputStream* st) const {
 // Implementation of OptimizedEntryBlob
 
 OptimizedEntryBlob::OptimizedEntryBlob(const char* name, int size, CodeBuffer* cb, intptr_t exception_handler_offset,
-                     jobject receiver, ByteSize jfa_sp_offset) :
+                                       jobject receiver, ByteSize frame_data_offset) :
   BufferBlob(name, size, cb),
   _exception_handler_offset(exception_handler_offset),
   _receiver(receiver),
-  _jfa_sp_offset(jfa_sp_offset) {
+  _frame_data_offset(frame_data_offset) {
   CodeCache::commit(this);
 }
 
 OptimizedEntryBlob* OptimizedEntryBlob::create(const char* name, CodeBuffer* cb, intptr_t exception_handler_offset,
-                             jobject receiver, ByteSize jfa_sp_offset) {
+                                               jobject receiver, ByteSize frame_data_offset) {
   ThreadInVMfromUnknown __tiv;  // get to VM state in case we block on CodeCache_lock
 
   OptimizedEntryBlob* blob = nullptr;
   unsigned int size = CodeBlob::allocation_size(cb, sizeof(OptimizedEntryBlob));
   {
     MutexLocker mu(CodeCache_lock, Mutex::_no_safepoint_check_flag);
-    blob = new (size) OptimizedEntryBlob(name, size, cb, exception_handler_offset, receiver, jfa_sp_offset);
+    blob = new (size) OptimizedEntryBlob(name, size, cb, exception_handler_offset, receiver, frame_data_offset);
   }
   // Track memory usage statistic after releasing CodeCache_lock
   MemoryService::track_code_cache_memory_usage();
 
   return blob;
+}
+
+void OptimizedEntryBlob::oops_do(OopClosure* f, const frame& frame) {
+  frame_data_for_frame(frame)->old_handles->oops_do(f);
+}
+
+JavaFrameAnchor* OptimizedEntryBlob::jfa_for_frame(const frame& frame) const {
+  return &frame_data_for_frame(frame)->jfa;
 }

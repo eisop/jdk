@@ -33,6 +33,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import jdk.internal.misc.ScopedMemoryAccess;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.vm.annotation.ForceInline;
 import jdk.internal.vm.vector.VectorSupport;
@@ -3173,15 +3174,14 @@ public abstract class DoubleVector extends AbstractVector<Double> {
     final
     DoubleVector fromByteBuffer0Template(ByteBuffer bb, int offset) {
         DoubleSpecies vsp = vspecies();
-        return VectorSupport.load(
-            vsp.vectorType(), vsp.elementType(), vsp.laneCount(),
-            bufferBase(bb), bufferAddress(bb, offset),
-            bb, offset, vsp,
-            (buf, off, s) -> {
-                ByteBuffer wb = wrapper(buf, NATIVE_ENDIAN);
-                return s.ldOp(wb, off,
-                        (wb_, o, i) -> wb_.getDouble(o + i * 8));
-           });
+        return ScopedMemoryAccess.loadFromByteBuffer(
+                vsp.vectorType(), vsp.elementType(), vsp.laneCount(),
+                bb, offset, vsp,
+                (buf, off, s) -> {
+                    ByteBuffer wb = wrapper(buf, NATIVE_ENDIAN);
+                    return s.ldOp(wb, off,
+                            (wb_, o, i) -> wb_.getDouble(o + i * 8));
+                });
     }
 
     // Unchecked storing operations in native byte order.
@@ -3224,15 +3224,14 @@ public abstract class DoubleVector extends AbstractVector<Double> {
     final
     void intoByteBuffer0(ByteBuffer bb, int offset) {
         DoubleSpecies vsp = vspecies();
-        VectorSupport.store(
-            vsp.vectorType(), vsp.elementType(), vsp.laneCount(),
-            bufferBase(bb), bufferAddress(bb, offset),
-            this, bb, offset,
-            (buf, off, v) -> {
-                ByteBuffer wb = wrapper(buf, NATIVE_ENDIAN);
-                v.stOp(wb, off,
-                        (wb_, o, i, e) -> wb_.putDouble(o + i * 8, e));
-            });
+        ScopedMemoryAccess.storeIntoByteBuffer(
+                vsp.vectorType(), vsp.elementType(), vsp.laneCount(),
+                this, bb, offset,
+                (buf, off, v) -> {
+                    ByteBuffer wb = wrapper(buf, NATIVE_ENDIAN);
+                    v.stOp(wb, off,
+                            (wb_, o, i, e) -> wb_.putDouble(o + i * 8, e));
+                });
     }
 
     // End of low-level memory operations.
@@ -3632,12 +3631,12 @@ public abstract class DoubleVector extends AbstractVector<Double> {
      */
     static DoubleSpecies species(VectorShape s) {
         Objects.requireNonNull(s);
-        switch (s) {
-            case S_64_BIT: return (DoubleSpecies) SPECIES_64;
-            case S_128_BIT: return (DoubleSpecies) SPECIES_128;
-            case S_256_BIT: return (DoubleSpecies) SPECIES_256;
-            case S_512_BIT: return (DoubleSpecies) SPECIES_512;
-            case S_Max_BIT: return (DoubleSpecies) SPECIES_MAX;
+        switch (s.switchKey) {
+            case VectorShape.SK_64_BIT: return (DoubleSpecies) SPECIES_64;
+            case VectorShape.SK_128_BIT: return (DoubleSpecies) SPECIES_128;
+            case VectorShape.SK_256_BIT: return (DoubleSpecies) SPECIES_256;
+            case VectorShape.SK_512_BIT: return (DoubleSpecies) SPECIES_512;
+            case VectorShape.SK_Max_BIT: return (DoubleSpecies) SPECIES_MAX;
             default: throw new IllegalArgumentException("Bad shape: " + s);
         }
     }

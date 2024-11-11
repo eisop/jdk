@@ -232,6 +232,7 @@ private:
   static bool is_registered_lambda_proxy_class(InstanceKlass* ik);
   static bool warn_excluded(InstanceKlass* k, const char* reason);
   static bool check_for_exclusion_impl(InstanceKlass* k);
+  static bool has_been_redefined(InstanceKlass* k);
 
   static bool _dump_in_progress;
   DEBUG_ONLY(static bool _no_class_loading_should_happen;)
@@ -330,6 +331,7 @@ public:
   static size_t estimate_size_for_archive();
   static void write_to_archive(bool is_static_archive = true);
   static void adjust_lambda_proxy_class_dictionary();
+  static void cleanup_lambda_proxy_class_dictionary();
   static void serialize_dictionary_headers(class SerializeClosure* soc,
                                            bool is_static_archive = true);
   static void serialize_vm_classes(class SerializeClosure* soc);

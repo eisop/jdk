@@ -117,8 +117,8 @@ class Klass : public Metadata {
   // Klass identifier used to implement devirtualized oop closure dispatching.
   const KlassID _id;
 
-  // vtable length
-  int _vtable_len;
+  // Processed access flags, for use by Class.getModifiers.
+  jint        _modifier_flags;
 
   // The fields _super_check_offset, _secondary_super_cache, _secondary_supers
   // and _primary_supers all help make fast subtype checks.  See big discussion
@@ -154,7 +154,10 @@ class Klass : public Metadata {
   // Provide access the corresponding instance java.lang.ClassLoader.
   ClassLoaderData* _class_loader_data;
 
-  jint        _modifier_flags;  // Processed access flags, for use by Class.getModifiers.
+  int _vtable_len;              // vtable length. This field may be read very often when we
+                                // have lots of itable dispatches (e.g., lambdas and streams).
+                                // Keep it away from the beginning of a Klass to avoid cacheline
+                                // contention that may happen when a nearby object is modified.
   AccessFlags _access_flags;    // Access flags. The class/interface distinction is stored here.
 
   JFR_ONLY(DEFINE_TRACE_ID_FIELD;)
@@ -178,7 +181,7 @@ private:
   enum {
     _archived_lambda_proxy_is_available = 2,
     _has_value_based_class_annotation = 4,
-    _is_shared_old_klass = 8
+    _verified_at_dump_time = 8
   };
 #endif
 
@@ -265,7 +268,8 @@ protected:
   void set_archived_java_mirror(oop m) NOT_CDS_JAVA_HEAP_RETURN;
 
   // Temporary mirror switch used by RedefineClasses
-  void replace_java_mirror(oop mirror);
+  OopHandle java_mirror_handle() const { return _java_mirror; }
+  void swap_java_mirror_handle(OopHandle& mirror) { _java_mirror.swap(mirror); }
 
   // Set java mirror OopHandle to NULL for CDS
   // This leaves the OopHandle in the CLD, but that's ok, you can't release them.
@@ -334,11 +338,11 @@ protected:
     NOT_CDS(return false;)
   }
 
-  void set_is_shared_old_klass() {
-    CDS_ONLY(_shared_class_flags |= _is_shared_old_klass;)
+  void set_verified_at_dump_time() {
+    CDS_ONLY(_shared_class_flags |= _verified_at_dump_time;)
   }
-  bool is_shared_old_klass() const {
-    CDS_ONLY(return (_shared_class_flags & _is_shared_old_klass) != 0;)
+  bool verified_at_dump_time() const {
+    CDS_ONLY(return (_shared_class_flags & _verified_at_dump_time) != 0;)
     NOT_CDS(return false;)
   }
 
@@ -693,7 +697,7 @@ protected:
   Symbol* name() const                   { return _name; }
   void set_name(Symbol* n);
 
-  virtual void release_C_heap_structures();
+  virtual void release_C_heap_structures(bool release_constant_pool = true);
 
  public:
   virtual jint compute_modifier_flags() const = 0;

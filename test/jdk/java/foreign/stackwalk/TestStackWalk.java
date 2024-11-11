@@ -22,11 +22,11 @@
  */
 
 /*
- * @test
+ * @test id=default_gc
  * @requires ((os.arch == "amd64" | os.arch == "x86_64") & sun.arch.data.model == "64") | os.arch == "aarch64"
  * @library /test/lib
- * @build sun.hotspot.WhiteBox
- * @run driver jdk.test.lib.helpers.ClassFileInstaller sun.hotspot.WhiteBox
+ * @build jdk.test.whitebox.WhiteBox
+ * @run driver jdk.test.lib.helpers.ClassFileInstaller jdk.test.whitebox.WhiteBox
  *
  * @run main/othervm
  *   -Xbootclasspath/a:.
@@ -47,6 +47,63 @@
  *   TestStackWalk
  */
 
+/*
+ * @test id=zgc
+ * @requires (((os.arch == "amd64" | os.arch == "x86_64") & sun.arch.data.model == "64") | os.arch == "aarch64")
+ * @requires vm.gc.Z
+ * @library /test/lib
+ * @build jdk.test.whitebox.WhiteBox
+ * @run driver jdk.test.lib.helpers.ClassFileInstaller jdk.test.whitebox.WhiteBox
+ *
+ * @run main/othervm
+ *   -Xbootclasspath/a:.
+ *   -XX:+UnlockDiagnosticVMOptions
+ *   -XX:+WhiteBoxAPI
+ *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
+ *   --enable-native-access=ALL-UNNAMED
+ *   -Xbatch
+ *   -XX:+UseZGC
+ *   TestStackWalk
+ *
+ * @run main/othervm
+ *   -Xbootclasspath/a:.
+ *   -XX:+UnlockDiagnosticVMOptions
+ *   -XX:+WhiteBoxAPI
+ *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=false
+ *   --enable-native-access=ALL-UNNAMED
+ *   -Xbatch
+ *   -XX:+UseZGC
+ *   TestStackWalk
+ */
+/*
+ * @test id=shenandoah
+ * @requires (((os.arch == "amd64" | os.arch == "x86_64") & sun.arch.data.model == "64") | os.arch == "aarch64")
+ * @requires vm.gc.Shenandoah
+ * @library /test/lib
+ * @build jdk.test.whitebox.WhiteBox
+ * @run driver jdk.test.lib.helpers.ClassFileInstaller jdk.test.whitebox.WhiteBox
+ *
+ * @run main/othervm
+ *   -Xbootclasspath/a:.
+ *   -XX:+UnlockDiagnosticVMOptions
+ *   -XX:+WhiteBoxAPI
+ *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
+ *   --enable-native-access=ALL-UNNAMED
+ *   -Xbatch
+ *   -XX:+UseShenandoahGC
+ *   TestStackWalk
+ *
+ * @run main/othervm
+ *   -Xbootclasspath/a:.
+ *   -XX:+UnlockDiagnosticVMOptions
+ *   -XX:+WhiteBoxAPI
+ *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=false
+ *   --enable-native-access=ALL-UNNAMED
+ *   -Xbatch
+ *   -XX:+UseShenandoahGC
+ *   TestStackWalk
+ */
+
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.SymbolLookup;
@@ -57,7 +114,7 @@ import java.lang.invoke.MethodType;
 import java.lang.ref.Reference;
 
 import jdk.incubator.foreign.ResourceScope;
-import sun.hotspot.WhiteBox;
+import jdk.test.whitebox.WhiteBox;
 
 import static java.lang.invoke.MethodHandles.lookup;
 import static jdk.incubator.foreign.CLinker.C_POINTER;

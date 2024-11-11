@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,14 +25,10 @@
  * @test
  * @bug 8245462 8229822
  * @summary Tests cancelling the request.
- * @library /test/lib http2/server
+ * @library /test/lib /test/jdk/java/net/httpclient/lib
  * @key randomness
- * @build jdk.test.lib.net.SimpleSSLContext HttpServerAdapters
+ * @build jdk.httpclient.test.lib.common.HttpServerAdapters jdk.test.lib.net.SimpleSSLContext
  *        ReferenceTracker CancelRequestTest
- * @modules java.base/sun.net.www.http
- *          java.net.http/jdk.internal.net.http.common
- *          java.net.http/jdk.internal.net.http.frame
- *          java.net.http/jdk.internal.net.http.hpack
  * @run testng/othervm -Djdk.internal.httpclient.debug=true
  *                     -Djdk.httpclient.enableAllMethodRetry=true
  *                     CancelRequestTest
@@ -45,6 +41,8 @@ import com.sun.net.httpserver.HttpsServer;
 import jdk.test.lib.RandomFactory;
 import jdk.test.lib.net.SimpleSSLContext;
 import org.testng.ITestContext;
+import org.testng.ITestResult;
+import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
@@ -65,6 +63,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -77,11 +76,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import jdk.httpclient.test.lib.common.HttpServerAdapters;
+import jdk.httpclient.test.lib.http2.Http2TestServer;
 
 import static java.lang.System.arraycopy;
 import static java.lang.System.out;
+import static java.net.http.HttpClient.Version.HTTP_1_1;
+import static java.net.http.HttpClient.Version.HTTP_2;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -149,16 +153,34 @@ public class CancelRequestTest implements HttpServerAdapters {
         return Boolean.getBoolean("jdk.internal.httpclient.debug");
     }
 
+    final AtomicReference<SkipException> skiptests = new AtomicReference<>();
+    void checkSkip() {
+        var skip = skiptests.get();
+        if (skip != null) throw skip;
+    }
+    static String name(ITestResult result) {
+        var params = result.getParameters();
+        return result.getName()
+                + (params == null ? "()" : Arrays.toString(result.getParameters()));
+    }
+
     @BeforeMethod
     void beforeMethod(ITestContext context) {
         if (stopAfterFirstFailure() && context.getFailedTests().size() > 0) {
-            throw new RuntimeException("some tests failed");
+            if (skiptests.get() == null) {
+                SkipException skip = new SkipException("some tests failed");
+                skip.setStackTrace(new StackTraceElement[0]);
+                skiptests.compareAndSet(null, skip);
+            }
         }
     }
 
     @AfterClass
-    static final void printFailedTests() {
+    static final void printFailedTests(ITestContext context) {
         out.println("\n=========================");
+        var failed = context.getFailedTests().getAllResults().stream()
+                .collect(Collectors.toMap(r -> name(r), ITestResult::getThrowable));
+        FAILURES.putAll(failed);
         try {
             out.printf("%n%sCreated %d servers and %d clients%n",
                     now(), serverCount.get(), clientCount.get());
@@ -275,6 +297,7 @@ public class CancelRequestTest implements HttpServerAdapters {
     @Test(dataProvider = "asyncurls")
     public void testGetSendAsync(String uri, boolean sameClient, boolean mayInterruptIfRunning)
             throws Exception {
+        checkSkip();
         HttpClient client = null;
         uri = uri + "/get";
         out.printf("%n%s testGetSendAsync(%s, %b, %b)%n", now(), uri, sameClient, mayInterruptIfRunning);
@@ -360,6 +383,7 @@ public class CancelRequestTest implements HttpServerAdapters {
     @Test(dataProvider = "asyncurls")
     public void testPostSendAsync(String uri, boolean sameClient, boolean mayInterruptIfRunning)
             throws Exception {
+        checkSkip();
         uri = uri + "/post";
         HttpClient client = null;
         out.printf("%n%s testPostSendAsync(%s, %b, %b)%n", now(), uri, sameClient, mayInterruptIfRunning);
@@ -463,6 +487,7 @@ public class CancelRequestTest implements HttpServerAdapters {
     @Test(dataProvider = "urls")
     public void testPostInterrupt(String uri, boolean sameClient)
             throws Exception {
+        checkSkip();
         HttpClient client = null;
         out.printf("%n%s testPostInterrupt(%s, %b)%n", now(), uri, sameClient);
         for (int i=0; i< ITERATION_COUNT; i++) {
@@ -524,25 +549,22 @@ public class CancelRequestTest implements HttpServerAdapters {
 
         // HTTP/1.1
         HttpTestHandler h1_chunkHandler = new HTTPSlowHandler();
-        InetSocketAddress sa = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
-        httpTestServer = HttpTestServer.of(HttpServer.create(sa, 0));
+        httpTestServer = HttpTestServer.create(HTTP_1_1);
         httpTestServer.addHandler(h1_chunkHandler, "/http1/x/");
         httpURI = "http://" + httpTestServer.serverAuthority() + "/http1/x/";
 
-        HttpsServer httpsServer = HttpsServer.create(sa, 0);
-        httpsServer.setHttpsConfigurator(new HttpsConfigurator(sslContext));
-        httpsTestServer = HttpTestServer.of(httpsServer);
+        httpsTestServer = HttpTestServer.create(HTTP_1_1, sslContext);
         httpsTestServer.addHandler(h1_chunkHandler, "/https1/x/");
         httpsURI = "https://" + httpsTestServer.serverAuthority() + "/https1/x/";
 
         // HTTP/2
         HttpTestHandler h2_chunkedHandler = new HTTPSlowHandler();
 
-        http2TestServer = HttpTestServer.of(new Http2TestServer("localhost", false, 0));
+        http2TestServer = HttpTestServer.create(HTTP_2);
         http2TestServer.addHandler(h2_chunkedHandler, "/http2/x/");
         http2URI = "http://" + http2TestServer.serverAuthority() + "/http2/x/";
 
-        https2TestServer = HttpTestServer.of(new Http2TestServer("localhost", true, sslContext));
+        https2TestServer = HttpTestServer.create(HTTP_2, sslContext);
         https2TestServer.addHandler(h2_chunkedHandler, "/https2/x/");
         https2URI = "https://" + https2TestServer.serverAuthority() + "/https2/x/";
 

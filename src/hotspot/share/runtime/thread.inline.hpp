@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2022, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2021, Azul Systems, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -41,7 +41,14 @@
 inline jlong Thread::cooked_allocated_bytes() {
   jlong allocated_bytes = Atomic::load_acquire(&_allocated_bytes);
   if (UseTLAB) {
-    size_t used_bytes = tlab().used_bytes();
+    // These reads are unsynchronized and unordered with the thread updating its tlab pointers.
+    // Use only if top > start && used_bytes <= max_tlab_size_bytes.
+    const HeapWord* const top = tlab().top_relaxed();
+    const HeapWord* const start = tlab().start_relaxed();
+    if (top <= start) {
+      return allocated_bytes;
+    }
+    const size_t used_bytes = pointer_delta(top, start, 1);
     if (used_bytes <= ThreadLocalAllocBuffer::max_size_in_bytes()) {
       // Comparing used_bytes with the maximum allowed size will ensure
       // that we don't add the used bytes from a semi-initialized TLAB
@@ -125,7 +132,7 @@ inline void JavaThread::set_pending_async_exception(oop e) {
 }
 
 inline JavaThreadState JavaThread::thread_state() const    {
-#if defined(PPC64) || defined (AARCH64)
+#if defined(PPC64) || defined (AARCH64) || defined(RISCV64)
   // Use membars when accessing volatile _thread_state. See
   // Threads::create_vm() for size checks.
   return (JavaThreadState) Atomic::load_acquire((volatile jint*)&_thread_state);
@@ -137,7 +144,7 @@ inline JavaThreadState JavaThread::thread_state() const    {
 inline void JavaThread::set_thread_state(JavaThreadState s) {
   assert(current_or_null() == NULL || current_or_null() == this,
          "state change should only be called by the current thread");
-#if defined(PPC64) || defined (AARCH64)
+#if defined(PPC64) || defined (AARCH64) || defined(RISCV64)
   // Use membars when accessing volatile _thread_state. See
   // Threads::create_vm() for size checks.
   Atomic::release_store((volatile jint*)&_thread_state, (jint)s);

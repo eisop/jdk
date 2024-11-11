@@ -107,9 +107,12 @@ public:
 
     verify_universe("Before CDS dynamic dump");
     DEBUG_ONLY(SystemDictionaryShared::NoClassLoadingMark nclm);
-    SystemDictionaryShared::check_excluded_classes();
 
+    // Block concurrent class unloading from changing the _dumptime_table
     MutexLocker ml(DumpTimeTable_lock, Mutex::_no_safepoint_check_flag);
+    SystemDictionaryShared::check_excluded_classes();
+    SystemDictionaryShared::cleanup_lambda_proxy_class_dictionary();
+
     init_header();
     gather_source_objs();
     reserve_buffer();

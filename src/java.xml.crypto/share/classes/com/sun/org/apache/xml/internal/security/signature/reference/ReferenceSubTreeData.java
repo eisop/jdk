@@ -25,11 +25,18 @@
  */
 package com.sun.org.apache.xml.internal.security.signature.reference;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
+
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -51,6 +58,7 @@ public class ReferenceSubTreeData implements ReferenceNodeSetData {
         this.excludeComments = excludeComments;
     }
 
+    @Override
     public Iterator<Node> iterator() {
         return new DelayedNodeIterator(root, excludeComments);
     }
@@ -78,6 +86,8 @@ public class ReferenceSubTreeData implements ReferenceNodeSetData {
             this.withComments = !excludeComments;
         }
 
+        @Override
+        @Pure
         public boolean hasNext() {
             if (nodeSet == null) {
                 nodeSet = dereferenceSameDocumentURI(root);
@@ -86,6 +96,8 @@ public class ReferenceSubTreeData implements ReferenceNodeSetData {
             return li.hasNext();
         }
 
+        @Override
+        @SideEffectsOnly("this")
         public Node next() {
             if (nodeSet == null) {
                 nodeSet = dereferenceSameDocumentURI(root);
@@ -98,6 +110,7 @@ public class ReferenceSubTreeData implements ReferenceNodeSetData {
             }
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

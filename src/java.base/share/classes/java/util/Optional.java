@@ -297,7 +297,9 @@ public final @NonNull class Optional<T> {
      *         present, otherwise an empty {@code Optional}
      * @throws NullPointerException if the mapping function is {@code null}
      */
+    @CFComment({"@SideEffectFree: the mapper must not have side effects."})
     @OptionalPropagator
+    @SideEffectFree
     public <U> Optional<U> map(Function<? super T, ? extends @Nullable U> mapper) {
         Objects.requireNonNull(mapper);
         if (!isPresent()) {
@@ -518,7 +520,7 @@ public final @NonNull class Optional<T> {
     @Override
     public String toString() {
         return value != null
-            ? String.format("Optional[%s]", value)
+            ? ("Optional[" + value + "]")
             : "Optional.empty";
     }
 }

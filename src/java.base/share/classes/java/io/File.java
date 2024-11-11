@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -30,6 +30,7 @@ import org.checkerframework.checker.interning.qual.Interned;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.lock.qual.ReleasesNoLocks;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.regex.qual.Regex;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -191,8 +192,9 @@ public class File
 
     /**
      * Check if the file has an invalid path. Currently, the inspection of
-     * a file path is very limited, and it only covers Nul character check.
-     * Returning true means the path is definitely invalid/garbage. But
+     * a file path is very limited, and it only covers Nul character check
+     * unless further checking is explicitly enabled by a system property.
+     * Returning true means the path is definitely invalid/garbage, but
      * returning false does not guarantee that the path is valid.
      *
      * @return true if the file path is invalid.
@@ -201,8 +203,7 @@ public class File
     final boolean isInvalid() {
         PathStatus s = status;
         if (s == null) {
-            s = (this.path.indexOf('\u0000') < 0) ? PathStatus.CHECKED
-                                                  : PathStatus.INVALID;
+            s = fs.isInvalid(this) ? PathStatus.INVALID : PathStatus.CHECKED;
             status = s;
         }
         return s == PathStatus.INVALID;
@@ -257,7 +258,7 @@ public class File
      * for convenience.  This string contains a single character, namely
      * {@link #pathSeparatorChar}.
      */
-    public static final @Interned String pathSeparator = "" + pathSeparatorChar;
+    public static final @Interned @Regex String pathSeparator = "" + pathSeparatorChar;
 
 
     /* -- Constructors -- */

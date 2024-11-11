@@ -52,6 +52,8 @@ import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolver;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverContext;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -193,10 +195,12 @@ public class Reference extends SignatureElementProxy {
 
         // Create DigestMethod Element without actually instantiating a MessageDigest Object
         Algorithm digestAlgorithm = new Algorithm(getDocument(), messageDigestAlgorithm) {
+            @Override
             public String getBaseNamespace() {
                 return Constants.SignatureSpecNS;
             }
 
+            @Override
             public String getBaseLocalName() {
                 return Constants._TAG_DIGESTMETHOD;
             }
@@ -612,17 +616,20 @@ public class Reference extends SignatureElementProxy {
             try {
                 final Set<Node> s = input.getNodeSet();
                 referenceData = new ReferenceNodeSetData() {
+                    @Override
                     public Iterator<Node> iterator() {
                         return new Iterator<Node>() {
 
                             final Iterator<Node> sIterator = s.iterator();
 
                             @Override
+                            @Pure
                             public boolean hasNext() {
                                 return sIterator.hasNext();
                             }
 
                             @Override
+                            @SideEffectsOnly("this")
                             public Node next() {
                                 return sIterator.next();
                             }
@@ -808,6 +815,7 @@ public class Reference extends SignatureElementProxy {
      * Method getBaseLocalName
      * {@inheritDoc}
      */
+    @Override
     public String getBaseLocalName() {
         return Constants._TAG_REFERENCE;
     }

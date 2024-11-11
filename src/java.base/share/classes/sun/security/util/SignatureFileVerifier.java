@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -53,6 +53,7 @@ import java.util.jar.JarException;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import sun.security.action.GetIntegerAction;
 import sun.security.jca.Providers;
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
@@ -97,6 +98,12 @@ public class SignatureFileVerifier {
 
     /** ConstraintsParameters for checking disabled algorithms */
     private JarConstraintsParameters params;
+
+    // the maximum allowed size in bytes for the signature-related files
+    public static final int MAX_SIG_FILE_SIZE = initializeMaxSigFileSize();
+
+    // The maximum size of array to allocate. Some VMs reserve some header words in an array.
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     /**
      * Create the named SignatureFileVerifier.
@@ -271,7 +278,7 @@ public class SignatureFileVerifier {
      *
      */
     public void process(Hashtable<String, CodeSigner[]> signers,
-            List<Object> manifestDigests)
+            List<Object> manifestDigests, String manifestName)
         throws IOException, SignatureException, NoSuchAlgorithmException,
             JarException, CertificateException
     {
@@ -280,7 +287,7 @@ public class SignatureFileVerifier {
         Object obj = null;
         try {
             obj = Providers.startJarVerification();
-            processImpl(signers, manifestDigests);
+            processImpl(signers, manifestDigests, manifestName);
         } finally {
             Providers.stopJarVerification(obj);
         }
@@ -288,7 +295,7 @@ public class SignatureFileVerifier {
     }
 
     private void processImpl(Hashtable<String, CodeSigner[]> signers,
-            List<Object> manifestDigests)
+            List<Object> manifestDigests, String manifestName)
         throws IOException, SignatureException, NoSuchAlgorithmException,
             JarException, CertificateException
     {
@@ -369,7 +376,7 @@ public class SignatureFileVerifier {
         }
 
         // MANIFEST.MF is always regarded as signed
-        updateSigners(newSigners, signers, JarFile.MANIFEST_NAME);
+        updateSigners(newSigners, signers, manifestName);
     }
 
     /**
@@ -384,7 +391,7 @@ public class SignatureFileVerifier {
             try {
                 params.setExtendedExceptionMsg(name + ".SF", key + " attribute");
                 DisabledAlgorithmConstraints
-                    .jarConstraints().permits(algorithm, params);
+                    .jarConstraints().permits(algorithm, params, false);
             } catch (GeneralSecurityException e) {
                 permittedAlgs.put(algorithm, Boolean.FALSE);
                 permittedAlgs.put(key.toUpperCase(), Boolean.FALSE);
@@ -544,6 +551,10 @@ public class SignatureFileVerifier {
                 MessageDigest digest = getDigest(algorithm);
                 if (digest != null) {
                     ManifestDigester.Entry mde = md.getMainAttsEntry(false);
+                    if (mde == null) {
+                        throw new SignatureException("Manifest Main Attribute check " +
+                                "failed due to missing main attributes entry");
+                    }
                     byte[] computedHash = mde.digest(digest);
                     byte[] expectedHash =
                         Base64.getMimeDecoder().decode((String)se.getValue());
@@ -839,5 +850,25 @@ public class SignatureFileVerifier {
         }
         signerCache.add(cachedSigners);
         signers.put(name, cachedSigners);
+    }
+
+    private static int initializeMaxSigFileSize() {
+        /*
+         * System property "jdk.jar.maxSignatureFileSize" used to configure
+         * the maximum allowed number of bytes for the signature-related files
+         * in a JAR file.
+         */
+        int tmp = GetIntegerAction.privilegedGetProperty(
+                "jdk.jar.maxSignatureFileSize", 16000000);
+        if (tmp < 0 || tmp > MAX_ARRAY_SIZE) {
+            if (debug != null) {
+                debug.println("The default signature file size of 16000000 bytes " +
+                        "will be used for the jdk.jar.maxSignatureFileSize " +
+                        "system property since the specified value " +
+                        "is out of range: " + tmp);
+            }
+            tmp = 16000000;
+        }
+        return tmp;
     }
 }

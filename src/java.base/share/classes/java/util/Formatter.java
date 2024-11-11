@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,6 +28,7 @@ package java.util;
 import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.checkerframework.checker.mustcall.qual.MustCallAlias;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -4551,10 +4552,9 @@ public final class Formatter implements Closeable, Flushable {
             }
 
             // apply zero padding
-            if (width != -1 && f.contains(Flags.ZERO_PAD)) {
-                for (int k = sb.length(); k < width; k++) {
-                    sb.insert(begin, zero);
-                }
+            if (width > sb.length() && f.contains(Flags.ZERO_PAD)) {
+                String zeros = String.valueOf(zero).repeat(width - sb.length());
+                sb.insert(begin, zeros);
             }
 
             return sb;
@@ -4604,6 +4604,7 @@ public final class Formatter implements Closeable, Flushable {
         }
 
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(Flags f) {
             return (flags & f.valueOf()) == f.valueOf();
         }

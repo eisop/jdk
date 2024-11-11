@@ -25,6 +25,8 @@
 
 package java.net;
 
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -431,6 +433,11 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                                 return defineClass(name, res);
                             } catch (IOException e) {
                                 throw new ClassNotFoundException(name, e);
+                            } catch (ClassFormatError e2) {
+                                if (res.getDataError() != null) {
+                                    e2.addSuppressed(res.getDataError());
+                                }
+                                throw e2;
                             }
                         } else {
                             return null;
@@ -670,7 +677,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                 return url != null;
             }
 
-            public URL nextElement() {
+            public URL nextElement(/*@NonEmpty Enumeration<URL> this*/) {
                 if (!next()) {
                     throw new NoSuchElementException();
                 }
@@ -679,6 +686,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                 return u;
             }
 
+            @EnsuresNonEmptyIf(result = true, expression = "this")
             public boolean hasMoreElements() {
                 return next();
             }

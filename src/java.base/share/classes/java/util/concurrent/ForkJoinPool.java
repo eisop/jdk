@@ -35,6 +35,7 @@
 
 package java.util.concurrent;
 
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.dataflow.qual.Pure;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -960,6 +961,7 @@ public class ForkJoinPool extends AbstractExecutorService {
          * has any tasks than does queueSize.
          */
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         final boolean isEmpty() {
             return !((source != 0 && owner == null) || top - base > 0);
         }
@@ -2564,7 +2566,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      * overridden by system properties
      */
     private ForkJoinPool(byte forCommonPoolOnly) {
-        int parallelism = Runtime.getRuntime().availableProcessors() - 1;
+        int parallelism = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
         ForkJoinWorkerThreadFactory fac = null;
         UncaughtExceptionHandler handler = null;
         try {  // ignore exceptions in accessing/parsing properties
@@ -2762,8 +2764,10 @@ public class ForkJoinPool extends AbstractExecutorService {
                         ForkJoinTask.cancelIgnoringExceptions(f);
                     else {
                         ((ForkJoinTask<T>)f).awaitPoolInvoke(this, ns);
-                        if ((ns = nanos - (System.nanoTime() - startTime)) < 0L)
+                        if ((ns = nanos - (System.nanoTime() - startTime)) < 0L) {
                             timedOut = true;
+                            ForkJoinTask.cancelIgnoringExceptions(f);
+                        }
                     }
                 }
             }

@@ -380,7 +380,7 @@
   notproduct(ccstr, PrintIdealGraphAddress, "127.0.0.1",                    \
           "IP address to connect to visualizer")                            \
                                                                             \
-  notproduct(ccstr, PrintIdealGraphFile, NULL,                              \
+  notproduct(ccstr, PrintIdealGraphFile, nullptr,                           \
           "File to dump ideal graph to.  If set overrides the "             \
           "use of the network")                                             \
                                                                             \
@@ -767,6 +767,9 @@
           "to stress handling of long counted loops: run inner loop"        \
           "for at most jint_max / StressLongCountedLoop")                   \
           range(0, max_juint)                                               \
+                                                                            \
+  product(bool, VerifyReceiverTypes, trueInDebug, DIAGNOSTIC,               \
+          "Verify receiver types at runtime")                               \
 
 // end of C2_FLAGS
 

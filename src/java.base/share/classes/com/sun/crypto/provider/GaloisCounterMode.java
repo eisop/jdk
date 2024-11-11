@@ -163,7 +163,13 @@ abstract class GaloisCounterMode extends CipherSpi {
         reInit = false;
 
         // always encrypt mode for embedded cipher
-        blockCipher.init(false, key.getAlgorithm(), keyValue);
+        try {
+            blockCipher.init(false, key.getAlgorithm(), keyValue);
+        } finally {
+            if (!encryption) {
+                Arrays.fill(keyValue, (byte) 0);
+            }
+        }
     }
 
     @Override
@@ -888,7 +894,7 @@ abstract class GaloisCounterMode extends CipherSpi {
                 // if src is read only, then we need a copy
                 if (!src.isReadOnly()) {
                     // If using the heap, check underlying byte[] address.
-                    if (!src.array().equals(dst.array()) ) {
+                    if (src.array() != dst.array()) {
                         return dst;
                     }
 
@@ -1422,6 +1428,13 @@ abstract class GaloisCounterMode extends CipherSpi {
             if (getBufferedLength() != 0) {
                 buffer = ByteBuffer.wrap(ibuffer.toByteArray());
                 len += buffer.remaining();
+            }
+
+            // Check that input data is long enough to fit the expected tag.
+            if (len < 0) {
+                throw new AEADBadTagException("Input data too short to " +
+                    "contain an expected tag length of " + tagLenBytes +
+                    "bytes");
             }
 
             checkDataLength(len);

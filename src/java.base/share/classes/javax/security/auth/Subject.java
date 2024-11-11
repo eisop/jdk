@@ -25,12 +25,16 @@
 
 package javax.security.auth;
 
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.util.*;
 import java.io.*;
@@ -151,8 +155,8 @@ public final class Subject implements java.io.Serializable {
      * has been set read-only before permitting subsequent modifications.
      * The newly created Sets also prevent illegal modifications
      * by ensuring that callers have sufficient permissions.  These Sets
-     * also prohibit null elements, and attempts to add or query a null
-     * element will result in a {@code NullPointerException}.
+     * also prohibit null elements, and attempts to add, query, or remove
+     * a null element will result in a {@code NullPointerException}.
      *
      * <p> To modify the Principals Set, the caller must have
      * {@code AuthPermission("modifyPrincipals")}.
@@ -181,8 +185,8 @@ public final class Subject implements java.io.Serializable {
      * has been set read-only before permitting subsequent modifications.
      * The newly created Sets also prevent illegal modifications
      * by ensuring that callers have sufficient permissions.  These Sets
-     * also prohibit null elements, and attempts to add or query a null
-     * element will result in a {@code NullPointerException}.
+     * also prohibit null elements, and attempts to add, query, or remove
+     * a null element will result in a {@code NullPointerException}.
      *
      * <p> To modify the Principals Set, the caller must have
      * {@code AuthPermission("modifyPrincipals")}.
@@ -1123,9 +1127,12 @@ public final class Subject implements java.io.Serializable {
             return new Iterator<E>() {
                 ListIterator<E> i = list.listIterator(0);
 
+                @Pure
+                @EnsuresNonEmptyIf(result = true, expression = "this")
                 public boolean hasNext() {return i.hasNext();}
 
-                public E next() {
+                @SideEffectsOnly("this")
+                public E next(/*@NonEmpty Iterator<E> this*/) {
                     if (which != Subject.PRIV_CREDENTIAL_SET) {
                         return i.next();
                     }
@@ -1172,6 +1179,7 @@ public final class Subject implements java.io.Serializable {
             };
         }
 
+        @EnsuresNonEmpty("this")
         public boolean add(E o) {
 
             Objects.requireNonNull(o,
@@ -1248,6 +1256,7 @@ public final class Subject implements java.io.Serializable {
 
         @SuppressWarnings("removal")
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o) {
 
             Objects.requireNonNull(o,
@@ -1390,6 +1399,7 @@ public final class Subject implements java.io.Serializable {
             }
         }
 
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() {
             return elements.isEmpty();
         }
@@ -1596,6 +1606,7 @@ public final class Subject implements java.io.Serializable {
         }
 
         @Override
+        @EnsuresNonEmpty("this")
         public boolean add(T o) {
 
             if (!c.isAssignableFrom(o.getClass())) {

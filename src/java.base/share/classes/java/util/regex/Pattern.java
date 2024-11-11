@@ -27,12 +27,15 @@ package java.util.regex;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.regex.qual.PolyRegex;
 import org.checkerframework.checker.regex.qual.Regex;
 import org.checkerframework.checker.signedness.qual.SignedPositive;
 import org.checkerframework.common.value.qual.MinLen;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -1116,6 +1119,7 @@ public final @UsesObjectEquals class Pattern
      *
      * @return  The source of this pattern
      */
+    @Pure
     public String pattern() {
         return pattern;
     }
@@ -1128,7 +1132,7 @@ public final @UsesObjectEquals class Pattern
      * @return  The string representation of this pattern
      * @since 1.5
      */
-    @SideEffectFree
+    @Pure
     public String toString(@GuardSatisfied Pattern this) {
         return pattern;
     }
@@ -1158,6 +1162,7 @@ public final @UsesObjectEquals class Pattern
      *
      * @return  The match flags specified when this pattern was compiled
      */
+    @Pure
     public int flags() {
         return flags0;
     }
@@ -1188,6 +1193,7 @@ public final @UsesObjectEquals class Pattern
      * @throws  PatternSyntaxException
      *          If the expression's syntax is invalid
      */
+    @Pure
     public static boolean matches(@Regex String regex, CharSequence input) {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(input);
@@ -1273,6 +1279,7 @@ public final @UsesObjectEquals class Pattern
      * @return  The array of strings computed by splitting the input
      *          around matches of this pattern
      */
+    @Pure
     public String @MinLen(1) [] split(CharSequence input, int limit) {
         int index = 0;
         boolean matchLimited = limit > 0;
@@ -1349,6 +1356,7 @@ public final @UsesObjectEquals class Pattern
      * @return  The array of strings computed by splitting the input
      *          around matches of this pattern
      */
+    @Pure
     public String @MinLen(1) [] split(CharSequence input) {
         return split(input, 0);
     }
@@ -3448,14 +3456,14 @@ loop:   for(int x=0, offset=0; x<nCodePoints; x++, offset+=len) {
     private static final int countChars(CharSequence seq, int index,
                                         int lengthInCodePoints) {
         // optimization
-        if (lengthInCodePoints == 1 && !Character.isHighSurrogate(seq.charAt(index))) {
-            assert (index >= 0 && index < seq.length());
+        if (lengthInCodePoints == 1 && index >= 0 && index < seq.length() &&
+            !Character.isHighSurrogate(seq.charAt(index))) {
             return 1;
         }
         int length = seq.length();
         int x = index;
         if (lengthInCodePoints >= 0) {
-            assert (index >= 0 && index < length);
+            assert ((length == 0 && index == 0) || index >= 0 && index < length);
             for (int i = 0; x < length && i < lengthInCodePoints; i++) {
                 if (Character.isHighSurrogate(seq.charAt(x++))) {
                     if (x < length && Character.isLowSurrogate(seq.charAt(x))) {
@@ -5793,6 +5801,7 @@ NEXT:       while (i <= last) {
      * @since   1.8
      * @see     Matcher#find
      */
+    @SideEffectFree
     public Predicate<String> asPredicate() {
         return s -> matcher(s).find();
     }
@@ -5813,6 +5822,7 @@ NEXT:       while (i <= last) {
      * @since   11
      * @see     Matcher#matches
      */
+    @SideEffectFree
     public Predicate<String> asMatchPredicate() {
         return s -> matcher(s).matches();
     }
@@ -5849,6 +5859,7 @@ NEXT:       while (i <= last) {
      * @see     #split(CharSequence)
      * @since   1.8
      */
+    @SideEffectFree
     public Stream<String> splitAsStream(final CharSequence input) {
         class MatcherIterator implements Iterator<String> {
             private Matcher matcher;
@@ -5860,7 +5871,8 @@ NEXT:       while (i <= last) {
             // > 0 if there are N next empty elements
             private int emptyElementCount;
 
-            public String next() {
+            @SideEffectsOnly("this")
+            public String next(@NonEmpty MatcherIterator this) {
                 if (!hasNext())
                     throw new NoSuchElementException();
 
@@ -5874,6 +5886,8 @@ NEXT:       while (i <= last) {
                 }
             }
 
+            @Pure
+            @EnsuresNonEmptyIf(result = true, expression = "this")
             public boolean hasNext() {
                 if (matcher == null) {
                     matcher = matcher(input);

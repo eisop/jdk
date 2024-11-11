@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2002, 2021, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2012, 2021 SAP SE. All rights reserved.
+ * Copyright (c) 2012, 2022 SAP SE. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -45,6 +45,9 @@ class Address {
   }
 
   Address(Register b, address d = 0)
+    : _base(b), _index(noreg), _disp((intptr_t)d) {}
+
+  Address(Register b, ByteSize d)
     : _base(b), _index(noreg), _disp((intptr_t)d) {}
 
   Address(Register b, intptr_t d)
@@ -576,6 +579,7 @@ class Assembler : public AbstractAssembler {
     XVNMSUBASP_OPCODE=(60u<< OPCODE_SHIFT |  209u << 3),
     XVNMSUBADP_OPCODE=(60u<< OPCODE_SHIFT |  241u << 3),
     XVRDPI_OPCODE  = (60u << OPCODE_SHIFT |  201u << 2),
+    XVRDPIC_OPCODE = (60u << OPCODE_SHIFT |  235u << 2),
     XVRDPIM_OPCODE = (60u << OPCODE_SHIFT |  249u << 2),
     XVRDPIP_OPCODE = (60u << OPCODE_SHIFT |  233u << 2),
 
@@ -1915,7 +1919,7 @@ class Assembler : public AbstractAssembler {
 
   // More convenient version.
   int condition_register_bit(ConditionRegister cr, Condition c) {
-    return 4 * (int)(intptr_t)cr + c;
+    return 4 * cr.encoding() + c;
   }
   void crand( ConditionRegister crdst, Condition cdst, ConditionRegister crsrc, Condition csrc);
   void crnand(ConditionRegister crdst, Condition cdst, ConditionRegister crsrc, Condition csrc);
@@ -2384,6 +2388,7 @@ class Assembler : public AbstractAssembler {
   inline void xvnmsubasp(VectorSRegister d, VectorSRegister a, VectorSRegister b);
   inline void xvnmsubadp(VectorSRegister d, VectorSRegister a, VectorSRegister b);
   inline void xvrdpi(   VectorSRegister d, VectorSRegister b);
+  inline void xvrdpic(  VectorSRegister d, VectorSRegister b);
   inline void xvrdpim(  VectorSRegister d, VectorSRegister b);
   inline void xvrdpip(  VectorSRegister d, VectorSRegister b);
 

@@ -82,13 +82,14 @@ module java.base {
     exports org.checkerframework.checker.fenum.qual;
     exports org.checkerframework.checker.formatter.qual;
     exports org.checkerframework.checker.guieffect.qual;
-    exports org.checkerframework.checker.i18nformatter.qual;
     exports org.checkerframework.checker.i18n.qual;
+    exports org.checkerframework.checker.i18nformatter.qual;
     exports org.checkerframework.checker.index.qual;
     exports org.checkerframework.checker.initialization.qual;
     exports org.checkerframework.checker.interning.qual;
     exports org.checkerframework.checker.lock.qual;
     exports org.checkerframework.checker.mustcall.qual;
+    exports org.checkerframework.checker.nonempty.qual;
     exports org.checkerframework.checker.nullness.qual;
     exports org.checkerframework.checker.optional.qual;
     exports org.checkerframework.checker.propkey.qual;
@@ -182,8 +183,10 @@ module java.base {
         java.management,
         java.naming,
         java.rmi,
+        jdk.charsets,
         jdk.jartool,
         jdk.jlink,
+        jdk.jfr,
         jdk.net,
         jdk.incubator.foreign;
     exports jdk.internal.access.foreign to
@@ -230,6 +233,7 @@ module java.base {
         jdk.attach,
         jdk.charsets,
         jdk.compiler,
+        jdk.crypto.cryptoki,
         jdk.incubator.vector,
         jdk.jfr,
         jdk.jshell,
@@ -348,7 +352,8 @@ module java.base {
         jdk.crypto.ec,
         jdk.security.auth;
     exports sun.security.provider.certpath to
-        java.naming;
+        java.naming,
+        jdk.jartool;
     exports sun.security.rsa to
         jdk.crypto.cryptoki;
     exports sun.security.timestamp to

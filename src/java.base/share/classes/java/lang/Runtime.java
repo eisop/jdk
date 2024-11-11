@@ -208,7 +208,7 @@ public @UsesObjectEquals class Runtime {
      *
      * @throws  SecurityException
      *          If a security manager is present and it denies
-     *          {@link RuntimePermission}("shutdownHooks")
+     *          {@link RuntimePermission}{@code ("shutdownHooks")}
      *
      * @see #removeShutdownHook
      * @see #halt(int)
@@ -238,7 +238,7 @@ public @UsesObjectEquals class Runtime {
      *
      * @throws  SecurityException
      *          If a security manager is present and it denies
-     *          {@link RuntimePermission}("shutdownHooks")
+     *          {@link RuntimePermission}{@code ("shutdownHooks")}
      *
      * @see #addShutdownHook
      * @see #exit(int)
@@ -377,7 +377,7 @@ public @UsesObjectEquals class Runtime {
      *
      * <p>More precisely, the {@code command} string is broken
      * into tokens using a {@link StringTokenizer} created by the call
-     * {@code new {@link StringTokenizer}(command)} with no
+     * {@code new StringTokenizer(command)} with no
      * further modification of the character categories.  The tokens
      * produced by the tokenizer are then placed in the new string
      * array {@code cmdarray}, in the same order.
@@ -663,6 +663,10 @@ public @UsesObjectEquals class Runtime {
      * There is no guarantee that this effort will recycle any particular
      * number of unused objects, reclaim any particular amount of space, or
      * complete at any particular time, if at all, before the method returns or ever.
+     * There is also no guarantee that this effort will determine
+     * the change of reachability in any particular number of objects,
+     * or that any particular number of {@link java.lang.ref.Reference Reference}
+     * objects will be cleared and enqueued.
      * <p>
      * The name {@code gc} stands for "garbage
      * collector". The Java Virtual Machine performs this recycling

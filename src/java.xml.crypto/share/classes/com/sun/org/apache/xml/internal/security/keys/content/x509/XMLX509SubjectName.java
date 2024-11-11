@@ -23,10 +23,8 @@
 package com.sun.org.apache.xml.internal.security.keys.content.x509;
 
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectFree;
 
 import java.security.cert.X509Certificate;
 
@@ -86,6 +84,7 @@ public class XMLX509SubjectName extends SignatureElementProxy implements XMLX509
     }
 
     /** {@inheritDoc} */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
@@ -100,6 +99,7 @@ public class XMLX509SubjectName extends SignatureElementProxy implements XMLX509
         return thisSubject.equals(otherSubject);
     }
 
+    @Override
     public int hashCode() {
         int result = 17;
         result = 31 * result + this.getSubjectName().hashCode();
@@ -107,6 +107,7 @@ public class XMLX509SubjectName extends SignatureElementProxy implements XMLX509
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getBaseLocalName() {
         return Constants._TAG_X509SUBJECTNAME;
     }

@@ -138,7 +138,7 @@ class ThreadInVMForHandshake : public ThreadStateTransition {
       _original_state(thread->thread_state()) {
 
     if (thread->has_last_Java_frame()) {
-      thread->frame_anchor()->make_walkable(thread);
+      thread->frame_anchor()->make_walkable();
     }
 
     thread->set_thread_state(_thread_in_vm);
@@ -209,7 +209,7 @@ class ThreadInVMfromNative : public ThreadStateTransition {
     // we call known native code using this wrapper holding locks.
     _thread->check_possible_safepoint();
     // Once we are in native vm expects stack to be walkable
-    _thread->frame_anchor()->make_walkable(_thread);
+    _thread->frame_anchor()->make_walkable();
     OrderAccess::storestore(); // Keep thread_state change and make_walkable() separate.
     _thread->set_thread_state(_thread_in_native);
   }
@@ -222,7 +222,7 @@ class ThreadToNativeFromVM : public ThreadStateTransition {
     // We are leaving the VM at this point and going directly to native code.
     // Block, if we are in the middle of a safepoint synchronization.
     assert(!thread->owns_locks(), "must release all locks when leaving VM");
-    thread->frame_anchor()->make_walkable(thread);
+    thread->frame_anchor()->make_walkable();
     trans(_thread_in_vm, _thread_in_native);
     // Check for pending. async. exceptions or suspends.
     if (_thread->has_special_runtime_exit_condition()) _thread->handle_special_runtime_exit_condition(false);
@@ -243,12 +243,14 @@ template <typename PRE_PROC>
 class ThreadBlockInVMPreprocess : public ThreadStateTransition {
  private:
   PRE_PROC& _pr;
+  bool _allow_suspend;
  public:
-  ThreadBlockInVMPreprocess(JavaThread* thread, PRE_PROC& pr) : ThreadStateTransition(thread), _pr(pr) {
+  ThreadBlockInVMPreprocess(JavaThread* thread, PRE_PROC& pr, bool allow_suspend = true)
+    : ThreadStateTransition(thread), _pr(pr), _allow_suspend(allow_suspend) {
     assert(thread->thread_state() == _thread_in_vm, "coming from wrong thread state");
     thread->check_possible_safepoint();
     // Once we are blocked vm expects stack to be walkable
-    thread->frame_anchor()->make_walkable(thread);
+    thread->frame_anchor()->make_walkable();
     OrderAccess::storestore(); // Keep thread_state change and make_walkable() separate.
     thread->set_thread_state(_thread_blocked);
   }
@@ -257,9 +259,9 @@ class ThreadBlockInVMPreprocess : public ThreadStateTransition {
     // Change to transition state and ensure it is seen by the VM thread.
     _thread->set_thread_state_fence(_thread_blocked_trans);
 
-    if (SafepointMechanism::should_process(_thread)) {
+    if (SafepointMechanism::should_process(_thread, _allow_suspend)) {
       _pr(_thread);
-      SafepointMechanism::process_if_requested(_thread);
+      SafepointMechanism::process_if_requested(_thread, _allow_suspend);
     }
 
     _thread->set_thread_state(_thread_in_vm);
@@ -289,7 +291,7 @@ class ThreadBlockInVM {
   ThreadBlockInVMPreprocess<InFlightMutexRelease> _tbivmpp;
  public:
   ThreadBlockInVM(JavaThread* thread, Mutex** in_flight_mutex_addr = NULL)
-    : _ifmr(in_flight_mutex_addr), _tbivmpp(thread, _ifmr) {}
+    : _ifmr(in_flight_mutex_addr), _tbivmpp(thread, _ifmr, /* allow_suspend= */ false) {}
 };
 
 // Debug class instantiated in JRT_ENTRY macro.
@@ -323,8 +325,6 @@ class VMNativeEntryWrapper {
 
 #define VM_LEAF_BASE(result_type, header)                            \
   debug_only(NoHandleMark __hm;)                                     \
-  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite,                    \
-                                         JavaThread::current()));    \
   os::verify_stack_alignment();                                      \
   /* begin of body */
 
@@ -464,6 +464,7 @@ extern "C" {                                                         \
 #define JVM_ENTRY_FROM_LEAF(env, result_type, header)                \
   { {                                                                \
     JavaThread* thread=JavaThread::thread_from_jni_environment(env); \
+    MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, thread));        \
     ThreadInVMfromNative __tiv(thread);                              \
     debug_only(VMNativeEntryWrapper __vew;)                          \
     VM_ENTRY_BASE_FROM_LEAF(result_type, header, thread)

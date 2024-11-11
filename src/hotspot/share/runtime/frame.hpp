@@ -177,6 +177,8 @@ class frame {
 
   bool is_entry_frame_valid(JavaThread* thread) const;
 
+  Method* safe_interpreter_frame_method() const;
+
   // All frames:
 
   // A low-level interface for vframes:
@@ -202,7 +204,11 @@ class frame {
 
  public:
   // Link (i.e., the pointer to the previous frame)
+  // might crash if the frame has no parent
   intptr_t* link() const;
+
+  // Link (i.e., the pointer to the previous frame) or null if the link cannot be accessed
+  intptr_t* link_or_null() const;
 
   // Return address
   address  sender_pc() const;
@@ -342,6 +348,7 @@ class frame {
 
   // tells whether there is another chunk of Delta stack above
   bool entry_frame_is_first() const;
+  bool optimized_entry_frame_is_first() const;
 
   // Safepoints
 

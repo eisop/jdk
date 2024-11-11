@@ -390,7 +390,7 @@ static void rewrite_nofast_bytecode(const methodHandle& method) {
 void MetaspaceShared::rewrite_nofast_bytecodes_and_calculate_fingerprints(Thread* thread, InstanceKlass* ik) {
   for (int i = 0; i < ik->methods()->length(); i++) {
     methodHandle m(thread, ik->methods()->at(i));
-    if (!ik->can_be_verified_at_dumptime()) {
+    if (ik->can_be_verified_at_dumptime()) {
       rewrite_nofast_bytecode(m);
     }
     Fingerprinter fp(m);
@@ -484,12 +484,11 @@ void VM_PopulateDumpSharedSpace::doit() {
 
   NOT_PRODUCT(SystemDictionary::verify();)
 
-  // At this point, many classes have been loaded.
-  // Gather systemDictionary classes in a global array and do everything to
-  // that so we don't have to walk the SystemDictionary again.
-  SystemDictionaryShared::check_excluded_classes();
-
+  // Block concurrent class unloading from changing the _dumptime_table
   MutexLocker ml(DumpTimeTable_lock, Mutex::_no_safepoint_check_flag);
+  SystemDictionaryShared::check_excluded_classes();
+  SystemDictionaryShared::cleanup_lambda_proxy_class_dictionary();
+
   StaticArchiveBuilder builder;
   builder.gather_source_objs();
   builder.reserve_buffer();
@@ -552,19 +551,19 @@ void VM_PopulateDumpSharedSpace::doit() {
 
 class CollectCLDClosure : public CLDClosure {
   GrowableArray<ClassLoaderData*> _loaded_cld;
+  GrowableArray<OopHandle> _loaded_cld_handles; // keep the CLDs alive
+  Thread* _current_thread;
 public:
-  CollectCLDClosure() {}
+  CollectCLDClosure(Thread* thread) : _current_thread(thread) {}
   ~CollectCLDClosure() {
-    for (int i = 0; i < _loaded_cld.length(); i++) {
-      ClassLoaderData* cld = _loaded_cld.at(i);
-      cld->dec_keep_alive();
+    for (int i = 0; i < _loaded_cld_handles.length(); i++) {
+      _loaded_cld_handles.at(i).release(Universe::vm_global());
     }
   }
   void do_cld(ClassLoaderData* cld) {
-    if (!cld->is_unloading()) {
-      cld->inc_keep_alive();
-      _loaded_cld.append(cld);
-    }
+    assert(cld->is_alive(), "must be");
+    _loaded_cld.append(cld);
+    _loaded_cld_handles.append(OopHandle(Universe::vm_global(), cld->holder_phantom()));
   }
 
   int nof_cld() const                { return _loaded_cld.length(); }
@@ -574,7 +573,7 @@ public:
 bool MetaspaceShared::linking_required(InstanceKlass* ik) {
   // For static CDS dump, do not link old classes.
   // For dynamic CDS dump, only link classes loaded by the builtin class loaders.
-  return DumpSharedSpaces ? !ik->can_be_verified_at_dumptime() : !ik->is_shared_unregistered_class();
+  return DumpSharedSpaces ? ik->can_be_verified_at_dumptime() : !ik->is_shared_unregistered_class();
 }
 
 bool MetaspaceShared::link_class_for_cds(InstanceKlass* ik, TRAPS) {
@@ -593,11 +592,10 @@ bool MetaspaceShared::link_class_for_cds(InstanceKlass* ik, TRAPS) {
 }
 
 void MetaspaceShared::link_and_cleanup_shared_classes(TRAPS) {
-  // Collect all loaded ClassLoaderData.
-  ResourceMark rm;
-
   LambdaFormInvokers::regenerate_holder_classes(CHECK);
-  CollectCLDClosure collect_cld;
+
+  // Collect all loaded ClassLoaderData.
+  CollectCLDClosure collect_cld(THREAD);
   {
     // ClassLoaderDataGraph::loaded_cld_do requires ClassLoaderDataGraph_lock.
     // We cannot link the classes while holding this lock (or else we may run into deadlock).
@@ -750,7 +748,7 @@ bool MetaspaceShared::try_link_class(JavaThread* current, InstanceKlass* ik) {
   ExceptionMark em(current);
   JavaThread* THREAD = current; // For exception macros.
   Arguments::assert_is_dumping_archive();
-  if (ik->is_loaded() && !ik->is_linked() && !ik->can_be_verified_at_dumptime() &&
+  if (ik->is_loaded() && !ik->is_linked() && ik->can_be_verified_at_dumptime() &&
       !SystemDictionaryShared::has_class_failed_verification(ik)) {
     bool saved = BytecodeVerificationLocal;
     if (ik->is_shared_unregistered_class() && ik->class_loader() == NULL) {

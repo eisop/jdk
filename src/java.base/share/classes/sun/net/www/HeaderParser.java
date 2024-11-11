@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,7 +25,11 @@
 
 package sun.net.www;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
+
 import java.util.Iterator;
+import java.util.OptionalInt;
 
 /* This is useful for the nightmare of parsing multi-part HTTP/RFC822 headers
  * sensibly:
@@ -199,9 +203,11 @@ public class HeaderParser {
         ParserIterator (boolean returnValue) {
             returnsValue = returnValue;
         }
+        @Pure
         public boolean hasNext () {
             return index<nkeys;
         }
+        @SideEffectsOnly("this")
         public String next () {
             return tab[index++][returnsValue?1:0];
         }
@@ -246,6 +252,19 @@ public class HeaderParser {
             return Default;
         }
     }
+
+    public OptionalInt findInt(String k) {
+        try {
+            String s = findValue(k);
+            if (s == null) {
+                return OptionalInt.empty();
+            }
+            return OptionalInt.of(Integer.parseInt(s));
+        } catch (Throwable t) {
+            return OptionalInt.empty();
+        }
+    }
+
     /*
     public static void main(String[] a) throws Exception {
         System.out.print("enter line to parse> ");

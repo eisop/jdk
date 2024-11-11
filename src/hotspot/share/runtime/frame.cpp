@@ -46,6 +46,7 @@
 #include "runtime/monitorChunk.hpp"
 #include "runtime/os.hpp"
 #include "runtime/sharedRuntime.hpp"
+#include "runtime/safefetch.hpp"
 #include "runtime/signature.hpp"
 #include "runtime/stubCodeGenerator.hpp"
 #include "runtime/stubRoutines.hpp"
@@ -241,6 +242,14 @@ bool frame::is_entry_frame_valid(JavaThread* thread) const {
   // Validate sp saved in the java frame anchor
   JavaFrameAnchor* jfa = entry_frame_call_wrapper()->anchor();
   return (jfa->last_Java_sp() > sp());
+}
+
+Method* frame::safe_interpreter_frame_method() const {
+  Method** m_addr = interpreter_frame_method_addr();
+  if (m_addr == nullptr) {
+    return nullptr;
+  }
+  return (Method*) SafeFetchN((intptr_t*) m_addr, 0);
 }
 
 bool frame::should_be_deoptimized() const {
@@ -506,8 +515,8 @@ void frame::interpreter_frame_print_on(outputStream* st) const {
   for (BasicObjectLock* current = interpreter_frame_monitor_end();
        current < interpreter_frame_monitor_begin();
        current = next_monitor_in_interpreter_frame(current)) {
-    st->print(" - obj    [");
-    current->obj()->print_value_on(st);
+    st->print(" - obj    [%s", current->obj() == nullptr ? "null" : "");
+    if (current->obj() != nullptr) current->obj()->print_value_on(st);
     st->print_cr("]");
     st->print(" - lock   [");
     current->lock()->print_on(st, current->obj());
@@ -1068,9 +1077,7 @@ void frame::oops_do_internal(OopClosure* f, CodeBlobClosure* cf, const RegisterM
   } else if (is_entry_frame()) {
     oops_entry_do(f, map);
   } else if (is_optimized_entry_frame()) {
-   // Nothing to do
-   // receiver is a global ref
-   // handle block is for JNI
+    _cb->as_optimized_entry_blob()->oops_do(f, *this);
   } else if (CodeCache::contains(pc())) {
     oops_code_blob_do(f, cf, map, derived_mode);
   } else {

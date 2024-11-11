@@ -187,7 +187,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         // to invoke directly. (javac prefers to avoid this situation by
         // generating bridges in the target class)
         useImplMethodHandle = (Modifier.isProtected(implInfo.getModifiers()) &&
-                               !VerifyAccess.isSamePackage(implClass, implInfo.getDeclaringClass())) ||
+                               !VerifyAccess.isSamePackage(targetClass, implInfo.getDeclaringClass())) ||
                                implKind == H_INVOKESPECIAL;
         cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         int parameterCount = factoryType.parameterCount();
@@ -282,8 +282,8 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * registers the lambda proxy class for including into the CDS archive.
      */
     private Class<?> spinInnerClass() throws LambdaConversionException {
-        // CDS does not handle disableEagerInitialization.
-        if (!disableEagerInitialization) {
+        // CDS does not handle disableEagerInitialization or useImplMethodHandle
+        if (!disableEagerInitialization && !useImplMethodHandle) {
             // include lambda proxy class in CDS archive at dump time
             if (CDS.isDumpingArchive()) {
                 Class<?> innerClass = generateInnerClass();
@@ -564,7 +564,10 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
             convertArgumentTypes(methodType);
 
             if (useImplMethodHandle) {
-                MethodType mtype = implInfo.getMethodType().insertParameterTypes(0, implClass);
+                MethodType mtype = implInfo.getMethodType();
+                if (implKind != MethodHandleInfo.REF_invokeStatic) {
+                    mtype = mtype.insertParameterTypes(0, implClass);
+                }
                 visitMethodInsn(INVOKEVIRTUAL, "java/lang/invoke/MethodHandle",
                                 "invokeExact", mtype.descriptorString(), false);
             } else {

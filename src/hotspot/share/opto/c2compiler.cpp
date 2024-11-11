@@ -45,6 +45,9 @@ const char* C2Compiler::retry_no_subsuming_loads() {
 const char* C2Compiler::retry_no_escape_analysis() {
   return "retry without escape analysis";
 }
+const char* C2Compiler::retry_no_locks_coarsening() {
+  return "retry without locks coarsening";
+}
 const char* C2Compiler::retry_class_loading_during_parsing() {
   return "retry class loading during parsing";
 }
@@ -97,13 +100,14 @@ void C2Compiler::compile_method(ciEnv* env, ciMethod* target, int entry_bci, boo
   bool subsume_loads = SubsumeLoads;
   bool do_escape_analysis = DoEscapeAnalysis;
   bool eliminate_boxing = EliminateAutoBox;
+  bool do_locks_coarsening = EliminateLocks;
 
   while (!env->failing()) {
     // Attempt to compile while subsuming loads into machine instructions.
-    Compile C(env, target, entry_bci, subsume_loads, do_escape_analysis, eliminate_boxing, install_code, directive);
+    Compile C(env, target, entry_bci, subsume_loads, do_escape_analysis, eliminate_boxing, do_locks_coarsening, install_code, directive);
 
     // Check result and retry if appropriate.
-    if (C.failure_reason() != NULL) {
+    if (C.failure_reason() != nullptr) {
       if (C.failure_reason_is(retry_class_loading_during_parsing())) {
         env->report_failure(C.failure_reason());
         continue;  // retry
@@ -117,6 +121,12 @@ void C2Compiler::compile_method(ciEnv* env, ciMethod* target, int entry_bci, boo
       if (C.failure_reason_is(retry_no_escape_analysis())) {
         assert(do_escape_analysis, "must make progress");
         do_escape_analysis = false;
+        env->report_failure(C.failure_reason());
+        continue;  // retry
+      }
+      if (C.failure_reason_is(retry_no_locks_coarsening())) {
+        assert(do_locks_coarsening, "must make progress");
+        do_locks_coarsening = false;
         env->report_failure(C.failure_reason());
         continue;  // retry
       }
@@ -139,6 +149,10 @@ void C2Compiler::compile_method(ciEnv* env, ciMethod* target, int entry_bci, boo
       }
       if (do_escape_analysis) {
         do_escape_analysis = false;
+        continue;  // retry
+      }
+      if (do_locks_coarsening) {
+        do_locks_coarsening = false;
         continue;  // retry
       }
     }
@@ -200,7 +214,10 @@ bool C2Compiler::is_intrinsic_supported(const methodHandle& method, bool is_virt
     if (!Matcher::match_rule_supported(Op_AryEq)) return false;
     break;
   case vmIntrinsics::_copyMemory:
-    if (StubRoutines::unsafe_arraycopy() == NULL) return false;
+    if (StubRoutines::unsafe_arraycopy() == nullptr) return false;
+    break;
+  case vmIntrinsics::_encodeAsciiArray:
+    if (!Matcher::match_rule_supported(Op_EncodeISOArray) || !Matcher::supports_encode_ascii_array) return false;
     break;
   case vmIntrinsics::_encodeISOArray:
   case vmIntrinsics::_encodeByteISOArray:
@@ -410,7 +427,7 @@ bool C2Compiler::is_intrinsic_supported(const methodHandle& method, bool is_virt
     if (!Matcher::match_rule_supported(Op_MulHiL)) return false;
     break;
   case vmIntrinsics::_getCallerClass:
-    if (vmClasses::reflect_CallerSensitive_klass() == NULL) return false;
+    if (vmClasses::reflect_CallerSensitive_klass() == nullptr) return false;
     break;
   case vmIntrinsics::_onSpinWait:
     if (!Matcher::match_rule_supported(Op_OnSpinWait)) return false;
@@ -584,6 +601,7 @@ bool C2Compiler::is_intrinsic_supported(const methodHandle& method, bool is_virt
   case vmIntrinsics::_putLongUnaligned:
   case vmIntrinsics::_loadFence:
   case vmIntrinsics::_storeFence:
+  case vmIntrinsics::_storeStoreFence:
   case vmIntrinsics::_fullFence:
   case vmIntrinsics::_currentThread:
 #ifdef JFR_HAVE_INTRINSICS

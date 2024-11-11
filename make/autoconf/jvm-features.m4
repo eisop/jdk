@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011, 2021, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -248,8 +248,11 @@ AC_DEFUN_ONCE([JVM_FEATURES_CHECK_CDS],
 AC_DEFUN_ONCE([JVM_FEATURES_CHECK_DTRACE],
 [
   JVM_FEATURES_CHECK_AVAILABILITY(dtrace, [
-    AC_MSG_CHECKING([for dtrace tool])
-    if test "x$DTRACE" != "x" && test -x "$DTRACE"; then
+    AC_MSG_CHECKING([for dtrace tool and platform support])
+    if test "x$OPENJDK_TARGET_CPU_ARCH" = "xppc"; then
+      AC_MSG_RESULT([no, $OPENJDK_TARGET_CPU_ARCH])
+      AVAILABLE=false
+    elif test "x$DTRACE" != "x" && test -x "$DTRACE"; then
       AC_MSG_RESULT([$DTRACE])
     else
       AC_MSG_RESULT([no])
@@ -307,7 +310,9 @@ AC_DEFUN_ONCE([JVM_FEATURES_CHECK_SHENANDOAHGC],
   JVM_FEATURES_CHECK_AVAILABILITY(shenandoahgc, [
     AC_MSG_CHECKING([if platform is supported by Shenandoah])
     if test "x$OPENJDK_TARGET_CPU_ARCH" = "xx86" || \
-        test "x$OPENJDK_TARGET_CPU" = "xaarch64" ; then
+        test "x$OPENJDK_TARGET_CPU" = "xaarch64" || \
+        test "x$OPENJDK_TARGET_CPU" = "xppc64le" || \
+        test "x$OPENJDK_TARGET_CPU" = "xriscv64"; then
       AC_MSG_RESULT([yes])
     else
       AC_MSG_RESULT([no, $OPENJDK_TARGET_CPU])
@@ -352,6 +357,14 @@ AC_DEFUN_ONCE([JVM_FEATURES_CHECK_ZGC],
       if test "x$OPENJDK_TARGET_OS" = "xlinux" || \
           test "x$OPENJDK_TARGET_OS" = "xwindows" || \
           test "x$OPENJDK_TARGET_OS" = "xmacosx"; then
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no, $OPENJDK_TARGET_OS-$OPENJDK_TARGET_CPU])
+        AVAILABLE=false
+      fi
+    elif test "x$OPENJDK_TARGET_CPU" = "xppc64le" || \
+        test "x$OPENJDK_TARGET_CPU" = "xriscv64"; then
+      if test "x$OPENJDK_TARGET_OS" = "xlinux"; then
         AC_MSG_RESULT([yes])
       else
         AC_MSG_RESULT([no, $OPENJDK_TARGET_OS-$OPENJDK_TARGET_CPU])
@@ -542,6 +555,9 @@ AC_DEFUN([JVM_FEATURES_VERIFY],
   if ! JVM_FEATURES_IS_ACTIVE(jvmci); then
     INCLUDE_JVMCI="false"
   fi
+  if JVM_FEATURES_IS_ACTIVE(compiler2); then
+    INCLUDE_COMPILER2="true"
+  fi
 
   # Verify that we have at least one gc selected (i.e., feature named "*gc").
   if ! JVM_FEATURES_IS_ACTIVE(.*gc); then
@@ -565,6 +581,7 @@ AC_DEFUN_ONCE([JVM_FEATURES_SETUP],
   # missing any of them.
   ENABLE_CDS="true"
   INCLUDE_JVMCI="true"
+  INCLUDE_COMPILER2="false"
 
   for variant in $JVM_VARIANTS; do
     # Figure out if any features are unavailable, or should be filtered out
@@ -601,5 +618,6 @@ AC_DEFUN_ONCE([JVM_FEATURES_SETUP],
   AC_SUBST(JVM_FEATURES_custom)
 
   AC_SUBST(INCLUDE_JVMCI)
+  AC_SUBST(INCLUDE_COMPILER2)
 
 ])

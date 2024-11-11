@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -643,7 +643,8 @@ void LinearScan::compute_local_live_sets() {
         CodeEmitInfo* info = visitor.info_at(k);
         ValueStack* stack = info->stack();
         for_each_state_value(stack, value,
-          set_live_gen_kill(value, op, live_gen, live_kill)
+          set_live_gen_kill(value, op, live_gen, live_kill);
+          local_has_fpu_registers = local_has_fpu_registers || value->type()->is_float_kind();
         );
       }
 
@@ -1239,8 +1240,13 @@ void LinearScan::add_register_hints(LIR_Op* op) {
       break;
     }
     case lir_cmove: {
+#ifdef RISCV
+      assert(op->as_Op4() != NULL, "lir_cmove must be LIR_Op4");
+      LIR_Op4* cmove = (LIR_Op4*)op;
+#else
       assert(op->as_Op2() != NULL, "lir_cmove must be LIR_Op2");
       LIR_Op2* cmove = (LIR_Op2*)op;
+#endif
 
       LIR_Opr move_from = cmove->in_opr1();
       LIR_Opr move_to = cmove->result_opr();
@@ -1659,22 +1665,33 @@ void LinearScan::allocate_registers() {
   Interval* precolored_cpu_intervals, *not_precolored_cpu_intervals;
   Interval* precolored_fpu_intervals, *not_precolored_fpu_intervals;
 
-  // allocate cpu registers
+  // collect cpu intervals
   create_unhandled_lists(&precolored_cpu_intervals, &not_precolored_cpu_intervals,
                          is_precolored_cpu_interval, is_virtual_cpu_interval);
 
-  // allocate fpu registers
+  // collect fpu intervals
   create_unhandled_lists(&precolored_fpu_intervals, &not_precolored_fpu_intervals,
                          is_precolored_fpu_interval, is_virtual_fpu_interval);
-
-  // the fpu interval allocation cannot be moved down below with the fpu section as
+  // this fpu interval collection cannot be moved down below with the allocation section as
   // the cpu_lsw.walk() changes interval positions.
 
+  if (!has_fpu_registers()) {
+#ifdef ASSERT
+    assert(not_precolored_fpu_intervals == Interval::end(), "missed an uncolored fpu interval");
+#else
+    if (not_precolored_fpu_intervals != Interval::end()) {
+      BAILOUT("missed an uncolored fpu interval");
+    }
+#endif
+  }
+
+  // allocate cpu registers
   LinearScanWalker cpu_lsw(this, precolored_cpu_intervals, not_precolored_cpu_intervals);
   cpu_lsw.walk();
   cpu_lsw.finish_allocation();
 
   if (has_fpu_registers()) {
+    // allocate fpu registers
     LinearScanWalker fpu_lsw(this, precolored_fpu_intervals, not_precolored_fpu_intervals);
     fpu_lsw.walk();
     fpu_lsw.finish_allocation();
@@ -1936,6 +1953,14 @@ void LinearScan::resolve_exception_edge(XHandler* handler, int throwing_op_id, i
     // interval at the throwing instruction must be searched using the operands
     // of the phi function
     Value from_value = phi->operand_at(handler->phi_operand());
+    if (from_value == nullptr) {
+      // We have reached here in a kotlin application running with JVMTI
+      // capability "can_access_local_variables".
+      // The illegal state is not yet propagated to this phi. Do it here.
+      phi->make_illegal();
+      // We can skip the illegal phi edge.
+      return;
+    }
 
     // with phi functions it can happen that the same from_value is used in
     // multiple mappings, so notify move-resolver that this is allowed
@@ -3126,6 +3151,9 @@ void LinearScan::do_linear_scan() {
     }
   }
 
+#ifndef RISCV
+  // Disable these optimizations on riscv temporarily, because it does not
+  // work when the comparison operands are bound to branches or cmoves.
   { TIME_LINEAR_SCAN(timer_optimize_lir);
 
     EdgeMoveOptimizer::optimize(ir()->code());
@@ -3133,6 +3161,7 @@ void LinearScan::do_linear_scan() {
     // check that cfg is still correct after optimizations
     ir()->verify();
   }
+#endif
 
   NOT_PRODUCT(print_lir(1, "Before Code Generation", false));
   NOT_PRODUCT(LinearScanStatistic::compute(this, _stat_final));
@@ -6356,14 +6385,23 @@ void ControlFlowOptimizer::delete_unnecessary_jumps(BlockList* code) {
               // There might be a cmove inserted for profiling which depends on the same
               // compare. If we change the condition of the respective compare, we have
               // to take care of this cmove as well.
+#ifdef RISCV
+              LIR_Op4* prev_cmove = NULL;
+#else
               LIR_Op2* prev_cmove = NULL;
+#endif
 
               for(int j = instructions->length() - 3; j >= 0 && prev_cmp == NULL; j--) {
                 prev_op = instructions->at(j);
                 // check for the cmove
                 if (prev_op->code() == lir_cmove) {
+#ifdef RISCV
+                  assert(prev_op->as_Op4() != NULL, "cmove must be of type LIR_Op4");
+                  prev_cmove = (LIR_Op4*)prev_op;
+#else
                   assert(prev_op->as_Op2() != NULL, "cmove must be of type LIR_Op2");
                   prev_cmove = (LIR_Op2*)prev_op;
+#endif
                   assert(prev_branch->cond() == prev_cmove->condition(), "should be the same");
                 }
                 if (prev_op->code() == lir_cmp) {
