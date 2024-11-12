@@ -15,12 +15,7 @@ jobs:
       ls -al
       env | sort
     displayName: show environment
-  - bash: |
-      wget https://builds.shipilev.net/jtreg/jtreg-6.2%2B1.zip -O /tmp/$USER/jtreg.zip
-      unzip /tmp/$USER/jtreg.zip -d /tmp/$USER/
-      chmod +x /tmp/$USER/jtreg/bin/jtdiff /tmp/$USER/jtreg/bin/jtreg
-    displayName: download jtreg
-  - bash: pwd && ls && bash ./configure --with-jtreg=/tmp/$USER/jtreg --disable-warnings-as-errors
+  - bash: pwd && ls && bash ./configure --with-jtreg=/usr/share/jtreg --disable-warnings-as-errors
     displayName: configure
   - bash: make jdk
     timeoutInMinutes: 90
@@ -46,15 +41,10 @@ jobs:
       env | sort
     displayName: show environment
   - bash: |
-      wget https://builds.shipilev.net/jtreg/jtreg-6.2%2B1.zip -O /tmp/$USER/jtreg.zip
-      unzip /tmp/$USER/jtreg.zip -d /tmp/$USER/
-      chmod +x /tmp/$USER/jtreg/bin/jtdiff /tmp/$USER/jtreg/bin/jtreg
-    displayName: download jtreg
-  - bash: |
       set -ex
       if [ -d /tmp/$USER/git-scripts ]; \
         then git -C /tmp/$USER/git-scripts pull -q > /dev/null 2>&1 ; \
-        else mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth=1 -q https://github.com/plume-lib/git-scripts.git ; \
+        else mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth=1 -q https://github.com/eisop-plume-lib/git-scripts.git ; \
       fi
     displayName: git-scripts
   - bash: |
@@ -102,7 +92,7 @@ jobs:
       echo "About to run: git pull --no-edit https://github.com/${CI_ORGANIZATION}/jdk ${CI_BRANCH}"
       cd ../jdk17u && git pull --no-edit https://github.com/${CI_ORGANIZATION}/jdk ${CI_BRANCH} || (git --version && git show && git status && echo "Merge failed; see 'Pull request merge conflicts' at https://github.com/eisop/jdk/blob/master/README.md" && false)
     displayName: git merge
-  - bash: cd ../jdk17u && export JT_HOME=/tmp/$USER/jtreg && bash ./configure --with-jtreg=/tmp/$USER/jtreg --disable-warnings-as-errors
+  - bash: cd ../jdk17u && export JT_HOME=/tmp/$USER/jtreg && bash ./configure --with-jtreg=/usr/share/jtreg --disable-warnings-as-errors
     displayName: configure
   - bash: cd ../jdk17u && make jdk
     displayName: make jdk
