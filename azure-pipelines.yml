@@ -92,7 +92,7 @@ jobs:
       echo "About to run: git pull --no-edit https://github.com/${CI_ORGANIZATION}/jdk ${CI_BRANCH}"
       cd ../jdk17u && git pull --no-edit https://github.com/${CI_ORGANIZATION}/jdk ${CI_BRANCH} || (git --version && git show && git status && echo "Merge failed; see 'Pull request merge conflicts' at https://github.com/eisop/jdk/blob/master/README.md" && false)
     displayName: git merge
-  - bash: cd ../jdk17u && export JT_HOME=/tmp/$USER/jtreg && bash ./configure --with-jtreg=/usr/share/jtreg --disable-warnings-as-errors
+  - bash: cd ../jdk17u && export JT_HOME=/usr/share/jtreg && bash ./configure --with-jtreg=/usr/share/jtreg --disable-warnings-as-errors
     displayName: configure
   - bash: cd ../jdk17u && make jdk
     displayName: make jdk
