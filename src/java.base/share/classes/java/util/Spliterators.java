@@ -35,6 +35,8 @@ import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
  * Static classes and methods for operating on or creating instances of
@@ -45,6 +47,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @see Spliterator
  * @since 1.8
  */
+@AnnotatedFor("nullness")
 public final class Spliterators {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -148,7 +151,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(Object[])
      */
-    public static <T> Spliterator<T> spliterator(Object[] array,
+    public static <T> Spliterator<@PolyNull T> spliterator(@PolyNull Object[] array,
                                                  int additionalCharacteristics) {
         return new ArraySpliterator<>(Objects.requireNonNull(array),
                                       additionalCharacteristics);
@@ -183,7 +186,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(Object[], int, int)
      */
-    public static <T> Spliterator<T> spliterator(Object[] array, int fromIndex, int toIndex,
+    public static <T> Spliterator<@PolyNull T> spliterator(@PolyNull Object[] array, int fromIndex, int toIndex,
                                                  int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new ArraySpliterator<>(array, fromIndex, toIndex, additionalCharacteristics);
