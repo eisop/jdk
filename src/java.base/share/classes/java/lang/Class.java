@@ -403,7 +403,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      */
     @ForName
     @CallerSensitive
-    public static Class<?> forName(@ClassGetName String className)
+    public static Class<? extends Object> forName(@ClassGetName String className)
                 throws ClassNotFoundException {
         Class<?> caller = Reflection.getCallerClass();
         return forName0(className, true, ClassLoader.getClassLoader(caller), caller);
@@ -479,7 +479,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @since     1.2
      */
     @CallerSensitive
-    public static Class<?> forName(@ClassGetName String name, boolean initialize,
+    public static Class<? extends Object> forName(@ClassGetName String name, boolean initialize,
                                    @Nullable ClassLoader loader)
         throws ClassNotFoundException
     {
@@ -556,7 +556,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      */
     @SuppressWarnings("removal")
     @CallerSensitive
-    public static Class<?> forName(Module module, String name) {
+    public static Class<? extends Object> forName(Module module, String name) {
         Objects.requireNonNull(module);
         Objects.requireNonNull(name);
 
@@ -1184,7 +1184,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @return an array of interfaces directly implemented by this class
      */
     @SideEffectFree
-    public Class<?>[] getInterfaces(@GuardSatisfied Class<T> this) {
+    public Class<? extends Object>[] getInterfaces(@GuardSatisfied Class<T> this) {
         // defensively copy before handing over to user code
         return getInterfaces(true);
     }
@@ -1272,7 +1272,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @since 1.1
      */
     @Pure
-    public @Nullable Class<?> getComponentType(@GuardSatisfied Class<T> this) {
+    public @Nullable Class<? extends Object> getComponentType(@GuardSatisfied Class<T> this) {
         // Only return for array types. Storage may be reused for Class for instance types.
         if (isArray()) {
             return componentType;
@@ -1547,7 +1547,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @since 1.5
      */
     @CallerSensitive
-    public @Nullable Constructor<?> getEnclosingConstructor() throws SecurityException {
+    public @Nullable Constructor<? extends Object> getEnclosingConstructor() throws SecurityException {
         EnclosingMethodInfo enclosingInfo = getEnclosingMethodInfo();
 
         if (enclosingInfo == null)
@@ -1613,7 +1613,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @since 1.1
      */
     @CallerSensitive
-    public @Nullable Class<?> getDeclaringClass() throws SecurityException {
+    public @Nullable Class<? extends Object> getDeclaringClass() throws SecurityException {
         final Class<?> candidate = getDeclaringClass0();
 
         if (candidate != null) {
@@ -1645,7 +1645,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      */
     @Pure
     @CallerSensitive
-    public @Nullable Class<?> getEnclosingClass() throws SecurityException {
+    public @Nullable Class<? extends Object> getEnclosingClass() throws SecurityException {
         // There are five kinds of classes (or interfaces):
         // a) Top level classes
         // b) Nested classes (static member classes)
@@ -1906,7 +1906,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      */
     @SuppressWarnings("removal")
     @CallerSensitive
-    public Class<?>[] getClasses() {
+    public Class<? extends Object>[] getClasses() {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             checkMemberAccess(sm, Member.PUBLIC, Reflection.getCallerClass(), false);
@@ -2107,7 +2107,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @since 1.1
      */
     @CallerSensitive
-    public Constructor<?>[] getConstructors() throws SecurityException {
+    public Constructor<? extends Object>[] getConstructors() throws SecurityException {
         @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -2369,7 +2369,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @jls 8.5 Member Type Declarations
      */
     @CallerSensitive
-    public Class<?>[] getDeclaredClasses() throws SecurityException {
+    public Class<? extends Object>[] getDeclaredClasses() throws SecurityException {
         @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -4285,7 +4285,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @jvms 5.4.4 Access Control
      */
     @CallerSensitive
-    public Class<?> getNestHost() {
+    public Class<? extends Object> getNestHost() {
         if (isPrimitive() || isArray()) {
             return this;
         }
@@ -4377,7 +4377,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @jvms 4.7.29 The {@code NestMembers} Attribute
      */
     @CallerSensitive
-    public Class<?>[] getNestMembers() {
+    public Class<? extends Object>[] getNestMembers() {
         if (isPrimitive() || isArray()) {
             return new Class<?>[] { this };
         }
@@ -4494,7 +4494,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      */
     @Override
     @Pure
-    public @Nullable Class<?> componentType() {
+    public @Nullable Class<? extends Object> componentType() {
         return isArray() ? componentType : null;
     }
 
@@ -4507,7 +4507,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      */
     @Override
     @Pure
-    public Class<?> arrayType() {
+    public Class<? extends Object> arrayType() {
         return Array.newInstance(this, 0).getClass();
     }
 
@@ -4575,7 +4575,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @since 17
      */
     @CallerSensitive
-    public Class<?>[] getPermittedSubclasses() {
+    public Class<? extends Object>[] getPermittedSubclasses() {
         Class<?>[] subClasses;
         if (isArray() || isPrimitive() || (subClasses = getPermittedSubclasses0()) == null) {
             return null;
