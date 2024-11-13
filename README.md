@@ -123,7 +123,8 @@ Replace the existing export lines present in
 exports. If no new packages were added, then there are likely going to be no
 changes to the `module-info.java` file.
 
-Commit the changes. Do not include the top-level `checker-qual-source.jar` file.
+Commit the changes. Do not include the top-level `checker-qual-source.jar` file,
+but include any new `.java` files in a `qual/` directory.
 
 
 ## The typetools/jdk17u repository
