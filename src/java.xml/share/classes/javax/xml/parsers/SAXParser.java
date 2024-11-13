@@ -81,7 +81,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Jeff Suttor
  * @since 1.4
  */
-@AnnotatedFor({"nullness", "initialization"})
+@AnnotatedFor({"initialization", "nullness"})
 @SuppressWarnings("deprecation")
 public abstract class SAXParser {
 

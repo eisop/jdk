@@ -56,7 +56,7 @@ import jdk.internal.util.ArraysSupport;
  * @since   1.0
  */
 
-@AnnotatedFor({"index", "lock", "mustcall", "nullness", "initialization", "signedness"})
+@AnnotatedFor({"index", "initialization", "lock", "mustcall", "nullness", "signedness"})
 @InheritableMustCall({})
 public class ByteArrayOutputStream extends OutputStream {
 

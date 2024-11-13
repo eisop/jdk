@@ -64,7 +64,7 @@ import org.xml.sax.SAXException;
  * @since 1.4
  */
 
-@AnnotatedFor({"nullness", "initialization"})
+@AnnotatedFor({"initialization", "nullness"})
 public abstract class DocumentBuilder {
 
 

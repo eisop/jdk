@@ -45,7 +45,7 @@ import java.nio.charset.Charset;
  * @author      Mark Reinhold
  * @since       1.1
  */
-@AnnotatedFor({"nullness", "initialization"})
+@AnnotatedFor({"initialization", "nullness"})
 public class FileReader extends InputStreamReader {
 
    /**

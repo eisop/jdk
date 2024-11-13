@@ -36,7 +36,7 @@ import java.io.IOException;
  *
  * @since 1.5
  */
-@AnnotatedFor({"nullness", "initialization"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface Flushable {
 
     /**

@@ -35,7 +35,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @since 1.4
  */
-@AnnotatedFor({"nullness", "initialization"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface URIResolver {
 
     /**

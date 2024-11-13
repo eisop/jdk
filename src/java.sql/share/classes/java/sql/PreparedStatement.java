@@ -63,7 +63,7 @@ import java.io.InputStream;
  * @since 1.1
  */
 
-@AnnotatedFor({"nullness", "initialization"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface PreparedStatement extends Statement {
 
     /**

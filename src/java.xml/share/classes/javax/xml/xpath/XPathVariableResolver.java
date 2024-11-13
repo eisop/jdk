@@ -45,7 +45,7 @@ import javax.xml.namespace.QName;
  * @author  Jeff Suttor
  * @since 1.5
  */
-@AnnotatedFor({"nullness", "initialization"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface XPathVariableResolver {
   /**
    * <p>Find a variable in the set of available variables.</p>
