@@ -192,7 +192,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * </table>
  * <p>See also the <a href='http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407'>Document Object Model (DOM) Level 3 Core Specification</a>.
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface Attr extends Node {
     /**
      * Returns the name of this attribute. If <code>Node.localName</code> is

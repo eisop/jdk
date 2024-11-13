@@ -89,7 +89,7 @@ and Save Specification</a>.
  *
  * @since 1.5
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface LSInput {
     /**
      *  An attribute of a language and binding dependent type that represents

@@ -71,7 +71,7 @@ import java.util.Arrays;
  * @since   1.0
  */
 
-@AnnotatedFor({"index", "interning", "lock", "nullness"})
+@AnnotatedFor({"index", "initialization", "interning", "lock", "nullness"})
 public @UsesObjectEquals class StreamTokenizer {
 
     /* Only one of these will be non-null */

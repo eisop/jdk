@@ -160,7 +160,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.io.DataOutput
  * @since   1.0
  */
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"index", "initialization", "nullness"})
 public interface DataInput {
     /**
      * Reads some bytes from an input

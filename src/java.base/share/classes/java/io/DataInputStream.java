@@ -53,7 +53,7 @@ import java.util.Objects;
  * @see     java.io.DataOutputStream
  * @since   1.0
  */
-@AnnotatedFor({"index", "mustcall", "nullness", "signedness"})
+@AnnotatedFor({"index", "initialization", "mustcall", "nullness", "signedness"})
 public class DataInputStream extends FilterInputStream implements DataInput {
 
     /**

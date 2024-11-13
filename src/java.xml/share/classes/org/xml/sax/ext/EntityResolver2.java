@@ -75,7 +75,7 @@ import org.xml.sax.SAXException;
  * @since 1.5, SAX 2.0 (extensions 1.1 alpha)
  * @author David Brownell
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public interface EntityResolver2 extends EntityResolver
 {
     /**

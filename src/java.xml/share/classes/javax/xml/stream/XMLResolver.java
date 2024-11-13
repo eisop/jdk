@@ -38,7 +38,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author Copyright (c) 2009 by Oracle Corporation. All Rights Reserved.
  * @since 1.6
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public interface XMLResolver {
 
   /**

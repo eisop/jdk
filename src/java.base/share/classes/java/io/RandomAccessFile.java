@@ -71,7 +71,7 @@ import sun.nio.ch.FileChannelImpl;
  * @since   1.0
  */
 
-@AnnotatedFor({"index", "interning", "mustcall", "nullness", "signedness"})
+@AnnotatedFor({"index", "initialization", "interning", "mustcall", "nullness", "signedness"})
 public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput, Closeable {
 
     private FileDescriptor fd;

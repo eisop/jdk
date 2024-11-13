@@ -37,7 +37,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @since 1.2
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"initialization", "nullness"})
 @FunctionalInterface
 public interface FileFilter {
 

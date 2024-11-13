@@ -42,7 +42,7 @@ import javax.xml.validation.Schema;
  * @since 1.4
  */
 
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public abstract class DocumentBuilderFactory {
     private static final String DEFAULT_IMPL =
             "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";

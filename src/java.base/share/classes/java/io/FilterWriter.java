@@ -43,7 +43,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since       1.1
  */
 
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"index", "initialization", "nullness"})
 public abstract class FilterWriter extends Writer {
 
     /**

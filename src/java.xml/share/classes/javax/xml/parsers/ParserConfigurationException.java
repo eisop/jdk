@@ -34,7 +34,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.4
  */
 
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public class ParserConfigurationException extends Exception {
     private static final long serialVersionUID = -3688849216575373917L;
     /**

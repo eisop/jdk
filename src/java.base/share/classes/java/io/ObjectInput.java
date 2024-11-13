@@ -43,7 +43,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see java.io.ObjectInputStream
  * @since   1.1
  */
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"index", "initialization", "nullness"})
 public interface ObjectInput extends DataInput, AutoCloseable {
     /**
      * Read and return an object. The class that implements this interface

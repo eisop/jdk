@@ -42,7 +42,7 @@ import java.util.Objects;
  * @since       1.1
  */
 
-@AnnotatedFor({"index", "mustcall", "nullness"})
+@AnnotatedFor({"index", "initialization", "mustcall", "nullness"})
 @InheritableMustCall({})
 public class StringReader extends Reader {
 

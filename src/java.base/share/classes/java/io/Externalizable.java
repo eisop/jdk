@@ -64,7 +64,7 @@ import java.io.ObjectInput;
  * @see java.io.Serializable
  * @since   1.1
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface Externalizable extends java.io.Serializable {
     /**
      * The object implements the writeExternal method to save its contents

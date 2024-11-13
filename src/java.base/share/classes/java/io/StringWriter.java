@@ -47,7 +47,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since       1.1
  */
 
-@AnnotatedFor({"index", "lock", "mustcall", "nullness"})
+@AnnotatedFor({"index", "initialization", "lock", "mustcall", "nullness"})
 @InheritableMustCall({})
 public class StringWriter extends Writer {
 

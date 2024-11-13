@@ -49,7 +49,7 @@ import java.util.Arrays;
  * @author      Herb Jellinek
  * @since       1.1
  */
-@AnnotatedFor({"index", "lock", "mustcall", "nullness"})
+@AnnotatedFor({"index", "lock", "mustcall", "nullness", "initialization"})
 @InheritableMustCall({})
 public class CharArrayWriter extends Writer {
     /**

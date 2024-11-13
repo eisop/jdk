@@ -37,7 +37,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.io.OutputStream
  * @since   1.0
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"initialization", "nullness"})
 public class IOException extends Exception {
     @java.io.Serial
     static final long serialVersionUID = 7818375828146090155L;
