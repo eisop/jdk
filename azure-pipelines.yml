@@ -130,17 +130,8 @@ jobs:
     displayName: clone git-scripts
   - bash: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
     displayName: clone checker-framework
-# test-cftests-all.sh sometimes runs out of memory (under JDK 11 and 17), but running its component parts in sequence does not.
-#   - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
-#     displayName: test-cftests-all.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-junit.sh)
-    displayName: test-cftests-junit.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-nonjunit.sh)
-    displayName: test-cftests-nonjunit.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-inference.sh)
-    displayName: test-cftests-inference.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-typecheck.sh)
-    displayName: test-typecheck.sh
+  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
+    displayName: test-cftests-all.sh
 ## Here is how to create artifacts that can be downloaded.
 #   - bash: (cd ../checker-framework/checker/build/jtregJdk11/ && tar -czvf all.tgz all)
 #     condition: succeededOrFailed()
@@ -162,17 +153,8 @@ jobs:
     displayName: clone git-scripts
   - bash: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
     displayName: clone checker-framework
-# test-cftests-all.sh sometimes runs out of memory (under JDK 11 and 17), but running its component parts in sequence does not.
-#   - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
-#     displayName: test-cftests-all.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-junit.sh)
-    displayName: test-cftests-junit.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-nonjunit.sh)
-    displayName: test-cftests-nonjunit.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-inference.sh)
-    displayName: test-cftests-inference.sh
-  - bash: (cd ../checker-framework && checker/bin-devel/test-typecheck.sh)
-    displayName: test-typecheck.sh
+  - bash: (cd ../checker-framework && checker/bin-devel/test-cftests-all.sh)
+    displayName: test-cftests-all.sh
 
 - job: test_cftests_all_jdk_latest
   timeoutInMinutes: 120
