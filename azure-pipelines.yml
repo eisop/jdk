@@ -1,5 +1,5 @@
-variables:
-  system.debug: true
+# variables:
+#   system.debug: true
 
 jobs:
 
@@ -54,13 +54,6 @@ jobs:
         else mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth=1 -q https://github.com/eisop-plume-lib/plume-scripts.git ; \
       fi
     displayName: plume-scripts
-  - bash: |
-      set -ex
-      if [ -d /tmp/$USER/git-scripts ]; \
-        then git -C /tmp/$USER/git-scripts pull -q > /dev/null 2>&1 ; \
-        else mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git ; \
-      fi
-    displayName: git-scripts
   # This creates ../jdk17u .
   # If the depth is too small, the merge will fail.  However, we cannot use "--filter=blob:none"
   # because that leads to "fatal: remote error: filter 'combine' not supported".
