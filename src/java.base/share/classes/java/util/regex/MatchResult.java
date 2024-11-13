@@ -25,6 +25,9 @@
 
 package java.util.regex;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * The result of a match operation.
  *
@@ -37,6 +40,7 @@ package java.util.regex;
  * @see Matcher
  * @since 1.5
  */
+@AnnotatedFor("nullness")
 public interface MatchResult {
 
     /**
@@ -170,7 +174,7 @@ public interface MatchResult {
      *          If there is no capturing group in the pattern
      *          with the given index
      */
-    public String group(int group);
+    public @Nullable String group(int group);
 
     /**
      * Returns the number of capturing groups in this match result's pattern.
