@@ -36,6 +36,8 @@
 package java.util.concurrent;
 
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,6 +47,7 @@ import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -1418,6 +1421,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
      * {@inheritDoc}
      */
     @Pure
+    @EnsuresNonEmptyIf(result = false, expression = "this")
     public boolean isEmpty() {
         return findFirst() == null;
     }
@@ -1876,7 +1880,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public K firstKey() {
+    public K firstKey(@NonEmpty ConcurrentSkipListMap<K,V> this) {
         Node<K,V> n = findFirst();
         if (n == null)
             throw new NoSuchElementException();
@@ -1886,7 +1890,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public K lastKey() {
+    public K lastKey(@NonEmpty ConcurrentSkipListMap<K,V> this) {
         Node<K,V> n = findLast();
         if (n == null)
             throw new NoSuchElementException();
@@ -2119,6 +2123,8 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
             advance(baseHead());
         }
 
+        @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public final boolean hasNext() {
             return next != null;
         }
@@ -2147,7 +2153,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     }
 
     final class ValueIterator extends Iter<V> {
-        public V next() {
+        public V next(@NonEmpty ValueIterator this) {
             V v;
             if ((v = nextValue) == null)
                 throw new NoSuchElementException();
@@ -2157,7 +2163,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     }
 
     final class KeyIterator extends Iter<K> {
-        public K next() {
+        public K next(@NonEmpty KeyIterator this) {
             Node<K,V> n;
             if ((n = next) == null)
                 throw new NoSuchElementException();
@@ -2168,7 +2174,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     }
 
     final class EntryIterator extends Iter<Map.Entry<K,V>> {
-        public Map.Entry<K,V> next() {
+        public Map.Entry<K,V> next(@NonEmpty EntryIterator this) {
             Node<K,V> n;
             if ((n = next) == null)
                 throw new NoSuchElementException();
@@ -2202,8 +2208,10 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         @Pure
         public int size() { return m.size(); }
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() { return m.isEmpty(); }
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o) { return m.containsKey(o); }
         public boolean remove(@UnknownSignedness Object o) { return m.remove(o) != null; }
         public void clear() { m.clear(); }
@@ -2290,8 +2298,10 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         @Pure
         public int size() { return m.size(); }
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() { return m.isEmpty(); }
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o) { return m.containsValue(o); }
         public void clear() { m.clear(); }
         public Object[] toArray()     { return toList(this).toArray();  }
@@ -2333,6 +2343,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         }
 
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -2348,6 +2359,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
                             e.getValue());
         }
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() {
             return m.isEmpty();
         }
@@ -2520,7 +2532,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         /**
          * Returns lowest absolute key (ignoring directionality).
          */
-        K lowestKey() {
+        K lowestKey(@NonEmpty SubMap<K,V> this) {
             Comparator<? super K> cmp = m.comparator;
             ConcurrentSkipListMap.Node<K,V> n = loNode(cmp);
             if (isBeforeEnd(n, cmp))
@@ -2532,7 +2544,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         /**
          * Returns highest absolute key (ignoring directionality).
          */
-        K highestKey() {
+        K highestKey(@NonEmpty SubMap<K,V> this) {
             Comparator<? super K> cmp = m.comparator;
             ConcurrentSkipListMap.Node<K,V> n = hiNode(cmp);
             if (n != null) {
@@ -2687,6 +2699,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         }
 
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() {
             Comparator<? super K> cmp = m.comparator;
             return !isBeforeEnd(loNode(cmp), cmp);
@@ -2953,11 +2966,13 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
                 }
             }
 
+            @Pure
+            @EnsuresNonEmptyIf(result = true, expression = "this")
             public final boolean hasNext() {
                 return next != null;
             }
 
-            final void advance() {
+            final void advance(@NonEmpty SubMapIter<T> this) {
                 if (next == null)
                     throw new NoSuchElementException();
                 lastReturned = next;
@@ -3033,7 +3048,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         }
 
         final class SubMapValueIterator extends SubMapIter<V> {
-            public V next() {
+            public V next(@NonEmpty SubMapValueIterator this) {
                 V v = nextValue;
                 advance();
                 return v;
@@ -3044,7 +3059,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         }
 
         final class SubMapKeyIterator extends SubMapIter<K> {
-            public K next() {
+            public K next(@NonEmpty SubMapKeyIterator this) {
                 Node<K,V> n = next;
                 advance();
                 return n.key;
@@ -3059,7 +3074,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         }
 
         final class SubMapEntryIterator extends SubMapIter<Map.Entry<K,V>> {
-            public Map.Entry<K,V> next() {
+            public Map.Entry<K,V> next(@NonEmpty SubMapEntryIterator this) {
                 Node<K,V> n = next;
                 V v = nextValue;
                 advance();
