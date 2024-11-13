@@ -27,6 +27,9 @@ package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
+import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.nonempty.qual.NonEmpty;
+import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyFor;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyForIf;
 import org.checkerframework.checker.nullness.qual.KeyFor;
@@ -36,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -198,7 +202,7 @@ public class TreeMap<K,V>
      *         or are not mutually comparable
      * @throws NullPointerException if the specified map is null
      */
-    public TreeMap(Map<? extends K, ? extends V> m) {
+    public @PolyNonEmpty TreeMap(@PolyNonEmpty Map<? extends K, ? extends V> m) {
         comparator = null;
         putAll(m);
     }
@@ -212,7 +216,7 @@ public class TreeMap<K,V>
      *         and whose comparator is to be used to sort this map
      * @throws NullPointerException if the specified map is null
      */
-    public TreeMap(SortedMap<K, ? extends V> m) {
+    public @PolyNonEmpty TreeMap(@PolyNonEmpty SortedMap<K, ? extends V> m) {
         comparator = m.comparator();
         try {
             buildFromSorted(m.size(), m.entrySet().iterator(), null, null);
@@ -308,14 +312,14 @@ public class TreeMap<K,V>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public @KeyFor("this") K firstKey() {
+    public @KeyFor("this") K firstKey(@NonEmpty TreeMap<K,V> this) {
         return key(getFirstEntry());
     }
 
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public @KeyFor("this") K lastKey() {
+    public @KeyFor("this") K lastKey(@NonEmpty TreeMap<K,V> this) {
         return key(getLastEntry());
     }
 
@@ -1347,6 +1351,7 @@ public class TreeMap<K,V>
         }
 
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o) {
             return TreeMap.this.containsValue(o);
         }
@@ -1378,6 +1383,7 @@ public class TreeMap<K,V>
         }
 
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o) {
             if (!(o instanceof Map.Entry<?, ?> entry))
                 return false;
@@ -1451,8 +1457,10 @@ public class TreeMap<K,V>
         @Pure
         public @NonNegative int size() { return m.size(); }
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() { return m.isEmpty(); }
         @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o) { return m.containsKey(o); }
         public void clear() { m.clear(); }
         public E lower(E e) { return m.lowerKey(e); }
@@ -1519,10 +1527,13 @@ public class TreeMap<K,V>
             next = first;
         }
 
+        @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         public final boolean hasNext() {
             return next != null;
         }
 
+        @SideEffectsOnly("this")
         final Entry<K,V> nextEntry() {
             Entry<K,V> e = next;
             if (e == null)
@@ -1534,6 +1545,7 @@ public class TreeMap<K,V>
             return e;
         }
 
+        @SideEffectsOnly("this")
         final Entry<K,V> prevEntry() {
             Entry<K,V> e = next;
             if (e == null)
@@ -1563,7 +1575,7 @@ public class TreeMap<K,V>
         EntryIterator(Entry<K,V> first) {
             super(first);
         }
-        public Map.Entry<K,V> next() {
+        public Map.Entry<K,V> next(@NonEmpty EntryIterator this) {
             return nextEntry();
         }
     }
@@ -1572,7 +1584,7 @@ public class TreeMap<K,V>
         ValueIterator(Entry<K,V> first) {
             super(first);
         }
-        public V next() {
+        public V next(@NonEmpty ValueIterator this) {
             return nextEntry().value;
         }
     }
@@ -1581,7 +1593,7 @@ public class TreeMap<K,V>
         KeyIterator(Entry<K,V> first) {
             super(first);
         }
-        public K next() {
+        public K next(@NonEmpty KeyIterator this) {
             return nextEntry().key;
         }
     }
@@ -1590,7 +1602,7 @@ public class TreeMap<K,V>
         DescendingKeyIterator(Entry<K,V> first) {
             super(first);
         }
-        public K next() {
+        public K next(@NonEmpty DescendingKeyIterator this) {
             return prevEntry().key;
         }
         public void remove() {
@@ -1642,7 +1654,7 @@ public class TreeMap<K,V>
      * Returns the key corresponding to the specified Entry.
      * @throws NoSuchElementException if the Entry is null
      */
-    static <K> K key(Entry<K,?> e) {
+    static <K> K key(@NonNull Entry<K,?> e) {
         if (e==null)
             throw new NoSuchElementException();
         return e.key;
@@ -1824,6 +1836,7 @@ public class TreeMap<K,V>
         // public methods
 
         @Pure
+        @EnsuresNonEmptyIf(result = false, expression = "this")
         public boolean isEmpty() {
             return (fromStart && toEnd) ? m.isEmpty() : entrySet().isEmpty();
         }
@@ -2012,12 +2025,14 @@ public class TreeMap<K,V>
             }
 
             @Pure
+            @EnsuresNonEmptyIf(result = false, expression = "this")
             public boolean isEmpty() {
                 TreeMap.Entry<K,V> n = absLowest();
                 return n == null || tooHigh(n.key);
             }
 
             @Pure
+            @EnsuresNonEmptyIf(result = true, expression = "this")
             public boolean contains(@UnknownSignedness Object o) {
                 if (!(o instanceof Entry<?, ?> entry))
                     return false;
@@ -2062,10 +2077,13 @@ public class TreeMap<K,V>
                 fenceKey = fence == null ? UNBOUNDED : fence.key;
             }
 
+            @Pure
+            @EnsuresNonEmptyIf(result = true, expression = "this")
             public final boolean hasNext() {
                 return next != null && next.key != fenceKey;
             }
 
+            @SideEffectsOnly("this")
             final TreeMap.Entry<K,V> nextEntry() {
                 TreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)
@@ -2077,6 +2095,7 @@ public class TreeMap<K,V>
                 return e;
             }
 
+            @SideEffectsOnly("this")
             final TreeMap.Entry<K,V> prevEntry() {
                 TreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)
@@ -2118,7 +2137,7 @@ public class TreeMap<K,V>
                                 TreeMap.Entry<K,V> fence) {
                 super(first, fence);
             }
-            public Map.Entry<K,V> next() {
+            public Map.Entry<K,V> next(@NonEmpty SubMapEntryIterator this) {
                 return nextEntry();
             }
             public void remove() {
@@ -2132,7 +2151,7 @@ public class TreeMap<K,V>
                 super(last, fence);
             }
 
-            public Map.Entry<K,V> next() {
+            public Map.Entry<K,V> next(@NonEmpty DescendingSubMapEntryIterator this) {
                 return prevEntry();
             }
             public void remove() {
@@ -2147,7 +2166,7 @@ public class TreeMap<K,V>
                               TreeMap.Entry<K,V> fence) {
                 super(first, fence);
             }
-            public K next() {
+            public K next(@NonEmpty SubMapKeyIterator this) {
                 return nextEntry().key;
             }
             public void remove() {
@@ -2185,7 +2204,7 @@ public class TreeMap<K,V>
                                         TreeMap.Entry<K,V> fence) {
                 super(last, fence);
             }
-            public K next() {
+            public K next(@NonEmpty DescendingSubMapKeyIterator this) {
                 return prevEntry().key;
             }
             public void remove() {
