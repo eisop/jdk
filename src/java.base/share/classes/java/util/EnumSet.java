@@ -79,7 +79,7 @@ import jdk.internal.access.SharedSecrets;
  * @since 1.5
  * @see EnumMap
  */
-@AnnotatedFor({"nullness", "index"})
+@AnnotatedFor({"initialization", "nullness", "index"})
 public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     implements Cloneable, java.io.Serializable
 {

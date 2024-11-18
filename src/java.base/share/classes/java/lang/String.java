@@ -171,7 +171,7 @@ import sun.nio.cs.UTF_8;
  * @jls     15.18.1 String Concatenation Operator +
  */
 
-@AnnotatedFor({"aliasing", "formatter", "index", "interning", "lock", "nullness", "regex", "signature", "signedness"})
+@AnnotatedFor({"aliasing", "formatter", "index", "initialization", "interning", "lock", "nullness", "regex", "signature", "signedness"})
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence,
                Constable, ConstantDesc {
