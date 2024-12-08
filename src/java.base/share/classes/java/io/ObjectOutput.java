@@ -42,7 +42,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see java.io.ObjectInputStream
  * @since   1.1
  */
-@AnnotatedFor({"nullness", "index", "signedness"})
+@AnnotatedFor({"index", "initialization", "nullness", "signedness"})
 public interface ObjectOutput extends DataOutput, AutoCloseable {
     /**
      * Write an object to the underlying storage or stream.  The

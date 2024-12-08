@@ -47,7 +47,7 @@ import jdk.xml.internal.SecuritySupport;
  *
  * @author Santiago PericasGeertsen
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 class FactoryFinder {
     private static final String DEFAULT_PACKAGE = "com.sun.org.apache.xerces.internal";
     /**

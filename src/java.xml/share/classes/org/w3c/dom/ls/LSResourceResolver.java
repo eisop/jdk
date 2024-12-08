@@ -70,7 +70,7 @@ and Save Specification</a>.
  *
  * @since 1.5
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface LSResourceResolver {
     /**
      *  Allow the application to resolve external resources.

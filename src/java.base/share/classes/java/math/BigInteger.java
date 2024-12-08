@@ -139,7 +139,7 @@ import jdk.internal.vm.annotation.Stable;
  * @since 1.1
  */
 
-@AnnotatedFor({"nullness", "value"})
+@AnnotatedFor({"initialization", "nullness", "value"})
 public class BigInteger extends Number implements Comparable<BigInteger> {
     /**
      * The signum of this BigInteger: -1 for negative, 0 for zero, or

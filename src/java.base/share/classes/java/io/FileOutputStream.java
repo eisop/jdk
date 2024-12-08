@@ -73,7 +73,7 @@ import sun.nio.ch.FileChannelImpl;
  * @see     java.nio.file.Files#newOutputStream
  * @since   1.0
  */
-@AnnotatedFor({"index", "mustcall", "nullness", "signedness"})
+@AnnotatedFor({"index", "initialization", "mustcall", "nullness", "signedness"})
 public class FileOutputStream extends OutputStream
 {
     /**

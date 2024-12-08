@@ -191,7 +191,7 @@ import static java.lang.constant.ConstantDescs.DEFAULT_NAME;
  * @author  Ulf Zibis
  * @since   1.0
  */
-@AnnotatedFor({"index", "interning", "nullness", "value"})
+@AnnotatedFor({"index", "initialization", "interning", "nullness", "value"})
 @jdk.internal.ValueBased
 public final
 class Character implements java.io.Serializable, Comparable<Character>, Constable {

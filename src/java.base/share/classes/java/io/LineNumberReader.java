@@ -58,7 +58,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since       1.1
  */
 
-@AnnotatedFor({"index", "lock", "mustcall", "nullness"})
+@AnnotatedFor({"index", "initialization", "lock", "mustcall", "nullness"})
 public class LineNumberReader extends BufferedReader {
 
     /** Previous character types */

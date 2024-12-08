@@ -38,7 +38,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.4
  */
 
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public class FactoryConfigurationError extends Error {
     private static final long serialVersionUID = -827108682472263355L;
 

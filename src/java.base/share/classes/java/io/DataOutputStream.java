@@ -47,7 +47,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.io.DataInputStream
  * @since   1.0
  */
-@AnnotatedFor({"index", "lock", "mustcall", "nullness", "signedness"})
+@AnnotatedFor({"index", "initialization", "lock", "mustcall", "nullness", "signedness"})
 public class DataOutputStream extends FilterOutputStream implements DataOutput {
     /**
      * The number of bytes written to the data output stream so far.

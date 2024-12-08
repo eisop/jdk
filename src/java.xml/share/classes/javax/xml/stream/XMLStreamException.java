@@ -39,7 +39,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.6
  */
 
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public class XMLStreamException extends Exception {
   private static final long serialVersionUID = 2018819321811497362L;
 

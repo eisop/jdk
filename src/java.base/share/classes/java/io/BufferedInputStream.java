@@ -58,7 +58,7 @@ import jdk.internal.util.ArraysSupport;
  * @author  Arthur van Hoff
  * @since   1.0
  */
-@AnnotatedFor({"index", "nullness", "mustcall"})
+@AnnotatedFor({"index", "initialization", "mustcall", "nullness"})
 public class BufferedInputStream extends FilterInputStream {
 
     private static int DEFAULT_BUFFER_SIZE = 8192;

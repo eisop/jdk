@@ -82,7 +82,7 @@ import java.io.IOException;
  * @see org.xml.sax.XMLReader#setEntityResolver
  * @see org.xml.sax.InputSource
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public interface EntityResolver {
 
 

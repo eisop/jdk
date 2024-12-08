@@ -112,7 +112,7 @@ import sun.security.util.SecurityConstants;
  * @serial exclude
  */
 
-@AnnotatedFor({"lock", "nullness", "index"})
+@AnnotatedFor({"index", "initialization", "lock", "nullness"})
 public final class FilePermission extends Permission implements Serializable {
 
     /**

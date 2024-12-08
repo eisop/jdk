@@ -83,7 +83,7 @@ import java.util.stream.StreamSupport;
  * @since       1.1
  */
 
-@AnnotatedFor({"index", "lock", "mustcall", "nullness"})
+@AnnotatedFor({"index", "initialization", "lock", "mustcall", "nullness"})
 public class BufferedReader extends Reader {
 
     private Reader in;

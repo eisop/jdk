@@ -68,7 +68,7 @@
  *
  * @since 1.0
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 @DefaultQualifier(value = KeyForBottom.class, locations = TypeUseLocation.LOWER_BOUND)
 package java.lang;
 import org.checkerframework.framework.qual.DefaultQualifier;

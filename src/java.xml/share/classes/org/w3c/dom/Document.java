@@ -57,7 +57,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * <code>Document</code> within whose context they were created.
  * <p>See also the <a href='http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407'>Document Object Model (DOM) Level 3 Core Specification</a>.
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"initialization", "nullness"})
 public interface Document extends Node {
     /**
      * The Document Type Declaration (see <code>DocumentType</code>)

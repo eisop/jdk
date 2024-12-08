@@ -59,7 +59,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * indicate that indexing on CharacterData is done in 16-bit units.
  * <p>See also the <a href='http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407'>Document Object Model (DOM) Level 3 Core Specification</a>.
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"initialization", "nullness"})
 public interface CharacterData extends Node {
     /**
      * The character data of the node that implements this interface. The DOM

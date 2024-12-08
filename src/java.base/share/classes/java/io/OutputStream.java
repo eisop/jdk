@@ -53,7 +53,7 @@ import java.util.Objects;
  * @see     java.io.OutputStream#write(int)
  * @since   1.0
  */
-@AnnotatedFor({"index", "interning", "nullness", "signedness"})
+@AnnotatedFor({"index", "initialization", "interning", "nullness", "signedness"})
 public abstract @UsesObjectEquals class OutputStream implements Closeable, Flushable {
     /**
      * Constructor for subclasses to call.

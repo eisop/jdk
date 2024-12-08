@@ -95,7 +95,7 @@ import java.util.stream.StreamSupport;
  * @author John Rose
  * @since  1.2
  */
-@AnnotatedFor({"index", "interning", "lock", "nullness", "signedness"})
+@AnnotatedFor({"index", "initialization", "interning", "lock", "nullness", "signedness"})
 public class Arrays {
 
     // Suppresses default constructor, ensuring non-instantiability.

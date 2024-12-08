@@ -60,7 +60,7 @@ import java.util.Objects;
  * @since       1.1
  */
 
-@AnnotatedFor({"index", "interning", "lock", "nullness"})
+@AnnotatedFor({"index", "initialization", "interning", "lock", "nullness"})
 public abstract @UsesObjectEquals class Reader implements Readable, Closeable {
 
     private static final int TRANSFER_BUFFER_SIZE = 8192;
