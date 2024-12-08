@@ -42,7 +42,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author  Arthur van Hoff
  * @since   1.0
  */
-@AnnotatedFor({"index", "initialization", "nullness", "mustcall", "signedness"})
+@AnnotatedFor({"index", "initialization", "mustcall", "nullness", "signedness"})
 public class BufferedOutputStream extends FilterOutputStream {
     /**
      * The internal buffer where data is stored.
