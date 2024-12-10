@@ -201,7 +201,7 @@ public class ToolEnvironment {
         if (quiet) {
             return;
         }
-        log.noticeUsingKey(key);
+        JavadocLog.printRawLines(log.getDiagnosticWriter(), log.getText(key));
     }
 
     /**
@@ -214,7 +214,7 @@ public class ToolEnvironment {
         if (quiet) {
             return;
         }
-        log.noticeUsingKey(key, a1);
+        JavadocLog.printRawLines(log.getDiagnosticWriter(), log.getText(key, a1));
     }
 
     TreePath getTreePath(JCCompilationUnit tree) {

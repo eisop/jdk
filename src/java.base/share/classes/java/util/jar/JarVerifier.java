@@ -87,6 +87,9 @@ class JarVerifier {
     /** the bytes for the manDig object */
     byte manifestRawBytes[] = null;
 
+    /** the manifest name this JarVerifier is created upon */
+    final String manifestName;
+
     /** controls eager signature validation */
     boolean eagerValidation;
 
@@ -96,7 +99,8 @@ class JarVerifier {
     /** collect -DIGEST-MANIFEST values for deny list */
     private List<Object> manifestDigests;
 
-    public JarVerifier(byte rawBytes[]) {
+    public JarVerifier(String name, byte rawBytes[]) {
+        manifestName = name;
         manifestRawBytes = rawBytes;
         sigFileSigners = new Hashtable<>();
         verifiedSigners = new Hashtable<>();
@@ -183,7 +187,7 @@ class JarVerifier {
 
         // only set the jev object for entries that have a signature
         // (either verified or not)
-        if (!name.equals(JarFile.MANIFEST_NAME)) {
+        if (!name.equalsIgnoreCase(JarFile.MANIFEST_NAME)) {
             if (sigFileSigners.get(name) != null ||
                     verifiedSigners.get(name) != null) {
                 mev.setEntry(name, je);
@@ -273,7 +277,8 @@ class JarVerifier {
                             }
 
                             sfv.setSignatureFile(bytes);
-                            sfv.process(sigFileSigners, manifestDigests);
+                            sfv.process(sigFileSigners, manifestDigests,
+                                    manifestName);
                         }
                     }
                     return;
@@ -316,7 +321,7 @@ class JarVerifier {
                         sfv.setSignatureFile(bytes);
                     }
                 }
-                sfv.process(sigFileSigners, manifestDigests);
+                sfv.process(sigFileSigners, manifestDigests, manifestName);
 
             } catch (IOException | CertificateException |
                     NoSuchAlgorithmException | SignatureException e) {
@@ -422,9 +427,9 @@ class JarVerifier {
         manDig = null;
         // MANIFEST.MF is always treated as signed and verified,
         // move its signers from sigFileSigners to verifiedSigners.
-        if (sigFileSigners.containsKey(JarFile.MANIFEST_NAME)) {
-            CodeSigner[] codeSigners = sigFileSigners.remove(JarFile.MANIFEST_NAME);
-            verifiedSigners.put(JarFile.MANIFEST_NAME, codeSigners);
+        if (sigFileSigners.containsKey(manifestName)) {
+            CodeSigner[] codeSigners = sigFileSigners.remove(manifestName);
+            verifiedSigners.put(manifestName, codeSigners);
         }
     }
 
@@ -879,7 +884,7 @@ class JarVerifier {
      */
     boolean isTrustedManifestEntry(String name) {
         // How many signers? MANIFEST.MF is always verified
-        CodeSigner[] forMan = verifiedSigners.get(JarFile.MANIFEST_NAME);
+        CodeSigner[] forMan = verifiedSigners.get(manifestName);
         if (forMan == null) {
             return true;
         }
