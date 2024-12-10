@@ -66,9 +66,17 @@ final class Finalizer extends FinalReference<Object> { /* Package-private; must 
         return queue;
     }
 
+    static final boolean ENABLED = isFinalizationEnabled();
+
+    private static native boolean isFinalizationEnabled();
+
     /* Invoked by VM */
     static void register(Object finalizee) {
-        new Finalizer(finalizee);
+        if (ENABLED) {
+            new Finalizer(finalizee);
+        } else {
+            throw new InternalError("unexpected call to Finalizer::register when finalization is disabled");
+        }
     }
 
     private void runFinalizer(JavaLangAccess jla) {
@@ -91,6 +99,7 @@ final class Finalizer extends FinalReference<Object> { /* Package-private; must 
             assert finalizee != null;
             if (!(finalizee instanceof java.lang.Enum)) {
                 jla.invokeFinalize(finalizee);
+                reportComplete(finalizee);
 
                 // Clear stack slot containing this variable, to decrease
                 // the chances of false retention with a conservative GC
@@ -99,6 +108,8 @@ final class Finalizer extends FinalReference<Object> { /* Package-private; must 
         } catch (Throwable x) { }
         super.clear();
     }
+
+    private static native void reportComplete(Object finalizee);
 
     /* Create a privileged secondary finalizer thread in the system thread
      * group for the given Runnable, and wait for it to complete.
@@ -132,7 +143,7 @@ final class Finalizer extends FinalReference<Object> { /* Package-private; must 
 
     /* Called by Runtime.runFinalization() */
     static void runFinalization() {
-        if (VM.initLevel() == 0) {
+        if (VM.initLevel() == 0 || ! ENABLED) {
             return;
         }
 
@@ -184,14 +195,16 @@ final class Finalizer extends FinalReference<Object> { /* Package-private; must 
     }
 
     static {
-        ThreadGroup tg = Thread.currentThread().getThreadGroup();
-        for (ThreadGroup tgn = tg;
-             tgn != null;
-             tg = tgn, tgn = tg.getParent());
-        Thread finalizer = new FinalizerThread(tg);
-        finalizer.setPriority(Thread.MAX_PRIORITY - 2);
-        finalizer.setDaemon(true);
-        finalizer.start();
+        if (ENABLED) {
+            ThreadGroup tg = Thread.currentThread().getThreadGroup();
+            for (ThreadGroup tgn = tg;
+                 tgn != null;
+                 tg = tgn, tgn = tg.getParent());
+            Thread finalizer = new FinalizerThread(tg);
+            finalizer.setPriority(Thread.MAX_PRIORITY - 2);
+            finalizer.setDaemon(true);
+            finalizer.start();
+        }
     }
 
 }

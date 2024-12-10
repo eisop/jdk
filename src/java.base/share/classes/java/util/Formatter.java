@@ -395,6 +395,10 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">time</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  * <tr><th scope="row" style="vertical-align:top"> {@code 'H'}
  *     <td> Hour of the day for the 24-hour clock, formatted as two digits with
@@ -466,6 +470,10 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">date</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top">{@code 'B'}
@@ -526,6 +534,10 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">composites</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top">{@code 'R'}
@@ -745,6 +757,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">dgConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 'b'}
@@ -803,6 +820,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">dFlags</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Flag
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code '-'}
@@ -847,6 +869,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">charConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 'c'}
@@ -951,6 +978,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">IntConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 'd'}
@@ -1034,6 +1066,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">intFlags</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code '+'}
@@ -1115,6 +1152,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">bIntConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 'd'}
@@ -1212,6 +1254,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">floatConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 'e'}
@@ -1449,6 +1496,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">floatConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 'e'}
@@ -1576,6 +1628,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">DTConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 't'}
@@ -1599,6 +1656,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">time</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top"> {@code 'H'}
@@ -1694,6 +1756,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">date</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top">{@code 'B'}
@@ -1770,6 +1837,11 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">composites</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Unicode
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top">{@code 'R'}
@@ -1824,6 +1896,10 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">DTConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top">{@code '%'}
@@ -1852,6 +1928,10 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  *
  * <table class="striped">
  * <caption style="display:none">DTConv</caption>
+ * <thead>
+ * <tr><th scope="col" style="vertical-align:bottom"> Conversion
+ *     <th scope="col" style="vertical-align:bottom"> Description
+ * </thead>
  * <tbody>
  *
  * <tr><th scope="row" style="vertical-align:top">{@code 'n'}

@@ -38,6 +38,7 @@ import java.nio.ReadOnlyBufferException;
 import java.util.Objects;
 
 import jdk.internal.ref.CleanerFactory;
+import jdk.internal.util.Preconditions;
 import sun.nio.ch.DirectBuffer;
 
 /**
@@ -158,9 +159,7 @@ public @UsesObjectEquals class Inflater {
      * @see Inflater#needsInput
      */
     public void setInput(byte[] input, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len) {
-        if (off < 0 || len < 0 || off > input.length - len) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Preconditions.checkFromIndexSize(len, off, input.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             this.input = null;
             this.inputArray = input;
@@ -225,9 +224,7 @@ public @UsesObjectEquals class Inflater {
      * @see Inflater#getAdler
      */
     public void setDictionary(byte[] dictionary, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len) {
-        if (off < 0 || len < 0 || off > dictionary.length - len) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Preconditions.checkFromIndexSize(len, off, dictionary.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             ensureOpen();
             setDictionary(zsRef.address(), dictionary, off, len);
@@ -370,9 +367,7 @@ public @UsesObjectEquals class Inflater {
     public @GTENegativeOne int inflate(byte[] output, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len)
         throws DataFormatException
     {
-        if (off < 0 || len < 0 || off > output.length - len) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Preconditions.checkFromIndexSize(len, off, output.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             ensureOpen();
             ByteBuffer input = this.input;
@@ -431,7 +426,9 @@ public @UsesObjectEquals class Inflater {
                 needDict = true;
             }
             if (input != null) {
-                input.position(inputPos + read);
+                if (read > 0) {
+                    input.position(inputPos + read);
+                }
             } else {
                 this.inputPos = inputPos + read;
             }

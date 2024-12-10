@@ -50,11 +50,25 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
 
     @IntrinsicCandidate
     public static int implEncodeISOArray(byte[] sa, int sp,
-                                          byte[] da, int dp, int len) {
+                                         byte[] da, int dp, int len) {
         int i = 0;
         for (; i < len; i++) {
             char c = StringUTF16.getChar(sa, sp++);
             if (c > '\u00FF')
+                break;
+            da[dp++] = (byte)c;
+        }
+        return i;
+    }
+
+    @IntrinsicCandidate
+    public static int implEncodeAsciiArray(char[] sa, int sp,
+                                           byte[] da, int dp, int len)
+    {
+        int i = 0;
+        for (; i < len; i++) {
+            char c = sa[sp++];
+            if (c >= '\u0080')
                 break;
             da[dp++] = (byte)c;
         }

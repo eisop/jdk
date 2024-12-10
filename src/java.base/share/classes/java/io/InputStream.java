@@ -223,7 +223,7 @@ public abstract class InputStream implements Closeable {
      * @throws     NullPointerException  if {@code b} is {@code null}.
      * @see        java.io.InputStream#read(byte[], int, int)
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte b[]) throws IOException {
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
@@ -284,7 +284,7 @@ public abstract class InputStream implements Closeable {
      *             {@code b.length - off}
      * @see        java.io.InputStream#read()
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         Objects.checkFromIndexSize(off, len, b.length);
         if (len == 0) {
             return 0;

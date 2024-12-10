@@ -86,17 +86,17 @@ import sun.net.PlatformSocketImpl;
 @AnnotatedFor({"calledmethods", "interning", "mustcall", "nullness"})
 public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
     /**
-     * Various states of this socket.
+     * The underlying SocketImpl
      */
-    private boolean created = false;
-    private boolean bound = false;
-    private boolean closed = false;
-    private Object closeLock = new Object();
+    private final SocketImpl impl;
 
     /**
-     * The implementation of this Socket.
+     * Various states of this socket, need stateLock to change.
      */
-    private SocketImpl impl;
+    private volatile boolean created;   // impl.create(boolean) called
+    private volatile boolean bound;
+    private volatile boolean closed;
+    private final Object stateLock = new Object();
 
     /**
      * Creates a server socket with a user-specified {@code SocketImpl}.
@@ -132,7 +132,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @revised 1.4
      */
     public ServerSocket() throws IOException {
-        setImpl();
+        this.impl = createImpl();
     }
 
     /**
@@ -272,18 +272,15 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @since   1.1
      */
     public ServerSocket(int port, int backlog, @Nullable InetAddress bindAddr) throws IOException {
-        setImpl();
         if (port < 0 || port > 0xFFFF)
-            throw new IllegalArgumentException(
-                       "Port value out of range: " + port);
+            throw new IllegalArgumentException("Port value out of range: " + port);
         if (backlog < 1)
-          backlog = 50;
+            backlog = 50;
+
+        this.impl = createImpl();
         try {
             bind(new InetSocketAddress(bindAddr, port), backlog);
-        } catch(SecurityException e) {
-            close();
-            throw e;
-        } catch(IOException e) {
+        } catch (IOException | SecurityException e) {
             close();
             throw e;
         }
@@ -297,35 +294,36 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @throws SocketException if creation fails.
      * @since 1.4
      */
-    SocketImpl getImpl() throws SocketException {
-        if (!created)
-            createImpl();
+    private SocketImpl getImpl() throws SocketException {
+        if (!created) {
+            synchronized (stateLock) {
+                if (!created) {
+                    if (closed) {
+                        throw new SocketException("Socket is closed");
+                    }
+                    try {
+                        impl.create(true);
+                    } catch (SocketException e) {
+                        throw e;
+                    } catch (IOException e) {
+                        throw new SocketException(e.getMessage());
+                    }
+                    created = true;
+                }
+            }
+        }
         return impl;
     }
 
-    private void setImpl() {
+    /**
+     * Create a SocketImpl for a server socket.
+     */
+    private static SocketImpl createImpl() {
         SocketImplFactory factory = ServerSocket.factory;
         if (factory != null) {
-            impl = factory.createSocketImpl();
+            return factory.createSocketImpl();
         } else {
-            impl = SocketImpl.createPlatformSocketImpl(true);
-        }
-    }
-
-    /**
-     * Creates the socket implementation.
-     *
-     * @throws SocketException if creation fails
-     * @since 1.4
-     */
-    void createImpl() throws SocketException {
-        if (impl == null)
-            setImpl();
-        try {
-            impl.create(true);
-            created = true;
-        } catch (IOException e) {
-            throw new SocketException(e.getMessage());
+            return SocketImpl.createPlatformSocketImpl(true);
         }
     }
 
@@ -389,21 +387,21 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
         if (epoint.isUnresolved())
             throw new SocketException("Unresolved address");
         if (backlog < 1)
-          backlog = 50;
-        try {
-            @SuppressWarnings("removal")
-            SecurityManager security = System.getSecurityManager();
-            if (security != null)
-                security.checkListen(epoint.getPort());
+            backlog = 50;
+
+        @SuppressWarnings("removal")
+        SecurityManager security = System.getSecurityManager();
+        if (security != null)
+            security.checkListen(epoint.getPort());
+
+        synchronized (stateLock) {
+            if (closed)
+                throw new SocketException("Socket is closed");
+            if (bound)
+                throw new SocketException("Already bound");
             getImpl().bind(epoint.getAddress(), epoint.getPort());
             getImpl().listen(backlog);
             bound = true;
-        } catch(SecurityException e) {
-            bound = false;
-            throw e;
-        } catch(IOException e) {
-            bound = false;
-            throw e;
         }
     }
 
@@ -721,12 +719,15 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @revised 1.4
      */
     public void close() throws IOException {
-        synchronized(closeLock) {
-            if (isClosed())
-                return;
-            if (created)
-                impl.close();
-            closed = true;
+        synchronized (stateLock) {
+            if (!closed) {
+                closed = true;
+
+                // close underlying socket if created
+                if (created) {
+                    impl.close();
+                }
+            }
         }
     }
 
@@ -771,9 +772,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      */
     @EnsuresCalledMethodsIf(expression="this", result=true, methods={"close"})
     public boolean isClosed() {
-        synchronized(closeLock) {
-            return closed;
-        }
+        return closed;
     }
 
     /**
@@ -794,7 +793,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @since   1.1
      * @see #getSoTimeout()
      */
-    public synchronized void setSoTimeout(int timeout) throws SocketException {
+    public void setSoTimeout(int timeout) throws SocketException {
         if (isClosed())
             throw new SocketException("Socket is closed");
         if (timeout < 0)
@@ -810,7 +809,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @since   1.1
      * @see #setSoTimeout(int)
      */
-    public synchronized int getSoTimeout() throws IOException {
+    public int getSoTimeout() throws IOException {
         if (isClosed())
             throw new SocketException("Socket is closed");
         Object o = getImpl().getOption(SocketOptions.SO_TIMEOUT);
@@ -995,7 +994,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @since 1.4
      * @see #getReceiveBufferSize
      */
-     public synchronized void setReceiveBufferSize (int size) throws SocketException {
+     public void setReceiveBufferSize (int size) throws SocketException {
         if (!(size > 0)) {
             throw new IllegalArgumentException("negative receive size");
         }
@@ -1018,8 +1017,7 @@ public @UsesObjectEquals class ServerSocket implements java.io.Closeable {
      * @see #setReceiveBufferSize(int)
      * @since 1.4
      */
-    public synchronized int getReceiveBufferSize()
-    throws SocketException{
+    public int getReceiveBufferSize() throws SocketException {
         if (isClosed())
             throw new SocketException("Socket is closed");
         int result = 0;

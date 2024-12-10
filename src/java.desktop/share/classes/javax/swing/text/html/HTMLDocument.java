@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -905,8 +905,8 @@ public class HTMLDocument extends DefaultStyledDocument {
         if (name != null) {
             Object     maps = getProperty(MAP_PROPERTY);
 
-            if (maps != null && (maps instanceof Hashtable)) {
-                return (Map)((Hashtable)maps).get(name);
+            if (maps instanceof Hashtable<?, ?> hashtable) {
+                return (Map) hashtable.get(name);
             }
         }
         return null;
@@ -2712,15 +2712,14 @@ public class HTMLDocument extends DefaultStyledDocument {
         }
 
         private Element[] getPathTo(int offset) {
-            Stack<Element> elements = new Stack<Element>();
+            ArrayList<Element> elements = new ArrayList<Element>();
             Element e = getDefaultRootElement();
             int index;
             while (!e.isLeaf()) {
-                elements.push(e);
+                elements.add(e);
                 e = e.getElement(e.getElementIndex(offset));
             }
-            Element[] retValue = new Element[elements.size()];
-            elements.copyInto(retValue);
+            Element[] retValue = elements.toArray(new Element[0]);
             return retValue;
         }
 
@@ -3257,8 +3256,8 @@ public class HTMLDocument extends DefaultStyledDocument {
                     }
                     if (rel != null) {
                         rel = rel.toLowerCase();
-                        if ((media.indexOf("all") != -1 ||
-                             media.indexOf("screen") != -1) &&
+                        if ((media.contains("all") ||
+                             media.contains("screen")) &&
                             (rel.equals("stylesheet") ||
                              (rel.equals("alternate stylesheet") &&
                               title.equals(defaultStyle)))) {
@@ -4200,7 +4199,7 @@ public class HTMLDocument extends DefaultStyledDocument {
                 try {
                     if (offset == 0 || !getText(offset - 1, 1).equals("\n")) {
                         // Need to insert a newline.
-                        AttributeSet newAttrs = null;
+                        SimpleAttributeSet newAttrs = null;
                         boolean joinP = true;
 
                         if (offset != 0) {
@@ -4234,9 +4233,8 @@ public class HTMLDocument extends DefaultStyledDocument {
                             // sure and set the name (otherwise it will be
                             // inherited).
                             newAttrs = new SimpleAttributeSet();
-                            ((SimpleAttributeSet)newAttrs).addAttribute
-                                              (StyleConstants.NameAttribute,
-                                               HTML.Tag.CONTENT);
+                            newAttrs.addAttribute(StyleConstants.NameAttribute,
+                                                  HTML.Tag.CONTENT);
                         }
                         ElementSpec es = new ElementSpec(newAttrs,
                                      ElementSpec.ContentType, NEWLINE, 0,

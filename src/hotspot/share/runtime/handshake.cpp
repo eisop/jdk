@@ -167,7 +167,7 @@ class HandshakeSpinYield : public StackObj {
       // On UP this is always true.
       Thread* self = Thread::current();
       if (self->is_Java_thread()) {
-        wait_blocked(self->as_Java_thread(), now);
+        wait_blocked(JavaThread::cast(self), now);
       } else {
         wait_raw(now);
       }
@@ -301,7 +301,7 @@ void HandshakeOperation::prepare(JavaThread* current_target, Thread* executing_t
   if (_requester != NULL && _requester != executing_thread && _requester->is_Java_thread()) {
     // The handshake closure may contain oop Handles from the _requester.
     // We must make sure we can use them.
-    StackWatermarkSet::start_processing(_requester->as_Java_thread(), StackWatermarkKind::gc);
+    StackWatermarkSet::start_processing(JavaThread::cast(_requester), StackWatermarkKind::gc);
   }
 }
 
@@ -342,13 +342,23 @@ void Handshake::execute(HandshakeClosure* hs_cl) {
 }
 
 void Handshake::execute(HandshakeClosure* hs_cl, JavaThread* target) {
+  // tlh == nullptr means we rely on a ThreadsListHandle somewhere
+  // in the caller's context (and we sanity check for that).
+  Handshake::execute(hs_cl, nullptr, target);
+}
+
+void Handshake::execute(HandshakeClosure* hs_cl, ThreadsListHandle* tlh, JavaThread* target) {
   JavaThread* self = JavaThread::current();
   HandshakeOperation op(hs_cl, target, Thread::current());
 
   jlong start_time_ns = os::javaTimeNanos();
 
-  ThreadsListHandle tlh;
-  if (tlh.includes(target)) {
+  guarantee(target != nullptr, "must be");
+  if (tlh == nullptr) {
+    guarantee(Thread::is_JavaThread_protected_by_TLH(target),
+              "missing ThreadsListHandle in calling context.");
+    target->handshake_state()->add_operation(&op);
+  } else if (tlh->includes(target)) {
     target->handshake_state()->add_operation(&op);
   } else {
     char buf[128];
@@ -396,19 +406,25 @@ void Handshake::execute(AsyncHandshakeClosure* hs_cl, JavaThread* target) {
   jlong start_time_ns = os::javaTimeNanos();
   AsyncHandshakeOperation* op = new AsyncHandshakeOperation(hs_cl, target, start_time_ns);
 
-  ThreadsListHandle tlh;
-  if (tlh.includes(target)) {
-    target->handshake_state()->add_operation(op);
-  } else {
-    log_handshake_info(start_time_ns, op->name(), 0, 0, "(thread dead)");
-    delete op;
+  guarantee(target != nullptr, "must be");
+
+  Thread* current = Thread::current();
+  if (current != target) {
+    // Another thread is handling the request and it must be protecting
+    // the target.
+    guarantee(Thread::is_JavaThread_protected_by_TLH(target),
+              "missing ThreadsListHandle in calling context.");
   }
+  // Implied else:
+  // The target is handling the request itself so it can't be dead.
+
+  target->handshake_state()->add_operation(op);
 }
 
 HandshakeState::HandshakeState(JavaThread* target) :
   _handshakee(target),
   _queue(),
-  _lock(Monitor::leaf, "HandshakeState", Mutex::_allow_vm_block_flag, Monitor::_safepoint_check_never),
+  _lock(Monitor::nosafepoint, "HandshakeState_lock"),
   _active_handshaker(),
   _suspended(false),
   _async_suspend_handshake(false)
@@ -627,7 +643,7 @@ class ThreadSelfSuspensionHandshake : public AsyncHandshakeClosure {
  public:
   ThreadSelfSuspensionHandshake() : AsyncHandshakeClosure("ThreadSelfSuspensionHandshake") {}
   void do_thread(Thread* thr) {
-    JavaThread* current = thr->as_Java_thread();
+    JavaThread* current = JavaThread::cast(thr);
     assert(current == Thread::current(), "Must be self executed.");
     JavaThreadState jts = current->thread_state();
 
@@ -640,8 +656,8 @@ class ThreadSelfSuspensionHandshake : public AsyncHandshakeClosure {
 };
 
 bool HandshakeState::suspend_with_handshake() {
-  if (_handshakee->is_exiting() ||
-     _handshakee->threadObj() == NULL) {
+  assert(_handshakee->threadObj() != NULL, "cannot suspend with a NULL threadObj");
+  if (_handshakee->is_exiting()) {
     log_trace(thread, suspend)("JavaThread:" INTPTR_FORMAT " exiting", p2i(_handshakee));
     return false;
   }
@@ -676,7 +692,7 @@ class SuspendThreadHandshake : public HandshakeClosure {
 public:
   SuspendThreadHandshake() : HandshakeClosure("SuspendThread"), _did_suspend(false) {}
   void do_thread(Thread* thr) {
-    JavaThread* target = thr->as_Java_thread();
+    JavaThread* target = JavaThread::cast(thr);
     _did_suspend = target->handshake_state()->suspend_with_handshake();
   }
   bool did_suspend() { return _did_suspend; }

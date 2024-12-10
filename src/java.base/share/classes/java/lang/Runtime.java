@@ -298,6 +298,12 @@ public @UsesObjectEquals class Runtime {
      * behaves in exactly the same way as the invocation
      * {@link #exec(String, String[], File) exec}{@code (command, null, null)}.
      *
+     * @deprecated This method is error-prone and should not be used, the corresponding method
+     * {@link #exec(String[])} or {@link ProcessBuilder} should be used instead.
+     * The command string is broken into tokens using only whitespace characters.
+     * For an argument with an embedded space, such as a filename, this can cause problems
+     * as the token does not include the full filename.
+     *
      * @param   command   a specified system command.
      *
      * @return  A new {@link Process} object for managing the subprocess
@@ -319,6 +325,7 @@ public @UsesObjectEquals class Runtime {
      * @see     #exec(String[], String[], File)
      * @see     ProcessBuilder
      */
+    @Deprecated(since="18")
     public Process exec(@Untainted String command) throws IOException {
         return exec(command, null, null);
     }
@@ -331,6 +338,12 @@ public @UsesObjectEquals class Runtime {
      * {@code exec(command, envp)}
      * behaves in exactly the same way as the invocation
      * {@link #exec(String, String[], File) exec}{@code (command, envp, null)}.
+     *
+     * @deprecated This method is error-prone and should not be used, the corresponding method
+     * {@link #exec(String[], String[])} or {@link ProcessBuilder} should be used instead.
+     * The command string is broken into tokens using only whitespace characters.
+     * For an argument with an embedded space, such as a filename, this can cause problems
+     * as the token does not include the full filename.
      *
      * @param   command   a specified system command.
      *
@@ -360,6 +373,7 @@ public @UsesObjectEquals class Runtime {
      * @see     #exec(String[], String[], File)
      * @see     ProcessBuilder
      */
+    @Deprecated(since="18")
     public Process exec(@Untainted String command, @Untainted String @Nullable [] envp) throws IOException {
         return exec(command, envp, null);
     }
@@ -381,6 +395,12 @@ public @UsesObjectEquals class Runtime {
      * further modification of the character categories.  The tokens
      * produced by the tokenizer are then placed in the new string
      * array {@code cmdarray}, in the same order.
+     *
+     * @deprecated This method is error-prone and should not be used, the corresponding method
+     * {@link #exec(String[], String[], File)} or {@link ProcessBuilder} should be used instead.
+     * The command string is broken into tokens using only whitespace characters.
+     * For an argument with an embedded space, such as a filename, this can cause problems
+     * as the token does not include the full filename.
      *
      * @param   command   a specified system command.
      *
@@ -414,6 +434,7 @@ public @UsesObjectEquals class Runtime {
      * @see     ProcessBuilder
      * @since 1.3
      */
+    @Deprecated(since="18")
     public Process exec(@Untainted String command, @Untainted String @Nullable [] envp, @Nullable File dir)
         throws IOException {
         if (command.isEmpty())
@@ -457,7 +478,7 @@ public @UsesObjectEquals class Runtime {
      *
      * @see     ProcessBuilder
      */
-    public Process exec(@Untainted String cmdarray[]) throws IOException {
+    public Process exec(@Untainted String [] cmdarray) throws IOException {
         return exec(cmdarray, null, null);
     }
 
@@ -694,8 +715,17 @@ public @UsesObjectEquals class Runtime {
      * The method {@link System#runFinalization()} is the conventional
      * and convenient means of invoking this method.
      *
+     * @deprecated Finalization has been deprecated for removal.  See
+     * {@link java.lang.Object#finalize} for background information and details
+     * about migration options.
+     * <p>
+     * When running in a JVM in which finalization has been disabled or removed,
+     * no objects will be pending finalization, so this method does nothing.
+     *
      * @see     java.lang.Object#finalize()
+     * @jls 12.6 Finalization of Class Instances
      */
+    @Deprecated(since="18", forRemoval=true)
     public void runFinalization() {
         SharedSecrets.getJavaLangRefAccess().runFinalization();
     }

@@ -928,8 +928,7 @@ public final class Double extends Number
     @Pure
     @StaticallyExecutable
     public static int hashCode(double value) {
-        long bits = doubleToLongBits(value);
-        return (int)(bits ^ (bits >>> 32));
+        return Long.hashCode(doubleToLongBits(value));
     }
 
     /**

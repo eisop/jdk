@@ -388,7 +388,7 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @param     len the number of bytes to read.
      * @throws    IOException If an I/O error has occurred.
      */
-    private native int readBytes(@PolySigned byte b[], int off, int len) throws IOException;
+    private native int readBytes(@PolySigned byte[] b, int off, int len) throws IOException;
 
     /**
      * Reads up to {@code len} bytes of data from this file into an
@@ -415,7 +415,7 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      *             {@code len} is negative, or {@code len} is greater than
      *             {@code b.length - off}
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(@PolySigned byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         return readBytes(b, off, len);
     }
 
@@ -438,7 +438,7 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      *             or if some other I/O error occurs.
      * @throws     NullPointerException If {@code b} is {@code null}.
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(@PolySigned byte b[]) throws IOException {
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(@PolySigned byte[] b) throws IOException {
         return readBytes(b, 0, b.length);
     }
 
@@ -455,7 +455,7 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      *              all the bytes.
      * @throws  IOException   if an I/O error occurs.
      */
-    public final void readFully(@PolySigned byte b[]) throws IOException {
+    public final void readFully(@PolySigned byte[] b) throws IOException {
         readFully(b, 0, b.length);
     }
 
@@ -477,7 +477,7 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      *                all the bytes.
      * @throws  IOException   if an I/O error occurs.
      */
-    public final void readFully(@PolySigned byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    public final void readFully(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         int n = 0;
         do {
             int count = this.read(b, off + n, len - n);
@@ -546,7 +546,7 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @param     len the number of bytes that are written
      * @throws    IOException If an I/O error has occurred.
      */
-    private native void writeBytes(@PolySigned byte b[], int off, int len) throws IOException;
+    private native void writeBytes(@PolySigned byte[] b, int off, int len) throws IOException;
 
     /**
      * Writes {@code b.length} bytes from the specified byte array
@@ -555,7 +555,7 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @param      b   the data.
      * @throws     IOException  if an I/O error occurs.
      */
-    public void write(@PolySigned byte b[]) throws IOException {
+    public void write(@PolySigned byte[] b) throws IOException {
         writeBytes(b, 0, b.length);
     }
 
@@ -567,8 +567,9 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @param      off   the start offset in the data.
      * @param      len   the number of bytes to write.
      * @throws     IOException  if an I/O error occurs.
+     * @throws     IndexOutOfBoundsException {@inheritDoc}
      */
-    public void write(@PolySigned byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         writeBytes(b, off, len);
     }
 

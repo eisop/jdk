@@ -36,12 +36,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.security.AccessController;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.PrivilegedAction;
-import java.security.Security;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
@@ -339,7 +337,7 @@ public final class SocketPermission extends Permission
                         ind = host.lastIndexOf(':');
                         host = "[" + host.substring(0, ind) + "]" +
                             host.substring(ind);
-                    } else if (tokens == 8 && host.indexOf("::") == -1) {
+                    } else if (tokens == 8 && !host.contains("::")) {
                         // IPv6 address only, not followed by port
                         host = "[" + host + "]";
                     } else {
@@ -879,7 +877,7 @@ public final class SocketPermission extends Permission
 
     /**
      * Checks if the incoming Permission's action are a proper subset of
-     * the this object's actions.
+     * this object's actions.
      * <P>
      * Check, in the following order:
      * <ul>
@@ -1305,7 +1303,7 @@ public final class SocketPermission extends Permission
     /*
     public String toString()
     {
-        StringBuffer s = new StringBuffer(super.toString() + "\n" +
+        StringBuilder s = new StringBuilder(super.toString() + "\n" +
             "cname = " + cname + "\n" +
             "wildcard = " + wildcard + "\n" +
             "invalid = " + invalid + "\n" +

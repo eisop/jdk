@@ -480,6 +480,7 @@ public @UsesObjectEquals class ManagementFactory {
      * @see javax.management.MBeanServerFactory#createMBeanServer
      */
     public static synchronized MBeanServer getPlatformMBeanServer() {
+        @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             Permission perm = new MBeanServerPermission("createMBeanServer");
@@ -604,6 +605,7 @@ public @UsesObjectEquals class ManagementFactory {
         // Only allow MXBean interfaces from the platform modules loaded by the
         // bootstrap or platform class loader
         final Class<?> cls = mxbeanInterface;
+        @SuppressWarnings("removal")
         ClassLoader loader =
             AccessController.doPrivileged(
                 (PrivilegedAction<ClassLoader>) () -> cls.getClassLoader());
@@ -891,6 +893,7 @@ public @UsesObjectEquals class ManagementFactory {
     private static final String NOTIF_EMITTER =
         "javax.management.NotificationEmitter";
 
+    @SuppressWarnings("removal")
     private static void addMXBean(final MBeanServer mbs, String name, final Object pmo)
     {
         try {
@@ -926,6 +929,7 @@ public @UsesObjectEquals class ManagementFactory {
 
         static {
             // get all providers
+            @SuppressWarnings("removal")
             List<PlatformMBeanProvider> providers = AccessController.doPrivileged(
                 new PrivilegedAction<List<PlatformMBeanProvider>>() {
                     @Override
@@ -1018,6 +1022,11 @@ public @UsesObjectEquals class ManagementFactory {
     }
 
     static {
+        loadNativeLib();
+    }
+
+    @SuppressWarnings("removal")
+    private static void loadNativeLib() {
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             System.loadLibrary("management");
             return null;

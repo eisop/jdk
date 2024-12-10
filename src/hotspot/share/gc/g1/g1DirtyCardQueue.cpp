@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -34,7 +34,7 @@
 #include "gc/g1/g1RedirtyCardsQueue.hpp"
 #include "gc/g1/g1RemSet.hpp"
 #include "gc/g1/g1ThreadLocalData.hpp"
-#include "gc/g1/heapRegionRemSet.hpp"
+#include "gc/g1/heapRegionRemSet.inline.hpp"
 #include "gc/shared/suspendibleThreadSet.hpp"
 #include "memory/iterator.hpp"
 #include "runtime/atomic.hpp"
@@ -45,8 +45,8 @@
 #include "runtime/thread.inline.hpp"
 #include "runtime/threadSMR.hpp"
 #include "utilities/globalCounter.inline.hpp"
-#include "utilities/lockFreeQueue.inline.hpp"
 #include "utilities/macros.hpp"
+#include "utilities/nonblockingQueue.inline.hpp"
 #include "utilities/pair.hpp"
 #include "utilities/quickSort.hpp"
 #include "utilities/ticks.hpp"
@@ -123,7 +123,13 @@ void G1DirtyCardQueueSet::enqueue_completed_buffer(BufferNode* cbn) {
   // Increment _num_cards before adding to queue, so queue removal doesn't
   // need to deal with _num_cards possibly going negative.
   size_t new_num_cards = Atomic::add(&_num_cards, buffer_size() - cbn->index());
-  _completed.push(*cbn);
+  {
+    // Perform push in CS.  The old tail may be popped while the push is
+    // observing it (attaching it to the new buffer).  We need to ensure it
+    // can't be reused until the push completes, to avoid ABA problems.
+    GlobalCounter::CriticalSection cs(Thread::current());
+    _completed.push(*cbn);
+  }
   if ((new_num_cards > process_cards_threshold()) &&
       (_primary_refinement_thread != NULL)) {
     _primary_refinement_thread->activate();
@@ -131,12 +137,12 @@ void G1DirtyCardQueueSet::enqueue_completed_buffer(BufferNode* cbn) {
 }
 
 // Thread-safe attempt to remove and return the first buffer from
-// the _completed queue, using the LockFreeQueue::try_pop() underneath.
-// It has a restriction that it may return NULL when there are objects
+// the _completed queue, using the NonblockingQueue::try_pop() underneath.
+// It has a limitation that it may return NULL when there are objects
 // in the queue if there is a concurrent push/append operation.
 BufferNode* G1DirtyCardQueueSet::dequeue_completed_buffer() {
-  using Status = LockFreeQueuePopStatus;
   Thread* current_thread = Thread::current();
+  BufferNode* result = NULL;
   while (true) {
     // Use GlobalCounter critical section to avoid ABA problem.
     // The release of a buffer to its allocator's free list uses
@@ -147,19 +153,7 @@ BufferNode* G1DirtyCardQueueSet::dequeue_completed_buffer() {
     // one CS could defer releasing buffer to the free list for reuse,
     // leading to excessive allocations.
     GlobalCounter::CriticalSection cs(current_thread);
-    Pair<Status, BufferNode*> pop_result = _completed.try_pop();
-    switch (pop_result.first) {
-      case Status::success:
-        return pop_result.second;
-      case Status::operation_in_progress:
-        // Returning NULL instead retrying, in order to mitigate the
-        // chance of spinning for a long time. In the case of getting a
-        // buffer to refine, it is also OK to return NULL when there is
-        // an interfering concurrent push/append operation.
-        return NULL;
-      case Status::lost_race:
-        break;  // Try again.
-    }
+    if (_completed.try_pop(&result)) return result;
   }
 }
 
@@ -177,8 +171,9 @@ BufferNode* G1DirtyCardQueueSet::get_completed_buffer() {
 #ifdef ASSERT
 void G1DirtyCardQueueSet::verify_num_cards() const {
   size_t actual = 0;
-  BufferNode* cur = _completed.top();
-  for ( ; cur != NULL; cur = cur->next()) {
+  for (BufferNode* cur = _completed.first();
+       !_completed.is_end(cur);
+       cur = cur->next()) {
     actual += buffer_size() - cur->index();
   }
   assert(actual == Atomic::load(&_num_cards),
@@ -318,8 +313,6 @@ void G1DirtyCardQueueSet::enqueue_all_paused_buffers() {
 }
 
 void G1DirtyCardQueueSet::abandon_completed_buffers() {
-  enqueue_all_paused_buffers();
-  verify_num_cards();
   G1BufferNodeList list = take_all_completed_buffers();
   BufferNode* buffers_to_delete = list._head;
   while (buffers_to_delete != NULL) {
@@ -557,8 +550,6 @@ void G1DirtyCardQueueSet::abandon_logs() {
     }
   } closure(*this);
   Threads::threads_do(&closure);
-
-  G1BarrierSet::shared_dirty_card_queue().reset();
 }
 
 void G1DirtyCardQueueSet::concatenate_logs() {
@@ -582,7 +573,6 @@ void G1DirtyCardQueueSet::concatenate_logs() {
   } closure(*this);
   Threads::threads_do(&closure);
 
-  G1BarrierSet::shared_dirty_card_queue().flush();
   enqueue_all_paused_buffers();
   verify_num_cards();
   set_max_cards(old_limit);

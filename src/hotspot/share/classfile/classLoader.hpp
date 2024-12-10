@@ -254,9 +254,9 @@ class ClassLoader: AllStatic {
   static int  _libzip_loaded; // used to sync loading zip.
   static void release_load_zip_library();
   static inline void load_zip_library_if_needed();
-  static jzfile* open_zip_file(const char* canonical_path, char** error_msg, JavaThread* thread);
 
  public:
+  static jzfile* open_zip_file(const char* canonical_path, char** error_msg, JavaThread* thread);
   static ClassPathEntry* create_class_path_entry(JavaThread* current,
                                                  const char *path, const struct stat* st,
                                                  bool is_boot_append,
@@ -365,7 +365,8 @@ class ClassLoader: AllStatic {
   static int num_module_path_entries();
   static void  exit_with_path_failure(const char* error, const char* message);
   static char* skip_uri_protocol(char* source);
-  static void  record_result(JavaThread* current, InstanceKlass* ik, const ClassFileStream* stream);
+  static void  record_result(JavaThread* current, InstanceKlass* ik,
+                             const ClassFileStream* stream, bool redefined);
 #endif
 
   static char* lookup_vm_options();

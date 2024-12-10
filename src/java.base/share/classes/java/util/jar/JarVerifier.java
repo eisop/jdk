@@ -99,7 +99,7 @@ class JarVerifier {
     /** collect -DIGEST-MANIFEST values for deny list */
     private List<Object> manifestDigests;
 
-    public JarVerifier(String name, byte rawBytes[]) {
+    public JarVerifier(String name, byte[] rawBytes) {
         manifestName = name;
         manifestRawBytes = rawBytes;
         sigFileSigners = new Hashtable<>();
@@ -447,7 +447,7 @@ class JarVerifier {
         {
             this.is = Objects.requireNonNull(is);
             this.jv = jv;
-            this.mev = new ManifestEntryVerifier(man);
+            this.mev = new ManifestEntryVerifier(man, jv.manifestName);
             this.jv.beginEntry(je, mev);
             this.numLeft = je.getSize();
             if (this.numLeft == 0)
@@ -469,7 +469,7 @@ class JarVerifier {
             }
         }
 
-        public int read(byte b[], int off, int len) throws IOException {
+        public int read(byte[] b, int off, int len) throws IOException {
             ensureOpen();
             if ((numLeft > 0) && (numLeft < len)) {
                 len = (int)numLeft;

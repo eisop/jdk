@@ -67,7 +67,7 @@ public final class SimpleCMYKColorSpace extends ColorSpace {
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object o) {
-        return o != null && o instanceof SimpleCMYKColorSpace;
+        return o instanceof SimpleCMYKColorSpace;
     }
 
     public int hashCode() {

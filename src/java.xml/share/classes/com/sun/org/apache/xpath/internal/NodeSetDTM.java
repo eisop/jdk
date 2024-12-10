@@ -359,6 +359,7 @@ public class NodeSetDTM extends NodeVector
   }
 
   /* An instance of the DTMManager. */
+  @SuppressWarnings("serial") // Type of field is not Serializable
   DTMManager m_manager;
 
   /**

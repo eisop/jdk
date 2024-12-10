@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -481,8 +481,7 @@ class NameImpl {
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
-        if ((obj != null) && (obj instanceof NameImpl)) {
-            NameImpl target = (NameImpl)obj;
+        if (obj instanceof NameImpl target) {
             if (target.size() ==  this.size()) {
                 Enumeration<String> mycomps = getAll();
                 Enumeration<String> comps = target.getAll();
