@@ -99,8 +99,7 @@ import javax.accessibility.*;
 @AnnotatedFor({"nullness"})
 @JavaBean(defaultProperty = "JMenuBar", description = "A toplevel window for creating dialog boxes.")
 @SwingContainer(delegate = "getContentPane")
-@SuppressWarnings({"serial", // Same-version serialization only
-                   "doclint:missing"})
+@SuppressWarnings({"serial"}) // Same-version serialization only
 public class JDialog extends Dialog implements WindowConstants,
                                                Accessible,
                                                RootPaneContainer,
@@ -116,6 +115,9 @@ public class JDialog extends Dialog implements WindowConstants,
     private int defaultCloseOperation = HIDE_ON_CLOSE;
 
     /**
+     * The <code>JRootPane</code> instance that manages the
+     * <code>contentPane</code>.
+     *
      * @see #getRootPane
      * @see #setRootPane
      */

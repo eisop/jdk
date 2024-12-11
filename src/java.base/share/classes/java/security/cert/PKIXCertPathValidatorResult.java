@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -154,8 +154,8 @@ public @UsesObjectEquals class PKIXCertPathValidatorResult implements CertPathVa
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("PKIXCertPathValidatorResult: [\n");
-        sb.append("  Trust Anchor: " + trustAnchor.toString() + "\n");
-        sb.append("  Policy Tree: " + String.valueOf(policyTree) + "\n");
+        sb.append("  Trust Anchor: " + trustAnchor + "\n");
+        sb.append("  Policy Tree: " + policyTree + "\n");
         sb.append("  Subject Public Key: " + subjectPublicKey + "\n");
         sb.append("]");
         return sb.toString();

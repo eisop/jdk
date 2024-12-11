@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,9 +43,9 @@ import jdk.internal.vm.annotation.Stable;
  * In any case, it may be invoked through an associated method handle
  * called its {@linkplain #dynamicInvoker dynamic invoker}.
  * <p>
- * {@code CallSite} is an abstract class which does not allow
+ * {@code CallSite} is an abstract sealed class which does not allow
  * direct subclassing by users.  It has three immediate,
- * concrete subclasses that may be either instantiated or subclassed.
+ * concrete non-sealed subclasses that may be either instantiated or subclassed.
  * <ul>
  * <li>If a mutable target is not required, an {@code invokedynamic} instruction
  * may be permanently bound by means of a {@linkplain ConstantCallSite constant call site}.
@@ -89,7 +89,7 @@ private static CallSite bootstrapDynamic(MethodHandles.Lookup caller, String nam
  */
 @AnnotatedFor({"interning"})
 public
-abstract @UsesObjectEquals class CallSite {
+abstract sealed @UsesObjectEquals class CallSite permits ConstantCallSite, MutableCallSite, VolatileCallSite {
 
     // The actual payload of this call site.
     // Can be modified using {@link MethodHandleNatives#setCallSiteTargetNormal} or {@link MethodHandleNatives#setCallSiteTargetVolatile}.

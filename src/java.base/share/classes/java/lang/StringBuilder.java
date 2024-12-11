@@ -498,8 +498,7 @@ public final class StringBuilder
     @IntrinsicCandidate
     public @PolyRegex String toString(@GuardSatisfied @PolyRegex StringBuilder this) {
         // Create a copy, don't share the array
-        return isLatin1() ? StringLatin1.newString(value, 0, count)
-                          : StringUTF16.newString(value, 0, count);
+        return new String(this);
     }
 
     /**

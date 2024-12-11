@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -181,7 +181,7 @@ import sun.management.spi.PlatformMBeanProvider.PlatformComponent;
  * </tr>
  * <tr>
  * <th scope="row"> {@link PlatformLoggingMXBean} </th>
- * <td> {@link java.util.logging.LogManager#LOGGING_MXBEAN_NAME
+ * <td> {@link java.logging/java.util.logging.LogManager#LOGGING_MXBEAN_NAME
  *             java.util.logging:type=Logging}</td>
  * </tr>
  * </tbody>
@@ -252,7 +252,8 @@ import sun.management.spi.PlatformMBeanProvider.PlatformComponent;
  * @since   1.5
  */
 @AnnotatedFor({"interning", "mustcall"})
-@SuppressWarnings("removal")
+@SuppressWarnings({"removal",
+                   "doclint:reference"}) // cross-module links
 public @UsesObjectEquals class ManagementFactory {
     // A class with only static fields and methods.
     private ManagementFactory() {};
@@ -637,7 +638,7 @@ public @UsesObjectEquals class ManagementFactory {
     // using newPlatformMXBeanProxy(mbs, on, LoggingMXBean.class)
     // even though the underlying MXBean no longer implements
     // java.util.logging.LoggingMXBean.
-    // Altough java.util.logging.LoggingMXBean is deprecated, an application
+    // Although java.util.logging.LoggingMXBean is deprecated, an application
     // that uses newPlatformMXBeanProxy(mbs, on, LoggingMXBean.class) will
     // continue to work.
     //
@@ -941,8 +942,7 @@ public @UsesObjectEquals class ManagementFactory {
                         all.add(new DefaultPlatformMBeanProvider());
                         return all;
                     }
-                }, null, new FilePermission("<<ALL FILES>>", "read"),
-                new RuntimePermission("sun.management.spi.PlatformMBeanProvider.subclass"));
+                }, null, new FilePermission("<<ALL FILES>>", "read"));
 
             // load all platform components into a map
             var map = new HashMap<String, PlatformComponent<?>>();

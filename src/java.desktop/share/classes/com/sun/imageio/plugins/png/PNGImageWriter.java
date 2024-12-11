@@ -324,7 +324,7 @@ final class PNGImageWriteParam extends ImageWriteParam {
      * <p> The default implementation resets the compression quality
      * to <code>0.5F</code>.
      *
-     * @exception IllegalStateException if the compression mode is not
+     * @throws IllegalStateException if the compression mode is not
      * <code>MODE_EXPLICIT</code>.
      */
     @Override

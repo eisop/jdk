@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,6 +35,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import java.nio.channels.FileChannel;
 import jdk.internal.access.SharedSecrets;
 import jdk.internal.access.JavaIOFileDescriptorAccess;
+import jdk.internal.misc.Blocker;
 import sun.nio.ch.FileChannelImpl;
 
 
@@ -296,9 +297,13 @@ public class FileOutputStream extends OutputStream
      * @param name name of file to be opened
      * @param append whether the file is to be opened in append mode
      */
-    private void open(String name, boolean append)
-        throws FileNotFoundException {
-        open0(name, append);
+    private void open(String name, boolean append) throws FileNotFoundException {
+        long comp = Blocker.begin();
+        try {
+            open0(name, append);
+        } finally {
+            Blocker.end(comp);
+        }
     }
 
     /**
@@ -317,8 +322,15 @@ public class FileOutputStream extends OutputStream
      * @param      b   the byte to be written.
      * @throws     IOException  if an I/O error occurs.
      */
+    @Override
     public void write(@PolySigned int b) throws IOException {
-        write(b, fdAccess.getAppend(fd));
+        boolean append = fdAccess.getAppend(fd);
+        long comp = Blocker.begin();
+        try {
+            write(b, append);
+        } finally {
+            Blocker.end(comp);
+        }
     }
 
     /**
@@ -337,24 +349,38 @@ public class FileOutputStream extends OutputStream
      * Writes {@code b.length} bytes from the specified byte array
      * to this file output stream.
      *
-     * @param      b   the data.
-     * @throws     IOException  if an I/O error occurs.
+     * @param      b   {@inheritDoc}
+     * @throws     IOException  {@inheritDoc}
      */
+    @Override
     public void write(@PolySigned byte[] b) throws IOException {
-        writeBytes(b, 0, b.length, fdAccess.getAppend(fd));
+        boolean append = fdAccess.getAppend(fd);
+        long comp = Blocker.begin();
+        try {
+            writeBytes(b, 0, b.length, append);
+        } finally {
+            Blocker.end(comp);
+        }
     }
 
     /**
      * Writes {@code len} bytes from the specified byte array
      * starting at offset {@code off} to this file output stream.
      *
-     * @param      b     the data.
-     * @param      off   the start offset in the data.
-     * @param      len   the number of bytes to write.
+     * @param      b     {@inheritDoc}
+     * @param      off   {@inheritDoc}
+     * @param      len   {@inheritDoc}
      * @throws     IOException  if an I/O error occurs.
      */
+    @Override
     public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
-        writeBytes(b, off, len, fdAccess.getAppend(fd));
+        boolean append = fdAccess.getAppend(fd);
+        long comp = Blocker.begin();
+        try {
+            writeBytes(b, off, len, append);
+        } finally {
+            Blocker.end(comp);
+        }
     }
 
     /**
@@ -377,6 +403,7 @@ public class FileOutputStream extends OutputStream
      *
      * @revised 1.4
      */
+    @Override
     public void close() throws IOException {
         if (closed) {
             return;

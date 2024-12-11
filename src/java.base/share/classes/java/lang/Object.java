@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,6 +43,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
+import jdk.internal.misc.Blocker;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 
 /**
@@ -103,11 +104,11 @@ public class Object {
      *     This integer need not remain consistent from one execution of an
      *     application to another execution of the same application.
      * <li>If two objects are equal according to the {@link
-     *     equals(Object) equals} method, then calling the {@code
+     *     #equals(Object) equals} method, then calling the {@code
      *     hashCode} method on each of the two objects must produce the
      *     same integer result.
      * <li>It is <em>not</em> required that if two objects are unequal
-     *     according to the {@link equals(Object) equals} method, then
+     *     according to the {@link #equals(Object) equals} method, then
      *     calling the {@code hashCode} method on each of the two objects
      *     must produce distinct integer results.  However, the programmer
      *     should be aware that producing distinct integer results for
@@ -173,7 +174,7 @@ public class Object {
      * relation, each equivalence class only has a single element.
      *
      * @apiNote
-     * It is generally necessary to override the {@link hashCode hashCode}
+     * It is generally necessary to override the {@link #hashCode() hashCode}
      * method whenever this method is overridden, so as to maintain the
      * general contract for the {@code hashCode} method, which states
      * that equal objects must have equal hash codes.
@@ -391,7 +392,22 @@ public class Object {
      * @see    #wait()
      * @see    #wait(long, int)
      */
-    public final native void wait(@UnknownInitialization Object this, @NonNegative long timeoutMillis) throws InterruptedException;
+    public final void wait(@UnknownInitialization Object this, @NonNegative long timeoutMillis) throws InterruptedException {
+        long comp = Blocker.begin();
+        try {
+            wait0(timeoutMillis);
+        } catch (InterruptedException e) {
+            Thread thread = Thread.currentThread();
+            if (thread.isVirtual())
+                thread.getAndClearInterrupt();
+            throw e;
+        } finally {
+            Blocker.end(comp);
+        }
+    }
+
+    // final modifier so method not in vtable
+    private final native void wait0(long timeoutMillis) throws InterruptedException;
 
     /**
      * Causes the current thread to wait until it is awakened, typically
@@ -445,10 +461,10 @@ public class Object {
      * is not satisfied. See the example below.
      * <p>
      * For more information on this topic, see section 14.2,
-     * "Condition Queues," in Brian Goetz and others' <em>Java Concurrency
-     * in Practice</em> (Addison-Wesley, 2006) or Item 69 in Joshua
-     * Bloch's <em>Effective Java, Second Edition</em> (Addison-Wesley,
-     * 2008).
+     * "Condition Queues," in Brian Goetz and others' <cite>Java Concurrency
+     * in Practice</cite> (Addison-Wesley, 2006) or Item 81 in Joshua
+     * Bloch's <cite>Effective Java, Third Edition</cite> (Addison-Wesley,
+     * 2018).
      * <p>
      * If the current thread is {@linkplain java.lang.Thread#interrupt() interrupted}
      * by any thread before or while it is waiting, then an {@code InterruptedException}

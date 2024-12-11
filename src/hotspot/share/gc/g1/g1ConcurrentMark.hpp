@@ -568,7 +568,7 @@ public:
   void cleanup();
   // Mark in the previous bitmap. Caution: the prev bitmap is usually read-only, so use
   // this carefully.
-  inline void mark_in_prev_bitmap(oop p);
+  inline void par_mark_in_prev_bitmap(oop p);
 
   // Clears marks for all objects in the given range, for the prev or
   // next bitmaps.  Caution: the previous bitmap is usually
@@ -847,8 +847,8 @@ class G1PrintRegionLivenessInfoClosure : public HeapRegionClosure {
   // Accumulator for the remembered set size
   size_t _total_remset_bytes;
 
-  // Accumulator for strong code roots memory size
-  size_t _total_strong_code_roots_bytes;
+  // Accumulator for code roots memory size
+  size_t _total_code_roots_bytes;
 
   static double bytes_to_mb(size_t val) {
     return (double) val / (double) M;

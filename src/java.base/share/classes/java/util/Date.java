@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,18 +32,13 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.text.DateFormat;
-import java.time.LocalDate;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
-import java.lang.ref.SoftReference;
 import java.time.Instant;
 import sun.util.calendar.BaseCalendar;
-import sun.util.calendar.CalendarDate;
 import sun.util.calendar.CalendarSystem;
 import sun.util.calendar.CalendarUtils;
-import sun.util.calendar.Era;
-import sun.util.calendar.Gregorian;
 import sun.util.calendar.ZoneInfo;
 
 /**
@@ -984,11 +979,10 @@ public class Date
      * @since   1.2
      * @throws    NullPointerException if {@code anotherDate} is null.
      */
+    @Override
     @Pure
     public int compareTo(@GuardSatisfied Date this, @GuardSatisfied Date anotherDate) {
-        long thisTime = getMillisOf(this);
-        long anotherTime = getMillisOf(anotherDate);
-        return (thisTime<anotherTime ? -1 : (thisTime==anotherTime ? 0 : 1));
+        return Long.compare(getMillisOf(this), getMillisOf(anotherDate));
     }
 
     /**

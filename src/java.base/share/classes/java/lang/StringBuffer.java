@@ -731,9 +731,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
     @IntrinsicCandidate
     public synchronized String toString(@GuardSatisfied StringBuffer this) {
         if (toStringCache == null) {
-            return toStringCache =
-                    isLatin1() ? StringLatin1.newString(value, 0, count)
-                               : StringUTF16.newString(value, 0, count);
+            return toStringCache = new String(this, null);
         }
         return new String(toStringCache);
     }

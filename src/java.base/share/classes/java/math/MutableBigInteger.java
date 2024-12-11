@@ -949,13 +949,13 @@ import java.util.Arrays;
             x--; y--;
 
             diff = (a.value[x+a.offset] & LONG_MASK) -
-                   (b.value[y+b.offset] & LONG_MASK) - ((int)-(diff>>32));
+                   (b.value[y+b.offset] & LONG_MASK) + (diff >> 32);
             result[rstart--] = (int)diff;
         }
         // Subtract remainder of longer number
         while (x > 0) {
             x--;
-            diff = (a.value[x+a.offset] & LONG_MASK) - ((int)-(diff>>32));
+            diff = (a.value[x+a.offset] & LONG_MASK) + (diff >> 32);
             result[rstart--] = (int)diff;
         }
 
@@ -990,13 +990,13 @@ import java.util.Arrays;
         while (y > 0) {
             x--; y--;
             diff = (a.value[a.offset+ x] & LONG_MASK) -
-                (b.value[b.offset+ y] & LONG_MASK) - ((int)-(diff>>32));
+                (b.value[b.offset+ y] & LONG_MASK) + (diff >> 32);
             a.value[a.offset+x] = (int)diff;
         }
         // Subtract remainder of longer number
-        while (x > 0) {
+        while (diff < 0 && x > 0) {
             x--;
-            diff = (a.value[a.offset+ x] & LONG_MASK) - ((int)-(diff>>32));
+            diff = (a.value[a.offset+ x] & LONG_MASK) + (diff >> 32);
             a.value[a.offset+x] = (int)diff;
         }
 

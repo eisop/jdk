@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -390,6 +390,11 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * A call to {@code forName("X")} causes the class named
      * {@code X} to be initialized.
      *
+     * <p>
+     * In cases where this method is called from a context where there is no
+     * caller frame on the stack (e.g. when called directly from a JNI
+     * attached thread), the system class loader is used.
+     *
      * @param      className   the fully qualified name of the desired class.
      * @return     the {@code Class} object for the class with the
      *             specified name.
@@ -414,7 +419,9 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
     @CallerSensitiveAdapter
     private static Class<?> forName(String className, Class<?> caller)
             throws ClassNotFoundException {
-        return forName0(className, true, ClassLoader.getClassLoader(caller), caller);
+        ClassLoader loader = (caller == null) ? ClassLoader.getSystemClassLoader()
+                                              : ClassLoader.getClassLoader(caller);
+        return forName0(className, true, loader, caller);
     }
 
     /**
@@ -1633,7 +1640,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * representing the class in which it was declared.  This method returns
      * null if this class or interface is not a member of any other class.  If
      * this {@code Class} object represents an array class, a primitive
-     * type, or void,then this method returns null.
+     * type, or void, then this method returns null.
      *
      * @return the declaring class for this class
      * @throws SecurityException
@@ -1784,8 +1791,18 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * <li>an array whose component type does not have a canonical name</li>
      * </ul>
      *
+     * The canonical name for a primitive class is the keyword for the
+     * corresponding primitive type ({@code byte}, {@code short},
+     * {@code char}, {@code int}, and so on).
+     *
+     * <p>An array type has a canonical name if and only if its
+     * component type has a canonical name. When an array type has a
+     * canonical name, it is equal to the canonical name of the
+     * component type followed by "{@code []}".
+     *
      * @return the canonical name of the underlying class if it exists, and
      * {@code null} otherwise.
+     * @jls 6.7 Fully Qualified Names and Canonical Names
      * @since 1.5
      */
     public @Nullable @CanonicalName String getCanonicalName() {
@@ -2136,6 +2153,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      *         s.checkPackageAccess()} denies access to the package
      *         of this class.
      *
+     * @see #getDeclaredConstructors()
      * @since 1.1
      */
     @CallerSensitive
@@ -2337,7 +2355,9 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @param parameterTypes the parameter array
      * @return the {@code Constructor} object of the public constructor that
      *         matches the specified {@code parameterTypes}
-     * @throws NoSuchMethodException if a matching method is not found.
+     * @throws NoSuchMethodException if a matching constructor is not found,
+     *         including when this {@code Class} object represents
+     *         an interface, a primitive type, an array class, or void.
      * @throws SecurityException
      *         If a security manager, <i>s</i>, is present and
      *         the caller's class loader is not the same as or an
@@ -2346,6 +2366,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      *         s.checkPackageAccess()} denies access to the package
      *         of this class.
      *
+     * @see #getDeclaredConstructor(Class<?>[])
      * @since 1.1
      */
     @GetConstructor
@@ -2596,20 +2617,19 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
         return copyMethods(privateGetDeclaredMethods(false));
     }
 
-
     /**
      * Returns an array of {@code Constructor} objects reflecting all the
-     * constructors declared by the class represented by this
+     * constructors implicitly or explicitly declared by the class represented by this
      * {@code Class} object. These are public, protected, default
      * (package) access, and private constructors.  The elements in the array
      * returned are not sorted and are not in any particular order.  If the
-     * class has a default constructor, it is included in the returned array.
+     * class has a default constructor (JLS {@jls 8.8.9}), it is included in the returned array.
+     * If a record class has a canonical constructor (JLS {@jls
+     * 8.10.4.1}, {@jls 8.10.4.2}), it is included in the returned array.
+     *
      * This method returns an array of length 0 if this {@code Class}
      * object represents an interface, a primitive type, an array class, or
      * void.
-     *
-     * <p> See <cite>The Java Language Specification</cite>,
-     * section {@jls 8.2}.
      *
      * @return  the array of {@code Constructor} objects representing all the
      *          declared constructors of this class
@@ -2635,6 +2655,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      *          </ul>
      *
      * @since 1.1
+     * @see #getConstructors()
      * @jls 8.8 Constructor Declarations
      */
     @CallerSensitive
@@ -2797,7 +2818,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
 
     /**
      * Returns a {@code Constructor} object that reflects the specified
-     * constructor of the class or interface represented by this
+     * constructor of the class represented by this
      * {@code Class} object.  The {@code parameterTypes} parameter is
      * an array of {@code Class} objects that identify the constructor's
      * formal parameter types, in declared order.
@@ -2809,7 +2830,9 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * @param parameterTypes the parameter array
      * @return  The {@code Constructor} object for the constructor with the
      *          specified parameter list
-     * @throws  NoSuchMethodException if a matching method is not found.
+     * @throws  NoSuchMethodException if a matching constructor is not found,
+     *          including when this {@code Class} object represents
+     *          an interface, a primitive type, an array class, or void.
      * @throws  SecurityException
      *          If a security manager, <i>s</i>, is present and any of the
      *          following conditions is met:
@@ -2831,6 +2854,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      *
      *          </ul>
      *
+     * @see #getConstructor(Class<?>[])
      * @since 1.1
      */
     @CallerSensitive
@@ -3046,9 +3070,9 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
         if (callerModule != thisModule) {
             String pn = Resources.toPackageName(name);
             if (thisModule.getDescriptor().packages().contains(pn)) {
-                if (callerModule == null && !thisModule.isOpen(pn)) {
-                    // no caller, package not open
-                    return false;
+                if (callerModule == null) {
+                    // no caller, return true if the package is open to all modules
+                    return thisModule.isOpen(pn);
                 }
                 if (!thisModule.isOpen(pn, callerModule)) {
                     // package not open to caller
@@ -3169,7 +3193,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
         }
         // check package access on the proxy interfaces
         if (checkProxyInterfaces && Proxy.isProxyClass(this)) {
-            ReflectUtil.checkProxyPackageAccess(ccl, this.getInterfaces());
+            ReflectUtil.checkProxyPackageAccess(ccl, this.getInterfaces(/* cloneArray */ false));
         }
     }
 
@@ -3418,7 +3442,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
         addAll(fields, privateGetDeclaredFields(true));
 
         // Direct superinterfaces, recursively
-        for (Class<?> si : getInterfaces()) {
+        for (Class<?> si : getInterfaces(/* cloneArray */ false)) {
             addAll(fields, si.privateGetPublicFields());
         }
 
@@ -3884,12 +3908,13 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
     // Fetches the factory for reflective objects
     @SuppressWarnings("removal")
     private static ReflectionFactory getReflectionFactory() {
-        if (reflectionFactory == null) {
-            reflectionFactory =
-                java.security.AccessController.doPrivileged
-                    (new ReflectionFactory.GetReflectionFactoryAction());
+        var factory = reflectionFactory;
+        if (factory != null) {
+            return factory;
         }
-        return reflectionFactory;
+        return reflectionFactory =
+                java.security.AccessController.doPrivileged
+                        (new ReflectionFactory.GetReflectionFactoryAction());
     }
     private static ReflectionFactory reflectionFactory;
 
@@ -3956,7 +3981,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
             if (universe == null)
                 throw new IllegalArgumentException(
                     getName() + " is not an enum class");
-            directory = new HashMap<>((int)(universe.length / 0.75f) + 1);
+            directory = HashMap.newHashMap(universe.length);
             for (T constant : universe) {
                 directory.put(((Enum<?>)constant).name(), constant);
             }
@@ -4172,10 +4197,10 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
                 Class<? extends Annotation> annotationClass = e.getKey();
                 if (AnnotationType.getInstance(annotationClass).isInherited()) {
                     if (annotations == null) { // lazy construction
-                        annotations = new LinkedHashMap<>((Math.max(
+                        annotations = LinkedHashMap.newLinkedHashMap(Math.max(
                                 declaredAnnotations.size(),
                                 Math.min(12, declaredAnnotations.size() + superAnnotations.size())
-                            ) * 4 + 2) / 3
+                            )
                         );
                     }
                     annotations.put(annotationClass, e.getValue());
@@ -4534,13 +4559,22 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
      * Returns a {@code Class} for an array type whose component type
      * is described by this {@linkplain Class}.
      *
+     * @throws UnsupportedOperationException if this component type is {@linkplain
+     *         Void#TYPE void} or if the number of dimensions of the resulting array
+     *         type would exceed 255.
      * @return a {@code Class} describing the array type
+     * @jvms 4.3.2 Field Descriptors
+     * @jvms 4.4.1 The {@code CONSTANT_Class_info} Structure
      * @since 12
      */
     @Override
     @Pure
     public Class<? extends Object> arrayType() {
-        return Array.newInstance(this, 0).getClass();
+        try {
+            return Array.newInstance(this, 0).getClass();
+        } catch (IllegalArgumentException iae) {
+            throw new UnsupportedOperationException(iae);
+        }
     }
 
     /**

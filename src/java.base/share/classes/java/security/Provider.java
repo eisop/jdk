@@ -867,7 +867,6 @@ public abstract class Provider extends Properties {
     * @param in the {@code ObjectInputStream} to read
     * @throws IOException if an I/O error occurs
     * @throws ClassNotFoundException if a serialized class cannot be loaded
-    * @serial
     */
     @java.io.Serial
     private void readObject(ObjectInputStream in)
@@ -1118,11 +1117,6 @@ public abstract class Provider extends Properties {
         String type = key.substring(0, i);
         String alg = key.substring(i + 1);
         return new String[] {type, alg};
-    }
-
-    // utility method for getting a String with service type and algorithm
-    private static String getKey(Service s) {
-        return s.getType() + "." + s.getAlgorithm();
     }
 
     private static final String ALIAS_PREFIX = "Alg.Alias.";
@@ -1548,20 +1542,11 @@ public abstract class Provider extends Properties {
         final String name;
         final boolean supportsParameter;
         final String constructorParameterClassName;
-        private volatile Class<?> constructorParameterClass;
 
         EngineDescription(String name, boolean sp, String paramName) {
             this.name = name;
             this.supportsParameter = sp;
             this.constructorParameterClassName = paramName;
-        }
-        Class<?> getConstructorParameterClass() throws ClassNotFoundException {
-            Class<?> clazz = constructorParameterClass;
-            if (clazz == null) {
-                clazz = Class.forName(constructorParameterClassName);
-                constructorParameterClass = clazz;
-            }
-            return clazz;
         }
     }
 
@@ -1623,7 +1608,7 @@ public abstract class Provider extends Properties {
                             "java.lang.Object");
     }
 
-    // get the "standard" (mixed-case) engine name for arbitary case engine name
+    // get the "standard" (mixed-case) engine name for arbitrary case engine name
     // if there is no known engine by that name, return s
     private static String getEngineName(String s) {
         // try original case first, usually correct
