@@ -86,7 +86,7 @@ final class Utilities {
             sniList.add(sniHostName);
         }
 
-        return Collections.<SNIServerName>unmodifiableList(sniList);
+        return Collections.unmodifiableList(sniList);
     }
 
     /**

@@ -75,6 +75,7 @@ import sun.security.jca.JCAUtil;
  */
 abstract class P11Key implements Key, Length {
 
+    @Serial
     private static final long serialVersionUID = -2575874101938349339L;
 
     private static final String PUBLIC = "public";
@@ -196,10 +197,10 @@ abstract class P11Key implements Key, Length {
             return true;
         }
         // equals() should never throw exceptions
-        if (token.isValid() == false) {
+        if (!token.isValid()) {
             return false;
         }
-        if (obj instanceof Key == false) {
+        if (!(obj instanceof Key other)) {
             return false;
         }
         String thisFormat = getFormat();
@@ -208,8 +209,7 @@ abstract class P11Key implements Key, Length {
             // XXX getEncoded() for unextractable keys will change that
             return false;
         }
-        Key other = (Key)obj;
-        if (thisFormat.equals(other.getFormat()) == false) {
+        if (!thisFormat.equals(other.getFormat())) {
             return false;
         }
         byte[] thisEnc = this.getEncodedInternal();
@@ -224,7 +224,7 @@ abstract class P11Key implements Key, Length {
 
     public int hashCode() {
         // hashCode() should never throw exceptions
-        if (token.isValid() == false) {
+        if (!token.isValid()) {
             return 0;
         }
         byte[] b1 = getEncodedInternal();
@@ -377,23 +377,18 @@ abstract class P11Key implements Key, Length {
     // we assume that all components of public keys are always accessible
     static PublicKey publicKey(Session session, long keyID, String algorithm,
             int keyLength, CK_ATTRIBUTE[] attrs) {
-        switch (algorithm) {
-            case "RSA":
-                return new P11RSAPublicKey(session, keyID, algorithm,
-                        keyLength, attrs);
-            case "DSA":
-                return new P11DSAPublicKey(session, keyID, algorithm,
-                        keyLength, attrs);
-            case "DH":
-                return new P11DHPublicKey(session, keyID, algorithm,
-                        keyLength, attrs);
-            case "EC":
-                return new P11ECPublicKey(session, keyID, algorithm,
-                        keyLength, attrs);
-            default:
-                throw new ProviderException
+        return switch (algorithm) {
+            case "RSA" -> new P11RSAPublicKey(session, keyID, algorithm,
+                    keyLength, attrs);
+            case "DSA" -> new P11DSAPublicKey(session, keyID, algorithm,
+                    keyLength, attrs);
+            case "DH" -> new P11DHPublicKey(session, keyID, algorithm,
+                    keyLength, attrs);
+            case "EC" -> new P11ECPublicKey(session, keyID, algorithm,
+                    keyLength, attrs);
+            default -> throw new ProviderException
                     ("Unknown public key algorithm " + algorithm);
-        }
+        };
     }
 
     static PrivateKey privateKey(Session session, long keyID, String algorithm,
@@ -407,28 +402,24 @@ abstract class P11Key implements Key, Length {
         boolean keySensitive = (attrs[0].getBoolean() ||
                 attrs[1].getBoolean() || !attrs[2].getBoolean());
 
-        switch (algorithm) {
-        case "RSA":
-            return P11RSAPrivateKeyInternal.of(session, keyID, algorithm,
+        return switch (algorithm) {
+            case "RSA" -> P11RSAPrivateKeyInternal.of(session, keyID, algorithm,
                     keyLength, attrs, keySensitive);
-        case "DSA":
-            return P11DSAPrivateKeyInternal.of(session, keyID, algorithm,
+            case "DSA" -> P11DSAPrivateKeyInternal.of(session, keyID, algorithm,
                     keyLength, attrs, keySensitive);
-        case "DH":
-            return P11DHPrivateKeyInternal.of(session, keyID, algorithm,
+            case "DH" -> P11DHPrivateKeyInternal.of(session, keyID, algorithm,
                     keyLength, attrs, keySensitive);
-        case "EC":
-            return P11ECPrivateKeyInternal.of(session, keyID, algorithm,
+            case "EC" -> P11ECPrivateKeyInternal.of(session, keyID, algorithm,
                     keyLength, attrs, keySensitive);
-        default:
-            throw new ProviderException
+            default -> throw new ProviderException
                     ("Unknown private key algorithm " + algorithm);
-        }
+        };
     }
 
     // base class for all PKCS11 private keys
     private static abstract class P11PrivateKey extends P11Key implements
             PrivateKey {
+        @Serial
         private static final long serialVersionUID = -2138581185214187615L;
 
         protected byte[] encoded; // guard by synchronized
@@ -449,6 +440,7 @@ abstract class P11Key implements Key, Length {
     }
 
     private static class P11SecretKey extends P11Key implements SecretKey {
+        @Serial
         private static final long serialVersionUID = -7828241727014329084L;
 
         private volatile byte[] encoded; // guard by double-checked locking
@@ -492,6 +484,7 @@ abstract class P11Key implements Key, Length {
     // base class for all PKCS11 public keys
     private static abstract class P11PublicKey extends P11Key implements
             PublicKey {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         protected byte[] encoded; // guard by synchronized
@@ -505,6 +498,7 @@ abstract class P11Key implements Key, Length {
     @SuppressWarnings("deprecation")
     private static class P11TlsMasterSecretKey extends P11SecretKey
             implements TlsMasterSecret {
+        @Serial
         private static final long serialVersionUID = -1318560923770573441L;
 
         private final int majorVersion, minorVersion;
@@ -525,6 +519,7 @@ abstract class P11Key implements Key, Length {
 
     // impl class for sensitive/unextractable RSA private keys
     static class P11RSAPrivateKeyInternal extends P11PrivateKey {
+        @Serial
         private static final long serialVersionUID = -2138581185214187615L;
 
         static P11RSAPrivateKeyInternal of(Session session, long keyID,
@@ -598,6 +593,7 @@ abstract class P11Key implements Key, Length {
     // RSA CRT private key
     private static final class P11RSAPrivateKey extends P11RSAPrivateKeyInternal
             implements RSAPrivateCrtKey {
+        @Serial
         private static final long serialVersionUID = 9215872438913515220L;
 
         private transient BigInteger e, d, p, q, pe, qe, coeff;
@@ -675,6 +671,7 @@ abstract class P11Key implements Key, Length {
     // RSA non-CRT private key
     private static final class P11RSAPrivateNonCRTKey extends
             P11RSAPrivateKeyInternal implements RSAPrivateKey {
+        @Serial
         private static final long serialVersionUID = 1137764983777411481L;
 
         private transient BigInteger d;
@@ -720,6 +717,7 @@ abstract class P11Key implements Key, Length {
 
     private static final class P11RSAPublicKey extends P11PublicKey
                                                 implements RSAPublicKey {
+        @Serial
         private static final long serialVersionUID = -826726289023854455L;
         private transient BigInteger n, e;
 
@@ -776,6 +774,7 @@ abstract class P11Key implements Key, Length {
 
     private static final class P11DSAPublicKey extends P11PublicKey
                                                 implements DSAPublicKey {
+        @Serial
         private static final long serialVersionUID = 5989753793316396637L;
 
         private transient BigInteger y;
@@ -809,13 +808,9 @@ abstract class P11Key implements Key, Length {
             token.ensureValid();
             if (encoded == null) {
                 fetchValues();
-                try {
-                    Key key = new sun.security.provider.DSAPublicKey
-                            (y, params.getP(), params.getQ(), params.getG());
-                    encoded = key.getEncoded();
-                } catch (InvalidKeyException e) {
-                    throw new ProviderException(e);
-                }
+                Key key = new sun.security.provider.DSAPublicKey
+                        (y, params.getP(), params.getQ(), params.getG());
+                encoded = key.getEncoded();
             }
             return encoded;
         }
@@ -835,6 +830,7 @@ abstract class P11Key implements Key, Length {
     }
 
     static class P11DSAPrivateKeyInternal extends P11PrivateKey {
+        @Serial
         private static final long serialVersionUID = 3119629997181999389L;
 
         protected transient DSAParams params;
@@ -876,6 +872,7 @@ abstract class P11Key implements Key, Length {
 
     private static final class P11DSAPrivateKey extends P11DSAPrivateKeyInternal
                                         implements DSAPrivateKey {
+        @Serial
         private static final long serialVersionUID = 3119629997181999389L;
 
         private transient BigInteger x; // params inside P11DSAPrivateKeyInternal
@@ -928,6 +925,7 @@ abstract class P11Key implements Key, Length {
     }
 
     static class P11DHPrivateKeyInternal extends P11PrivateKey {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         protected transient DHParameterSpec params;
@@ -968,6 +966,7 @@ abstract class P11Key implements Key, Length {
 
     private static final class P11DHPrivateKey extends P11DHPrivateKeyInternal
                                                 implements DHPrivateKey {
+        @Serial
         private static final long serialVersionUID = -1698576167364928838L;
 
         private transient BigInteger x; // params in P11DHPrivateKeyInternal
@@ -1106,7 +1105,7 @@ abstract class P11Key implements Key, Length {
                 + "\n  g: " + params.getG();
         }
         public int hashCode() {
-            if (token.isValid() == false) {
+            if (!token.isValid()) {
                 return 0;
             }
             fetchValues();
@@ -1115,14 +1114,13 @@ abstract class P11Key implements Key, Length {
         public boolean equals(Object obj) {
             if (this == obj) return true;
             // equals() should never throw exceptions
-            if (token.isValid() == false) {
+            if (!token.isValid()) {
                 return false;
             }
-            if (!(obj instanceof DHPublicKey)) {
+            if (!(obj instanceof DHPublicKey other)) {
                 return false;
             }
             fetchValues();
-            DHPublicKey other = (DHPublicKey) obj;
             DHParameterSpec otherParams = other.getParams();
             return ((this.y.compareTo(other.getY()) == 0) &&
                     (this.params.getP().compareTo(otherParams.getP()) == 0) &&
@@ -1132,6 +1130,7 @@ abstract class P11Key implements Key, Length {
 
     static class P11ECPrivateKeyInternal extends P11PrivateKey {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
         protected transient ECParameterSpec params;
@@ -1176,6 +1175,7 @@ abstract class P11Key implements Key, Length {
 
     private static final class P11ECPrivateKey extends P11ECPrivateKeyInternal
                                                 implements ECPrivateKey {
+        @Serial
         private static final long serialVersionUID = -7786054399510515515L;
 
         private transient BigInteger s; // params in P11ECPrivateKeyInternal
@@ -1234,6 +1234,7 @@ abstract class P11Key implements Key, Length {
 
     private static final class P11ECPublicKey extends P11PublicKey
                                                 implements ECPublicKey {
+        @Serial
         private static final long serialVersionUID = -6371481375154806089L;
 
         private transient ECPoint w;

@@ -4127,7 +4127,7 @@ public @UIType class Container extends Component {
     }
 
     /*
-     * This method is overriden to handle opaque children in non-opaque
+     * This method is overridden to handle opaque children in non-opaque
      * containers.
      */
     @Override

@@ -25,15 +25,14 @@
 
 package jdk.jfr.internal;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
@@ -55,9 +54,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import jdk.internal.module.Checks;
-import jdk.internal.org.objectweb.asm.ClassReader;
-import jdk.internal.org.objectweb.asm.util.CheckClassAdapter;
-import jdk.internal.platform.Metrics;
 import jdk.jfr.Event;
 import jdk.jfr.FlightRecorderPermission;
 import jdk.jfr.Recording;
@@ -310,22 +306,22 @@ public final class Utils {
             return Long.parseLong(s.substring(0, s.length() - 2).trim());
         }
         if (s.endsWith("us")) {
-            return NANOSECONDS.convert(Long.parseLong(s.substring(0, s.length() - 2).trim()), MICROSECONDS);
+            return MICROSECONDS.toNanos(Long.parseLong(s.substring(0, s.length() - 2).trim()));
         }
         if (s.endsWith("ms")) {
-            return NANOSECONDS.convert(Long.parseLong(s.substring(0, s.length() - 2).trim()), MILLISECONDS);
+            return MILLISECONDS.toNanos(Long.parseLong(s.substring(0, s.length() - 2).trim()));
         }
         if (s.endsWith("s")) {
-            return NANOSECONDS.convert(Long.parseLong(s.substring(0, s.length() - 1).trim()), SECONDS);
+            return SECONDS.toNanos(Long.parseLong(s.substring(0, s.length() - 1).trim()));
         }
         if (s.endsWith("m")) {
-            return 60 * NANOSECONDS.convert(Long.parseLong(s.substring(0, s.length() - 1).trim()), SECONDS);
+            return MINUTES.toNanos(Long.parseLong(s.substring(0, s.length() - 1).trim()));
         }
         if (s.endsWith("h")) {
-            return 60 * 60 * NANOSECONDS.convert(Long.parseLong(s.substring(0, s.length() - 1).trim()), SECONDS);
+            return HOURS.toNanos(Long.parseLong(s.substring(0, s.length() - 1).trim()));
         }
         if (s.endsWith("d")) {
-            return 24 * 60 * 60 * NANOSECONDS.convert(Long.parseLong(s.substring(0, s.length() - 1).trim()), SECONDS);
+            return DAYS.toNanos(Long.parseLong(s.substring(0, s.length() - 1).trim()));
         }
 
         try {
@@ -459,7 +455,7 @@ public final class Utils {
     }
 
     public static Map<String, String> sanitizeNullFreeStringMap(Map<String, String> settings) {
-        HashMap<String, String> map = new HashMap<>(settings.size());
+        HashMap<String, String> map = HashMap.newHashMap(settings.size());
         for (Map.Entry<String, String> e : settings.entrySet()) {
             String key = e.getKey();
             if (key == null) {

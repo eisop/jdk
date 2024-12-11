@@ -627,6 +627,7 @@ public class PrintStream extends FilterOutputStream
      * @param  buf   A byte array
      * @param  off   Offset from which to start taking bytes
      * @param  len   Number of bytes to write
+     * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
     public void write(@GuardSatisfied PrintStream this, @PolySigned byte[] buf, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) {

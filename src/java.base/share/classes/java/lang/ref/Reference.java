@@ -48,6 +48,7 @@ import jdk.internal.ref.Cleaner;
  *
  * @author   Mark Reinhold
  * @since    1.2
+ * @sealedGraph
  */
 
 @AnnotatedFor({"lock", "nullness"})

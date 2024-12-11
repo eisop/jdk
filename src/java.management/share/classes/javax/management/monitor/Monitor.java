@@ -167,7 +167,7 @@ public abstract class Monitor
      * Remaining attribute names extracted from complex type attribute name.
      */
     private final List<String> remainingAttributes =
-        new CopyOnWriteArrayList<String>();
+        new CopyOnWriteArrayList<>();
 
     /**
      * AccessControlContext of the Monitor.start() caller.
@@ -190,7 +190,7 @@ public abstract class Monitor
      * Map containing the thread pool executor per thread group.
      */
     private static final Map<ThreadPoolExecutor, Void> executors =
-            new WeakHashMap<ThreadPoolExecutor, Void>();
+            new WeakHashMap<>();
 
     /**
      * Lock for executors map.
@@ -354,7 +354,7 @@ public abstract class Monitor
      * List of ObservedObjects to which the attribute to observe belongs.
      */
     final List<ObservedObject> observedObjects =
-        new CopyOnWriteArrayList<ObservedObject>();
+        new CopyOnWriteArrayList<>();
 
     /**
      * Flag denoting that a notification has occurred after changing
@@ -1492,7 +1492,7 @@ public abstract class Monitor
                             maximumPoolSize,
                             60L,
                             TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<Runnable>(),
+                            new LinkedBlockingQueue<>(),
                             new DaemonThreadFactory("ThreadGroup<" +
                             group.getName() + "> Executor", group));
                     executor.allowCoreThreadTimeOut(true);
@@ -1519,7 +1519,7 @@ public abstract class Monitor
                 sf = Monitor.this.schedulerFuture;
                 ac = Monitor.this.acc;
             }
-            PrivilegedAction<Void> action = new PrivilegedAction<Void>() {
+            PrivilegedAction<Void> action = new PrivilegedAction<>() {
                 public Void run() {
                     if (Monitor.this.isActive()) {
                         final int an[] = alreadyNotifieds;

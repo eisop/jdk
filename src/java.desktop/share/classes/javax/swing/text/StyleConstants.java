@@ -47,6 +47,7 @@ import javax.swing.Icon;
  *      and SpaceBelow a paragraph."></p>
  *
  * @author  Timothy Prinzing
+ * @sealedGraph
  */
 @AnnotatedFor({"interning"})
 public sealed class StyleConstants

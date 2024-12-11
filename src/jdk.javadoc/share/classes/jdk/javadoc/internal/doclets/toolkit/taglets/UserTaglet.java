@@ -110,7 +110,7 @@ public final class UserTaglet implements Taglet {
     @Override
     public Content getInlineTagOutput(Element element, DocTree tag, TagletWriter writer) {
         Content output = writer.getOutputInstance();
-        output.add(new RawHtml(userTaglet.toString(List.of(tag), element)));
+        output.add(RawHtml.of(userTaglet.toString(List.of(tag), element)));
         return output;
     }
 
@@ -122,7 +122,7 @@ public final class UserTaglet implements Taglet {
         if (!tags.isEmpty()) {
             String tagString = userTaglet.toString(tags, holder);
             if (tagString != null) {
-                output.add(new RawHtml(tagString));
+                output.add(RawHtml.of(tagString));
             }
         }
         return output;

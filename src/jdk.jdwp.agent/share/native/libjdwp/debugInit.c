@@ -795,7 +795,6 @@ debugInit_reset(JNIEnv *env)
     threadControl_reset();
     util_reset();
     commonRef_reset(env);
-    classTrack_reset();
 
     /*
      * If this is a server, we are now ready to accept another connection.
@@ -1029,6 +1028,7 @@ parseOptions(char *options)
     /* Set vthread debugging level. */
     gdata->vthreadsSupported = JNI_TRUE;
     gdata->includeVThreads = JNI_FALSE;
+    gdata->rememberVThreadsWhenDisconnected = JNI_FALSE;
 
     /* Options being NULL will end up being an error. */
     if (options == NULL) {
@@ -1143,6 +1143,8 @@ parseOptions(char *options)
             } else {
                 goto syntax_error;
             }
+            // These two flags always set the same for now.
+            gdata->rememberVThreadsWhenDisconnected = gdata->includeVThreads;
             current += strlen(current) + 1;
         } else if (strcmp(buf, "launch") == 0) {
             /*LINTED*/

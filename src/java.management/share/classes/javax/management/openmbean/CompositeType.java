@@ -26,23 +26,16 @@
 
 package javax.management.openmbean;
 
-import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.framework.qual.AnnotatedFor;
-
-
-// java import
-//
 import org.checkerframework.checker.nullness.qual.EnsuresKeyForIf;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Collections;
 import java.util.Iterator;
-
-// jmx import
-//
 
 
 /**
@@ -152,8 +145,8 @@ public class CompositeType extends OpenType<CompositeData> {
         // Initialize internal "names to descriptions" and "names to types" sorted maps,
         // and, by doing so, check there are no duplicate item names
         //
-        nameToDescription = new TreeMap<String,String>();
-        nameToType        = new TreeMap<String,OpenType<?>>();
+        nameToDescription = new TreeMap<>();
+        nameToType        = new TreeMap<>();
         String key;
         for (int i=0; i<itemNames.length; i++) {
             key = itemNames[i].trim();

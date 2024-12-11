@@ -1008,7 +1008,8 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
     }
     static MethodHandle fakeVarHandleInvoke(MemberName method) {
         // TODO caching, is it necessary?
-        MethodType type = MethodType.methodType(method.getReturnType(), UnsupportedOperationException.class,
+        MethodType type = MethodType.methodType(method.getMethodType().returnType(),
+                                                UnsupportedOperationException.class,
                                                 VarHandle.class, Object[].class);
         MethodHandle mh = throwException(type);
         mh = mh.bindTo(new UnsupportedOperationException("cannot reflectively invoke VarHandle"));

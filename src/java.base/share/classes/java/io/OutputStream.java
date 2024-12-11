@@ -165,6 +165,9 @@ public abstract @UsesObjectEquals class OutputStream implements Closeable, Flush
      * @throws     IOException  if an I/O error occurs. In particular,
      *             an {@code IOException} is thrown if the output
      *             stream is closed.
+     * @throws     IndexOutOfBoundsException If {@code off} is negative,
+     *             {@code len} is negative, or {@code len} is greater than
+     *             {@code b.length - off}
      */
     public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         Objects.checkFromIndexSize(off, len, b.length);

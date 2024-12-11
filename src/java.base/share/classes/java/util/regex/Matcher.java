@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -40,6 +40,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Spliterator;
@@ -243,6 +244,8 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     int modCount;
 
+    private Map<String, Integer> namedGroups;
+
     /**
      * No default constructor.
      */
@@ -295,7 +298,8 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
                                         this.last,
                                         groupCount(),
                                         this.groups.clone(),
-                                        text);
+                                        text,
+                                        namedGroups());
     }
 
     private static class ImmutableMatchResult implements MatchResult {
@@ -304,15 +308,18 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
         private final int[] groups;
         private final int groupCount;
         private final String text;
+        private final Map<String, Integer> namedGroups;
 
         ImmutableMatchResult(int first, int last, int groupCount,
-                             int[] groups, String text)
+                             int[] groups, String text,
+                             Map<String, Integer> namedGroups)
         {
             this.first = first;
             this.last = last;
             this.groupCount = groupCount;
             this.groups = groups;
             this.text = text;
+            this.namedGroups = namedGroups;
         }
 
         @Override
@@ -326,8 +333,7 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
         @Pure
         public int start(int group) {
             checkMatch();
-            if (group < 0 || group > groupCount)
-                throw new IndexOutOfBoundsException("No group " + group);
+            checkGroup(group);
             return groups[group * 2];
         }
 
@@ -342,8 +348,7 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
         @Pure
         public int end(int group) {
             checkMatch();
-            if (group < 0 || group > groupCount)
-                throw new IndexOutOfBoundsException("No group " + group);
+            checkGroup(group);
             return groups[group * 2 + 1];
         }
 
@@ -364,18 +369,33 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
         @SideEffectFree
         public String group(int group) {
             checkMatch();
-            if (group < 0 || group > groupCount)
-                throw new IndexOutOfBoundsException("No group " + group);
-            if ((groups[group*2] == -1) || (groups[group*2+1] == -1))
+            checkGroup(group);
+            if ((groups[group * 2] == -1) || (groups[group * 2 + 1] == -1))
                 return null;
             return text.subSequence(groups[group * 2], groups[group * 2 + 1]).toString();
         }
 
+        @Override
+        public Map<String, Integer> namedGroups() {
+            return namedGroups;
+        }
+
+        @Override
+        public boolean hasMatch() {
+            return first >= 0;
+        }
+
+        private void checkGroup(int group) {
+            if (group < 0 || group > groupCount)
+                throw new IndexOutOfBoundsException("No group " + group);
+        }
+
         private void checkMatch() {
-            if (first < 0)
+            if (!hasMatch())
                 throw new IllegalStateException("No match found");
 
         }
+
     }
 
     /**
@@ -471,8 +491,7 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     @Pure
     public @NonNegative int start() {
-        if (first < 0)
-            throw new IllegalStateException("No match available");
+        checkMatch();
         return first;
     }
 
@@ -502,10 +521,8 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     @Pure
     public @GTENegativeOne int start(@NonNegative int group) {
-        if (first < 0)
-            throw new IllegalStateException("No match available");
-        if (group < 0 || group > groupCount())
-            throw new IndexOutOfBoundsException("No group " + group);
+        checkMatch();
+        checkGroup(group);
         return groups[group * 2];
     }
 
@@ -546,8 +563,7 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     @Pure
     public @NonNegative int end() {
-        if (first < 0)
-            throw new IllegalStateException("No match available");
+        checkMatch();
         return last;
     }
 
@@ -577,10 +593,8 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     @Pure
     public @GTENegativeOne int end(@NonNegative int group) {
-        if (first < 0)
-            throw new IllegalStateException("No match available");
-        if (group < 0 || group > groupCount())
-            throw new IndexOutOfBoundsException("No group " + group);
+        checkMatch();
+        checkGroup(group);
         return groups[group * 2 + 1];
     }
 
@@ -672,10 +686,8 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     @SideEffectFree
     public @Nullable String group(@NonNegative int group) {
-        if (first < 0)
-            throw new IllegalStateException("No match found");
-        if (group < 0 || group > groupCount())
-            throw new IndexOutOfBoundsException("No group " + group);
+        checkMatch();
+        checkGroup(group);
         if ((groups[group*2] == -1) || (groups[group*2+1] == -1))
             return null;
         return getSubSequence(groups[group * 2], groups[group * 2 + 1]).toString();
@@ -937,9 +949,7 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      *          that does not exist in the pattern
      */
     public Matcher appendReplacement(StringBuffer sb, String replacement) {
-        // If no match, return error
-        if (first < 0)
-            throw new IllegalStateException("No match available");
+        checkMatch();
         StringBuilder result = new StringBuilder();
         appendExpandedReplacement(replacement, result);
         // Append the intervening text
@@ -1028,8 +1038,7 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     public Matcher appendReplacement(StringBuilder sb, String replacement) {
         // If no match, return error
-        if (first < 0)
-            throw new IllegalStateException("No match available");
+        checkMatch();
         StringBuilder result = new StringBuilder();
         appendExpandedReplacement(replacement, result);
         // Append the intervening text
@@ -1092,10 +1101,10 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
                         throw new IllegalArgumentException(
                             "capturing group name {" + gname +
                             "} starts with digit character");
-                    if (!parentPattern.namedGroups().containsKey(gname))
+                    if (!namedGroups().containsKey(gname))
                         throw new IllegalArgumentException(
                             "No group with name {" + gname + "}");
-                    refNum = parentPattern.namedGroups().get(gname);
+                    refNum = namedGroups().get(gname);
                     cursor++;
                 } else {
                     // The first number is always a group
@@ -1845,10 +1854,47 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
      */
     int getMatchedGroupIndex(String name) {
         Objects.requireNonNull(name, "Group name");
-        if (first < 0)
-            throw new IllegalStateException("No match found");
-        if (!parentPattern.namedGroups().containsKey(name))
+        checkMatch();
+        if (!namedGroups().containsKey(name))
             throw new IllegalArgumentException("No group with name <" + name + ">");
-        return parentPattern.namedGroups().get(name);
+        return namedGroups().get(name);
     }
+
+    private void checkGroup(int group) {
+        if (group < 0 || group > groupCount())
+            throw new IndexOutOfBoundsException("No group " + group);
+    }
+
+    private void checkMatch() {
+        if (!hasMatch())
+            throw new IllegalStateException("No match found");
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     *
+     * @since {@inheritDoc}
+     */
+    @Override
+    public Map<String, Integer> namedGroups() {
+        if (namedGroups == null) {
+            return namedGroups = parentPattern.namedGroups();
+        }
+        return namedGroups;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@inheritDoc}
+     *
+     * @since {@inheritDoc}
+     */
+    @Override
+    public boolean hasMatch() {
+        return first >= 0;
+    }
+
 }

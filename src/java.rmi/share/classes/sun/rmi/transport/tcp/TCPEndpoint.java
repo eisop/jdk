@@ -497,8 +497,7 @@ public class TCPEndpoint implements Endpoint {
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
-        if ((obj != null) && (obj instanceof TCPEndpoint)) {
-            TCPEndpoint ep = (TCPEndpoint) obj;
+        if (obj instanceof TCPEndpoint ep) {
             if (port != ep.port || !host.equals(ep.host))
                 return false;
             if (((csf == null) ^ (ep.csf == null)) ||

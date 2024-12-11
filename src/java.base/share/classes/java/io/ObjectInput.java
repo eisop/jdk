@@ -88,6 +88,9 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      *          {@code -1} if there is no more data because the end of
      *          the stream has been reached.
      * @throws  IOException If an I/O error has occurred.
+     * @throws  IndexOutOfBoundsException If {@code off} is negative,
+     *          {@code len} is negative, or {@code len} is greater than
+     *          {@code b.length - off}
      */
     public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException;
 

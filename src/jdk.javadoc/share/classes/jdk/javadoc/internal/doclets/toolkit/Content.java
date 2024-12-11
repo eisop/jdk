@@ -39,6 +39,7 @@ public abstract class Content {
 
     /**
      * Returns a string representation of the content.
+     * Newlines are represented by {@code \n}.
      *
      * @return string representation of the content
      */
@@ -46,7 +47,7 @@ public abstract class Content {
     public String toString() {
         StringWriter out = new StringWriter();
         try {
-            write(out, true);
+            write(out, "\n", true);
         } catch (IOException e) {
             // cannot happen from StringWriter
             throw new AssertionError(e);
@@ -107,14 +108,16 @@ public abstract class Content {
     }
 
     /**
-     * Writes content to a writer.
+     * Writes content to a writer, using a given newline sequence, which should be
+     * either {@code \n} or the platform line separator.
      *
      * @param writer the writer
+     * @param newline the newline sequence to use
      * @param atNewline whether the writer has just written a newline
      * @return whether the writer has just written a newline
      * @throws IOException if an error occurs while writing the output
      */
-    public abstract boolean write(Writer writer, boolean atNewline) throws IOException;
+    public abstract boolean write(Writer writer, String newline, boolean atNewline) throws IOException;
 
     /**
      * Returns true if the content is empty.
@@ -135,9 +138,7 @@ public abstract class Content {
     }
 
     /**
-     * Return the number of characters of plain text content in this object
-     * (optional operation.)
-     * @return the number of characters of plain text content in this
+     * {@return the number of characters of plain text content in this object}
      */
     public int charCount() {
         return 0;

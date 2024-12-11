@@ -41,6 +41,7 @@ import java.util.Arrays;
  *
  * @author Nicholas Talian, Vincent Hardy, Jim Graham, Jerry Evans
  * @since 1.6
+ * @sealedGraph
  */
 @AnnotatedFor({"interning"})
 public abstract sealed @UsesObjectEquals class MultipleGradientPaint implements Paint

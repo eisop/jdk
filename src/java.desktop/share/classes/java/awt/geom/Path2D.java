@@ -72,6 +72,7 @@ import sun.awt.geom.Curve;
  *
  * @author Jim Graham
  * @since 1.6
+ * @sealedGraph
  */
 @AnnotatedFor({"interning"})
 public abstract sealed @UsesObjectEquals class Path2D implements Shape, Cloneable
@@ -2310,7 +2311,7 @@ public abstract sealed @UsesObjectEquals class Path2D implements Shape, Cloneabl
         if (java.lang.Double.isNaN(x+w) || java.lang.Double.isNaN(y+h)) {
             /* [xy]+[wh] is NaN if any of those values are NaN,
              * or if adding the two together would produce NaN
-             * by virtue of adding opposing Infinte values.
+             * by virtue of adding opposing Infinite values.
              * Since we need to add them below, their sum must
              * not be NaN.
              * We return false because NaN always produces a
@@ -2382,7 +2383,7 @@ public abstract sealed @UsesObjectEquals class Path2D implements Shape, Cloneabl
         if (java.lang.Double.isNaN(x+w) || java.lang.Double.isNaN(y+h)) {
             /* [xy]+[wh] is NaN if any of those values are NaN,
              * or if adding the two together would produce NaN
-             * by virtue of adding opposing Infinte values.
+             * by virtue of adding opposing Infinite values.
              * Since we need to add them below, their sum must
              * not be NaN.
              * We return false because NaN always produces a
@@ -2460,7 +2461,7 @@ public abstract sealed @UsesObjectEquals class Path2D implements Shape, Cloneabl
         if (java.lang.Double.isNaN(x+w) || java.lang.Double.isNaN(y+h)) {
             /* [xy]+[wh] is NaN if any of those values are NaN,
              * or if adding the two together would produce NaN
-             * by virtue of adding opposing Infinte values.
+             * by virtue of adding opposing Infinite values.
              * Since we need to add them below, their sum must
              * not be NaN.
              * We return false because NaN always produces a
@@ -2531,7 +2532,7 @@ public abstract sealed @UsesObjectEquals class Path2D implements Shape, Cloneabl
         if (java.lang.Double.isNaN(x+w) || java.lang.Double.isNaN(y+h)) {
             /* [xy]+[wh] is NaN if any of those values are NaN,
              * or if adding the two together would produce NaN
-             * by virtue of adding opposing Infinte values.
+             * by virtue of adding opposing Infinite values.
              * Since we need to add them below, their sum must
              * not be NaN.
              * We return false because NaN always produces a

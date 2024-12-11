@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -48,6 +48,7 @@ import java.io.StreamCorruptedException;
 
 import java.lang.reflect.Modifier;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.util.Enumeration;
@@ -140,7 +141,7 @@ public @UsesObjectEquals class Beans {
      * a classname the applet's "init" method is called.  (If the bean was
      * deserialized this step is skipped.)
      * <p>
-     * Note that for beans which are applets, it is the caller's responsiblity
+     * Note that for beans which are applets, it is the caller's responsibility
      * to call "start" on the applet.  For correct behaviour, this should be done
      * after the applet has been added into a visible AWT container.
      * <p>
@@ -290,7 +291,7 @@ public @UsesObjectEquals class Beans {
                     URL codeBase  = null;
                     URL docBase   = null;
 
-                    // Now get the URL correponding to the resource name.
+                    // Now get the URL corresponding to the resource name.
                     if (cls == null) {
                         objectUrl = ClassLoader.getSystemResource(resourceName);
                     } else
@@ -309,13 +310,13 @@ public @UsesObjectEquals class Beans {
 
                         if (s.endsWith(resourceName)) {
                             int ix   = s.length() - resourceName.length();
-                            codeBase = new URL(s.substring(0,ix));
+                            codeBase = newURL(s.substring(0,ix));
                             docBase  = codeBase;
 
                             ix = s.lastIndexOf('/');
 
                             if (ix >= 0) {
-                                docBase = new URL(s.substring(0,ix+1));
+                                docBase = newURL(s.substring(0,ix+1));
                             }
                         }
                     }
@@ -359,6 +360,11 @@ public @UsesObjectEquals class Beans {
     @SuppressWarnings("unchecked")
     private static void unsafeBeanContextAdd(BeanContext beanContext, Object res) {
         beanContext.add(res);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static URL newURL(String spec) throws MalformedURLException {
+        return new URL(spec);
     }
 
     /**

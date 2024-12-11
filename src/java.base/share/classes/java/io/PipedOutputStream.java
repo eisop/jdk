@@ -143,6 +143,7 @@ public class PipedOutputStream extends OutputStream {
      * @throws  IOException if the pipe is <a href=#BROKEN> broken</a>,
      *          {@link #connect(java.io.PipedInputStream) unconnected},
      *          closed, or if an I/O error occurs.
+     * @throws  IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
     public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {

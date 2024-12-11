@@ -420,6 +420,9 @@ public class HashSet<E>
      * @since 19
      */
     public static <T> HashSet<T> newHashSet(int numElements) {
+        if (numElements < 0) {
+            throw new IllegalArgumentException("Negative number of elements: " + numElements);
+        }
         return new HashSet<>(HashMap.calculateHashMapCapacity(numElements));
     }
 
