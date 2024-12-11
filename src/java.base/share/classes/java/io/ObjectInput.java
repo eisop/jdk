@@ -75,7 +75,7 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      *          returned when the end of the stream is reached.
      * @throws  IOException If an I/O error has occurred.
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte b[]) throws IOException;
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b) throws IOException;
 
     /**
      * Reads into an array of bytes.  This method will
@@ -87,7 +87,7 @@ public interface ObjectInput extends DataInput, AutoCloseable {
      *          returned when the end of the stream is reached.
      * @throws  IOException If an I/O error has occurred.
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException;
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException;
 
     /**
      * Skips n bytes of input.

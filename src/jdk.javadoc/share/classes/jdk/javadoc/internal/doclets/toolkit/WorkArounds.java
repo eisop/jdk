@@ -125,10 +125,9 @@ public class WorkArounds {
         return false;
     }
 
-    // TODO: fix jx.l.m add this method.
     @Pure
-    public boolean isSynthesized(AnnotationMirror aDesc) {
-        return ((Attribute)aDesc).isSynthesized();
+    public boolean isMandated(AnnotationMirror aDesc) {
+        return elementUtils.getOrigin(null, aDesc) == Elements.Origin.MANDATED;
     }
 
     // TODO: DocTrees: Trees.getPath(Element e) is slow a factor 4-5 times.

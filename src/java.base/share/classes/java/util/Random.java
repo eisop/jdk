@@ -84,7 +84,6 @@ import jdk.internal.misc.Unsafe;
  * @since   1.0
  */
 @AnnotatedFor({"index", "interning", "lock", "nullness", "signedness"})
-@SuppressWarnings("exports")
 @RandomGeneratorProperties(
         name = "Random",
         i = 48, j = 0, k = 0,

@@ -76,6 +76,7 @@ import jdk.internal.perf.PerfCounter;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.misc.VM;
 import jdk.internal.reflect.CallerSensitive;
+import jdk.internal.reflect.CallerSensitiveAdapter;
 import jdk.internal.reflect.Reflection;
 import jdk.internal.util.StaticProperty;
 import sun.reflect.misc.ReflectUtil;
@@ -1632,9 +1633,13 @@ public abstract @UsesObjectEquals class ClassLoader {
      */
     @CallerSensitive
     protected static boolean registerAsParallelCapable() {
-        Class<? extends ClassLoader> callerClass =
-            Reflection.getCallerClass().asSubclass(ClassLoader.class);
-        return ParallelLoaders.register(callerClass);
+        return registerAsParallelCapable(Reflection.getCallerClass());
+    }
+
+    // Caller-sensitive adapter method for reflective invocation
+    @CallerSensitiveAdapter
+    private static boolean registerAsParallelCapable(Class<?> caller) {
+        return ParallelLoaders.register(caller.asSubclass(ClassLoader.class));
     }
 
     /**
@@ -2264,7 +2269,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          for consistency with the existing {@link #getPackages} method.
      *
      * @return The array of {@code Package} objects that have been defined by
-     *         this class loader; or an zero length array if no package has been
+     *         this class loader; or a zero length array if no package has been
      *         defined by this class loader.
      *
      * @jvms 5.3 Creation and Loading

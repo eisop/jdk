@@ -306,7 +306,7 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
         private final String text;
 
         ImmutableMatchResult(int first, int last, int groupCount,
-                             int groups[], String text)
+                             int[] groups, String text)
         {
             this.first = first;
             this.last = last;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -41,8 +41,8 @@ import sun.nio.cs.StreamEncoder;
 /**
  * An OutputStreamWriter is a bridge from character streams to byte streams:
  * Characters written to it are encoded into bytes using a specified {@link
- * java.nio.charset.Charset charset}.  The charset that it uses
- * may be specified by name or may be given explicitly, or the platform's
+ * Charset charset}.  The charset that it uses
+ * may be specified by name or may be given explicitly, or the
  * default charset may be accepted.
  *
  * <p> Each invocation of a write() method causes the encoding converter to be
@@ -55,7 +55,7 @@ import sun.nio.cs.StreamEncoder;
  *
  * <pre>
  * Writer out
- *   = new BufferedWriter(new OutputStreamWriter(System.out));
+ *   = new BufferedWriter(new OutputStreamWriter(anOutputStream));
  * </pre>
  *
  * <p> A <i>surrogate pair</i> is a character represented by a sequence of two
@@ -69,12 +69,12 @@ import sun.nio.cs.StreamEncoder;
  *
  * <p> This class always replaces malformed surrogate elements and unmappable
  * character sequences with the charset's default <i>substitution sequence</i>.
- * The {@linkplain java.nio.charset.CharsetEncoder} class should be used when more
+ * The {@linkplain CharsetEncoder} class should be used when more
  * control over the encoding process is required.
  *
  * @see BufferedWriter
  * @see OutputStream
- * @see java.nio.charset.Charset
+ * @see Charset
  *
  * @author      Mark Reinhold
  * @since       1.1
@@ -92,8 +92,7 @@ public class OutputStreamWriter extends Writer {
      *         An OutputStream
      *
      * @param  charsetName
-     *         The name of a supported
-     *         {@link java.nio.charset.Charset charset}
+     *         The name of a supported {@link Charset charset}
      *
      * @throws     UnsupportedEncodingException
      *             If the named encoding is not supported
@@ -108,14 +107,17 @@ public class OutputStreamWriter extends Writer {
     }
 
     /**
-     * Creates an OutputStreamWriter that uses the default character encoding.
+     * Creates an OutputStreamWriter that uses the default character encoding, or
+     * where {@code out} is a {@code PrintStream}, the charset used by the print
+     * stream.
      *
      * @param  out  An OutputStream
+     * @see Charset#defaultCharset()
      */
     public @MustCallAlias OutputStreamWriter(@MustCallAlias OutputStream out) {
         super(out);
         se = StreamEncoder.forOutputStreamWriter(out, this,
-                Charset.defaultCharset());
+                out instanceof PrintStream ps ? ps.charset() : Charset.defaultCharset());
     }
 
     /**
@@ -169,7 +171,7 @@ public class OutputStreamWriter extends Writer {
      * @return The historical name of this encoding, or possibly
      *         {@code null} if the stream has been closed
      *
-     * @see java.nio.charset.Charset
+     * @see Charset
      *
      * @revised 1.4
      */
@@ -209,7 +211,7 @@ public class OutputStreamWriter extends Writer {
      *
      * @throws  IOException  If an I/O error occurs
      */
-    public void write(char cbuf[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    public void write(char[] cbuf, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         se.write(cbuf, off, len);
     }
 

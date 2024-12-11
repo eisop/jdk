@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -110,7 +110,7 @@ public final class Short extends Number implements Comparable<Short>, Constable 
     @SideEffectFree
     @StaticallyExecutable
     public static @ArrayLen({1, 2, 3, 4, 5, 6}) String toString(short s) {
-        return Integer.toString((int)s, 10);
+        return Integer.toString(s);
     }
 
     /**
@@ -490,10 +490,11 @@ public final class Short extends Number implements Comparable<Short>, Constable 
      * @return  a string representation of the value of this object in
      *          base&nbsp;10.
      */
+    @Override
     @SideEffectFree
     @StaticallyExecutable
     public @ArrayLen({1, 2, 3, 4, 5, 6}) String toString() {
-        return Integer.toString((int)value);
+        return Integer.toString(value);
     }
 
     /**

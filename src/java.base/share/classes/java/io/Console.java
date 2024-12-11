@@ -40,6 +40,7 @@ import java.util.*;
 import java.nio.charset.Charset;
 import jdk.internal.access.JavaIOAccess;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.util.StaticProperty;
 import sun.nio.cs.StreamDecoder;
 import sun.nio.cs.StreamEncoder;
 import sun.security.action.GetPropertyAction;
@@ -490,7 +491,7 @@ public final @UsesObjectEquals class Console implements Flushable
             return in.ready();
         }
 
-        public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(char cbuf[], @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length)
+        public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(char[] cbuf, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length)
             throws IOException
         {
             int off = offset;
@@ -587,22 +588,29 @@ public final @UsesObjectEquals class Console implements Flushable
 
     private static final Charset CHARSET;
     static {
-        String csname = encoding();
         Charset cs = null;
-        if (csname == null) {
-            csname = GetPropertyAction.privilegedGetProperty("sun.stdout.encoding");
+        boolean istty = istty();
+
+        if (istty) {
+            String csname = encoding();
+            if (csname == null) {
+                csname = GetPropertyAction.privilegedGetProperty("sun.stdout.encoding");
+            }
+            if (csname != null) {
+                cs = Charset.forName(csname, null);
+            }
         }
-        if (csname != null) {
-            try {
-                cs = Charset.forName(csname);
-            } catch (Exception ignored) { }
+        if (cs == null) {
+            cs = Charset.forName(StaticProperty.nativeEncoding(),
+                    Charset.defaultCharset());
         }
-        CHARSET = cs == null ? Charset.defaultCharset() : cs;
+
+        CHARSET = cs;
 
         // Set up JavaIOAccess in SharedSecrets
         SharedSecrets.setJavaIOAccess(new JavaIOAccess() {
             public Console console() {
-                if (istty()) {
+                if (istty) {
                     if (cons == null)
                         cons = new Console();
                     return cons;

@@ -467,7 +467,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
     "#2: groupSnapshot.length = ngroupsSnapshot by #0.1, for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"
     })
     @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.range"})
-    private @NonNegative int enumerate(Thread list[], @NonNegative int n, boolean recurse) {
+    private @NonNegative int enumerate(Thread[] list, @NonNegative int n, boolean recurse) {
         int ngroupsSnapshot = 0;
         ThreadGroup[] groupsSnapshot = null;
         synchronized (this) {
@@ -607,7 +607,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @SuppressWarnings("index:array.access.unsafe.high")
-    private @NonNegative int enumerate(ThreadGroup list[], @NonNegative int n, boolean recurse) {
+    private @NonNegative int enumerate(ThreadGroup[] list, @NonNegative int n, boolean recurse) {
         int ngroupsSnapshot = 0;
         ThreadGroup[] groupsSnapshot = null;
         synchronized (this) {
@@ -659,6 +659,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *     {@link Thread#stop} for details.
      */
     @Deprecated(since="1.2", forRemoval=true)
+    @SuppressWarnings("removal")
     public final void stop() {
         if (stopOrSuspend(false))
             Thread.currentThread().stop();

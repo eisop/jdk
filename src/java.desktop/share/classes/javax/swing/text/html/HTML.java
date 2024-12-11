@@ -47,6 +47,7 @@ import javax.swing.text.StyleContext;
  *
  */
 @AnnotatedFor({"interning"})
+@SuppressWarnings("doclint:missing")
 public class HTML {
 
     /**
@@ -1266,7 +1267,7 @@ public class HTML {
         String istr = (String) attr.getAttribute(key);
         if (istr != null) {
             try {
-                value = Integer.valueOf(istr).intValue();
+                value = Integer.parseInt(istr);
             } catch (NumberFormatException e) {
                 value = def;
             }

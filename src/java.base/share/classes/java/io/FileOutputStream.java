@@ -330,7 +330,7 @@ public class FileOutputStream extends OutputStream
      *     end of file
      * @throws    IOException If an I/O error has occurred.
      */
-    private native void writeBytes(@PolySigned byte b[], int off, int len, boolean append)
+    private native void writeBytes(@PolySigned byte[] b, int off, int len, boolean append)
         throws IOException;
 
     /**
@@ -340,7 +340,7 @@ public class FileOutputStream extends OutputStream
      * @param      b   the data.
      * @throws     IOException  if an I/O error occurs.
      */
-    public void write(@PolySigned byte b[]) throws IOException {
+    public void write(@PolySigned byte[] b) throws IOException {
         writeBytes(b, 0, b.length, fdAccess.getAppend(fd));
     }
 
@@ -353,7 +353,7 @@ public class FileOutputStream extends OutputStream
      * @param      len   the number of bytes to write.
      * @throws     IOException  if an I/O error occurs.
      */
-    public void write(@PolySigned byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         writeBytes(b, off, len, fdAccess.getAppend(fd));
     }
 

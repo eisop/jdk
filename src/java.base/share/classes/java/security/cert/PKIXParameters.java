@@ -204,8 +204,8 @@ public @UsesObjectEquals class PKIXParameters implements CertPathParameters {
             throw new InvalidAlgorithmParameterException("the trustAnchors " +
                 "parameter must be non-empty");
         }
-        for (Iterator<TrustAnchor> i = trustAnchors.iterator(); i.hasNext(); ) {
-            if (!(i.next() instanceof TrustAnchor)) {
+        for (Object trustAnchor : trustAnchors) {
+            if (!(trustAnchor instanceof TrustAnchor)) {
                 throw new ClassCastException("all elements of set must be "
                     + "of type java.security.cert.TrustAnchor");
             }
@@ -253,9 +253,8 @@ public @UsesObjectEquals class PKIXParameters implements CertPathParameters {
      */
     public void setInitialPolicies(Set<String> initialPolicies) {
         if (initialPolicies != null) {
-            for (Iterator<String> i = initialPolicies.iterator();
-                        i.hasNext();) {
-                if (!(i.next() instanceof String))
+            for (Object initialPolicy : initialPolicies) {
+                if (!(initialPolicy instanceof String))
                     throw new ClassCastException("all elements of set must be "
                         + "of type java.lang.String");
             }
@@ -286,8 +285,8 @@ public @UsesObjectEquals class PKIXParameters implements CertPathParameters {
         if (stores == null) {
             this.certStores = new ArrayList<>();
         } else {
-            for (Iterator<CertStore> i = stores.iterator(); i.hasNext();) {
-                if (!(i.next() instanceof CertStore)) {
+            for (Object store : stores) {
+                if (!(store instanceof CertStore)) {
                     throw new ClassCastException("all elements of list must be "
                         + "of type java.security.cert.CertStore");
                 }

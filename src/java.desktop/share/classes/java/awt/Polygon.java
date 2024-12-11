@@ -579,7 +579,7 @@ public @UsesObjectEquals class Polygon implements Shape, java.io.Serializable {
         return getPathIterator(at);
     }
 
-    class PolygonPathIterator implements PathIterator {
+    static class PolygonPathIterator implements PathIterator {
         Polygon poly;
         AffineTransform transform;
         int index;

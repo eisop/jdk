@@ -1237,8 +1237,8 @@ public final @UsesObjectEquals class Files {
      * which case the method completes without copying the file. File attributes
      * are not required to be copied to the target file. If symbolic links are
      * supported, and the file is a symbolic link, then the final target of the
-     * link is copied. If the file is a directory then it creates an empty
-     * directory in the target location (entries in the directory are not
+     * link is copied. If the file is a directory then an empty directory is
+     * created in the target location (entries in the directory are not
      * copied). This method can be used with the {@link #walkFileTree
      * walkFileTree} method to copy a directory and all entries in the directory,
      * or an entire <i>file-tree</i> where required.
@@ -1591,7 +1591,7 @@ public final @UsesObjectEquals class Files {
      * <ul>
      * <li> The two paths locate the {@linkplain #isSameFile(Path, Path) same file},
      *      even if two {@linkplain Path#equals(Object) equal} paths locate a file
-     *      does not exist, or </li>
+     *      that does not exist, or </li>
      * <li> The two files are the same size, and every byte in the first file
      *      is identical to the corresponding byte in the second file. </li>
      * </ul>
@@ -1600,7 +1600,7 @@ public final @UsesObjectEquals class Files {
      * returned by this method is:
      * <ul>
      * <li> The position of the first mismatched byte, or </li>
-     * <li> The size of the smaller file (in bytes) when the files are different
+     * <li> The size of the smaller file (in bytes) when the files are of different
      *      sizes and every byte of the smaller file is identical to the
      *      corresponding byte of the larger file. </li>
      * </ul>
@@ -1884,7 +1884,7 @@ public final @UsesObjectEquals class Files {
      *          installed, its {@link SecurityManager#checkRead(String) checkRead}
      *          method is invoked to check read access to the file. If this
      *          method is invoked to read security sensitive attributes then the
-     *          security manager may be invoke to check for additional permissions.
+     *          security manager may be invoked to check for additional permissions.
      */
     @ReleasesNoLocks
     public static <A extends BasicFileAttributes> A readAttributes(Path path,
@@ -2122,7 +2122,7 @@ public final @UsesObjectEquals class Files {
      *          installed, its {@link SecurityManager#checkRead(String) checkRead}
      *          method denies read access to the file. If this method is invoked
      *          to read security sensitive attributes then the security manager
-     *          may be invoke to check for additional permissions.
+     *          may be invoked to check for additional permissions.
      */
     @CFComment({"nullness: The nullness of the returned map's values is unclear"})
     @ReleasesNoLocks
@@ -2573,6 +2573,7 @@ public final @UsesObjectEquals class Files {
      *          read access to the file.
      *
      * @see #notExists
+     * @see FileSystemProvider#checkAccess
      */
     @SideEffectFree
     public static boolean exists(Path path, LinkOption... options) {
@@ -3180,7 +3181,7 @@ public final @UsesObjectEquals class Files {
      * @throws  DirectoryNotEmptyException
      *          the {@code REPLACE_EXISTING} option is specified but the file
      *          cannot be replaced because it is a non-empty directory
-     *          <i>(optional specific exception)</i>     *
+     *          <i>(optional specific exception)</i>
      * @throws  UnsupportedOperationException
      *          if {@code options} contains a copy option that is not supported
      * @throws  SecurityException

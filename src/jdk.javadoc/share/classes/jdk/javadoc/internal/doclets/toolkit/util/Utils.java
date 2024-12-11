@@ -108,7 +108,6 @@ import com.sun.source.doctree.SerialTree;
 import com.sun.source.doctree.StartElementTree;
 import com.sun.source.doctree.TextTree;
 import com.sun.source.doctree.ThrowsTree;
-import com.sun.source.doctree.UnknownBlockTagTree;
 import com.sun.source.doctree.UsesTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.LineMap;
@@ -181,13 +180,7 @@ public class Utils {
         return getSymbol("java.lang.Object");
     }
 
-    public TypeMirror getExceptionType() {
-        return getSymbol("java.lang.Exception");
-    }
-
-    public TypeMirror getErrorType() {
-        return getSymbol("java.lang.Error");
-    }
+    public TypeMirror getThrowableType() { return getSymbol("java.lang.Throwable"); }
 
     public TypeMirror getSerializableType() {
         return getSymbol("java.io.Serializable");
@@ -532,10 +525,7 @@ public class Utils {
         if (isEnum(te) || isInterface(te) || isAnnotationType(te) || isRecord(te)) {
             return false;
         }
-        if (isError(te) || isException(te)) {
-            return false;
-        }
-        return true;
+        return !isThrowable(te);
     }
 
     @Pure
@@ -546,19 +536,11 @@ public class Utils {
     }
 
     @Pure
-    public boolean isError(TypeElement te) {
+    public boolean isThrowable(TypeElement te) {
         if (isEnum(te) || isInterface(te) || isAnnotationType(te)) {
             return false;
         }
-        return typeUtils.isSubtype(te.asType(), getErrorType());
-    }
-
-    @Pure
-    public boolean isException(TypeElement te) {
-        if (isEnum(te) || isInterface(te) || isAnnotationType(te)) {
-            return false;
-        }
-        return typeUtils.isSubtype(te.asType(), getExceptionType());
+        return typeUtils.isSubtype(te.asType(), getThrowableType());
     }
 
     @Pure
@@ -1019,6 +1001,21 @@ public class Utils {
     }
 
     /**
+     * Returns true if {@code type} or any of its enclosing types has non-empty type arguments.
+     * @param type the type
+     * @return {@code true} if type arguments were found
+     */
+    public boolean isGenericType(TypeMirror type) {
+        while (type instanceof DeclaredType dt) {
+            if (!dt.getTypeArguments().isEmpty()) {
+                return true;
+            }
+            type = dt.getEnclosingType();
+        }
+        return false;
+    }
+
+    /**
      * TODO: FIXME: port to javax.lang.model
      * Find a class within the context of this class. Search order: qualified name, in this class
      * (inner), in this package, in the class imports, in the package imports. Return the
@@ -1307,8 +1304,7 @@ public class Utils {
             case RECORD ->
                     "doclet.RecordClass";
             case CLASS ->
-                    isException(te) ? "doclet.Exception"
-                    : isError(te) ? "doclet.Error"
+                    isThrowable(te) ? "doclet.ExceptionClass"
                     : "doclet.Class";
             default ->
                     throw new IllegalArgumentException(te.getKind().toString());
@@ -2029,31 +2025,6 @@ public class Utils {
     }
 
     /**
-     * Returns a list of classes that are not errors or exceptions
-     * @param e Element
-     * @return List
-     */
-    public List<TypeElement> getOrdinaryClasses(Element e) {
-        return getClasses(e).stream()
-                .filter(te -> (!isException(te) && !isError(te)))
-                .toList();
-    }
-
-    public List<TypeElement> getErrors(Element e) {
-        return getClasses(e)
-                .stream()
-                .filter(this::isError)
-                .toList();
-    }
-
-    public List<TypeElement> getExceptions(Element e) {
-        return getClasses(e)
-                .stream()
-                .filter(this::isException)
-                .toList();
-    }
-
-    /**
      * Returns a list of documented elements of a given type with a given kind.
      * If the root of the search is a package, the search is recursive.
      *
@@ -2208,7 +2179,7 @@ public class Utils {
 
                 @Override
                 public String visitType(TypeElement e, Void p) {
-                    StringBuilder sb = new StringBuilder(e.getSimpleName());
+                    StringBuilder sb = new StringBuilder(e.getSimpleName().toString());
                     Element enclosed = e.getEnclosingElement();
                     while (enclosed != null
                             && (enclosed.getKind().isClass() || enclosed.getKind().isInterface())) {
@@ -3007,8 +2978,11 @@ public class Utils {
     }
 
     public PreviewSummary declaredUsingPreviewAPIs(Element el) {
-        List<TypeElement> usedInDeclaration = new ArrayList<>();
-        usedInDeclaration.addAll(annotations2Classes(el));
+        if (el.asType().getKind() == ERROR) {
+            // Can happen with undocumented --ignore-source-errors option
+            return new PreviewSummary(Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+        }
+        List<TypeElement> usedInDeclaration = new ArrayList<>(annotations2Classes(el));
         switch (el.getKind()) {
             case ANNOTATION_TYPE, CLASS, ENUM, INTERFACE, RECORD -> {
                 TypeElement te = (TypeElement) el;

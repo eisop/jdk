@@ -143,7 +143,7 @@ public abstract class Reference<T> {
      *   [inactive/unregistered]
      *
      * Unreachable states (because enqueue also clears):
-     *   [active/enqeued]
+     *   [active/enqueued]
      *   [active/dequeued]
      *
      * [1] Unregistered is not permitted for FinalReferences.
@@ -375,13 +375,20 @@ public abstract class Reference<T> {
      */
     @Pure
     public final boolean refersTo(T obj) {
-        return refersTo0(obj);
+        return refersToImpl(obj);
     }
 
     /* Implementation of refersTo(), overridden for phantom references.
+     * This method exists only to avoid making refersTo0() virtual. Making
+     * refersTo0() virtual has the undesirable effect of C2 often preferring
+     * to call the native implementation over the intrinsic.
      */
+    boolean refersToImpl(T obj) {
+        return refersTo0(obj);
+    }
+
     @IntrinsicCandidate
-    native boolean refersTo0(Object o);
+    private native boolean refersTo0(Object o);
 
     /**
      * Clears this reference object.  Invoking this method will not cause this
@@ -516,8 +523,7 @@ public abstract class Reference<T> {
      * this method.  Invocation of this method does not itself initiate garbage
      * collection or finalization.
      *
-     * <p> This method establishes an ordering for
-     * <a href="package-summary.html#reachability"><em>strong reachability</em></a>
+     * <p> This method establishes an ordering for <em>strong reachability</em>
      * with respect to garbage collection.  It controls relations that are
      * otherwise only implicit in a program -- the reachability conditions
      * triggering garbage collection.  This method is designed for use in
@@ -615,7 +621,6 @@ public abstract class Reference<T> {
      *
      * @param ref the reference. If {@code null}, this method has no effect.
      * @since 9
-     * @jls 12.6 Finalization of Class Instances
      */
     @ForceInline
     @CFComment("nullness: Docs say the parameter can be null, but in practice, calls pass `this`")
