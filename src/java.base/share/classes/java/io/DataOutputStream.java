@@ -116,7 +116,7 @@ public class DataOutputStream extends FilterOutputStream implements DataOutput {
      * @throws     IOException  if an I/O error occurs.
      * @see        java.io.FilterOutputStream#out
      */
-    public synchronized void write(@PolySigned byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len)
+    public synchronized void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len)
         throws IOException
     {
         out.write(b, off, len);

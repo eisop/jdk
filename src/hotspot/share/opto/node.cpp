@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -308,7 +308,7 @@ inline int Node::Init(int req) {
   // Allocate memory for the necessary number of edges.
   if (req > 0) {
     // Allocate space for _in array to have double alignment.
-    _in = (Node **) ((char *) (C->node_arena()->Amalloc_D(req * sizeof(void*))));
+    _in = (Node **) ((char *) (C->node_arena()->AmallocWords(req * sizeof(void*))));
   }
   // If there are default notes floating around, capture them:
   Node_Notes* nn = C->default_node_notes();
@@ -499,7 +499,7 @@ Node::Node(Node *n0, Node *n1, Node *n2, Node *n3,
 Node *Node::clone() const {
   Compile* C = Compile::current();
   uint s = size_of();           // Size of inherited Node
-  Node *n = (Node*)C->node_arena()->Amalloc_D(size_of() + _max*sizeof(Node*));
+  Node *n = (Node*)C->node_arena()->AmallocWords(size_of() + _max*sizeof(Node*));
   Copy::conjoint_words_to_lower((HeapWord*)this, (HeapWord*)n, s);
   // Set the new input pointer array
   n->_in = (Node**)(((char*)n)+s);
@@ -527,6 +527,10 @@ Node *Node::clone() const {
     // Don't add cloned node to Compile::_for_post_loop_opts_igvn list automatically.
     // If it is applicable, it will happen anyway when the cloned node is registered with IGVN.
     n->remove_flag(Node::NodeFlags::Flag_for_post_loop_opts_igvn);
+  }
+  if (n->is_reduction()) {
+    // Do not copy reduction information. This must be explicitly set by the calling code.
+    n->remove_flag(Node::Flag_is_reduction);
   }
   BarrierSetC2* bs = BarrierSet::barrier_set()->barrier_set_c2();
   bs->register_potential_barrier_node(n);
@@ -1212,6 +1216,9 @@ bool Node::has_special_unique_user() const {
   } else if (is_If() && (n->is_IfFalse() || n->is_IfTrue())) {
     // See IfProjNode::Identity()
     return true;
+  } else if ((is_IfFalse() || is_IfTrue()) && n->is_If()) {
+    // See IfNode::fold_compares
+    return true;
   } else {
     return false;
   }
@@ -1584,23 +1591,49 @@ jfloat Node::getf() const {
 #ifndef PRODUCT
 
 // Call this from debugger:
+Node* old_root() {
+  Matcher* matcher = Compile::current()->matcher();
+  if (matcher != nullptr) {
+    Node* new_root = Compile::current()->root();
+    Node* old_root = matcher->find_old_node(new_root);
+    if (old_root != nullptr) {
+      return old_root;
+    }
+  }
+  tty->print("old_root: not found.\n");
+  return nullptr;
+}
+
+// Call this from debugger, search in same graph as n:
 Node* find_node(Node* n, const int idx) {
   return n->find(idx);
 }
 
-// Call this from debugger with root node as default:
+// Call this from debugger, search in new nodes:
 Node* find_node(const int idx) {
   return Compile::current()->root()->find(idx);
 }
 
-// Call this from debugger:
+// Call this from debugger, search in old nodes:
+Node* find_old_node(const int idx) {
+  Node* root = old_root();
+  return (root == nullptr) ? nullptr : root->find(idx);
+}
+
+// Call this from debugger, search in same graph as n:
 Node* find_ctrl(Node* n, const int idx) {
   return n->find_ctrl(idx);
 }
 
-// Call this from debugger with root node as default:
+// Call this from debugger, search in new nodes:
 Node* find_ctrl(const int idx) {
   return Compile::current()->root()->find_ctrl(idx);
+}
+
+// Call this from debugger, search in old nodes:
+Node* find_old_ctrl(const int idx) {
+  Node* root = old_root();
+  return (root == nullptr) ? nullptr : root->find_ctrl(idx);
 }
 
 //------------------------------find_ctrl--------------------------------------
@@ -1648,13 +1681,6 @@ Node* Node::find(const int idx, bool only_ctrl) {
         add_to_worklist(n->raw_out(i), &worklist, old_arena, &old_space, &new_space);
       }
     }
-#ifdef ASSERT
-    // Search along debug_orig edges last
-    Node* orig = n->debug_orig();
-    while (orig != NULL && add_to_worklist(orig, &worklist, old_arena, &old_space, &new_space)) {
-      orig = orig->debug_orig();
-    }
-#endif // ASSERT
   }
   return result;
 }
@@ -1784,11 +1810,11 @@ void Node::dump(const char* suffix, bool mark, outputStream *st) const {
 
   const Type *t = bottom_type();
 
-  if (t != NULL && (t->isa_instptr() || t->isa_klassptr())) {
+  if (t != NULL && (t->isa_instptr() || t->isa_instklassptr())) {
     const TypeInstPtr  *toop = t->isa_instptr();
-    const TypeKlassPtr *tkls = t->isa_klassptr();
-    ciKlass*           klass = toop ? toop->klass() : (tkls ? tkls->klass() : NULL );
-    if (klass && klass->is_loaded() && klass->is_interface()) {
+    const TypeInstKlassPtr *tkls = t->isa_instklassptr();
+    ciKlass*           klass = toop ? toop->instance_klass() : (tkls ? tkls->instance_klass() : NULL );
+    if (klass && klass->is_loaded() && ((toop && toop->is_interface()) || (tkls && tkls->is_interface()))) {
       st->print("  Interface:");
     } else if (toop) {
       st->print("  Oop:");
@@ -2383,9 +2409,9 @@ Node* Node::find_similar(int opc) {
 }
 
 
-//--------------------------unique_ctrl_out------------------------------
+//--------------------------unique_ctrl_out_or_null-------------------------
 // Return the unique control out if only one. Null if none or more than one.
-Node* Node::unique_ctrl_out() const {
+Node* Node::unique_ctrl_out_or_null() const {
   Node* found = NULL;
   for (uint i = 0; i < outcnt(); i++) {
     Node* use = raw_out(i);
@@ -2397,6 +2423,14 @@ Node* Node::unique_ctrl_out() const {
     }
   }
   return found;
+}
+
+//--------------------------unique_ctrl_out------------------------------
+// Return the unique control out. Asserts if none or more than one control out.
+Node* Node::unique_ctrl_out() const {
+  Node* ctrl = unique_ctrl_out_or_null();
+  assert(ctrl != NULL, "control out is assumed to be unique");
+  return ctrl;
 }
 
 void Node::ensure_control_or_add_prec(Node* c) {

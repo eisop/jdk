@@ -66,6 +66,12 @@ import com.sun.source.doctree.*;
  * the last child scanned.
  * </ul>
  *
+ * @param <R> the return type of this visitor's methods.  Use {@link
+ *            Void} for visitors that do not need to return results.
+ * @param <P> the type of the additional parameter to this visitor's
+ *            methods.  Use {@code Void} for visitors that do not need an
+ *            additional parameter.
+ *
  * @since 1.8
  */
 public class DocTreeScanner<R,P> implements DocTreeVisitor<R,P> {
@@ -490,6 +496,23 @@ public class DocTreeScanner<R,P> implements DocTreeVisitor<R,P> {
     @Override
     public R visitSince(SinceTree node, P p) {
         return scan(node.getBody(), p);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @implSpec This implementation scans the children in left to right order.
+     *
+     * @param node  {@inheritDoc}
+     * @param p  {@inheritDoc}
+     * @return the result of scanning
+     * @since 18
+     */
+    @Override
+    public R visitSnippet(SnippetTree node, P p) {
+        R r = scan(node.getAttributes(), p);
+        r = scanAndReduce(node.getBody(), p, r);
+        return r;
     }
 
     /**

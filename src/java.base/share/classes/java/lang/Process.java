@@ -456,7 +456,7 @@ public abstract @UsesObjectEquals class Process {
      * terminated and the timeout value is less than, or equal to, zero, then
      * this method returns immediately with the value {@code false}.
      *
-     * <p>The default implementation of this methods polls the {@code exitValue}
+     * <p>The default implementation of this method polls the {@code exitValue}
      * to check if the process has terminated. Concrete implementations of this
      * class are strongly encouraged to override this method with a more
      * efficient implementation.
@@ -861,7 +861,7 @@ public abstract @UsesObjectEquals class Process {
      * A nested class to delay looking up the Charset for the native encoding.
      */
     private static class CharsetHolder {
-        private final static Charset nativeCharset;
+        private static final Charset nativeCharset;
         static {
             Charset cs;
             try {

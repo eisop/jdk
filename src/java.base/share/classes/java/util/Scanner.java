@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -575,10 +575,11 @@ public final @UsesObjectEquals class Scanner implements Iterator<String>, Closea
     /**
      * Constructs a new {@code Scanner} that produces values scanned
      * from the specified input stream. Bytes from the stream are converted
-     * into characters using the underlying platform's
-     * {@linkplain java.nio.charset.Charset#defaultCharset() default charset}.
+     * into characters using the
+     * {@linkplain Charset#defaultCharset() default charset}.
      *
      * @param  source An input stream to be scanned
+     * @see Charset#defaultCharset()
      */
     public @MustCallAlias Scanner(@MustCallAlias InputStream source) {
         this(new InputStreamReader(source), WHITESPACE_PATTERN);
@@ -647,11 +648,12 @@ public final @UsesObjectEquals class Scanner implements Iterator<String>, Closea
     /**
      * Constructs a new {@code Scanner} that produces values scanned
      * from the specified file. Bytes from the file are converted into
-     * characters using the underlying platform's
-     * {@linkplain java.nio.charset.Charset#defaultCharset() default charset}.
+     * characters using the
+     * {@linkplain Charset#defaultCharset() default charset}.
      *
      * @param  source A file to be scanned
      * @throws FileNotFoundException if source is not found
+     * @see Charset#defaultCharset()
      */
     public Scanner(File source) throws FileNotFoundException {
         this((ReadableByteChannel)(new FileInputStream(source).getChannel()));
@@ -720,13 +722,14 @@ public final @UsesObjectEquals class Scanner implements Iterator<String>, Closea
     /**
      * Constructs a new {@code Scanner} that produces values scanned
      * from the specified file. Bytes from the file are converted into
-     * characters using the underlying platform's
-     * {@linkplain java.nio.charset.Charset#defaultCharset() default charset}.
+     * characters using the
+     * {@linkplain Charset#defaultCharset() default charset}.
      *
      * @param   source
      *          the path to the file to be scanned
      * @throws  IOException
      *          if an I/O error occurs opening source
+     * @see Charset#defaultCharset()
      *
      * @since   1.7
      */
@@ -787,10 +790,11 @@ public final @UsesObjectEquals class Scanner implements Iterator<String>, Closea
     /**
      * Constructs a new {@code Scanner} that produces values scanned
      * from the specified channel. Bytes from the source are converted into
-     * characters using the underlying platform's
-     * {@linkplain java.nio.charset.Charset#defaultCharset() default charset}.
+     * characters using the
+     * {@linkplain Charset#defaultCharset() default charset}.
      *
      * @param  source A channel to scan
+     * @see Charset#defaultCharset()
      */
     public @MustCallAlias Scanner(@MustCallAlias ReadableByteChannel source) {
         this(makeReadable(Objects.requireNonNull(source, "source")),
@@ -1628,7 +1632,8 @@ public final @UsesObjectEquals class Scanner implements Iterator<String>, Closea
      * This method may block while waiting for input. The scanner does not
      * advance past any input.
      *
-     * @return true if and only if this scanner has another line of input
+     * @return true if there is a line separator in the remaining input
+     * or if the input has other remaining characters
      * @throws IllegalStateException if this scanner is closed
      */
     @Pure

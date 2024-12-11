@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -179,7 +179,7 @@ public class Flags {
     public static final int ANONCONSTR   = 1<<29; //non-class members
 
     /**
-     * Flag to indicate the super classes of this ClassSymbol has been attributed.
+     * Flag to indicate the superclasses of this ClassSymbol has been attributed.
      */
     public static final int SUPER_OWNER_ATTRIBUTED = 1<<29; //ClassSymbols
 
@@ -311,7 +311,12 @@ public class Flags {
     /**
      * Flag to indicate the given ModuleSymbol is a system module.
      */
-    public static final long SYSTEM_MODULE = 1L<<53;
+    public static final long SYSTEM_MODULE = 1L<<53; //ModuleSymbols only
+
+    /**
+     * Flag to indicate the given ClassSymbol is a value based.
+     */
+    public static final long VALUE_BASED = 1L<<53; //ClassSymbols only
 
     /**
      * Flag to indicate the given symbol has a @Deprecated annotation.

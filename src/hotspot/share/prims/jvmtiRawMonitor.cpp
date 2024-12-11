@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -123,6 +123,9 @@ JvmtiRawMonitor::is_valid() {
 void JvmtiRawMonitor::simple_enter(Thread* self) {
   for (;;) {
     if (Atomic::replace_if_null(&_owner, self)) {
+      if (self->is_Java_thread()) {
+        Continuation::pin(JavaThread::cast(self));
+      }
       return;
     }
 
@@ -137,6 +140,9 @@ void JvmtiRawMonitor::simple_enter(Thread* self) {
     if (_owner == NULL && Atomic::replace_if_null(&_owner, self)) {
       _entry_list = node._next;
       RawMonitor_lock->unlock();
+      if (self->is_Java_thread()) {
+        Continuation::pin(JavaThread::cast(self));
+      }
       return;
     }
     RawMonitor_lock->unlock();
@@ -150,6 +156,9 @@ void JvmtiRawMonitor::simple_exit(Thread* self) {
   guarantee(_owner == self, "invariant");
   Atomic::release_store(&_owner, (Thread*)NULL);
   OrderAccess::fence();
+  if (self->is_Java_thread()) {
+    Continuation::unpin(JavaThread::cast(self));
+  }
   if (_entry_list == NULL) {
     return;
   }
@@ -236,7 +245,7 @@ int JvmtiRawMonitor::simple_wait(Thread* self, jlong millis) {
 
   int ret = M_OK;
   if (self->is_Java_thread()) {
-    JavaThread* jt = self->as_Java_thread();
+    JavaThread* jt = JavaThread::cast(self);
     guarantee(jt->thread_state() == _thread_in_native, "invariant");
     {
       // This transition must be after we exited the monitor.
@@ -326,13 +335,13 @@ void JvmtiRawMonitor::raw_enter(Thread* self) {
   if (!self->is_Java_thread()) {
     simple_enter(self);
   } else {
-    JavaThread* jt = self->as_Java_thread();
+    JavaThread* jt = JavaThread::cast(self);
     guarantee(jt->thread_state() == _thread_in_native, "invariant");
     ThreadInVMfromNative tivmfn(jt);
     for (;;) {
       ExitOnSuspend eos(this);
       {
-        ThreadBlockInVMPreprocess<ExitOnSuspend> tbivmp(jt, eos);
+        ThreadBlockInVMPreprocess<ExitOnSuspend> tbivmp(jt, eos, true /* allow_suspend */);
         simple_enter(jt);
       }
       if (!eos.monitor_exited()) {
@@ -379,12 +388,12 @@ int JvmtiRawMonitor::raw_wait(jlong millis, Thread* self) {
   // Now we need to re-enter the monitor. For JavaThreads
   // we need to manage suspend requests.
   if (self->is_Java_thread()) { // JavaThread re-enter
-    JavaThread* jt = self->as_Java_thread();
+    JavaThread* jt = JavaThread::cast(self);
     ThreadInVMfromNative tivmfn(jt);
     for (;;) {
       ExitOnSuspend eos(this);
       {
-        ThreadBlockInVMPreprocess<ExitOnSuspend> tbivmp(jt, eos);
+        ThreadBlockInVMPreprocess<ExitOnSuspend> tbivmp(jt, eos, true /* allow_suspend */);
         simple_enter(jt);
       }
       if (!eos.monitor_exited()) {

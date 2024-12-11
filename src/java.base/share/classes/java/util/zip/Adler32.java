@@ -32,7 +32,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import java.lang.ref.Reference;
 import java.nio.ByteBuffer;
 import sun.nio.ch.DirectBuffer;
-
+import jdk.internal.util.Preconditions;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 
 /**
@@ -79,9 +79,7 @@ public @UsesObjectEquals class Adler32 implements Checksum {
         if (b == null) {
             throw new NullPointerException();
         }
-        if (off < 0 || len < 0 || off > b.length - len) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Preconditions.checkFromIndexSize(len, off, b.length, Preconditions.AIOOBE_FORMATTER);
         adler = updateBytes(adler, b, off, len);
     }
 

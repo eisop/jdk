@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -36,6 +36,7 @@
 #include "gc/shared/cardTableRS.hpp"
 #include "gc/shared/collectedHeap.inline.hpp"
 #include "gc/shared/collectorCounters.hpp"
+#include "gc/shared/continuationGCSupport.inline.hpp"
 #include "gc/shared/gcId.hpp"
 #include "gc/shared/gcLocker.hpp"
 #include "gc/shared/gcPolicyCounters.hpp"
@@ -55,14 +56,14 @@
 #include "gc/shared/space.hpp"
 #include "gc/shared/strongRootsScope.hpp"
 #include "gc/shared/weakProcessor.hpp"
-#include "gc/shared/workgroup.hpp"
+#include "gc/shared/workerThread.hpp"
 #include "memory/iterator.hpp"
 #include "memory/metaspaceCounters.hpp"
 #include "memory/metaspaceUtils.hpp"
 #include "memory/resourceArea.hpp"
 #include "memory/universe.hpp"
 #include "oops/oop.inline.hpp"
-#include "runtime/biasedLocking.hpp"
+#include "runtime/continuation.hpp"
 #include "runtime/handles.hpp"
 #include "runtime/handles.inline.hpp"
 #include "runtime/java.hpp"
@@ -439,8 +440,7 @@ bool GenCollectedHeap::must_clear_all_soft_refs() {
 }
 
 void GenCollectedHeap::collect_generation(Generation* gen, bool full, size_t size,
-                                          bool is_tlab, bool run_verification, bool clear_soft_refs,
-                                          bool restore_marks_for_biased_locking) {
+                                          bool is_tlab, bool run_verification, bool clear_soft_refs) {
   FormatBuffer<> title("Collect gen: %s", gen->short_name());
   GCTraceTime(Trace, gc, phases) t1(title);
   TraceCollectorStats tcs(gen->counters());
@@ -461,18 +461,10 @@ void GenCollectedHeap::collect_generation(Generation* gen, bool full, size_t siz
   }
   COMPILER2_OR_JVMCI_PRESENT(DerivedPointerTable::clear());
 
-  if (restore_marks_for_biased_locking) {
-    // We perform this mark word preservation work lazily
-    // because it's only at this point that we know whether we
-    // absolutely have to do it; we want to avoid doing it for
-    // scavenge-only collections where it's unnecessary
-    BiasedLocking::preserve_marks();
-  }
-
   // Do collection work
   {
     // Note on ref discovery: For what appear to be historical reasons,
-    // GCH enables and disabled (by enqueing) refs discovery.
+    // GCH enables and disabled (by enqueuing) refs discovery.
     // In the future this should be moved into the generation's
     // collect method so that ref discovery and enqueueing concerns
     // are local to a generation. The collect method could return
@@ -488,21 +480,11 @@ void GenCollectedHeap::collect_generation(Generation* gen, bool full, size_t siz
     // enqueue_discovered_references if the generation returns
     // without doing any work.
     ReferenceProcessor* rp = gen->ref_processor();
-    // If the discovery of ("weak") refs in this generation is
-    // atomic wrt other collectors in this configuration, we
-    // are guaranteed to have empty discovered ref lists.
-    if (rp->discovery_is_atomic()) {
-      rp->enable_discovery();
-      rp->setup_policy(clear_soft_refs);
-    } else {
-      // collect() below will enable discovery as appropriate
-    }
+    rp->start_discovery(clear_soft_refs);
+
     gen->collect(full, clear_soft_refs, size, is_tlab);
-    if (!rp->enqueuing_is_done()) {
-      rp->disable_discovery();
-    } else {
-      rp->set_enqueuing_is_done(false);
-    }
+
+    rp->disable_discovery();
     rp->verify_no_references_recorded();
   }
 
@@ -572,8 +554,7 @@ void GenCollectedHeap::do_collection(bool           full,
                        size,
                        is_tlab,
                        run_verification && VerifyGCLevel <= 0,
-                       do_clear_all_soft_refs,
-                       false);
+                       do_clear_all_soft_refs);
 
     if (size > 0 && (!is_tlab || _young_gen->supports_tlab_allocation()) &&
         size * HeapWordSize <= _young_gen->unsafe_max_alloc_nogc()) {
@@ -627,13 +608,18 @@ void GenCollectedHeap::do_collection(bool           full,
       increment_total_full_collections();
     }
 
+    Continuations::on_gc_marking_cycle_start();
+    Continuations::arm_all_nmethods();
+
     collect_generation(_old_gen,
                        full,
                        size,
                        is_tlab,
                        run_verification && VerifyGCLevel <= 1,
-                       do_clear_all_soft_refs,
-                       true);
+                       do_clear_all_soft_refs);
+
+    Continuations::on_gc_marking_cycle_finish();
+    Continuations::arm_all_nmethods();
 
     // Adjust generation sizes.
     _old_gen->compute_new_size();
@@ -654,8 +640,6 @@ void GenCollectedHeap::do_collection(bool           full,
     // Need to tell the epilogue code we are done with Full GC, regardless what was
     // the initial value for "complete" flag.
     gc_epilogue(true);
-
-    BiasedLocking::restore_marks();
 
     print_heap_after_gc();
   }
@@ -814,7 +798,10 @@ void GenCollectedHeap::full_process_roots(bool is_adjust_phase,
                                           bool only_strong_roots,
                                           OopClosure* root_closure,
                                           CLDClosure* cld_closure) {
-  MarkingCodeBlobClosure mark_code_closure(root_closure, is_adjust_phase);
+  // Called from either the marking phase or the adjust phase.
+  const bool is_marking_phase = !is_adjust_phase;
+
+  MarkingCodeBlobClosure mark_code_closure(root_closure, is_adjust_phase, is_marking_phase);
   CLDClosure* weak_cld_closure = only_strong_roots ? NULL : cld_closure;
 
   process_roots(so, root_closure, cld_closure, weak_cld_closure, &mark_code_closure);
@@ -822,8 +809,6 @@ void GenCollectedHeap::full_process_roots(bool is_adjust_phase,
 
 void GenCollectedHeap::gen_process_weak_roots(OopClosure* root_closure) {
   WeakProcessor::oops_do(root_closure);
-  _young_gen->ref_processor()->weak_oops_do(root_closure);
-  _old_gen->ref_processor()->weak_oops_do(root_closure);
 }
 
 bool GenCollectedHeap::no_allocs_since_save_marks() {
@@ -869,34 +854,24 @@ void GenCollectedHeap::collect(GCCause::Cause cause) {
 void GenCollectedHeap::collect(GCCause::Cause cause, GenerationType max_generation) {
   // The caller doesn't have the Heap_lock
   assert(!Heap_lock->owned_by_self(), "this thread should not own the Heap_lock");
-  MutexLocker ml(Heap_lock);
-  collect_locked(cause, max_generation);
-}
 
-void GenCollectedHeap::collect_locked(GCCause::Cause cause) {
-  // The caller has the Heap_lock
-  assert(Heap_lock->owned_by_self(), "this thread should own the Heap_lock");
-  collect_locked(cause, OldGen);
-}
+  unsigned int gc_count_before;
+  unsigned int full_gc_count_before;
 
-// this is the private collection interface
-// The Heap_lock is expected to be held on entry.
-
-void GenCollectedHeap::collect_locked(GCCause::Cause cause, GenerationType max_generation) {
-  // Read the GC count while holding the Heap_lock
-  unsigned int gc_count_before      = total_collections();
-  unsigned int full_gc_count_before = total_full_collections();
+  {
+    MutexLocker ml(Heap_lock);
+    // Read the GC count while holding the Heap_lock
+    gc_count_before      = total_collections();
+    full_gc_count_before = total_full_collections();
+  }
 
   if (GCLocker::should_discard(cause, gc_count_before)) {
     return;
   }
 
-  {
-    MutexUnlocker mu(Heap_lock);  // give up heap lock, execute gets it back
-    VM_GenCollectFull op(gc_count_before, full_gc_count_before,
-                         cause, max_generation);
-    VMThread::execute(&op);
-  }
+  VM_GenCollectFull op(gc_count_before, full_gc_count_before,
+                       cause, max_generation);
+  VMThread::execute(&op);
 }
 
 void GenCollectedHeap::do_full_collection(bool clear_all_soft_refs) {
@@ -924,11 +899,15 @@ void GenCollectedHeap::do_full_collection(bool clear_all_soft_refs,
   }
 }
 
-bool GenCollectedHeap::is_in_young(oop p) {
+bool GenCollectedHeap::is_in_young(oop p) const {
   bool result = cast_from_oop<HeapWord*>(p) < _old_gen->reserved().start();
   assert(result == _young_gen->is_in_reserved(p),
          "incorrect test - result=%d, p=" INTPTR_FORMAT, result, p2i((void*)p));
   return result;
+}
+
+bool GenCollectedHeap::requires_barriers(stackChunkOop obj) const {
+  return !is_in_young(obj);
 }
 
 // Returns "TRUE" iff "p" points into the committed areas of the heap.
@@ -1071,16 +1050,8 @@ void GenCollectedHeap::release_scratch() {
   _old_gen->reset_scratch();
 }
 
-class GenPrepareForVerifyClosure: public GenCollectedHeap::GenClosure {
-  void do_generation(Generation* gen) {
-    gen->prepare_for_verify();
-  }
-};
-
 void GenCollectedHeap::prepare_for_verify() {
   ensure_parsability(false);        // no need to retire TLABs
-  GenPrepareForVerifyClosure blk;
-  generation_iterate(&blk, false);
 }
 
 void GenCollectedHeap::generation_iterate(GenClosure* cl,
@@ -1257,19 +1228,4 @@ void GenCollectedHeap::ensure_parsability(bool retire_tlabs) {
   CollectedHeap::ensure_parsability(retire_tlabs);
   GenEnsureParsabilityClosure ep_cl;
   generation_iterate(&ep_cl, false);
-}
-
-oop GenCollectedHeap::handle_failed_promotion(Generation* old_gen,
-                                              oop obj,
-                                              size_t obj_size) {
-  guarantee(old_gen == _old_gen, "We only get here with an old generation");
-  assert(obj_size == (size_t)obj->size(), "bad obj_size passed in");
-  HeapWord* result = NULL;
-
-  result = old_gen->expand_and_allocate(obj_size, false);
-
-  if (result != NULL) {
-    Copy::aligned_disjoint_words(cast_from_oop<HeapWord*>(obj), result, obj_size);
-  }
-  return cast_to_oop(result);
 }

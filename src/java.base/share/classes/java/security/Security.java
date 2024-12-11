@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -95,8 +95,7 @@ public final @UsesObjectEquals class Security {
         if (propFile.exists()) {
             InputStream is = null;
             try {
-                FileInputStream fis = new FileInputStream(propFile);
-                is = new BufferedInputStream(fis);
+                is = new FileInputStream(propFile);
                 props.load(is);
                 loadedProps = true;
 
@@ -144,7 +143,7 @@ public final @UsesObjectEquals class Security {
             // now load the user-specified file so its values
             // will win if they conflict with the earlier values
             if (extraPropFile != null) {
-                BufferedInputStream bis = null;
+                InputStream is = null;
                 try {
                     URL propURL;
 
@@ -156,8 +155,8 @@ public final @UsesObjectEquals class Security {
                     } else {
                         propURL = new URL(extraPropFile);
                     }
-                    bis = new BufferedInputStream(propURL.openStream());
-                    props.load(bis);
+                    is = propURL.openStream();
+                    props.load(is);
                     loadedProps = true;
 
                     if (sdebug != null) {
@@ -176,9 +175,9 @@ public final @UsesObjectEquals class Security {
                         e.printStackTrace();
                     }
                 } finally {
-                    if (bis != null) {
+                    if (is != null) {
                         try {
-                            bis.close();
+                            is.close();
                         } catch (IOException ioe) {
                             if (sdebug != null) {
                                 sdebug.println("unable to close input stream");
@@ -230,7 +229,7 @@ public final @UsesObjectEquals class Security {
      * Looks up providers, and returns the property (and its associated
      * provider) mapping the key, if any.
      * The order in which the providers are looked up is the
-     * provider-preference order, as specificed in the security
+     * provider-preference order, as specified in the security
      * properties file.
      */
     private static ProviderProperty getProviderProperty(String key) {
@@ -626,8 +625,7 @@ public final @UsesObjectEquals class Security {
 
         // For each selection criterion, remove providers
         // which don't satisfy the criterion from the candidate set.
-        for (Iterator<String> ite = keySet.iterator(); ite.hasNext(); ) {
-            String key = ite.next();
+        for (String key : keySet) {
             String value = filter.get(key);
 
             LinkedHashSet<Provider> newCandidates = getAllQualifyingCandidates(key, value,
@@ -657,14 +655,7 @@ public final @UsesObjectEquals class Security {
         if (candidates == null || candidates.isEmpty())
             return null;
 
-        Object[] candidatesArray = candidates.toArray();
-        Provider[] result = new Provider[candidatesArray.length];
-
-        for (int i = 0; i < result.length; i++) {
-            result[i] = (Provider)candidatesArray[i];
-        }
-
-        return result;
+        return candidates.toArray(new Provider[0]);
     }
 
     // Map containing cached Spi Class objects of the specified type
@@ -820,7 +811,7 @@ public final @UsesObjectEquals class Security {
      * setProperty() was either "package.access" or
      * "package.definition", we need to signal to the SecurityManager
      * class that the value has just changed, and that it should
-     * invalidate it's local cache values.
+     * invalidate its local cache values.
      */
     private static void invalidateSMCache(String key) {
 

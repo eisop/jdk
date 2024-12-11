@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -189,6 +189,10 @@ class ConcurrentHashTable : public CHeapObj<F> {
 
     Bucket* get_buckets() { return _buckets; }
     Bucket* get_bucket(size_t idx) { return &_buckets[idx]; }
+
+    size_t get_mem_size() {
+      return sizeof(*this) + _size * sizeof(Bucket);
+    }
   };
 
   // For materializing a supplied value.
@@ -384,8 +388,10 @@ class ConcurrentHashTable : public CHeapObj<F> {
 
   TableRateStatistics _stats_rate;
 
+  size_t get_mem_size(Thread* thread);
+
   size_t get_size_log2(Thread* thread);
-  size_t get_node_size() const { return sizeof(Node); }
+  static size_t get_node_size() { return sizeof(Node); }
   bool is_max_size_reached() { return _size_limit_reached; }
 
   // This means no paused bucket resize operation is going to resume
@@ -476,7 +482,7 @@ class ConcurrentHashTable : public CHeapObj<F> {
   template <typename EVALUATE_FUNC, typename DELETE_FUNC>
   void bulk_delete(Thread* thread, EVALUATE_FUNC& eval_f, DELETE_FUNC& del_f);
 
-  // Calcuate statistics. Item sizes are calculated with VALUE_SIZE_FUNC.
+  // Calculate statistics. Item sizes are calculated with VALUE_SIZE_FUNC.
   template <typename VALUE_SIZE_FUNC>
   TableStatistics statistics_calculate(Thread* thread, VALUE_SIZE_FUNC& vs_f);
 

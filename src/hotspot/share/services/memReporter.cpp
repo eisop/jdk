@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -98,10 +98,12 @@ void MemReporterBase::print_virtual_memory_region(const char* type, address base
 
 void MemSummaryReporter::report() {
   outputStream* out = output();
-  size_t total_reserved_amount = _malloc_snapshot->total() +
-    _vm_snapshot->total_reserved();
-  size_t total_committed_amount = _malloc_snapshot->total() +
-    _vm_snapshot->total_committed();
+  const size_t total_malloced_bytes = _malloc_snapshot->total();
+  const size_t total_mmap_reserved_bytes = _vm_snapshot->total_reserved();
+  const size_t total_mmap_committed_bytes = _vm_snapshot->total_committed();
+
+  size_t total_reserved_amount = total_malloced_bytes + total_mmap_reserved_bytes;
+  size_t total_committed_amount = total_malloced_bytes + total_mmap_committed_bytes;
 
   // Overall total
   out->print_cr("\nNative Memory Tracking:\n");
@@ -113,7 +115,14 @@ void MemSummaryReporter::report() {
 
   out->print("Total: ");
   print_total(total_reserved_amount, total_committed_amount);
-  out->print("\n");
+  out->cr();
+  out->print_cr("       malloc: " SIZE_FORMAT "%s #" SIZE_FORMAT,
+                amount_in_current_scale(total_malloced_bytes), current_scale(),
+                _malloc_snapshot->total_count());
+  out->print("       mmap:   ");
+  print_total(total_mmap_reserved_bytes, total_mmap_committed_bytes);
+  out->cr();
+  out->cr();
 
   // Summary by memory type
   for (int index = 0; index < mt_number_of_types; index ++) {
@@ -354,7 +363,7 @@ void MemDetailReporter::report_virtual_memory_region(const ReservedMemoryRegion*
     if (committed_rgn->size() == reserved_rgn->size() && committed_rgn->call_stack()->equals(*stack)) {
       // One region spanning the entire reserved region, with the same stack trace.
       // Don't print this regions because the "reserved and committed" line above
-      // already indicates that the region is comitted.
+      // already indicates that the region is committed.
       assert(itr.next() == NULL, "Unexpectedly more than one regions");
       return;
     }
@@ -784,7 +793,8 @@ void MemDetailDiffReporter::old_virtual_memory_site(const VirtualMemoryAllocatio
 
 void MemDetailDiffReporter::diff_virtual_memory_site(const VirtualMemoryAllocationSite* early,
   const VirtualMemoryAllocationSite* current) const {
-  assert(early->flag() == current->flag(), "Should be the same");
+  assert(early->flag() == current->flag() || early->flag() == mtNone,
+    "Expect the same flag, but %s != %s", NMTUtil::flag_to_name(early->flag()),NMTUtil::flag_to_name(current->flag()));
   diff_virtual_memory_site(current->call_stack(), current->reserved(), current->committed(),
     early->reserved(), early->committed(), current->flag());
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -57,7 +57,7 @@
 #include "oops/oop.inline.hpp"
 #include "oops/symbol.hpp"
 #include "prims/jvmtiExport.hpp"
-#include "runtime/biasedLocking.hpp"
+#include "runtime/continuation.hpp"
 #include "runtime/deoptimization.hpp"
 #include "runtime/flags/flagSetting.hpp"
 #include "runtime/handles.inline.hpp"
@@ -231,7 +231,6 @@ void print_statistics() {
   if ((PrintC1Statistics || LogVMOutput || LogCompilation) && UseCompiler) {
     FlagSetting fs(DisplayVMOutput, DisplayVMOutput && PrintC1Statistics);
     Runtime1::print_statistics();
-    Deoptimization::print_statistics();
     SharedRuntime::print_statistics();
   }
 #endif /* COMPILER1 */
@@ -240,14 +239,14 @@ void print_statistics() {
   if ((PrintOptoStatistics || LogVMOutput || LogCompilation) && UseCompiler) {
     FlagSetting fs(DisplayVMOutput, DisplayVMOutput && PrintOptoStatistics);
     Compile::print_statistics();
-#ifndef COMPILER1
     Deoptimization::print_statistics();
+#ifndef COMPILER1
     SharedRuntime::print_statistics();
 #endif //COMPILER1
     os::print_statistics();
   }
 
-  if (PrintLockStatistics || PrintPreciseBiasedLockingStatistics || PrintPreciseRTMLockingStatistics) {
+  if (PrintLockStatistics || PrintPreciseRTMLockingStatistics) {
     OptoRuntime::print_named_counters();
   }
 #ifdef ASSERT
@@ -307,10 +306,6 @@ void print_statistics() {
     CodeCache::print_internals();
   }
 
-  if (PrintVtableStats) {
-    klassVtable::print_statistics();
-    klassItable::print_statistics();
-  }
   if (VerifyOops && Verbose) {
     tty->print_cr("+VerifyOops count: %d", StubRoutines::verify_oop_count());
   }
@@ -331,10 +326,6 @@ void print_statistics() {
 
   if (LogTouchedMethods && PrintTouchedMethodsAtExit) {
     Method::print_touched_methods(tty);
-  }
-
-  if (PrintBiasedLockingStatistics) {
-    BiasedLocking::print_counters();
   }
 
   // Native memory tracking data
@@ -361,6 +352,14 @@ void print_statistics() {
     CompileBroker::print_times();
   }
 
+#ifdef COMPILER2_OR_JVMCI
+  if ((LogVMOutput || LogCompilation) && UseCompiler) {
+    // Only print the statistics to the log file
+    FlagSetting fs(DisplayVMOutput, false);
+    Deoptimization::print_statistics();
+  }
+#endif /* COMPILER2 || INCLUDE_JVMCI */
+
   if (PrintCodeCache) {
     MutexLocker mu(CodeCache_lock, Mutex::_no_safepoint_check_flag);
     CodeCache::print();
@@ -375,13 +374,10 @@ void print_statistics() {
   }
 
 #ifdef COMPILER2
-  if (PrintPreciseBiasedLockingStatistics || PrintPreciseRTMLockingStatistics) {
+  if (PrintPreciseRTMLockingStatistics) {
     OptoRuntime::print_named_counters();
   }
 #endif
-  if (PrintBiasedLockingStatistics) {
-    BiasedLocking::print_counters();
-  }
 
   // Native memory tracking data
   if (PrintNMTStatistics) {
@@ -436,7 +432,7 @@ void before_exit(JavaThread* thread) {
 
 #if INCLUDE_JVMCI
   if (EnableJVMCI) {
-    JVMCI::shutdown();
+    JVMCI::shutdown(thread);
   }
 #endif
 
@@ -447,7 +443,7 @@ void before_exit(JavaThread* thread) {
 
   EventThreadEnd event;
   if (event.should_commit()) {
-    event.set_thread(JFR_THREAD_ID(thread));
+    event.set_thread(JFR_JVM_THREAD_ID(thread));
     event.commit();
   }
 
@@ -508,9 +504,10 @@ void before_exit(JavaThread* thread) {
   os::terminate_signal_thread();
 
 #if INCLUDE_CDS
-  if (DynamicDumpSharedSpaces) {
+  if (DynamicArchive::should_dump_at_vm_exit()) {
+    assert(ArchiveClassesAtExit != NULL, "Must be already set");
     ExceptionMark em(thread);
-    DynamicArchive::dump();
+    DynamicArchive::dump(ArchiveClassesAtExit, thread);
     if (thread->has_pending_exception()) {
       ResourceMark rm(thread);
       oop pending_exception = thread->pending_exception();
@@ -561,7 +558,7 @@ void vm_exit(int code) {
       // Historically there must have been some exit path for which
       // that was not the case and so we set it explicitly - even
       // though we no longer know what that path may be.
-      thread->as_Java_thread()->set_thread_state(_thread_in_vm);
+      JavaThread::cast(thread)->set_thread_state(_thread_in_vm);
     }
 
     // Fire off a VM_Exit operation to bring VM to a safepoint and exit
@@ -609,10 +606,10 @@ void vm_perform_shutdown_actions() {
     if (thread != NULL && thread->is_Java_thread()) {
       // We are leaving the VM, set state to native (in case any OS exit
       // handlers call back to the VM)
-      JavaThread* jt = thread->as_Java_thread();
+      JavaThread* jt = JavaThread::cast(thread);
       // Must always be walkable or have no last_Java_frame when in
       // thread_in_native
-      jt->frame_anchor()->make_walkable(jt);
+      jt->frame_anchor()->make_walkable();
       jt->set_thread_state(_thread_in_native);
     }
   }

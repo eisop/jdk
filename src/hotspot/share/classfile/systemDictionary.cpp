@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -68,7 +68,6 @@
 #include "prims/jvmtiExport.hpp"
 #include "prims/methodHandles.hpp"
 #include "runtime/arguments.hpp"
-#include "runtime/biasedLocking.hpp"
 #include "runtime/handles.inline.hpp"
 #include "runtime/java.hpp"
 #include "runtime/javaCalls.hpp"
@@ -77,6 +76,7 @@
 #include "runtime/signature.hpp"
 #include "services/classLoadingService.hpp"
 #include "services/diagnosticCommand.hpp"
+#include "services/finalizerService.hpp"
 #include "services/threadService.hpp"
 #include "utilities/macros.hpp"
 #include "utilities/utf8.hpp"
@@ -155,7 +155,6 @@ ClassLoaderData* SystemDictionary::register_loader(Handle class_loader, bool cre
 
 bool is_parallelCapable(Handle class_loader) {
   if (class_loader.is_null()) return true;
-  if (AlwaysLockClassLoader) return false;
   return java_lang_ClassLoader::parallelCapable(class_loader());
 }
 // ----------------------------------------------------------------------------
@@ -1014,6 +1013,15 @@ bool SystemDictionary::is_shared_class_visible_impl(Symbol* class_name,
     return true;
   }
 
+  if (pkg_entry == NULL) {
+    // We might have looked up pkg_entry before the module system was initialized.
+    // Need to reload it now.
+    TempNewSymbol pkg_name = ClassLoader::package_from_class_name(class_name);
+    if (pkg_name != NULL) {
+      pkg_entry = ClassLoaderData::class_loader_data(class_loader())->packages()->lookup_only(pkg_name);
+    }
+  }
+
   ModuleEntry* mod_entry = (pkg_entry == NULL) ? NULL : pkg_entry->module();
   bool should_be_in_named_module = (mod_entry != NULL && mod_entry->is_named());
   bool was_archived_from_named_module = scp_entry->in_named_module();
@@ -1309,9 +1317,8 @@ InstanceKlass* SystemDictionary::load_instance_class_impl(Symbol* class_name, Ha
                                jt->get_thread_stat()->perf_timers_addr(),
                                PerfClassTraceTime::CLASS_LOAD);
 
-    Handle s = java_lang_String::create_from_symbol(class_name, CHECK_NULL);
     // Translate to external class name format, i.e., convert '/' chars to '.'
-    Handle string = java_lang_String::externalize_classname(s, CHECK_NULL);
+    Handle string = java_lang_String::externalize_classname(class_name, CHECK_NULL);
 
     JavaValue result(T_OBJECT);
 
@@ -1446,7 +1453,6 @@ void SystemDictionary::define_instance_class(InstanceKlass* k, Handle class_load
     // Grabs and releases SystemDictionary_lock
     update_dictionary(name_hash, k, class_loader);
   }
-  k->eager_initialize(THREAD);
 
   // notify jvmti
   if (JvmtiExport::should_post_class_load()) {
@@ -1561,8 +1567,8 @@ InstanceKlass* SystemDictionary::find_or_define_instance_class(Symbol* class_nam
 
 
 // ----------------------------------------------------------------------------
-// Update hierachy. This is done before the new klass has been added to the SystemDictionary. The Compile_lock
-// is held, to ensure that the compiler is not using the class hierachy, and that deoptimization will kick in
+// Update hierarchy. This is done before the new klass has been added to the SystemDictionary. The Compile_lock
+// is held, to ensure that the compiler is not using the class hierarchy, and that deoptimization will kick in
 // before a new class is used.
 
 void SystemDictionary::add_to_hierarchy(InstanceKlass* k) {
@@ -1576,7 +1582,7 @@ void SystemDictionary::add_to_hierarchy(InstanceKlass* k) {
   // The compiler reads the hierarchy outside of the Compile_lock.
   // Access ordering is used to add to hierarchy.
 
-  // Link into hierachy.
+  // Link into hierarchy.
   k->append_to_sibling_list();                    // add to superklass/sibling list
   k->process_interfaces();                        // handle all "implements" declarations
 
@@ -1603,7 +1609,7 @@ bool SystemDictionary::do_unloading(GCTimer* gc_timer) {
     if (unloading_occurred) {
       MutexLocker ml2(is_concurrent ? Module_lock : NULL);
       JFR_ONLY(Jfr::on_unloading_classes();)
-
+      MANAGEMENT_ONLY(FinalizerService::purge_unloaded();)
       MutexLocker ml1(is_concurrent ? SystemDictionary_lock : NULL);
       ClassLoaderDataGraph::clean_module_and_package_info();
       constraints()->purge_loader_constraints();
@@ -1626,6 +1632,9 @@ bool SystemDictionary::do_unloading(GCTimer* gc_timer) {
     } else {
       assert(_pd_cache_table->number_of_entries() == 0, "should be empty");
     }
+
+    MutexLocker ml(is_concurrent ? ClassInitError_lock : NULL);
+    InstanceKlass::clean_initialization_error_table();
   }
 
   return unloading_occurred;
@@ -1661,7 +1670,7 @@ void SystemDictionary::initialize(TRAPS) {
 // Constraints on class loaders. The details of the algorithm can be
 // found in the OOPSLA'98 paper "Dynamic Class Loading in the Java
 // Virtual Machine" by Sheng Liang and Gilad Bracha.  The basic idea is
-// that the dictionary needs to maintain a set of contraints that
+// that the dictionary needs to maintain a set of constraints that
 // must be satisfied by all classes in the dictionary.
 // if defining is true, then LinkageError if already in dictionary
 // if initiating loader, then ok if InstanceKlass matches existing entry
@@ -1723,7 +1732,7 @@ void SystemDictionary::check_constraints(unsigned int name_hash,
   }
 }
 
-// Update class loader data dictionary - done after check_constraint and add_to_hierachy
+// Update class loader data dictionary - done after check_constraint and add_to_hierarchy
 // have been called.
 void SystemDictionary::update_dictionary(unsigned int hash,
                                          InstanceKlass* k,
@@ -2013,8 +2022,9 @@ Method* SystemDictionary::find_method_handle_intrinsic(vmIntrinsicID iid,
     spe = NULL;
     // Must create lots of stuff here, but outside of the SystemDictionary lock.
     m = Method::make_method_handle_intrinsic(iid, signature, CHECK_NULL);
-    if (!Arguments::is_interpreter_only()) {
+    if (!Arguments::is_interpreter_only() || iid == vmIntrinsics::_linkToNative) {
       // Generate a compiled form of the MH intrinsic.
+      // linkToNative doesn't have interpreter-specific implementation, so always has to go through compiled version.
       AdapterHandlerLibrary::create_native_wrapper(m);
       // Check if have the compiled code.
       if (!m->has_compiled_code()) {
@@ -2077,9 +2087,9 @@ static Method* unpack_method_and_appendix(Handle mname,
 Method* SystemDictionary::find_method_handle_invoker(Klass* klass,
                                                      Symbol* name,
                                                      Symbol* signature,
-                                                          Klass* accessing_klass,
-                                                          Handle *appendix_result,
-                                                          TRAPS) {
+                                                     Klass* accessing_klass,
+                                                     Handle* appendix_result,
+                                                     TRAPS) {
   assert(THREAD->can_call_java() ,"");
   Handle method_type =
     SystemDictionary::find_method_handle_type(signature, accessing_klass, CHECK_NULL);
@@ -2352,11 +2362,10 @@ void SystemDictionary::invoke_bootstrap_method(BootstrapInfo& bootstrap_specifie
     assert(appendix_box->obj_at(0) == NULL, "");
   }
 
-  // call condy: java.lang.invoke.MethodHandleNatives::linkDynamicConstant(caller, condy_index, bsm, type, info)
-  //       indy: java.lang.invoke.MethodHandleNatives::linkCallSite(caller, indy_index, bsm, name, mtype, info, &appendix)
+  // call condy: java.lang.invoke.MethodHandleNatives::linkDynamicConstant(caller, bsm, type, info)
+  //       indy: java.lang.invoke.MethodHandleNatives::linkCallSite(caller, bsm, name, mtype, info, &appendix)
   JavaCallArguments args;
   args.push_oop(Handle(THREAD, bootstrap_specifier.caller_mirror()));
-  args.push_int(bootstrap_specifier.bss_index());
   args.push_oop(bootstrap_specifier.bsm());
   args.push_oop(bootstrap_specifier.name_arg());
   args.push_oop(bootstrap_specifier.type_arg());

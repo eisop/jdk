@@ -422,10 +422,10 @@ public abstract @UsesObjectEquals class GraphicsDevice {
      * </code></pre>
      *
      * @param dm The new display mode of this graphics device.
-     * @exception IllegalArgumentException if the {@code DisplayMode}
+     * @throws IllegalArgumentException if the {@code DisplayMode}
      * supplied is {@code null}, or is not available in the array returned
      * by {@code getDisplayModes}
-     * @exception UnsupportedOperationException if
+     * @throws UnsupportedOperationException if
      * {@code isDisplayChangeSupported} returns {@code false}
      * @see #getDisplayMode
      * @see #getDisplayModes

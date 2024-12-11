@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -333,7 +333,7 @@ public class ModuleDescriptor
          */
         @Override
         public int hashCode() {
-            int hash = name.hashCode() * 43 + mods.hashCode();
+            int hash = name.hashCode() * 43 + modsHashCode(mods);
             if (compiledVersion != null)
                 hash = hash * 43 + compiledVersion.hashCode();
             if (rawCompiledVersion != null)
@@ -511,7 +511,7 @@ public class ModuleDescriptor
          */
         @Override
         public int hashCode() {
-            int hash = mods.hashCode();
+            int hash = modsHashCode(mods);
             hash = hash * 43 + source.hashCode();
             return hash * 43 + targets.hashCode();
         }
@@ -714,7 +714,7 @@ public class ModuleDescriptor
          */
         @Override
         public int hashCode() {
-            int hash = mods.hashCode();
+            int hash = modsHashCode(mods);
             hash = hash * 43 + source.hashCode();
             return hash * 43 + targets.hashCode();
         }
@@ -899,7 +899,8 @@ public class ModuleDescriptor
      * integer or a string.  Tokens are separated by the punctuation characters
      * {@code '.'}, {@code '-'}, or {@code '+'}, or by transitions from a
      * sequence of digits to a sequence of characters that are neither digits
-     * nor punctuation characters, or vice versa.
+     * nor punctuation characters, or vice versa.  Consecutive repeated
+     * punctuation characters are treated as a single punctuation character.
      *
      * <ul>
      *
@@ -1039,13 +1040,6 @@ public class ModuleDescriptor
 
             while (i < n) {
                 c = v.charAt(i);
-                if (c >= '0' && c <= '9')
-                    i = takeNumber(v, i, pre);
-                else
-                    i = takeString(v, i, pre);
-                if (i >= n)
-                    break;
-                c = v.charAt(i);
                 if (c == '.' || c == '-') {
                     i++;
                     continue;
@@ -1054,6 +1048,10 @@ public class ModuleDescriptor
                     i++;
                     break;
                 }
+                if (c >= '0' && c <= '9')
+                    i = takeNumber(v, i, pre);
+                else
+                    i = takeString(v, i, pre);
             }
 
             if (c == '+' && i >= n)
@@ -1061,17 +1059,14 @@ public class ModuleDescriptor
 
             while (i < n) {
                 c = v.charAt(i);
-                if (c >= '0' && c <= '9')
-                    i = takeNumber(v, i, build);
-                else
-                    i = takeString(v, i, build);
-                if (i >= n)
-                    break;
-                c = v.charAt(i);
                 if (c == '.' || c == '-' || c == '+') {
                     i++;
                     continue;
                 }
+                if (c >= '0' && c <= '9')
+                    i = takeNumber(v, i, build);
+                else
+                    i = takeString(v, i, build);
             }
 
             this.version = v;
@@ -1478,13 +1473,14 @@ public class ModuleDescriptor
      * <cite>The Java Language Specification</cite>. </p>
      *
      * <p> Example usage: </p>
-     * <pre>{@code    ModuleDescriptor descriptor = ModuleDescriptor.newModule("stats.core")
+     * {@snippet :
+     *     ModuleDescriptor descriptor = ModuleDescriptor.newModule("stats.core")
      *         .requires("java.base")
      *         .exports("org.acme.stats.core.clustering")
      *         .exports("org.acme.stats.core.regression")
      *         .packages(Set.of("org.acme.stats.core.internal"))
      *         .build();
-     * }</pre>
+     * }
      *
      * @apiNote A {@code Builder} checks the components and invariants as
      * components are added to the builder. The rationale for this is to detect
@@ -1514,7 +1510,7 @@ public class ModuleDescriptor
          *
          * If {@code strict} is {@code true} then module, package, and class
          * names are checked to ensure they are legal names. In addition, the
-         * {@link #build buid} method will add "{@code requires java.base}" if
+         * {@link #build build} method will add "{@code requires java.base}" if
          * the dependency is not declared.
          */
         Builder(String name, boolean strict, Set<Modifier> modifiers) {
@@ -2269,7 +2265,7 @@ public class ModuleDescriptor
         int hc = hash;
         if (hc == 0) {
             hc = name.hashCode();
-            hc = hc * 43 + Objects.hashCode(modifiers);
+            hc = hc * 43 + modsHashCode(modifiers);
             hc = hc * 43 + requires.hashCode();
             hc = hc * 43 + Objects.hashCode(packages);
             hc = hc * 43 + exports.hashCode();
@@ -2455,7 +2451,7 @@ public class ModuleDescriptor
      * Reads the binary form of a module declaration from an input stream as a
      * module descriptor. This method works exactly as specified by the 2-arg
      * {@link #read(InputStream,Supplier) read} method with the exception that
-     * a packager finder is not used to find additional packages when the
+     * a package finder is not used to find additional packages when the
      * module descriptor read from the stream does not indicate the set of
      * packages.
      *
@@ -2524,7 +2520,7 @@ public class ModuleDescriptor
      * Reads the binary form of a module declaration from a byte buffer as a
      * module descriptor. This method works exactly as specified by the 2-arg
      * {@link #read(ByteBuffer,Supplier) read} method with the exception that a
-     * packager finder is not used to find additional packages when the module
+     * package finder is not used to find additional packages when the module
      * descriptor encoded in the buffer does not indicate the set of packages.
      *
      * @param  bb
@@ -2552,6 +2548,18 @@ public class ModuleDescriptor
                                                       .toLowerCase(Locale.ROOT)),
                               Stream.of(what)))
                 .collect(Collectors.joining(" "));
+    }
+
+    /**
+     * Generates and returns a hashcode for the enum instances. The returned hashcode
+     * is a value based on the {@link Enum#name() name} of each enum instance.
+     */
+    private static int modsHashCode(Iterable<? extends Enum<?>> enums) {
+        int h = 0;
+        for (Enum<?> e : enums) {
+            h = h * 43 + Objects.hashCode(e.name());
+        }
+        return h;
     }
 
     private static <T extends Object & Comparable<? super T>>

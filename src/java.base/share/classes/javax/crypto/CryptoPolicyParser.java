@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,6 +29,7 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.dataflow.qual.Pure;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -68,7 +69,7 @@ import java.lang.reflect.*;
 
 final class CryptoPolicyParser {
 
-    private Vector<GrantEntry> grantEntries;
+    private final Vector<GrantEntry> grantEntries;
 
     // Convenience variables for parsing
     private StreamTokenizer st;
@@ -78,7 +79,7 @@ final class CryptoPolicyParser {
      * Creates a CryptoPolicyParser object.
      */
     CryptoPolicyParser() {
-        grantEntries = new Vector<GrantEntry>();
+        grantEntries = new Vector<>();
     }
 
     /**
@@ -143,8 +144,7 @@ final class CryptoPolicyParser {
         while (lookahead != StreamTokenizer.TT_EOF) {
             if (peek("grant")) {
                 GrantEntry ge = parseGrantEntry(processedPermissions);
-                if (ge != null)
-                    grantEntries.addElement(ge);
+                grantEntries.addElement(ge);
             } else {
                 throw new ParsingException(st.lineno(), "expected grant " +
                                            "statement");
@@ -257,15 +257,15 @@ final class CryptoPolicyParser {
             // AlgorithmParameterSpec class name.
             String algParamSpecClassName = match("quoted string");
 
-            Vector<Integer> paramsV = new Vector<>(1);
+            ArrayList<Integer> paramsV = new ArrayList<>(1);
             while (peek(",")) {
                 match(",");
                 if (peek("number")) {
-                    paramsV.addElement(match());
+                    paramsV.add(match());
                 } else {
                     if (peek("*")) {
                         match("*");
-                        paramsV.addElement(Integer.MAX_VALUE);
+                        paramsV.add(Integer.MAX_VALUE);
                     } else {
                         throw new ParsingException(st.lineno(),
                                                    "Expecting an integer");
@@ -273,8 +273,7 @@ final class CryptoPolicyParser {
                 }
             }
 
-            Integer[] params = new Integer[paramsV.size()];
-            paramsV.copyInto(params);
+            Integer[] params = paramsV.toArray(new Integer[0]);
 
             e.checkParam = true;
             e.algParamSpec = getInstance(algParamSpecClassName, params);
@@ -283,11 +282,11 @@ final class CryptoPolicyParser {
         return e;
     }
 
-    private static final AlgorithmParameterSpec getInstance(String type,
-                                                            Integer[] params)
+    private static AlgorithmParameterSpec getInstance(String type,
+                                                      Integer[] params)
         throws ParsingException
     {
-        AlgorithmParameterSpec ret = null;
+        AlgorithmParameterSpec ret;
 
         try {
             Class<?> apsClass = Class.forName(type);
@@ -399,7 +398,7 @@ final class CryptoPolicyParser {
         switch (lookahead) {
         case StreamTokenizer.TT_NUMBER:
             throw new ParsingException(st.lineno(), expect,
-                                       "number "+String.valueOf(st.nval));
+                                       "number " + st.nval);
         case StreamTokenizer.TT_EOF:
            throw new ParsingException("expected "+expect+", read end of file");
         case StreamTokenizer.TT_WORD:
@@ -462,7 +461,7 @@ final class CryptoPolicyParser {
     }
 
     CryptoPermission[] getPermissions() {
-        Vector<CryptoPermission> result = new Vector<>();
+        ArrayList<CryptoPermission> result = new ArrayList<>();
 
         Enumeration<GrantEntry> grantEnum = grantEntries.elements();
         while (grantEnum.hasMoreElements()) {
@@ -473,16 +472,16 @@ final class CryptoPolicyParser {
                 CryptoPermissionEntry pe = permEnum.nextElement();
                 if (pe.cryptoPermission.equals(
                                         "javax.crypto.CryptoAllPermission")) {
-                    result.addElement(CryptoAllPermission.INSTANCE);
+                    result.add(CryptoAllPermission.INSTANCE);
                 } else {
                     if (pe.checkParam) {
-                        result.addElement(new CryptoPermission(
+                        result.add(new CryptoPermission(
                                                 pe.alg,
                                                 pe.maxKeySize,
                                                 pe.algParamSpec,
                                                 pe.exemptionMechanism));
                     } else {
-                        result.addElement(new CryptoPermission(
+                        result.add(new CryptoPermission(
                                                 pe.alg,
                                                 pe.maxKeySize,
                                                 pe.exemptionMechanism));
@@ -491,10 +490,7 @@ final class CryptoPolicyParser {
             }
         }
 
-        CryptoPermission[] ret = new CryptoPermission[result.size()];
-        result.copyInto(ret);
-
-        return ret;
+        return result.toArray(new CryptoPermission[0]);
     }
 
     private boolean isConsistent(String alg, String exemptionMechanism,
@@ -503,7 +499,7 @@ final class CryptoPolicyParser {
             exemptionMechanism == null ? "none" : exemptionMechanism;
 
         if (processedPermissions == null) {
-            processedPermissions = new Hashtable<String, Vector<String>>();
+            processedPermissions = new Hashtable<>();
             Vector<String> exemptionMechanisms = new Vector<>(1);
             exemptionMechanisms.addElement(thisExemptionMechanism);
             processedPermissions.put(alg, exemptionMechanisms);
@@ -522,7 +518,7 @@ final class CryptoPolicyParser {
                 return false;
             }
         } else {
-            exemptionMechanisms = new Vector<String>(1);
+            exemptionMechanisms = new Vector<>(1);
         }
 
         exemptionMechanisms.addElement(thisExemptionMechanism);
@@ -560,10 +556,10 @@ final class CryptoPolicyParser {
 
     private static class GrantEntry {
 
-        private Vector<CryptoPermissionEntry> permissionEntries;
+        private final Vector<CryptoPermissionEntry> permissionEntries;
 
         GrantEntry() {
-            permissionEntries = new Vector<CryptoPermissionEntry>();
+            permissionEntries = new Vector<>();
         }
 
         void add(CryptoPermissionEntry pe)
@@ -652,10 +648,8 @@ final class CryptoPolicyParser {
             if (obj == this)
                 return true;
 
-            if (!(obj instanceof CryptoPermissionEntry))
+            if (!(obj instanceof CryptoPermissionEntry that))
                 return false;
-
-            CryptoPermissionEntry that = (CryptoPermissionEntry) obj;
 
             if (this.cryptoPermission == null) {
                 if (that.cryptoPermission != null) return false;
@@ -677,14 +671,10 @@ final class CryptoPolicyParser {
             if (this.checkParam != that.checkParam) return false;
 
             if (this.algParamSpec == null) {
-                if (that.algParamSpec != null) return false;
+                return that.algParamSpec == null;
             } else {
-                if (!this.algParamSpec.equals(that.algParamSpec))
-                    return false;
+                return this.algParamSpec.equals(that.algParamSpec);
             }
-
-            // everything matched -- the 2 objects are equal
-            return true;
         }
     }
 

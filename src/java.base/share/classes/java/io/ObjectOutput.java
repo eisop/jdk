@@ -69,7 +69,7 @@ public interface ObjectOutput extends DataOutput, AutoCloseable {
      * @param     b the data to be written
      * @throws    IOException If an I/O error has occurred.
      */
-    public void write(@PolySigned byte b[]) throws IOException;
+    public void write(@PolySigned byte[] b) throws IOException;
 
     /**
      * Writes a sub array of bytes.
@@ -78,7 +78,7 @@ public interface ObjectOutput extends DataOutput, AutoCloseable {
      * @param     len       the number of bytes that are written
      * @throws    IOException If an I/O error has occurred.
      */
-    public void write(@PolySigned byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException;
+    public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException;
 
     /**
      * Flushes the stream. This will write any buffered
