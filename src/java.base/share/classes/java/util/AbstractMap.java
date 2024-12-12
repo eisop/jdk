@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -41,7 +41,6 @@ import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
-import java.util.Map.Entry;
 
 /**
  * This class provides a skeletal implementation of the {@code Map}
@@ -540,9 +539,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
                         return false;
                 }
             }
-        } catch (ClassCastException unused) {
-            return false;
-        } catch (NullPointerException unused) {
+        } catch (ClassCastException | NullPointerException unused) {
             return false;
         }
 
@@ -649,6 +646,9 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * implementations. For example, it may be convenient to return
      * arrays of {@code SimpleEntry} instances in method
      * {@code Map.entrySet().toArray}.
+     *
+     * @param <K> the type of key
+     * @param <V> the type of the value
      *
      * @since 1.6
      */
@@ -798,6 +798,8 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * {@link Map#entry Map::entry} and {@link Map.Entry#copyOf Map.Entry::copyOf}
      * methods.
      *
+     * @param <K> the type of the keys
+     * @param <V> the type of the value
      * @since 1.6
      */
     public static class SimpleImmutableEntry<K,V>

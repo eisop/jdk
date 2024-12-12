@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,7 +27,6 @@ package jdk.internal.net.http;
 
 import org.checkerframework.dataflow.qual.Pure;
 import java.io.IOException;
-import java.lang.System.Logger.Level;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -46,14 +45,13 @@ import java.util.stream.Collectors;
 import jdk.internal.net.http.common.FlowTube;
 import jdk.internal.net.http.common.Logger;
 import jdk.internal.net.http.common.Utils;
+import static jdk.internal.net.http.HttpClientImpl.KEEP_ALIVE_TIMEOUT; //seconds
 
 /**
  * Http 1.1 connection pool.
  */
 final class ConnectionPool {
 
-    static final long KEEP_ALIVE = Utils.getIntegerNetProperty(
-            "jdk.httpclient.keepalive.timeout", 1200); // seconds
     static final long MAX_POOL_SIZE = Utils.getIntegerNetProperty(
             "jdk.httpclient.connectionPoolSize", 0); // unbounded
     final Logger debug = Utils.getDebugLogger(this::dbgString, Utils.DEBUG);
@@ -69,18 +67,21 @@ final class ConnectionPool {
     /**
      * Entries in connection pool are keyed by destination address and/or
      * proxy address:
-     * case 1: plain TCP not via proxy (destination only)
+     * case 1: plain TCP not via proxy (destination IP only)
      * case 2: plain TCP via proxy (proxy only)
-     * case 3: SSL not via proxy (destination only)
-     * case 4: SSL over tunnel (destination and proxy)
+     * case 3: SSL not via proxy (destination IP+hostname only)
+     * case 4: SSL over tunnel (destination IP+hostname and proxy)
      */
     static class CacheKey {
         final InetSocketAddress proxy;
         final InetSocketAddress destination;
+        final boolean secure;
 
-        CacheKey(InetSocketAddress destination, InetSocketAddress proxy) {
+        private CacheKey(boolean secure, InetSocketAddress destination,
+                         InetSocketAddress proxy) {
             this.proxy = proxy;
             this.destination = destination;
+            this.secure = secure;
         }
 
         @Override
@@ -92,11 +93,25 @@ final class ConnectionPool {
                 return false;
             }
             final CacheKey other = (CacheKey) obj;
+            if (this.secure != other.secure) {
+                return false;
+            }
             if (!Objects.equals(this.proxy, other.proxy)) {
                 return false;
             }
             if (!Objects.equals(this.destination, other.destination)) {
                 return false;
+            }
+            if (secure && destination != null) {
+                if (destination.getHostName() != null) {
+                    if (!destination.getHostName().equalsIgnoreCase(
+                            other.destination.getHostName())) {
+                        return false;
+                    }
+                } else {
+                    if (other.destination.getHostName() != null)
+                        return false;
+                }
             }
             return true;
         }
@@ -129,10 +144,10 @@ final class ConnectionPool {
         assert !stopped : "Already stopped";
     }
 
-    static CacheKey cacheKey(InetSocketAddress destination,
+    static CacheKey cacheKey(boolean secure, InetSocketAddress destination,
                              InetSocketAddress proxy)
     {
-        return new CacheKey(destination, proxy);
+        return new CacheKey(secure, destination, proxy);
     }
 
     synchronized HttpConnection getConnection(boolean secure,
@@ -141,7 +156,7 @@ final class ConnectionPool {
         if (stopped) return null;
         // for plain (unsecure) proxy connection the destination address is irrelevant.
         addr = secure || proxy == null ? addr : null;
-        CacheKey key = new CacheKey(addr, proxy);
+        CacheKey key = new CacheKey(secure, addr, proxy);
         HttpConnection c = secure ? findConnection(key, sslPool)
                                   : findConnection(key, plainPool);
         //System.out.println ("getConnection returning: " + c);
@@ -153,7 +168,7 @@ final class ConnectionPool {
      * Returns the connection to the pool.
      */
     void returnToPool(HttpConnection conn) {
-        returnToPool(conn, Instant.now(), KEEP_ALIVE);
+        returnToPool(conn, Instant.now(), KEEP_ALIVE_TIMEOUT);
     }
 
     // Called also by whitebox tests
@@ -363,7 +378,7 @@ final class ConnectionPool {
         // should only be called while holding a synchronization
         // lock on the ConnectionPool
         void add(HttpConnection conn) {
-            add(conn, Instant.now(), KEEP_ALIVE);
+            add(conn, Instant.now(), KEEP_ALIVE_TIMEOUT);
         }
 
         // Used by whitebox test.

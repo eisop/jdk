@@ -77,7 +77,6 @@ import jdk.internal.icu.text.UCharacterIterator;
  *
  */
 @AnnotatedFor({"interning"})
-@SuppressWarnings("removal")
 public final @UsesObjectEquals class IDN {
     /**
      * Flag to allow processing of unassigned code points
@@ -229,19 +228,15 @@ public final @UsesObjectEquals class IDN {
     private static StringPrep namePrep = null;
 
     static {
-        InputStream stream = null;
-
         try {
             final String IDN_PROFILE = "/sun/net/idn/uidna.spp";
-            if (System.getSecurityManager() != null) {
-                stream = AccessController.doPrivileged(new PrivilegedAction<>() {
-                    public InputStream run() {
-                        return StringPrep.class.getResourceAsStream(IDN_PROFILE);
-                    }
-                });
-            } else {
-                stream = StringPrep.class.getResourceAsStream(IDN_PROFILE);
-            }
+            @SuppressWarnings("removal")
+            InputStream stream = System.getSecurityManager() != null
+                    ? AccessController.doPrivileged(new PrivilegedAction<>() {
+                            public InputStream run() {
+                                return StringPrep.class.getResourceAsStream(IDN_PROFILE);
+                            }})
+                    : StringPrep.class.getResourceAsStream(IDN_PROFILE);
 
             namePrep = new StringPrep(stream);
             stream.close();

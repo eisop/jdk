@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,7 +35,8 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException ;
 import java.util.BitSet;
 import java.util.Objects;
-import sun.security.action.GetPropertyAction;
+
+import jdk.internal.util.StaticProperty;
 
 /**
  * Utility class for HTML form encoding. This class contains static methods
@@ -63,7 +64,7 @@ import sun.security.action.GetPropertyAction;
  *     two-digit hexadecimal representation of the byte.
  *     The recommended encoding scheme to use is UTF-8. However,
  *     for compatibility reasons, if an encoding is not specified,
- *     then the default encoding of the platform is used.
+ *     then the default charset is used.
  * </ul>
  *
  * <p>
@@ -72,6 +73,8 @@ import sun.security.action.GetPropertyAction;
  * &quot;The+string+%C3%BC%40foo-bar&quot; because in UTF-8 the character
  * &#252; is encoded as two bytes C3 (hex) and BC (hex), and the
  * character @ is encoded as one byte 40 (hex).
+ *
+ * @see Charset#defaultCharset()
  *
  * @author  Herb Jellinek
  * @since   1.0
@@ -138,7 +141,7 @@ public @UsesObjectEquals class URLEncoder {
         dontNeedEncoding.set('.');
         dontNeedEncoding.set('*');
 
-        dfltEncName = GetPropertyAction.privilegedGetProperty("file.encoding");
+        dfltEncName = StaticProperty.fileEncoding();
     }
 
     /**
@@ -148,12 +151,12 @@ public @UsesObjectEquals class URLEncoder {
 
     /**
      * Translates a string into {@code x-www-form-urlencoded}
-     * format. This method uses the platform's default encoding
+     * format. This method uses the default charset
      * as the encoding scheme to obtain the bytes for unsafe characters.
      *
      * @param   s   {@code String} to be translated.
-     * @deprecated The resulting string may vary depending on the platform's
-     *             default encoding. Instead, use the encode(String,String)
+     * @deprecated The resulting string may vary depending on the
+     *             default charset. Instead, use the encode(String,String)
      *             method to specify the encoding.
      * @return  the translated {@code String}.
      */
@@ -165,7 +168,7 @@ public @UsesObjectEquals class URLEncoder {
         try {
             str = encode(s, dfltEncName);
         } catch (UnsupportedEncodingException e) {
-            // The system should always have the platform default
+            // The system should always have the default charset
         }
 
         return str;
@@ -176,7 +179,7 @@ public @UsesObjectEquals class URLEncoder {
      * format using a specific encoding scheme.
      * <p>
      * This method behaves the same as {@linkplain #encode(String s, Charset charset)}
-     * except that it will {@linkplain java.nio.charset.Charset#forName look up the charset}
+     * except that it will {@linkplain Charset#forName look up the charset}
      * using the given encoding name.
      *
      * @param   s   {@code String} to be translated.
@@ -205,7 +208,7 @@ public @UsesObjectEquals class URLEncoder {
 
     /**
      * Translates a string into {@code application/x-www-form-urlencoded}
-     * format using a specific {@linkplain java.nio.charset.Charset Charset}.
+     * format using a specific {@linkplain Charset Charset}.
      * This method uses the supplied charset to obtain the bytes for unsafe
      * characters.
      * <p>
@@ -218,7 +221,7 @@ public @UsesObjectEquals class URLEncoder {
      * @param charset the given charset
      * @return  the translated {@code String}.
      * @throws NullPointerException if {@code s} or {@code charset} is {@code null}.
-     * @see URLDecoder#decode(java.lang.String, java.nio.charset.Charset)
+     * @see URLDecoder#decode(java.lang.String, Charset)
      * @since 10
      */
     public static String encode(String s, Charset charset) {
