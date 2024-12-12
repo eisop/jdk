@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -121,7 +121,7 @@ import org.checkerframework.framework.qual.CFComment;
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness"})
-public interface SortedMap<K,V> extends Map<K,V> {
+public interface SortedMap<K,V> extends SequencedMap<K,V> {
     /**
      * Returns the comparator used to order the keys in this map, or
      * {@code null} if this map uses the {@linkplain Comparable
@@ -301,4 +301,54 @@ public interface SortedMap<K,V> extends Map<K,V> {
      */
     @SideEffectFree
     Set<Map.Entry<@KeyFor({"this"}) K, V>> entrySet(@GuardSatisfied SortedMap<K, V> this);
+
+    /**
+     * Throws {@code UnsupportedOperationException}. The encounter order induced by this
+     * map's comparison method determines the position of mappings, so explicit positioning
+     * is not supported.
+     *
+     * @implSpec
+     * The implementation in this interface always throws {@code UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException always
+     * @since 21
+     */
+     default V putFirst(K k, V v) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Throws {@code UnsupportedOperationException}. The encounter order induced by this
+     * map's comparison method determines the position of mappings, so explicit positioning
+     * is not supported.
+     *
+     * @implSpec
+     * The implementation in this interface always throws {@code UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException always
+     * @since 21
+     */
+    default V putLast(K k, V v) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @implSpec
+     * The implementation in this interface returns a reverse-ordered SortedMap
+     * view. The {@code reversed()} method of the view returns a reference
+     * to this SortedMap. Other operations on the view are implemented via calls to
+     * public methods on this SortedMap. The exact relationship between calls on the
+     * view and calls on this SortedMap is unspecified. However, order-sensitive
+     * operations generally delegate to the appropriate method with the opposite
+     * orientation. For example, calling {@code firstEntry} on the view results in
+     * a call to {@code lastEntry} on this SortedMap.
+     *
+     * @return a reverse-ordered view of this map, as a {@code SortedMap}
+     * @since 21
+     */
+    default SortedMap<K, V> reversed() {
+        return ReverseOrderSortedMapView.of(this);
+    }
 }
