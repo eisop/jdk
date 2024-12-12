@@ -226,30 +226,7 @@ public class BMPImageReader extends ImageReader implements BMPConstants {
     }
 
     private void readColorPalette(int sizeOfPalette) throws IOException {
-        final int UNIT_SIZE = 1024000;
-        if (sizeOfPalette < UNIT_SIZE) {
-            palette = new byte[sizeOfPalette];
-            iis.readFully(palette, 0, sizeOfPalette);
-        } else {
-            int bytesToRead = sizeOfPalette;
-            int bytesRead = 0;
-            List<byte[]> bufs = new ArrayList<>();
-            while (bytesToRead != 0) {
-                int sz = Math.min(bytesToRead, UNIT_SIZE);
-                byte[] unit = new byte[sz];
-                iis.readFully(unit, 0, sz);
-                bufs.add(unit);
-                bytesRead += sz;
-                bytesToRead -= sz;
-            }
-            byte[] paletteData = new byte[bytesRead];
-            int copiedBytes = 0;
-            for (byte[] ba : bufs) {
-                System.arraycopy(ba, 0, paletteData, copiedBytes, ba.length);
-                copiedBytes += ba.length;
-            }
-            palette = paletteData;
-        }
+        palette = ReaderUtil.staggeredReadByteStream(iis, sizeOfPalette);
     }
 
     /**
@@ -615,8 +592,10 @@ public class BMPImageReader extends ImageReader implements BMPConstants {
             height = Math.abs(height);
         }
 
-        if (metadata.compression == BI_RGB) {
-            long imageDataSize = ((long)width * height * (bitsPerPixel / 8));
+        if (metadata.compression == BI_RGB &&
+            metadata.paletteSize == 0 &&
+            metadata.bitsPerPixel >= 16) {
+            long imageDataSize = (((long)width * height * bitsPerPixel) / 8);
             if (imageDataSize > (bitmapFileSize - bitmapOffset)) {
                 throw new IIOException(I18N.getString("BMPImageReader9"));
             }

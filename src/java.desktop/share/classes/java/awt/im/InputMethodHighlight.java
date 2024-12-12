@@ -199,4 +199,4 @@ public @UsesObjectEquals class InputMethodHighlight {
     private int variation;
     private Map<TextAttribute, ?> style;
 
-};
+}

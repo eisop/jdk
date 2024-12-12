@@ -41,6 +41,7 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import static java.lang.ref.Reference.reachabilityFence;
+import java.lang.ref.Cleaner.Cleanable;
 import java.security.AccessControlContext;
 import java.security.AccessControlException;
 import java.security.AccessController;
@@ -50,7 +51,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import jdk.internal.javac.PreviewFeature;
+import jdk.internal.ref.CleanerFactory;
 import sun.security.util.SecurityConstants;
 
 /**
@@ -179,10 +180,7 @@ public @UsesObjectEquals class Executors {
      * @return the newly created single-threaded Executor
      */
     public static ExecutorService newSingleThreadExecutor() {
-        return new FinalizableDelegatedExecutorService
-            (new ThreadPoolExecutor(1, 1,
-                                    0L, TimeUnit.MILLISECONDS,
-                                    new LinkedBlockingQueue<Runnable>()));
+        return newSingleThreadExecutor(defaultThreadFactory());
     }
 
     /**
@@ -198,7 +196,7 @@ public @UsesObjectEquals class Executors {
      * @throws NullPointerException if threadFactory is null
      */
     public static ExecutorService newSingleThreadExecutor(ThreadFactory threadFactory) {
-        return new FinalizableDelegatedExecutorService
+        return new AutoShutdownDelegatedExecutorService
             (new ThreadPoolExecutor(1, 1,
                                     0L, TimeUnit.MILLISECONDS,
                                     new LinkedBlockingQueue<Runnable>(),
@@ -256,9 +254,8 @@ public @UsesObjectEquals class Executors {
      * @param threadFactory the factory to use when creating new threads
      * @return a new executor that creates a new Thread for each task
      * @throws NullPointerException if threadFactory is null
-     * @since 19
+     * @since 21
      */
-    @PreviewFeature(feature = PreviewFeature.Feature.VIRTUAL_THREADS)
     public static ExecutorService newThreadPerTaskExecutor(ThreadFactory threadFactory) {
         return ThreadPerTaskExecutor.create(threadFactory);
     }
@@ -272,10 +269,8 @@ public @UsesObjectEquals class Executors {
      * that creates virtual threads.
      *
      * @return a new executor that creates a new virtual Thread for each task
-     * @throws UnsupportedOperationException if preview features are not enabled
-     * @since 19
+     * @since 21
      */
-    @PreviewFeature(feature = PreviewFeature.Feature.VIRTUAL_THREADS)
     public static ExecutorService newVirtualThreadPerTaskExecutor() {
         ThreadFactory factory = Thread.ofVirtual().factory();
         return newThreadPerTaskExecutor(factory);
@@ -765,7 +760,11 @@ public @UsesObjectEquals class Executors {
                 e.execute(command);
             } finally { reachabilityFence(this); }
         }
-        public void shutdown() { e.shutdown(); }
+        public void shutdown() {
+            try {
+                e.shutdown();
+            } finally { reachabilityFence(this); }
+        }
         public List<Runnable> shutdownNow() {
             try {
                 return e.shutdownNow();
@@ -830,14 +829,28 @@ public @UsesObjectEquals class Executors {
         }
     }
 
-    private static class FinalizableDelegatedExecutorService
+    /**
+     * A DelegatedExecutorService that uses a Cleaner to shut down the underlying
+     * ExecutorService when the wrapper becomes phantom reachable.
+     */
+    private static class AutoShutdownDelegatedExecutorService
             extends DelegatedExecutorService {
-        FinalizableDelegatedExecutorService(ExecutorService executor) {
+        private final Cleanable cleanable;
+        AutoShutdownDelegatedExecutorService(ExecutorService executor) {
             super(executor);
+            Runnable action = () -> {
+                if (!executor.isShutdown()) {
+                    PrivilegedAction<Void> pa = () -> { executor.shutdown(); return null; };
+                    @SuppressWarnings("removal")
+                    var ignore = AccessController.doPrivileged(pa);
+                }
+            };
+            cleanable = CleanerFactory.cleaner().register(this, action);
         }
-        @SuppressWarnings("removal")
-        protected void finalize() {
+        @Override
+        public void shutdown() {
             super.shutdown();
+            cleanable.clean();  // unregisters the cleanable
         }
     }
 

@@ -106,6 +106,7 @@ import jdk.internal.icu.text.NormalizerBase;
  * character encodings the Unicode text needs to be normalized to NFC.
  * For more usage examples, see the Unicode Standard Annex.
  *
+ * @spec https://www.unicode.org/reports/tr15 Unicode Normalization Forms
  * @since 1.6
  */
 @AnnotatedFor({"interning"})
@@ -120,6 +121,7 @@ public final @UsesObjectEquals class Normalizer {
      * Unicode Standard Annex #15 &mdash; Unicode Normalization Forms</a>
      * and two methods to access them.
      *
+     * @spec https://www.unicode.org/reports/tr15 Unicode Normalization Forms
      * @since 1.6
      */
     public static enum Form {
