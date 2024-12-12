@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,8 +27,8 @@ package jdk.javadoc.internal.doclets.formats.html;
 
 import org.checkerframework.dataflow.qual.Pure;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +45,6 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 
-import com.sun.source.util.DocTreePath;
 import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
@@ -77,11 +76,6 @@ import jdk.javadoc.internal.doclets.toolkit.util.PreviewAPIListBuilder;
  * Also do the error checking on the options used. For example it is illegal to
  * use "-helpfile" option when already "-nohelp" option is used.
  * </p>
- *
- *  <p><b>This is NOT part of any supported API.
- *  If you write code that depends on this, you do so at your own risk.
- *  This code and its internal interfaces are subject to change or
- *  deletion without notice.</b>
  */
 public class HtmlConfiguration extends BaseConfiguration {
 
@@ -157,7 +151,7 @@ public class HtmlConfiguration extends BaseConfiguration {
     // Note: this should (eventually) be merged with Navigation.PageMode,
     // which performs a somewhat similar role
     public enum ConditionalPage {
-        CONSTANT_VALUES, DEPRECATED, PREVIEW, SERIALIZED_FORM, SYSTEM_PROPERTIES, NEW
+        CONSTANT_VALUES, DEPRECATED, EXTERNAL_SPECS, PREVIEW, SERIALIZED_FORM, SYSTEM_PROPERTIES, NEW
     }
 
     /**
@@ -167,6 +161,11 @@ public class HtmlConfiguration extends BaseConfiguration {
      * to these files in the navigation par, on each page, the help file, and so on.
      */
     public final Set<ConditionalPage> conditionalPages;
+
+    /**
+     * The build date, to be recorded in generated files.
+     */
+    private ZonedDateTime buildDate;
 
     /**
      * Constructs the full configuration needed by the doclet, including
@@ -217,6 +216,7 @@ public class HtmlConfiguration extends BaseConfiguration {
 
         conditionalPages = EnumSet.noneOf(ConditionalPage.class);
     }
+
     protected void initConfiguration(DocletEnvironment docEnv,
                                      Function<String, String> resourceKeyMapper) {
         super.initConfiguration(docEnv, resourceKeyMapper);
@@ -225,7 +225,6 @@ public class HtmlConfiguration extends BaseConfiguration {
     }
 
     private final Runtime.Version docletVersion;
-    public final Date startTime = new Date();
 
     @Override
     public Runtime.Version getDocletVersion() {
@@ -261,6 +260,10 @@ public class HtmlConfiguration extends BaseConfiguration {
         if (!options.validateOptions()) {
             return false;
         }
+
+        ZonedDateTime zdt = options.date();
+        buildDate = zdt != null ? zdt : ZonedDateTime.now();
+
         if (!getSpecifiedTypeElements().isEmpty()) {
             Map<String, PackageElement> map = new HashMap<>();
             PackageElement pkg;
@@ -282,6 +285,13 @@ public class HtmlConfiguration extends BaseConfiguration {
     }
 
     /**
+     * {@return the date to be recorded in generated files}
+     */
+    public ZonedDateTime getBuildDate() {
+        return buildDate;
+    }
+
+    /**
      * Decide the page which will appear first in the right-hand frame. It will
      * be "overview-summary.html" if "-overview" option is used or no
      * "-overview" but the number of packages is more than one. It will be
@@ -298,12 +308,6 @@ public class HtmlConfiguration extends BaseConfiguration {
         } else {
             if (showModules) {
                 topFile = DocPath.empty.resolve(docPaths.moduleSummary(modules.first()));
-            } else if (packages.size() == 1 && packages.first().isUnnamed()) {
-                List<TypeElement> classes = new ArrayList<>(getIncludedTypeElements());
-                if (!classes.isEmpty()) {
-                    TypeElement te = getValidClass(classes);
-                    topFile = docPaths.forClass(te);
-                }
             } else if (!packages.isEmpty()) {
                 topFile = docPaths.forPackage(packages.first()).resolve(DocPaths.PACKAGE_SUMMARY);
             }
@@ -387,19 +391,16 @@ public class HtmlConfiguration extends BaseConfiguration {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    public List<DocPath> getAdditionalScripts() {
+        return options.additionalScripts().stream()
+                .map(sf -> DocFile.createFileForInput(this, sf))
+                .map(file -> DocPath.create(file.getName()))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
     @Override
     public JavaFileManager getFileManager() {
         return docEnv.getJavaFileManager();
-    }
-
-    @Override
-    public boolean showMessage(DocTreePath path, String key) {
-        return (path == null || !haveDocLint());
-    }
-
-    @Override
-    public boolean showMessage(Element e, String key) {
-        return (e == null || !haveDocLint());
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -429,10 +429,13 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      * required then a region starting at zero, and no smaller than the
      * expected maximum size of the file, should be locked.  The two-argument
      * {@link #lock(Object,CompletionHandler)} method simply locks a region
-     * of size {@link Long#MAX_VALUE}. If a lock that overlaps the requested
-     * region is already held by this Java virtual machine, or this method has
-     * been invoked to lock an overlapping region and that operation has not
-     * completed, then this method throws {@link OverlappingFileLockException}.
+     * of size {@link Long#MAX_VALUE}.  If the {@code position} is non-negative
+     * and the {@code size} is zero, then a lock of size
+     * {@code Long.MAX_VALUE - position} is returned.  If a lock that
+     * overlaps the requested region is already held by this Java virtual
+     * machine, or this method has been invoked to lock an overlapping region
+     * and that operation has not completed, then this method throws
+     * {@link OverlappingFileLockException}.
      *
      * <p> Some operating systems do not support a mechanism to acquire a file
      * lock in an asynchronous manner. Consequently an implementation may
@@ -458,7 +461,10 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      *          non-negative
      * @param   size
      *          The size of the locked region; must be non-negative, and the sum
-     *          {@code position}&nbsp;+&nbsp;{@code size} must be non-negative
+     *          {@code position}&nbsp;+&nbsp;{@code size} must be non-negative.
+     *          A value of zero means to lock all bytes from the specified
+     *          starting position to the end of the file, regardless of whether
+     *          the file is subsequently extended or truncated
      * @param   shared
      *          {@code true} to request a shared lock, in which case this
      *          channel must be open for reading (and possibly writing);
@@ -536,7 +542,10 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      *          non-negative
      * @param   size
      *          The size of the locked region; must be non-negative, and the sum
-     *          {@code position}&nbsp;+&nbsp;{@code size} must be non-negative
+     *          {@code position}&nbsp;+&nbsp;{@code size} must be non-negative.
+     *          A value of zero means to lock all bytes from the specified
+     *          starting position to the end of the file, regardless of whether
+     *          the file is subsequently extended or truncated
      * @param   shared
      *          {@code true} to request a shared lock, in which case this
      *          channel must be open for reading (and possibly writing);
@@ -590,7 +599,9 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      * either having acquired a lock on the requested region or having failed to
      * do so.  If it fails to acquire a lock because an overlapping lock is held
      * by another program then it returns {@code null}.  If it fails to acquire
-     * a lock for any other reason then an appropriate exception is thrown.
+     * a lock for any other reason then an appropriate exception is thrown.  If
+     * the {@code position} is non-negative and the {@code size} is zero, then a
+     * lock of size {@code Long.MAX_VALUE - position} is returned.
      *
      * @param  position
      *         The position at which the locked region is to start; must be
@@ -598,7 +609,10 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      *
      * @param  size
      *         The size of the locked region; must be non-negative, and the sum
-     *         {@code position}&nbsp;+&nbsp;{@code size} must be non-negative
+     *         {@code position}&nbsp;+&nbsp;{@code size} must be non-negative.
+     *         A value of zero means to lock all bytes from the specified
+     *         starting position to the end of the file, regardless of whether
+     *         the file is subsequently extended or truncated
      *
      * @param  shared
      *         {@code true} to request a shared lock,
