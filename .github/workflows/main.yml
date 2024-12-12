@@ -34,8 +34,9 @@ on:
     inputs:
       platforms:
         description: 'Platform(s) to execute on (comma separated, e.g. "linux-x64, macos, aarch64")'
-        required: true
-        default: 'linux-x64, linux-x86, linux-x64-variants, linux-cross-compile, macos-x64, macos-aarch64, windows-x64, windows-aarch64, docs'
+        required: false
+        default: ''
+          # default: 'linux-x64, linux-x86, linux-x64-variants, linux-cross-compile, macos-x64, macos-aarch64, windows-x64, windows-aarch64, docs'
       configure-arguments:
         description: 'Additional configure arguments'
         required: false
@@ -94,7 +95,9 @@ jobs:
             normalized_input="$(echo ,$input, | tr -d ' ')"
             if [[ "$normalized_input" == ",," ]]; then
               # For an empty input, assume all platforms should run
-              echo 'true'
+              # echo 'true'
+              # WMD: Assume empty means no platforms
+              echo 'false'
               return
             else
               # Check for all acceptable platform names
