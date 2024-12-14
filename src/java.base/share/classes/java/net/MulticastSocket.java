@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -126,10 +126,9 @@ public class MulticastSocket extends DatagramSocket {
      * Create a MulticastSocket that delegates to the given delegate if not null.
      * @param delegate the delegate, can be null.
      */
-    MulticastSocket(MulticastSocket delegate)  {
+    MulticastSocket(MulticastSocket delegate) {
         super(delegate);
     }
-
 
     /**
      * Constructs a multicast socket and binds it to any available port
@@ -232,7 +231,7 @@ public class MulticastSocket extends DatagramSocket {
      *             <b>int</b> instead of <b>byte</b> as the type for ttl.
      * @see #getTTL()
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "1.2")
     public void setTTL(byte ttl) throws IOException {
         delegate().setTTL(ttl);
     }
@@ -277,7 +276,7 @@ public class MulticastSocket extends DatagramSocket {
      * which returns an <b>int</b> instead of a <b>byte</b>.
      * @see #setTTL(byte)
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "1.2")
     public byte getTTL() throws IOException {
         return delegate().getTTL();
     }
@@ -569,7 +568,7 @@ public class MulticastSocket extends DatagramSocket {
      * @see SecurityManager#checkMulticast(java.net.InetAddress, byte)
      * @see SecurityManager#checkConnect
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "1.4")
     public void send(DatagramPacket p, byte ttl)
         throws IOException {
         delegate().send(p, ttl);

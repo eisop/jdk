@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -186,8 +186,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
         @SuppressWarnings("removal")
         String systemFonts = java.security.AccessController.doPrivileged(
                new GetPropertyAction("swing.useSystemFontSettings"));
-        useSystemFontSettings = (systemFonts == null ||
-                                 Boolean.valueOf(systemFonts).booleanValue());
+        useSystemFontSettings = systemFonts == null || Boolean.parseBoolean(systemFonts);
 
         if (useSystemFontSettings) {
             Object value = UIManager.get("Application.useSystemFontSettings");
@@ -327,7 +326,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
         LazyValue dialogBold12 = t -> new FontUIResource(Font.DIALOG, Font.BOLD, 12);
 
         // *** Colors
-        // XXX - some of these doens't seem to be used
+        // XXX - some of these doesn't seem to be used
         ColorUIResource red = new ColorUIResource(Color.red);
         ColorUIResource black = new ColorUIResource(Color.black);
         ColorUIResource white = new ColorUIResource(Color.white);
@@ -629,7 +628,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
             "Button.font", ControlFont,
             "Button.background", ControlBackgroundColor,
             // Button.foreground, Button.shadow, Button.darkShadow,
-            // Button.disabledForground, and Button.disabledShadow are only
+            // Button.disabledForeground, and Button.disabledShadow are only
             // used for Windows Classic. Windows XP will use colors
             // from the current visual style.
             "Button.foreground", ControlTextColor,
@@ -646,7 +645,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
             "Button.dashedRectGapHeight", new XPValue(Integer.valueOf(6), Integer.valueOf(8)),
             "Button.textShiftOffset", new XPValue(Integer.valueOf(0),
                                                   Integer.valueOf(1)),
-            // W2K keyboard navigation hidding.
+            // W2K keyboard navigation hiding.
             "Button.showMnemonics", showMnemonics,
             "Button.focusInputMap",
                new UIDefaults.LazyInputMap(new Object[] {
@@ -1345,7 +1344,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
                               "KP_DOWN", "selectNextRow",
                            "shift DOWN", "selectNextRowExtendSelection",
                         "shift KP_DOWN", "selectNextRowExtendSelection",
-                      "ctrl shift DOWN", "selectNextRowExtendSelection",
+                      "ctrl shift DOWN", "selectLastRowExtendSelection",
                    "ctrl shift KP_DOWN", "selectNextRowExtendSelection",
                             "ctrl DOWN", "selectNextRowChangeLead",
                          "ctrl KP_DOWN", "selectNextRowChangeLead",
@@ -1353,7 +1352,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
                                 "KP_UP", "selectPreviousRow",
                              "shift UP", "selectPreviousRowExtendSelection",
                           "shift KP_UP", "selectPreviousRowExtendSelection",
-                        "ctrl shift UP", "selectPreviousRowExtendSelection",
+                        "ctrl shift UP", "selectFirstRowExtendSelection",
                      "ctrl shift KP_UP", "selectPreviousRowExtendSelection",
                               "ctrl UP", "selectPreviousRowChangeLead",
                            "ctrl KP_UP", "selectPreviousRowChangeLead",
@@ -2114,7 +2113,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
      * Gets an <code>Icon</code> from the native libraries if available.
      * A desktop property is used to trigger reloading the icon when needed.
      */
-    private class ActiveWindowsIcon implements UIDefaults.ActiveValue {
+    private static class ActiveWindowsIcon implements UIDefaults.ActiveValue {
         private Icon icon;
         private String nativeImageName;
         private String fallbackName;
@@ -2420,7 +2419,7 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
         }
     }
 
-    private class TriggerDesktopProperty extends WindowsDesktopProperty {
+    private static class TriggerDesktopProperty extends WindowsDesktopProperty {
         TriggerDesktopProperty(String key) {
             super(key, null);
             // This call adds a property change listener for the property,
@@ -2432,12 +2431,12 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
         protected void updateUI() {
             super.updateUI();
 
-            // Make sure property change listener is readded each time
+            // Make sure property change listener is re-added each time
             getValueFromDesktop();
         }
     }
 
-    private class FontDesktopProperty extends TriggerDesktopProperty {
+    private static class FontDesktopProperty extends TriggerDesktopProperty {
         FontDesktopProperty(String key) {
             super(key);
         }

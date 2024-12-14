@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,10 +27,10 @@ package java.nio;
 
 import java.io.FileDescriptor;
 import java.io.UncheckedIOException;
+import java.lang.foreign.MemorySegment;
 import java.lang.ref.Reference;
 import java.util.Objects;
 
-import jdk.internal.access.foreign.MemorySegmentProxy;
 import jdk.internal.access.foreign.UnmapperProxy;
 import jdk.internal.misc.ScopedMemoryAccess;
 import jdk.internal.misc.Unsafe;
@@ -70,8 +70,9 @@ import jdk.internal.misc.Unsafe;
  * @since 1.4
  */
 
-public abstract class MappedByteBuffer
+public abstract sealed class MappedByteBuffer
     extends ByteBuffer
+    permits DirectByteBuffer
 {
 
     // This is a little bit backwards: By rights MappedByteBuffer should be a
@@ -95,48 +96,53 @@ public abstract class MappedByteBuffer
     // This should only be invoked by the DirectByteBuffer constructors
     //
     MappedByteBuffer(int mark, int pos, int lim, int cap, // package-private
-                     FileDescriptor fd, boolean isSync, MemorySegmentProxy segment) {
+                     FileDescriptor fd, boolean isSync, MemorySegment segment) {
         super(mark, pos, lim, cap, segment);
         this.fd = fd;
         this.isSync = isSync;
     }
 
     MappedByteBuffer(int mark, int pos, int lim, int cap, // package-private
-                     boolean isSync, MemorySegmentProxy segment) {
+                     boolean isSync, MemorySegment segment) {
         super(mark, pos, lim, cap, segment);
         this.fd = null;
         this.isSync = isSync;
     }
 
-    MappedByteBuffer(int mark, int pos, int lim, int cap, MemorySegmentProxy segment) { // package-private
+    MappedByteBuffer(int mark, int pos, int lim, int cap, MemorySegment segment) { // package-private
         super(mark, pos, lim, cap, segment);
         this.fd = null;
         this.isSync = false;
     }
 
     UnmapperProxy unmapper() {
-        return fd != null ?
-                new UnmapperProxy() {
-                    @Override
-                    public long address() {
-                        return address;
-                    }
+        return fd == null
+                ? null
+                : new UnmapperProxy() {
 
-                    @Override
-                    public FileDescriptor fileDescriptor() {
-                        return fd;
-                    }
+            // Ensure safe publication as MappedByteBuffer.this.address is not final
+            private final long addr = address;
 
-                    @Override
-                    public boolean isSync() {
-                        return isSync;
-                    }
+            @Override
+            public long address() {
+                return addr;
+            }
 
-                    @Override
-                    public void unmap() {
-                        Unsafe.getUnsafe().invokeCleaner(MappedByteBuffer.this);
-                    }
-                } : null;
+            @Override
+            public FileDescriptor fileDescriptor() {
+                return fd;
+            }
+
+            @Override
+            public boolean isSync() {
+                return isSync;
+            }
+
+            @Override
+            public void unmap() {
+                Unsafe.getUnsafe().invokeCleaner(MappedByteBuffer.this);
+            }
+        };
     }
 
     /**
@@ -188,7 +194,7 @@ public abstract class MappedByteBuffer
         if (fd == null) {
             return true;
         }
-        return SCOPED_MEMORY_ACCESS.isLoaded(scope(), address, isSync, capacity());
+        return SCOPED_MEMORY_ACCESS.isLoaded(session(), address, isSync, capacity());
     }
 
     /**
@@ -206,7 +212,7 @@ public abstract class MappedByteBuffer
             return this;
         }
         try {
-            SCOPED_MEMORY_ACCESS.load(scope(), address, isSync, capacity());
+            SCOPED_MEMORY_ACCESS.load(session(), address, isSync, capacity());
         } finally {
             Reference.reachabilityFence(this);
         }
@@ -306,7 +312,7 @@ public abstract class MappedByteBuffer
         if ((address != 0) && (capacity != 0)) {
             // check inputs
             Objects.checkFromIndexSize(index, length, capacity);
-            SCOPED_MEMORY_ACCESS.force(scope(), fd, address, isSync, index, length);
+            SCOPED_MEMORY_ACCESS.force(session(), fd, address, isSync, index, length);
         }
         return this;
     }
@@ -315,6 +321,7 @@ public abstract class MappedByteBuffer
 
     /**
      * {@inheritDoc}
+     * @since 9
      */
     @Override
     public final MappedByteBuffer position(int newPosition) {
@@ -324,6 +331,7 @@ public abstract class MappedByteBuffer
 
     /**
      * {@inheritDoc}
+     * @since 9
      */
     @Override
     public final MappedByteBuffer limit(int newLimit) {
@@ -333,6 +341,7 @@ public abstract class MappedByteBuffer
 
     /**
      * {@inheritDoc}
+     * @since 9
      */
     @Override
     public final MappedByteBuffer mark() {
@@ -342,6 +351,7 @@ public abstract class MappedByteBuffer
 
     /**
      * {@inheritDoc}
+     * @since 9
      */
     @Override
     public final MappedByteBuffer reset() {
@@ -351,6 +361,7 @@ public abstract class MappedByteBuffer
 
     /**
      * {@inheritDoc}
+     * @since 9
      */
     @Override
     public final MappedByteBuffer clear() {
@@ -360,6 +371,7 @@ public abstract class MappedByteBuffer
 
     /**
      * {@inheritDoc}
+     * @since 9
      */
     @Override
     public final MappedByteBuffer flip() {
@@ -369,6 +381,7 @@ public abstract class MappedByteBuffer
 
     /**
      * {@inheritDoc}
+     * @since 9
      */
     @Override
     public final MappedByteBuffer rewind() {
@@ -384,6 +397,8 @@ public abstract class MappedByteBuffer
      * {@code force()} on the returned buffer, will only act on the sub-range
      * of this buffer that the returned buffer represents, namely
      * {@code [position(),limit())}.
+     *
+     * @since 17
      */
     @Override
     public abstract MappedByteBuffer slice();
@@ -397,18 +412,25 @@ public abstract class MappedByteBuffer
      * of this buffer that the returned buffer represents, namely
      * {@code [index,index+length)}, where {@code index} and {@code length} are
      * assumed to satisfy the preconditions.
+     *
+     * @since 17
      */
     @Override
     public abstract MappedByteBuffer slice(int index, int length);
 
     /**
      * {@inheritDoc}
+     *
+     * @since 17
      */
     @Override
     public abstract MappedByteBuffer duplicate();
 
     /**
      * {@inheritDoc}
+     * @throws  ReadOnlyBufferException {@inheritDoc}
+     *
+     * @since 17
      */
     @Override
     public abstract MappedByteBuffer compact();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -34,8 +34,6 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @see ObjectInputValidation
  * @since 1.1
- *
- * @since   1.1
  */
 @AnnotatedFor({"nullness"})
 public class InvalidObjectException extends ObjectStreamException {
@@ -49,7 +47,21 @@ public class InvalidObjectException extends ObjectStreamException {
      *
      * @see ObjectInputValidation
      */
-    public  InvalidObjectException(@Nullable String reason) {
+    public InvalidObjectException(@Nullable String reason) {
         super(reason);
+    }
+
+    /**
+     * Constructs an {@code InvalidObjectException} with the given
+     * reason and cause.
+     *
+     * @param reason Detailed message explaining the reason for the failure.
+     * @param cause the cause
+     *
+     * @see ObjectInputValidation
+     * @since 19
+     */
+    public InvalidObjectException(String reason, Throwable cause) {
+        super(reason, cause);
     }
 }

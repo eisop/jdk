@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,10 +28,12 @@
 #include "opto/node.hpp"
 #include "opto/opcodes.hpp"
 #include "opto/type.hpp"
+#include "utilities/pair.hpp"
 
 // Portions of code courtesy of Clifford Click
 
 class PhaseTransform;
+typedef const Pair<Node*, jint> ConstAddOperands;
 
 //------------------------------AddNode----------------------------------------
 // Classic Add functionality.  This covers all the usual 'add' behaviors for
@@ -51,7 +53,8 @@ public:
 
   // We also canonicalize the Node, moving constants to the right input,
   // and flatten expressions (so that 1+x+2 becomes x+3).
-  virtual Node *Ideal(PhaseGVN *phase, bool can_reshape);
+  virtual Node* Ideal(PhaseGVN* phase, bool can_reshape);
+  Node* IdealIL(PhaseGVN* phase, bool can_reshape, BasicType bt);
 
   // Compute a new Type for this node.  Basically we just do the pre-check,
   // then call the virtual add() to set the type.
@@ -74,11 +77,14 @@ public:
   // Supplied function to return the multiplicative opcode
   virtual int min_opcode() const = 0;
 
-  virtual bool operates_on(BasicType bt, bool signed_int) const {
-    assert(bt == T_INT || bt == T_LONG, "unsupported");
-    return false;
-  }
   static AddNode* make(Node* in1, Node* in2, BasicType bt);
+
+  // Utility function to check if the given node is a NOT operation,
+  // i.e., n == m ^ (-1).
+  static bool is_not(PhaseGVN* phase, Node* n, BasicType bt);
+
+  // Utility function to make a NOT operation, i.e., returning n ^ (-1).
+  static AddNode* make_not(PhaseGVN* phase, Node* n, BasicType bt);
 };
 
 //------------------------------AddINode---------------------------------------
@@ -92,12 +98,9 @@ public:
   virtual const Type *bottom_type() const { return TypeInt::INT; }
   int max_opcode() const { return Op_MaxI; }
   int min_opcode() const { return Op_MinI; }
-  virtual Node *Ideal(PhaseGVN *phase, bool can_reshape);
+  virtual Node* Ideal(PhaseGVN* phase, bool can_reshape);
   virtual Node* Identity(PhaseGVN* phase);
-  virtual bool operates_on(BasicType bt, bool signed_int) const {
-    assert(bt == T_INT || bt == T_LONG, "unsupported");
-    return bt == T_INT;
-  }
+
   virtual uint ideal_reg() const { return Op_RegI; }
 };
 
@@ -112,12 +115,9 @@ public:
   virtual const Type *bottom_type() const { return TypeLong::LONG; }
   int max_opcode() const { return Op_MaxL; }
   int min_opcode() const { return Op_MinL; }
-  virtual Node *Ideal(PhaseGVN *phase, bool can_reshape);
+  virtual Node* Ideal(PhaseGVN* phase, bool can_reshape);
   virtual Node* Identity(PhaseGVN* phase);
-  virtual bool operates_on(BasicType bt, bool signed_int) const {
-    assert(bt == T_INT || bt == T_LONG, "unsupported");
-    return bt == T_LONG;
-  }
+
   virtual uint ideal_reg() const { return Op_RegL; }
 };
 
@@ -175,13 +175,13 @@ public:
   virtual const Type *bottom_type() const;
   virtual uint  ideal_reg() const { return Op_RegP; }
   Node         *base_node() { assert( req() > Base, "Missing base"); return in(Base); }
-  static Node* Ideal_base_and_offset(Node* ptr, PhaseTransform* phase,
+  static Node* Ideal_base_and_offset(Node* ptr, PhaseValues* phase,
                                      // second return value:
                                      intptr_t& offset);
 
   // Collect the AddP offset values into the elements array, giving up
   // if there are more than length.
-  int unpack_offsets(Node* elements[], int length);
+  int unpack_offsets(Node* elements[], int length) const;
 
   // Do not match base-ptr edge
   virtual uint match_edge(uint idx) const;
@@ -227,6 +227,7 @@ class XorINode : public AddNode {
 public:
   XorINode( Node *in1, Node *in2 ) : AddNode(in1,in2) {}
   virtual int Opcode() const;
+  virtual Node *Ideal(PhaseGVN *phase, bool can_reshape);
   virtual const Type *add_ring( const Type *, const Type * ) const;
   virtual const Type *add_id() const { return TypeInt::ZERO; }
   virtual const Type *bottom_type() const { return TypeInt::INT; }
@@ -242,6 +243,7 @@ class XorLNode : public AddNode {
 public:
   XorLNode( Node *in1, Node *in2 ) : AddNode(in1,in2) {}
   virtual int Opcode() const;
+  virtual Node *Ideal(PhaseGVN *phase, bool can_reshape);
   virtual const Type *add_ring( const Type *, const Type * ) const;
   virtual const Type *add_id() const { return TypeLong::ZERO; }
   virtual const Type *bottom_type() const { return TypeLong::LONG; }
@@ -259,12 +261,15 @@ class MaxNode : public AddNode {
 private:
   static Node* build_min_max(Node* a, Node* b, bool is_max, bool is_unsigned, const Type* t, PhaseGVN& gvn);
   static Node* build_min_max_diff_with_zero(Node* a, Node* b, bool is_max, const Type* t, PhaseGVN& gvn);
+  Node* extract_add(PhaseGVN* phase, ConstAddOperands x_operands, ConstAddOperands y_operands);
 
 public:
   MaxNode( Node *in1, Node *in2 ) : AddNode(in1,in2) {}
   virtual int Opcode() const = 0;
   virtual int max_opcode() const = 0;
   virtual int min_opcode() const = 0;
+  Node* IdealI(PhaseGVN* phase, bool can_reshape);
+  virtual Node* Identity(PhaseGVN* phase);
 
   static Node* unsigned_max(Node* a, Node* b, const Type* t, PhaseGVN& gvn) {
     return build_min_max(a, b, true, true, t, gvn);
@@ -291,6 +296,9 @@ public:
   static Node* min_diff_with_zero(Node* a, Node* b, const Type* t, PhaseGVN& gvn) {
     return build_min_max_diff_with_zero(a, b, false, t, gvn);
   }
+
+  static Node* build_min_max_int(Node* a, Node* b, bool is_max);
+  static Node* build_min_max_long(PhaseGVN* phase, Node* a, Node* b, bool is_max);
 };
 
 //------------------------------MaxINode---------------------------------------
@@ -306,6 +314,7 @@ public:
   virtual uint ideal_reg() const { return Op_RegI; }
   int max_opcode() const { return Op_MaxI; }
   int min_opcode() const { return Op_MinI; }
+  virtual Node* Ideal(PhaseGVN* phase, bool can_reshape);
 };
 
 //------------------------------MinINode---------------------------------------
@@ -328,28 +337,38 @@ public:
 // MAXimum of 2 longs.
 class MaxLNode : public MaxNode {
 public:
-  MaxLNode(Node *in1, Node *in2) : MaxNode(in1, in2) {}
+  MaxLNode(Compile* C, Node* in1, Node* in2) : MaxNode(in1, in2) {
+    init_flags(Flag_is_macro);
+    C->add_macro_node(this);
+  }
   virtual int Opcode() const;
-  virtual const Type *add_ring(const Type*, const Type*) const { return TypeLong::LONG; }
-  virtual const Type *add_id() const { return TypeLong::make(min_jlong); }
-  virtual const Type *bottom_type() const { return TypeLong::LONG; }
+  virtual const Type* add_ring(const Type* t0, const Type* t1) const;
+  virtual const Type* add_id() const { return TypeLong::make(min_jlong); }
+  virtual const Type* bottom_type() const { return TypeLong::LONG; }
   virtual uint ideal_reg() const { return Op_RegL; }
   int max_opcode() const { return Op_MaxL; }
   int min_opcode() const { return Op_MinL; }
+  virtual Node* Identity(PhaseGVN* phase);
+  virtual Node* Ideal(PhaseGVN *phase, bool can_reshape);
 };
 
 //------------------------------MinLNode---------------------------------------
 // MINimum of 2 longs.
 class MinLNode : public MaxNode {
 public:
-  MinLNode(Node *in1, Node *in2) : MaxNode(in1, in2) {}
+  MinLNode(Compile* C, Node* in1, Node* in2) : MaxNode(in1, in2) {
+    init_flags(Flag_is_macro);
+    C->add_macro_node(this);
+  }
   virtual int Opcode() const;
-  virtual const Type *add_ring(const Type*, const Type*) const { return TypeLong::LONG; }
-  virtual const Type *add_id() const { return TypeLong::make(max_jlong); }
-  virtual const Type *bottom_type() const { return TypeLong::LONG; }
+  virtual const Type* add_ring(const Type* t0, const Type* t1) const;
+  virtual const Type* add_id() const { return TypeLong::make(max_jlong); }
+  virtual const Type* bottom_type() const { return TypeLong::LONG; }
   virtual uint ideal_reg() const { return Op_RegL; }
   int max_opcode() const { return Op_MaxL; }
   int min_opcode() const { return Op_MinL; }
+  virtual Node* Identity(PhaseGVN* phase);
+  virtual Node* Ideal(PhaseGVN* phase, bool can_reshape);
 };
 
 //------------------------------MaxFNode---------------------------------------

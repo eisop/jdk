@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,13 +32,15 @@ import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.ref.Cleaner.Cleanable;
-import java.lang.ref.Reference;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 import java.util.Objects;
 
 import jdk.internal.ref.CleanerFactory;
+import jdk.internal.util.Preconditions;
 import sun.nio.ch.DirectBuffer;
+
+import static java.util.zip.ZipUtils.NIO_ACCESS;
 
 /**
  * This class provides support for general purpose decompression using the
@@ -48,10 +50,14 @@ import sun.nio.ch.DirectBuffer;
  * the <a href="package-summary.html#package-description">java.util.zip
  * package description</a>.
  * <p>
+ * Unless otherwise noted, passing a {@code null} argument to a constructor
+ * or method in this class will cause a {@link NullPointerException} to be
+ * thrown.
+ * <p>
  * This class inflates sequences of ZLIB compressed bytes. The input byte
  * sequence is provided in either byte array or byte buffer, via one of the
  * {@code setInput()} methods. The output byte sequence is written to the
- * output byte array or byte buffer passed to the {@code deflate()} methods.
+ * output byte array or byte buffer passed to the {@code inflate()} methods.
  * <p>
  * The following code fragment demonstrates a trivial compression
  * and decompression of a string using {@code Deflater} and
@@ -107,6 +113,7 @@ public @UsesObjectEquals class Inflater {
     private byte[] inputArray;
     private int inputPos, inputLim;
     private boolean finished;
+    private boolean pendingOutput;
     private boolean needDict;
     private long bytesRead;
     private long bytesWritten;
@@ -134,6 +141,7 @@ public @UsesObjectEquals class Inflater {
      *
      * @param nowrap if true then support GZIP compatible compression
      */
+    @SuppressWarnings("this-escape")
     public Inflater(boolean nowrap) {
         this.zsRef = new InflaterZStreamRef(this, init(nowrap));
     }
@@ -158,9 +166,7 @@ public @UsesObjectEquals class Inflater {
      * @see Inflater#needsInput
      */
     public void setInput(byte[] input, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len) {
-        if (off < 0 || len < 0 || off > input.length - len) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Preconditions.checkFromIndexSize(off, len, input.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             this.input = null;
             this.inputArray = input;
@@ -225,9 +231,7 @@ public @UsesObjectEquals class Inflater {
      * @see Inflater#getAdler
      */
     public void setDictionary(byte[] dictionary, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len) {
-        if (off < 0 || len < 0 || off > dictionary.length - len) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Preconditions.checkFromIndexSize(off, len, dictionary.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             ensureOpen();
             setDictionary(zsRef.address(), dictionary, off, len);
@@ -268,11 +272,12 @@ public @UsesObjectEquals class Inflater {
             int remaining = Math.max(dictionary.limit() - position, 0);
             ensureOpen();
             if (dictionary.isDirect()) {
-                long address = ((DirectBuffer) dictionary).address();
+                NIO_ACCESS.acquireSession(dictionary);
                 try {
+                    long address = ((DirectBuffer) dictionary).address();
                     setDictionaryBuffer(zsRef.address(), address + position, remaining);
                 } finally {
-                    Reference.reachabilityFence(dictionary);
+                    NIO_ACCESS.releaseSession(dictionary);
                 }
             } else {
                 byte[] array = ZipUtils.getBufferArray(dictionary);
@@ -370,9 +375,7 @@ public @UsesObjectEquals class Inflater {
     public @GTENegativeOne int inflate(byte[] output, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len)
         throws DataFormatException
     {
-        if (off < 0 || len < 0 || off > output.length - len) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Preconditions.checkFromIndexSize(off, len, output.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             ensureOpen();
             ByteBuffer input = this.input;
@@ -394,13 +397,14 @@ public @UsesObjectEquals class Inflater {
                     try {
                         int inputRem = Math.max(input.limit() - inputPos, 0);
                         if (input.isDirect()) {
+                            NIO_ACCESS.acquireSession(input);
                             try {
                                 long inputAddress = ((DirectBuffer) input).address();
                                 result = inflateBufferBytes(zsRef.address(),
                                     inputAddress + inputPos, inputRem,
                                     output, off, len);
                             } finally {
-                                Reference.reachabilityFence(input);
+                                NIO_ACCESS.releaseSession(input);
                             }
                         } else {
                             byte[] inputArray = ZipUtils.getBufferArray(input);
@@ -427,11 +431,18 @@ public @UsesObjectEquals class Inflater {
             if ((result >>> 62 & 1) != 0) {
                 finished = true;
             }
+            if (written == len && !finished) {
+                pendingOutput = true;
+            } else {
+                pendingOutput = false;
+            }
             if ((result >>> 63 & 1) != 0) {
                 needDict = true;
             }
             if (input != null) {
-                input.position(inputPos + read);
+                if (read > 0) {
+                    input.position(inputPos + read);
+                }
             } else {
                 this.inputPos = inputPos + read;
             }
@@ -521,13 +532,14 @@ public @UsesObjectEquals class Inflater {
                     inputPos = this.inputPos;
                     try {
                         if (output.isDirect()) {
-                            long outputAddress = ((DirectBuffer) output).address();
+                            NIO_ACCESS.acquireSession(output);
                             try {
+                                long outputAddress = ((DirectBuffer) output).address();
                                 result = inflateBytesBuffer(zsRef.address(),
                                     inputArray, inputPos, inputLim - inputPos,
                                     outputAddress + outputPos, outputRem);
                             } finally {
-                                Reference.reachabilityFence(output);
+                                NIO_ACCESS.releaseSession(output);
                             }
                         } else {
                             byte[] outputArray = ZipUtils.getBufferArray(output);
@@ -545,16 +557,18 @@ public @UsesObjectEquals class Inflater {
                     int inputRem = Math.max(input.limit() - inputPos, 0);
                     try {
                         if (input.isDirect()) {
-                            long inputAddress = ((DirectBuffer) input).address();
+                            NIO_ACCESS.acquireSession(input);
                             try {
+                                long inputAddress = ((DirectBuffer) input).address();
                                 if (output.isDirect()) {
-                                    long outputAddress = ((DirectBuffer) output).address();
+                                    NIO_ACCESS.acquireSession(output);
                                     try {
+                                        long outputAddress = ((DirectBuffer) output).address();
                                         result = inflateBufferBuffer(zsRef.address(),
                                             inputAddress + inputPos, inputRem,
                                             outputAddress + outputPos, outputRem);
                                     } finally {
-                                        Reference.reachabilityFence(output);
+                                        NIO_ACCESS.releaseSession(output);
                                     }
                                 } else {
                                     byte[] outputArray = ZipUtils.getBufferArray(output);
@@ -564,19 +578,20 @@ public @UsesObjectEquals class Inflater {
                                         outputArray, outputOffset + outputPos, outputRem);
                                 }
                             } finally {
-                                Reference.reachabilityFence(input);
+                                NIO_ACCESS.releaseSession(input);
                             }
                         } else {
                             byte[] inputArray = ZipUtils.getBufferArray(input);
                             int inputOffset = ZipUtils.getBufferOffset(input);
                             if (output.isDirect()) {
-                                long outputAddress = ((DirectBuffer) output).address();
+                                NIO_ACCESS.acquireSession(output);
                                 try {
+                                    long outputAddress = ((DirectBuffer) output).address();
                                     result = inflateBytesBuffer(zsRef.address(),
                                         inputArray, inputOffset + inputPos, inputRem,
                                         outputAddress + outputPos, outputRem);
                                 } finally {
-                                    Reference.reachabilityFence(output);
+                                    NIO_ACCESS.releaseSession(output);
                                 }
                             } else {
                                 byte[] outputArray = ZipUtils.getBufferArray(output);
@@ -635,12 +650,16 @@ public @UsesObjectEquals class Inflater {
     /**
      * Returns the total number of compressed bytes input so far.
      *
-     * <p>Since the number of bytes may be greater than
-     * Integer.MAX_VALUE, the {@link #getBytesRead()} method is now
-     * the preferred means of obtaining this information.</p>
+     * @implSpec
+     * This method returns the equivalent of {@code (int) getBytesRead()}
+     * and therefore cannot return the correct value when it is greater
+     * than {@link Integer#MAX_VALUE}.
+     *
+     * @deprecated Use {@link #getBytesRead()} instead
      *
      * @return the total number of compressed bytes input so far
      */
+    @Deprecated(since = "23")
     public int getTotalIn() {
         return (int) getBytesRead();
     }
@@ -661,12 +680,16 @@ public @UsesObjectEquals class Inflater {
     /**
      * Returns the total number of uncompressed bytes output so far.
      *
-     * <p>Since the number of bytes may be greater than
-     * Integer.MAX_VALUE, the {@link #getBytesWritten()} method is now
-     * the preferred means of obtaining this information.</p>
+     * @implSpec
+     * This method returns the equivalent of {@code (int) getBytesWritten()}
+     * and therefore cannot return the correct value when it is greater
+     * than {@link Integer#MAX_VALUE}.
+     *
+     * @deprecated Use {@link #getBytesWritten()} instead
      *
      * @return the total number of uncompressed bytes output so far
      */
+    @Deprecated(since = "23")
     public int getTotalOut() {
         return (int) getBytesWritten();
     }
@@ -719,6 +742,10 @@ public @UsesObjectEquals class Inflater {
         assert Thread.holdsLock(zsRef);
         if (zsRef.address() == 0)
             throw new NullPointerException("Inflater has been closed");
+    }
+
+    boolean hasPendingOutput() {
+        return pendingOutput;
     }
 
     private static native void initIDs();

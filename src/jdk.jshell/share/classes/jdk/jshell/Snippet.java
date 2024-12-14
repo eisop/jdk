@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,6 +28,7 @@ package jdk.jshell;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import jdk.internal.javac.PreviewFeature;
 
 /**
  * A Snippet represents a snippet of Java source code as passed to
@@ -215,6 +216,15 @@ public abstract class Snippet {
         STATIC_IMPORT_ON_DEMAND_SUBKIND(Kind.IMPORT),
 
         /**
+         * Import Module Declaration.
+         * An import declaration of a module.
+         * @jls 7.5.5 Import Module Declarations
+         * @since 23
+         */
+        @PreviewFeature(feature=PreviewFeature.Feature.MODULE_IMPORTS, reflective=true)
+        MODULE_IMPORT_SUBKIND(Kind.IMPORT),
+
+        /**
          * A class declaration.
          * A {@code SubKind} of {@link Kind#TYPE_DECL}.
          * @jls 8.1 Class Declarations
@@ -377,7 +387,7 @@ public abstract class Snippet {
      * {@link jdk.jshell.Snippet.Status#isActive()}, if, as the
      * JShell state changes, the snippet will update, possibly
      * changing {@code Status}.
-     * An executable Snippet can only be executed if it is in the the
+     * An executable Snippet can only be executed if it is in the
      * {@link jdk.jshell.Snippet.Status#VALID} {@code Status}.
      * @see JShell#status(jdk.jshell.Snippet)
      */
@@ -593,7 +603,7 @@ public abstract class Snippet {
         setSequenceNumber(0);
     }
 
-    /**** public access ****/
+    //**** public access ****
 
     /**
      * The unique identifier for the snippet. No two active snippets will have

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -61,6 +61,8 @@ import javax.management.MBeanServerConnection;
 import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.security.auth.Subject;
+import jdk.internal.access.SharedSecrets;
 import static javax.management.monitor.MonitorNotification.*;
 
 /**
@@ -167,11 +169,12 @@ public abstract class Monitor
      * Remaining attribute names extracted from complex type attribute name.
      */
     private final List<String> remainingAttributes =
-        new CopyOnWriteArrayList<String>();
+        new CopyOnWriteArrayList<>();
 
     /**
-     * AccessControlContext of the Monitor.start() caller.
+     * Subject and possibly AccessControlContext of the Monitor.start() caller.
      */
+    private volatile Subject subject;
     @SuppressWarnings("removal")
     private static final AccessControlContext noPermissionsACC =
             new AccessControlContext(
@@ -190,7 +193,7 @@ public abstract class Monitor
      * Map containing the thread pool executor per thread group.
      */
     private static final Map<ThreadPoolExecutor, Void> executors =
-            new WeakHashMap<ThreadPoolExecutor, Void>();
+            new WeakHashMap<>();
 
     /**
      * Lock for executors map.
@@ -354,7 +357,7 @@ public abstract class Monitor
      * List of ObservedObjects to which the attribute to observe belongs.
      */
     final List<ObservedObject> observedObjects =
-        new CopyOnWriteArrayList<ObservedObject>();
+        new CopyOnWriteArrayList<>();
 
     /**
      * Flag denoting that a notification has occurred after changing
@@ -715,10 +718,14 @@ public abstract class Monitor
             //
             cleanupIsComplexTypeAttribute();
 
-            // Cache the AccessControlContext of the Monitor.start() caller.
+            // Cache the Subject or AccessControlContext of the Monitor.start() caller.
             // The monitor tasks will be executed within this context.
             //
-            acc = AccessController.getContext();
+            if (!SharedSecrets.getJavaLangAccess().allowSecurityManager()) {
+                subject = Subject.current();
+            } else {
+                acc = AccessController.getContext();
+            }
 
             // Start the scheduler.
             //
@@ -749,8 +756,9 @@ public abstract class Monitor
             //
             cleanupFutures();
 
-            // Reset the AccessControlContext.
+            // Reset the Subject and AccessControlContext.
             //
+            subject = null;
             acc = noPermissionsACC;
 
             // Reset the complex type attribute information
@@ -1206,45 +1214,15 @@ public abstract class Monitor
                 MONITOR_LOGGER.log(Level.TRACE, msg);
                 MONITOR_LOGGER.log(Level.TRACE, anf_ex::toString);
             }
-        } catch (MBeanException mb_ex) {
+        } catch (MBeanException | ReflectionException| IOException | RuntimeException e) {
             if (isAlreadyNotified(o, RUNTIME_ERROR_NOTIFIED))
                 return;
             else {
                 notifType = RUNTIME_ERROR;
                 setAlreadyNotified(o, index, RUNTIME_ERROR_NOTIFIED, an);
-                msg = mb_ex.getMessage() == null ? "" : mb_ex.getMessage();
+                msg = e.getMessage() == null ? "" : e.getMessage();
                 MONITOR_LOGGER.log(Level.TRACE, msg);
-                MONITOR_LOGGER.log(Level.TRACE, mb_ex::toString);
-            }
-        } catch (ReflectionException ref_ex) {
-            if (isAlreadyNotified(o, RUNTIME_ERROR_NOTIFIED)) {
-                return;
-            } else {
-                notifType = RUNTIME_ERROR;
-                setAlreadyNotified(o, index, RUNTIME_ERROR_NOTIFIED, an);
-                msg = ref_ex.getMessage() == null ? "" : ref_ex.getMessage();
-                MONITOR_LOGGER.log(Level.TRACE, msg);
-                MONITOR_LOGGER.log(Level.TRACE, ref_ex::toString);
-            }
-        } catch (IOException io_ex) {
-            if (isAlreadyNotified(o, RUNTIME_ERROR_NOTIFIED))
-                return;
-            else {
-                notifType = RUNTIME_ERROR;
-                setAlreadyNotified(o, index, RUNTIME_ERROR_NOTIFIED, an);
-                msg = io_ex.getMessage() == null ? "" : io_ex.getMessage();
-                MONITOR_LOGGER.log(Level.TRACE, msg);
-                MONITOR_LOGGER.log(Level.TRACE, io_ex::toString);
-            }
-        } catch (RuntimeException rt_ex) {
-            if (isAlreadyNotified(o, RUNTIME_ERROR_NOTIFIED))
-                return;
-            else {
-                notifType = RUNTIME_ERROR;
-                setAlreadyNotified(o, index, RUNTIME_ERROR_NOTIFIED, an);
-                msg = rt_ex.getMessage() == null ? "" : rt_ex.getMessage();
-                MONITOR_LOGGER.log(Level.TRACE, msg);
-                MONITOR_LOGGER.log(Level.TRACE, rt_ex::toString);
+                MONITOR_LOGGER.log(Level.TRACE, e::toString);
             }
         }
 
@@ -1522,7 +1500,7 @@ public abstract class Monitor
                             maximumPoolSize,
                             60L,
                             TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<Runnable>(),
+                            new LinkedBlockingQueue<>(),
                             new DaemonThreadFactory("ThreadGroup<" +
                             group.getName() + "> Executor", group));
                     executor.allowCoreThreadTimeOut(true);
@@ -1544,12 +1522,14 @@ public abstract class Monitor
         @SuppressWarnings("removal")
         public void run() {
             final ScheduledFuture<?> sf;
+            final Subject s;
             final AccessControlContext ac;
             synchronized (Monitor.this) {
                 sf = Monitor.this.schedulerFuture;
+                s  = Monitor.this.subject;
                 ac = Monitor.this.acc;
             }
-            PrivilegedAction<Void> action = new PrivilegedAction<Void>() {
+            PrivilegedAction<Void> action = new PrivilegedAction<>() {
                 public Void run() {
                     if (Monitor.this.isActive()) {
                         final int an[] = alreadyNotifieds;
@@ -1563,10 +1543,20 @@ public abstract class Monitor
                     return null;
                 }
             };
-            if (ac == null) {
-                throw new SecurityException("AccessControlContext cannot be null");
+            if (!SharedSecrets.getJavaLangAccess().allowSecurityManager()) {
+                // No SecurityManager permitted:
+                if (s == null) {
+                    action.run();
+                } else {
+                    Subject.doAs(s, action);
+                }
+            } else {
+                if (ac == null) {
+                    throw new SecurityException("AccessControlContext cannot be null");
+                }
+                // ACC means SM is permitted.
+                AccessController.doPrivileged(action, ac);
             }
-            AccessController.doPrivileged(action, ac);
             synchronized (Monitor.this) {
                 if (Monitor.this.isActive() &&
                     Monitor.this.schedulerFuture == sf) {

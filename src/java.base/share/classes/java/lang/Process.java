@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,6 +31,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 import org.checkerframework.checker.mustcall.qual.NotOwning;
 
+import jdk.internal.misc.Blocker;
 import jdk.internal.util.StaticProperty;
 
 import java.io.*;
@@ -170,7 +171,7 @@ public abstract @UsesObjectEquals class Process {
      * merged standard output and the standard error of the process.
      *
      * @apiNote
-     * Use {@link #getInputStream} and {@link #inputReader} with extreme care.
+     * Use {@link #getInputStream()} and {@link #inputReader()} with extreme care.
      * The {@code BufferedReader} may have buffered input from the input stream.
      *
      * @implNote
@@ -198,8 +199,8 @@ public abstract @UsesObjectEquals class Process {
      * <a href="ProcessBuilder.html#redirect-output">null input stream</a>.
      *
      * @apiNote
-     * Use {@link #getInputStream} and {@link #inputReader} with extreme care.
-     * The {@code BufferedReader} may have buffered input from the input stream.
+     * Use {@link #getErrorStream()} and {@link #errorReader()} with extreme care.
+     * The {@code BufferedReader} may have buffered input from the error stream.
      *
      * @implNote
      * Implementation note: It is a good idea for the returned
@@ -456,7 +457,7 @@ public abstract @UsesObjectEquals class Process {
      * terminated and the timeout value is less than, or equal to, zero, then
      * this method returns immediately with the value {@code false}.
      *
-     * <p>The default implementation of this methods polls the {@code exitValue}
+     * <p>The default implementation of this method polls the {@code exitValue}
      * to check if the process has terminated. Concrete implementations of this
      * class are strongly encouraged to override this method with a more
      * efficient implementation.
@@ -855,13 +856,82 @@ public abstract @UsesObjectEquals class Process {
 
             return n - remaining;
         }
+
+        @Override
+        public int read() throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read();
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read(b, off, len);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+    }
+
+    /**
+     * An output stream for a subprocess pipe.
+     */
+    static class PipeOutputStream extends FileOutputStream {
+        PipeOutputStream(FileDescriptor fd) {
+            super(fd);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b, off, len);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
     }
 
     /**
      * A nested class to delay looking up the Charset for the native encoding.
      */
     private static class CharsetHolder {
-        private final static Charset nativeCharset;
+        private static final Charset nativeCharset;
         static {
             Charset cs;
             try {

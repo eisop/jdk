@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 8251496
+ * @bug 8251496 8333590
  * @summary Test that UnmodifiableHeaders is in fact immutable
  * @modules jdk.httpserver/sun.net.httpserver:+open
  * @run testng/othervm UnmodifiableHeadersTest
@@ -40,10 +40,13 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import sun.net.httpserver.UnmodifiableHeaders;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.assertTrue;
 
 public class UnmodifiableHeadersTest {
 
@@ -62,14 +65,62 @@ public class UnmodifiableHeadersTest {
         assertEquals(unmodifiableHeaders2.get("Foo"), headers.get("Foo"));
     }
 
-    @Test
-    public static void testUnmodifiableHeaders() {
+    @DataProvider
+    public Object[][] headers() {
         var headers = new Headers();
         headers.add("Foo", "Bar");
-        HttpExchange exchange = new TestHttpExchange(headers);
+        var exchange = new TestHttpExchange(headers);
 
-        assertUnsupportedOperation(exchange.getRequestHeaders());
-        assertUnmodifiableCollection(exchange.getRequestHeaders());
+        return new Object[][] {
+                { exchange.getRequestHeaders() },
+                { Headers.of("Foo", "Bar") },
+                { Headers.of(Map.of("Foo", List.of("Bar"))) },
+        };
+    }
+
+    @Test(dataProvider = "headers")
+    public static void testUnmodifiableHeaders(Headers headers) {
+        assertUnsupportedOperation(headers);
+        assertUnmodifiableCollection(headers);
+        assertUnmodifiableList(headers);
+    }
+
+    @DataProvider
+    public Object[][] toStringHeaders() {
+        final Headers headers = new Headers();
+        headers.add("hello", "World");
+        return new Object[][] {
+                { headers },
+                { Headers.of("abc", "XYZ") },
+                { Headers.of(Map.of("foo", List.of("Bar"))) },
+                { Headers.of(Map.of("Hello", List.of())) },
+                { Headers.of(Map.of("one", List.of("two", "THREE"))) },
+        };
+    }
+
+    /*
+     * Verify that the String returned by Headers.toString() contains the expected
+     * key/value(s)
+     */
+    @Test(dataProvider = "toStringHeaders")
+    public void testToString(final Headers headers) {
+        final Headers copy = Headers.of(headers);
+        assertNotNull(copy, "Headers.of() returned null");
+        final String actualToString = copy.toString();
+        assertNotNull(actualToString, "toString() returned null");
+        for (final Map.Entry<String, List<String>> originalHeadersEntry : headers.entrySet()) {
+            final String expectedKey = originalHeadersEntry.getKey();
+            // We just verify the presence of key and value in the toString()
+            // return value. We intentionally don't expect or verify that the
+            // toString() content is in some specific form.
+            assertTrue(actualToString.contains(expectedKey),
+                    expectedKey + " missing in output of Headers.of().toString()");
+            final List<String> expectedVals = originalHeadersEntry.getValue();
+            for (final String val : expectedVals) {
+                assertTrue(actualToString.contains(val), val + " for header key "
+                        + expectedKey + " missing in output of Headers.of().toString()");
+            }
+        }
     }
 
     static final Class<UnsupportedOperationException> UOP = UnsupportedOperationException.class;

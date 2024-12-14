@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,6 +29,7 @@ import jdk.test.lib.process.ProcessTools;
 
 /*
  * @test
+ * @key stress randomness
  * @bug 8252219 8256535
  * @requires vm.compiler2.enabled
  * @summary Tests that using a stress option without -XX:StressSeed=N generates
@@ -38,6 +39,7 @@ import jdk.test.lib.process.ProcessTools;
  * @run driver compiler.debug.TestGenerateStressSeed StressGCM
  * @run driver compiler.debug.TestGenerateStressSeed StressIGVN
  * @run driver compiler.debug.TestGenerateStressSeed StressCCP
+ * @run driver compiler.debug.TestGenerateStressSeed StressMacroExpansion
  */
 
 public class TestGenerateStressSeed {
@@ -57,7 +59,7 @@ public class TestGenerateStressSeed {
                 "-Xcomp", "-XX:-TieredCompilation", "-XX:+UnlockDiagnosticVMOptions",
                 "-XX:CompileOnly=" + className + "::sum", "-XX:+" + stressOpt,
                 "-XX:+LogCompilation", "-XX:LogFile=" + log, className, "10"};
-            new OutputAnalyzer(ProcessTools.createJavaProcessBuilder(procArgs).start())
+            new OutputAnalyzer(ProcessTools.createLimitedTestJavaProcessBuilder(procArgs).start())
                 .shouldHaveExitValue(0);
             new OutputAnalyzer(Paths.get(log))
                 .shouldContain("stress_test seed");

@@ -72,7 +72,7 @@ public interface Metrics {
     public String getProvider();
 
 
-    /*****************************************************************
+    /* ***************************************************************
      * CPU Accounting Subsystem
      ****************************************************************/
 
@@ -123,7 +123,7 @@ public interface Metrics {
      */
     public long getCpuSystemUsage();
 
-    /*****************************************************************
+    /* ***************************************************************
      * CPU Scheduling Metrics
      ****************************************************************/
 
@@ -215,7 +215,7 @@ public interface Metrics {
      */
     public long getEffectiveCpuCount();
 
-    /*****************************************************************
+    /* ***************************************************************
      * CPU Sets
      ****************************************************************/
 
@@ -271,7 +271,7 @@ public interface Metrics {
      */
     public int[] getEffectiveCpuSetMems();
 
-    /*****************************************************************
+    /* ***************************************************************
      * Memory Subsystem
      ****************************************************************/
 
@@ -352,7 +352,28 @@ public interface Metrics {
      */
     public long getMemorySoftLimit();
 
-    /*****************************************************************
+    /* ***************************************************************
+     * pids subsystem
+     ****************************************************************/
+
+    /**
+     * Returns the maximum number of tasks that may be created in the Isolation Group.
+     *
+     * @return The maximum number of tasks, -1 if the quota is unlimited or
+     *         -2 if not supported.
+     *
+     */
+    public long getPidsMax();
+
+    /**
+     * Returns the current number of tasks in the Isolation Group.
+     *
+     * @return The current number of tasks or -2 if not supported
+     *
+     */
+    public long getPidsCurrent();
+
+    /* ***************************************************************
      * BlKIO Subsystem
      ****************************************************************/
 

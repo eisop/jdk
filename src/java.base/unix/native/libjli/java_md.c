@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -298,7 +298,6 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
                            char jvmcfg[],  jint so_jvmcfg) {
 
     char * jvmtype = NULL;
-    int argc = *pargc;
     char **argv = *pargv;
 
 #ifdef SETENV_REQUIRED
@@ -388,7 +387,7 @@ CreateExecutionEnvironment(int *pargc, char ***pargv,
                 if (lastslash)
                     *lastslash = '\0';
 
-                sprintf(new_runpath, LD_LIBRARY_PATH "="
+                snprintf(new_runpath, new_runpath_size, LD_LIBRARY_PATH "="
                         "%s:"
                         "%s/lib:"
                         "%s/../lib",
@@ -496,6 +495,8 @@ GetJREPath(char *path, jint pathsize, jboolean speculative)
     char libjava[MAXPATHLEN];
     struct stat s;
 
+    JLI_TraceLauncher("Attempt to get JRE path from launcher executable path\n");
+
     if (GetApplicationHome(path, pathsize)) {
         /* Is JRE co-located with the application? */
         JLI_Snprintf(libjava, sizeof(libjava), "%s/lib/" JAVA_DLL, path);
@@ -503,19 +504,9 @@ GetJREPath(char *path, jint pathsize, jboolean speculative)
             JLI_TraceLauncher("JRE path is %s\n", path);
             return JNI_TRUE;
         }
-        /* ensure storage for path + /jre + NULL */
-        if ((JLI_StrLen(path) + 4  + 1) > (size_t) pathsize) {
-            JLI_TraceLauncher("Insufficient space to store JRE path\n");
-            return JNI_FALSE;
-        }
-        /* Does the app ship a private JRE in <apphome>/jre directory? */
-        JLI_Snprintf(libjava, sizeof(libjava), "%s/jre/lib/" JAVA_DLL, path);
-        if (access(libjava, F_OK) == 0) {
-            JLI_StrCat(path, "/jre");
-            JLI_TraceLauncher("JRE path is %s\n", path);
-            return JNI_TRUE;
-        }
     }
+
+    JLI_TraceLauncher("Attempt to get JRE path from shared lib of the image\n");
 
     if (GetApplicationHomeFromDll(path, pathsize)) {
         JLI_Snprintf(libjava, sizeof(libjava), "%s/lib/" JAVA_DLL, path);
@@ -524,6 +515,17 @@ GetJREPath(char *path, jint pathsize, jboolean speculative)
             return JNI_TRUE;
         }
     }
+
+#if defined(AIX)
+    /* at least on AIX try also the LD_LIBRARY_PATH / LIBPATH */
+    if (GetApplicationHomeFromLibpath(path, pathsize)) {
+        JLI_Snprintf(libjava, sizeof(libjava), "%s/lib/" JAVA_DLL, path);
+        if (stat(libjava, &s) == 0) {
+            JLI_TraceLauncher("JRE path is %s\n", path);
+            return JNI_TRUE;
+        }
+    }
+#endif
 
     if (!speculative)
       JLI_ReportErrorMessage(JRE_ERROR8 JAVA_DLL);
@@ -651,6 +653,20 @@ static void* ThreadJavaMain(void* args) {
     return (void*)(intptr_t)JavaMain(args);
 }
 
+static size_t adjustStackSize(size_t stack_size) {
+    long page_size = sysconf(_SC_PAGESIZE);
+    if (stack_size % page_size == 0) {
+        return stack_size;
+    } else {
+        long pages = stack_size / page_size;
+        // Ensure we don't go over limit
+        if (stack_size <= SIZE_MAX - page_size) {
+            pages++;
+        }
+        return page_size * pages;
+    }
+}
+
 /*
  * Block current thread and continue execution in a new thread.
  */
@@ -661,9 +677,17 @@ CallJavaMainInNewThread(jlong stack_size, void* args) {
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    size_t adjusted_stack_size;
 
     if (stack_size > 0) {
-        pthread_attr_setstacksize(&attr, stack_size);
+        if (pthread_attr_setstacksize(&attr, stack_size) == EINVAL) {
+            // System may require stack size to be multiple of page size
+            // Retry with adjusted value
+            adjusted_stack_size = adjustStackSize(stack_size);
+            if (adjusted_stack_size != (size_t) stack_size) {
+                pthread_attr_setstacksize(&attr, adjusted_stack_size);
+            }
+        }
     }
     pthread_attr_setguardsize(&attr, 0); // no pthread guard page on java threads
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -128,10 +128,6 @@ public class Binder extends DebugeeBinder {
      */
     public Debugee makeLocalDebugee(Process process) {
         LocalLaunchedDebugee debugee = new LocalLaunchedDebugee(process, this);
-
-        Finalizer finalizer = new Finalizer(debugee);
-        finalizer.activate();
-
         return debugee;
     }
 
@@ -189,8 +185,7 @@ public class Binder extends DebugeeBinder {
 
         Debugee debugee = null;
 
-        String classPath = null;
-//        classPath = System.getProperty("java.class.path");
+        String classPath = System.getProperty("test.class.path");
 
         prepareForPipeConnection(argumentHandler);
 
@@ -710,6 +705,10 @@ public class Binder extends DebugeeBinder {
 
         String cmdline = classToExecute + " " + ArgumentHandler.joinArguments(rawArgs, quote);
 
+        if (System.getProperty("test.thread.factory") != null) {
+            cmdline = MainWrapper.class.getName() + " " + System.getProperty("test.thread.factory") + " " + cmdline;
+        }
+
         arg = (Connector.StringArgument) arguments.get("main");
         arg.setValue(cmdline);
 
@@ -735,6 +734,10 @@ public class Binder extends DebugeeBinder {
             arg.setValue(argumentHandler.getLaunchExecName());
         }
 
+        // This flag is needed so VirtualMachine.allThreads() includes known vthreads.
+        arg = (Connector.StringArgument) arguments.get("includevirtualthreads");
+        arg.setValue("y");
+
         String vmArgs = "";
 
         String vmUserArgs = argumentHandler.getLaunchOptions();
@@ -743,11 +746,15 @@ public class Binder extends DebugeeBinder {
             vmArgs = vmUserArgs;
         }
 
-/*
-        if (classPath != null) {
+        boolean vthreadMode = "Virtual".equals(System.getProperty("test.thread.factory"));
+        if (vthreadMode) {
+            /* Some tests need more carrier threads than the default provided. */
+            vmArgs += " -Djdk.virtualThreadScheduler.parallelism=15";
+        }
+
+        if (classPath != null && !vmArgs.contains("-cp") && !vmArgs.contains("-classpath")) {
             vmArgs += " -classpath " + quote + classPath + quote;
         }
- */
 
         if (vmArgs.length() > 0) {
             arg = (Connector.StringArgument) arguments.get("options");
@@ -927,10 +934,6 @@ public class Binder extends DebugeeBinder {
         }
 
         RemoteLaunchedDebugee debugee = new RemoteLaunchedDebugee(this);
-
-        Finalizer finalizer = new Finalizer(debugee);
-        finalizer.activate();
-
         return debugee;
     }
 
@@ -941,10 +944,6 @@ public class Binder extends DebugeeBinder {
     protected ManualLaunchedDebugee startManualDebugee(String cmd) {
         ManualLaunchedDebugee debugee = new ManualLaunchedDebugee(this);
         debugee.launchDebugee(cmd);
-
-        Finalizer finalizer = new Finalizer(debugee);
-        finalizer.activate();
-
         return debugee;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -348,6 +348,8 @@ public class GTKLookAndFeel extends SynthLookAndFeel {
         Double defaultCaretAspectRatio = Double.valueOf(0.025);
         Color caretColor = table.getColor("caretColor");
         Color controlText = table.getColor("controlText");
+        Color tabbedPaneBg = new ColorUIResource(238, 238, 238);
+        Color unselectedTabColor = new ColorUIResource(255, 255, 255);
 
         Object fieldInputMap = new UIDefaults.LazyInputMap(new Object[] {
                        "ctrl C", DefaultEditorKit.copyAction,
@@ -577,6 +579,7 @@ public class GTKLookAndFeel extends SynthLookAndFeel {
                  }),
             "ComboBox.font", new FontLazyValue(Region.COMBO_BOX),
             "ComboBox.isEnterSelectablePopup", Boolean.TRUE,
+            "ComboBox.squareButton", Boolean.FALSE,
 
 
             "EditorPane.caretForeground", caretColor,
@@ -590,6 +593,7 @@ public class GTKLookAndFeel extends SynthLookAndFeel {
             "FileChooser.ancestorInputMap",
                new UIDefaults.LazyInputMap(new Object[] {
                      "ESCAPE", "cancelSelection",
+                 "BACK_SPACE", "Go Up",
                  "ctrl ENTER", "approveSelection"
                  }),
             "FileChooserUI", "com.sun.java.swing.plaf.gtk.GTKLookAndFeel",
@@ -1018,6 +1022,11 @@ public class GTKLookAndFeel extends SynthLookAndFeel {
             "TabbedPane.selectedLabelShift", 3,
             "TabbedPane.font", new FontLazyValue(Region.TABBED_PANE),
             "TabbedPane.selectedTabPadInsets", new InsetsUIResource(2, 2, 0, 1),
+            "TabbedPane.selected", tabbedPaneBg,
+            "TabbedPane.contentOpaque", Boolean.TRUE,
+            "TabbedPane.tabsOpaque", Boolean.TRUE,
+            "TabbedPane.contentAreaColor", tabbedPaneBg,
+            "TabbedPane.unselectedBackground", unselectedTabColor,
 
             "Table.scrollPaneBorder", zeroBorder,
             "Table.background", tableBg,
@@ -1056,7 +1065,7 @@ public class GTKLookAndFeel extends SynthLookAndFeel {
                               "KP_DOWN", "selectNextRow",
                            "shift DOWN", "selectNextRowExtendSelection",
                         "shift KP_DOWN", "selectNextRowExtendSelection",
-                      "ctrl shift DOWN", "selectNextRowExtendSelection",
+                      "ctrl shift DOWN", "selectLastRowExtendSelection",
                    "ctrl shift KP_DOWN", "selectNextRowExtendSelection",
                             "ctrl DOWN", "selectNextRowChangeLead",
                          "ctrl KP_DOWN", "selectNextRowChangeLead",
@@ -1064,7 +1073,7 @@ public class GTKLookAndFeel extends SynthLookAndFeel {
                                 "KP_UP", "selectPreviousRow",
                              "shift UP", "selectPreviousRowExtendSelection",
                           "shift KP_UP", "selectPreviousRowExtendSelection",
-                        "ctrl shift UP", "selectPreviousRowExtendSelection",
+                        "ctrl shift UP", "selectFirstRowExtendSelection",
                      "ctrl shift KP_UP", "selectPreviousRowExtendSelection",
                               "ctrl UP", "selectPreviousRowChangeLead",
                            "ctrl KP_UP", "selectPreviousRowChangeLead",
@@ -1356,7 +1365,7 @@ public class GTKLookAndFeel extends SynthLookAndFeel {
         // colors specific only for GTK
         // It is impossible to create a simple GtkWidget without specifying the
         // type. So for GtkWidget we can use any appropriate concrete type of
-        // wigdet. LABEL in this case.
+        // widget. LABEL in this case.
         GTKStyle widgetStyle = (GTKStyle)factory.getStyle(null, Region.LABEL);
         Color bg = widgetStyle.getGTKColor(SynthConstants.ENABLED,
                                            GTKColorType.BACKGROUND);

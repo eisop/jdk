@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,6 +28,10 @@ package java.math;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
+import static java.math.BigDecimal.INFLATED;
+import static java.math.BigInteger.LONG_MASK;
+import java.util.Arrays;
+
 /**
  * A class used to represent multiprecision integers that makes efficient
  * use of allocated space by allowing a number to occupy only part of
@@ -44,10 +48,6 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author  Timothy Buktu
  * @since   1.3
  */
-
-import static java.math.BigDecimal.INFLATED;
-import static java.math.BigInteger.LONG_MASK;
-import java.util.Arrays;
 
 @AnnotatedFor({"interning"})
 @UsesObjectEquals class MutableBigInteger {
@@ -949,13 +949,13 @@ import java.util.Arrays;
             x--; y--;
 
             diff = (a.value[x+a.offset] & LONG_MASK) -
-                   (b.value[y+b.offset] & LONG_MASK) - ((int)-(diff>>32));
+                   (b.value[y+b.offset] & LONG_MASK) + (diff >> 32);
             result[rstart--] = (int)diff;
         }
         // Subtract remainder of longer number
         while (x > 0) {
             x--;
-            diff = (a.value[x+a.offset] & LONG_MASK) - ((int)-(diff>>32));
+            diff = (a.value[x+a.offset] & LONG_MASK) + (diff >> 32);
             result[rstart--] = (int)diff;
         }
 
@@ -990,13 +990,13 @@ import java.util.Arrays;
         while (y > 0) {
             x--; y--;
             diff = (a.value[a.offset+ x] & LONG_MASK) -
-                (b.value[b.offset+ y] & LONG_MASK) - ((int)-(diff>>32));
+                (b.value[b.offset+ y] & LONG_MASK) + (diff >> 32);
             a.value[a.offset+x] = (int)diff;
         }
         // Subtract remainder of longer number
-        while (x > 0) {
+        while (diff < 0 && x > 0) {
             x--;
-            diff = (a.value[a.offset+ x] & LONG_MASK) - ((int)-(diff>>32));
+            diff = (a.value[a.offset+ x] & LONG_MASK) + (diff >> 32);
             a.value[a.offset+x] = (int)diff;
         }
 
@@ -1096,9 +1096,9 @@ import java.util.Arrays;
 
         // Special case of one word dividend
         if (intLen == 1) {
-            long dividendValue = value[offset] & LONG_MASK;
-            int q = (int) (dividendValue / divisorLong);
-            int r = (int) (dividendValue - q * divisorLong);
+            int dividendValue = value[offset];
+            int q = Integer.divideUnsigned(dividendValue, divisor);
+            int r = Integer.remainderUnsigned(dividendValue, divisor);
             quotient.value[0] = q;
             quotient.intLen = (q == 0) ? 0 : 1;
             quotient.offset = 0;
@@ -1110,41 +1110,17 @@ import java.util.Arrays;
         quotient.offset = 0;
         quotient.intLen = intLen;
 
-        // Normalize the divisor
-        int shift = Integer.numberOfLeadingZeros(divisor);
-
-        int rem = value[offset];
-        long remLong = rem & LONG_MASK;
-        if (remLong < divisorLong) {
-            quotient.value[0] = 0;
-        } else {
-            quotient.value[0] = (int)(remLong / divisorLong);
-            rem = (int) (remLong - (quotient.value[0] * divisorLong));
-            remLong = rem & LONG_MASK;
-        }
-        int xlen = intLen;
-        while (--xlen > 0) {
-            long dividendEstimate = (remLong << 32) |
+        long rem = 0;
+        for (int xlen = intLen; xlen > 0; xlen--) {
+            long dividendEstimate = (rem << 32) |
                     (value[offset + intLen - xlen] & LONG_MASK);
-            int q;
-            if (dividendEstimate >= 0) {
-                q = (int) (dividendEstimate / divisorLong);
-                rem = (int) (dividendEstimate - q * divisorLong);
-            } else {
-                long tmp = divWord(dividendEstimate, divisor);
-                q = (int) (tmp & LONG_MASK);
-                rem = (int) (tmp >>> 32);
-            }
+            int q = (int) Long.divideUnsigned(dividendEstimate, divisorLong);
+            rem = Long.remainderUnsigned(dividendEstimate, divisorLong);
             quotient.value[intLen - xlen] = q;
-            remLong = rem & LONG_MASK;
         }
 
         quotient.normalize();
-        // Unnormalize
-        if (shift > 0)
-            return rem % divisor;
-        else
-            return rem;
+        return (int)rem;
     }
 
     /**
@@ -1535,13 +1511,10 @@ import java.util.Arrays;
         quotient.intLen = limit;
         int[] q = quotient.value;
 
-
-        // Must insert leading 0 in rem if its length did not change
-        if (rem.intLen == nlen) {
-            rem.offset = 0;
-            rem.value[0] = 0;
-            rem.intLen++;
-        }
+        // Insert leading 0 in rem
+        rem.offset = 0;
+        rem.value[0] = 0;
+        rem.intLen++;
 
         int dh = divisor[0];
         long dhLong = dh & LONG_MASK;
@@ -1564,14 +1537,8 @@ import java.util.Arrays;
                 skipCorrection = qrem + 0x80000000 < nh2;
             } else {
                 long nChunk = (((long)nh) << 32) | (nm & LONG_MASK);
-                if (nChunk >= 0) {
-                    qhat = (int) (nChunk / dhLong);
-                    qrem = (int) (nChunk - (qhat * dhLong));
-                } else {
-                    long tmp = divWord(nChunk, dh);
-                    qhat = (int) (tmp & LONG_MASK);
-                    qrem = (int) (tmp >>> 32);
-                }
+                qhat = (int) Long.divideUnsigned(nChunk, dhLong);
+                qrem = (int) Long.remainderUnsigned(nChunk, dhLong);
             }
 
             if (qhat == 0)
@@ -1623,14 +1590,8 @@ import java.util.Arrays;
             skipCorrection = qrem + 0x80000000 < nh2;
         } else {
             long nChunk = (((long) nh) << 32) | (nm & LONG_MASK);
-            if (nChunk >= 0) {
-                qhat = (int) (nChunk / dhLong);
-                qrem = (int) (nChunk - (qhat * dhLong));
-            } else {
-                long tmp = divWord(nChunk, dh);
-                qhat = (int) (tmp & LONG_MASK);
-                qrem = (int) (tmp >>> 32);
-            }
+            qhat = (int) Long.divideUnsigned(nChunk, dhLong);
+            qrem = (int) Long.remainderUnsigned(nChunk, dhLong);
         }
         if (qhat != 0) {
             if (!skipCorrection) { // Correct qhat
@@ -1739,14 +1700,8 @@ import java.util.Arrays;
                 skipCorrection = qrem + 0x80000000 < nh2;
             } else {
                 long nChunk = (((long) nh) << 32) | (nm & LONG_MASK);
-                if (nChunk >= 0) {
-                    qhat = (int) (nChunk / dhLong);
-                    qrem = (int) (nChunk - (qhat * dhLong));
-                } else {
-                    long tmp = divWord(nChunk, dh);
-                    qhat =(int)(tmp & LONG_MASK);
-                    qrem = (int)(tmp>>>32);
-                }
+                qhat = (int) Long.divideUnsigned(nChunk, dhLong);
+                qrem = (int) Long.remainderUnsigned(nChunk, dhLong);
             }
 
             if (qhat == 0)
@@ -1839,40 +1794,6 @@ import java.util.Arrays;
      */
     private boolean unsignedLongCompare(long one, long two) {
         return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE);
-    }
-
-    /**
-     * This method divides a long quantity by an int to estimate
-     * qhat for two multi precision numbers. It is used when
-     * the signed value of n is less than zero.
-     * Returns long value where high 32 bits contain remainder value and
-     * low 32 bits contain quotient value.
-     */
-    static long divWord(long n, int d) {
-        long dLong = d & LONG_MASK;
-        long r;
-        long q;
-        if (dLong == 1) {
-            q = (int)n;
-            r = 0;
-            return (r << 32) | (q & LONG_MASK);
-        }
-
-        // Approximate the quotient and remainder
-        q = (n >>> 1) / (dLong >>> 1);
-        r = n - q*dLong;
-
-        // Correct the approximation
-        while (r < 0) {
-            r += dLong;
-            q--;
-        }
-        while (r >= dLong) {
-            r -= dLong;
-            q++;
-        }
-        // n - q*dlong == r && 0 <= r <dLong, hence we're done.
-        return (r << 32) | (q & LONG_MASK);
     }
 
     /**
@@ -2110,6 +2031,7 @@ import java.util.Arrays;
 
         oddPart.leftShift(powersOf2);
         oddPart.multiply(y1, result);
+        oddPart.clear();
 
         evenPart.multiply(oddMod, temp1);
         temp1.multiply(y2, temp2);

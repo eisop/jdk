@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Red Hat, Inc. All rights reserved.
+ * Copyright (c) 2021, 2022, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,8 +27,9 @@
 
 #include "gc/shared/strongRootsScope.hpp"
 #include "gc/shared/taskTerminator.hpp"
-#include "gc/shared/workgroup.hpp"
+#include "gc/shared/workerThread.hpp"
 #include "gc/shenandoah/shenandoahClosures.inline.hpp"
+#include "gc/shenandoah/shenandoahGenerationType.hpp"
 #include "gc/shenandoah/shenandoahMark.inline.hpp"
 #include "gc/shenandoah/shenandoahOopClosures.inline.hpp"
 #include "gc/shenandoah/shenandoahReferenceProcessor.hpp"
@@ -36,6 +37,7 @@
 #include "gc/shenandoah/shenandoahSTWMark.hpp"
 #include "gc/shenandoah/shenandoahVerifier.hpp"
 
+template<ShenandoahGenerationType GENERATION>
 class ShenandoahInitMarkRootsClosure : public OopClosure {
 private:
   ShenandoahObjToScanQueue* const _queue;
@@ -50,17 +52,19 @@ public:
   void do_oop(oop* p)       { do_oop_work(p); }
 };
 
-ShenandoahInitMarkRootsClosure::ShenandoahInitMarkRootsClosure(ShenandoahObjToScanQueue* q) :
+template <ShenandoahGenerationType GENERATION>
+ShenandoahInitMarkRootsClosure<GENERATION>::ShenandoahInitMarkRootsClosure(ShenandoahObjToScanQueue* q) :
   _queue(q),
   _mark_context(ShenandoahHeap::heap()->marking_context()) {
 }
 
+template <ShenandoahGenerationType GENERATION>
 template <class T>
-void ShenandoahInitMarkRootsClosure::do_oop_work(T* p) {
-  ShenandoahMark::mark_through_ref<T, NO_DEDUP>(p, _queue, _mark_context, NULL, false);
+void ShenandoahInitMarkRootsClosure<GENERATION>::do_oop_work(T* p) {
+  ShenandoahMark::mark_through_ref<T, GENERATION>(p, _queue, _mark_context, false);
 }
 
-class ShenandoahSTWMarkTask : public AbstractGangTask {
+class ShenandoahSTWMarkTask : public WorkerTask {
 private:
   ShenandoahSTWMark* const _mark;
 
@@ -70,7 +74,7 @@ public:
 };
 
 ShenandoahSTWMarkTask::ShenandoahSTWMarkTask(ShenandoahSTWMark* mark) :
-  AbstractGangTask("Shenandoah STW mark"),
+  WorkerTask("Shenandoah STW mark"),
   _mark(mark) {
 }
 
@@ -89,8 +93,13 @@ ShenandoahSTWMark::ShenandoahSTWMark(bool full_gc) :
 }
 
 void ShenandoahSTWMark::mark() {
-  // Weak reference processing
   ShenandoahHeap* const heap = ShenandoahHeap::heap();
+
+  // Arm all nmethods. Even though this is STW mark, some marking code
+  // piggybacks on nmethod barriers for special instances.
+  ShenandoahCodeRoots::arm_nmethods_for_mark();
+
+  // Weak reference processing
   ShenandoahReferenceProcessor* rp = heap->ref_processor();
   rp->reset_thread_locals();
   rp->set_soft_reference_policy(heap->soft_ref_policy()->should_clear_all_soft_refs());
@@ -100,6 +109,8 @@ void ShenandoahSTWMark::mark() {
     assert(Thread::current()->is_VM_thread(), "Must be");
     heap->verifier()->verify_roots_no_forwarded();
   }
+
+  start_mark();
 
   uint nworkers = heap->workers()->active_workers();
   task_queues()->reserve(nworkers);
@@ -116,6 +127,10 @@ void ShenandoahSTWMark::mark() {
   }
 
   heap->mark_complete_marking_context();
+  end_mark();
+
+  // Mark is finished, can disarm the nmethods now.
+  ShenandoahCodeRoots::disarm_nmethods();
 
   assert(task_queues()->is_empty(), "Should be empty");
   TASKQUEUE_STATS_ONLY(task_queues()->print_taskqueue_stats());
@@ -123,7 +138,7 @@ void ShenandoahSTWMark::mark() {
 }
 
 void ShenandoahSTWMark::mark_roots(uint worker_id) {
-  ShenandoahInitMarkRootsClosure  init_mark(task_queues()->queue(worker_id));
+  ShenandoahInitMarkRootsClosure<NON_GEN>  init_mark(task_queues()->queue(worker_id));
   _root_scanner.roots_do(&init_mark, worker_id);
 }
 
@@ -131,9 +146,8 @@ void ShenandoahSTWMark::finish_mark(uint worker_id) {
   ShenandoahPhaseTimings::Phase phase = _full_gc ? ShenandoahPhaseTimings::full_gc_mark : ShenandoahPhaseTimings::degen_gc_stw_mark;
   ShenandoahWorkerTimingsTracker timer(phase, ShenandoahPhaseTimings::ParallelMark, worker_id);
   ShenandoahReferenceProcessor* rp = ShenandoahHeap::heap()->ref_processor();
+  StringDedup::Requests requests;
 
-  mark_loop(worker_id, &_terminator, rp,
-            false /* not cancellable */,
-            ShenandoahStringDedup::is_enabled() ? ALWAYS_DEDUP : NO_DEDUP);
+  mark_loop(worker_id, &_terminator, rp, NON_GEN, false /* not cancellable */,
+            ShenandoahStringDedup::is_enabled() ? ALWAYS_DEDUP : NO_DEDUP, &requests);
 }
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -47,6 +47,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 import jdk.internal.misc.CDS;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
+import jdk.internal.vm.annotation.Stable;
 
 import java.lang.constant.Constable;
 import java.lang.constant.DynamicConstantDesc;
@@ -112,7 +113,7 @@ public final class Byte extends Number implements Comparable<Byte>, Constable {
      */
     @SideEffectFree
     public static @ArrayLen({1,2,3,4}) String toString(byte b) {
-        return Integer.toString((int)b, 10);
+        return Integer.toString(b);
     }
 
     /**
@@ -127,9 +128,10 @@ public final class Byte extends Number implements Comparable<Byte>, Constable {
         return Optional.of(DynamicConstantDesc.ofNamed(BSM_EXPLICIT_CAST, DEFAULT_NAME, CD_byte, intValue()));
     }
 
-    private static class ByteCache {
+    private static final class ByteCache {
         private ByteCache() {}
 
+        @Stable
         static final Byte[] cache;
         static Byte[] archivedCache;
 
@@ -261,7 +263,7 @@ public final class Byte extends Number implements Comparable<Byte>, Constable {
      * equal to the value of:
      *
      * <blockquote>
-     * {@code new Byte(Byte.parseByte(s, radix))}
+     * {@code Byte.valueOf(Byte.parseByte(s, radix))}
      * </blockquote>
      *
      * @param s         the string to be parsed
@@ -292,7 +294,7 @@ public final class Byte extends Number implements Comparable<Byte>, Constable {
      * equal to the value of:
      *
      * <blockquote>
-     * {@code new Byte(Byte.parseByte(s))}
+     * {@code Byte.valueOf(Byte.parseByte(s))}
      * </blockquote>
      *
      * @param s         the string to be parsed
@@ -484,9 +486,10 @@ public final class Byte extends Number implements Comparable<Byte>, Constable {
      * @return  a string representation of the value of this object in
      *          base&nbsp;10.
      */
+    @Override
     @SideEffectFree
     public @ArrayLen({1,2,3,4}) String toString() {
-        return Integer.toString((int)value);
+        return Integer.toString(value);
     }
 
     /**

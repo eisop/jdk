@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -36,6 +36,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import jdk.internal.util.ArraysSupport;
+import jdk.internal.event.FileReadEvent;
 import sun.nio.ch.FileChannelImpl;
 
 /**
@@ -48,19 +49,13 @@ import sun.nio.ch.FileChannelImpl;
  * {@code FileReader}.
  *
  * @apiNote
- * To release resources used by this stream {@link #close} should be called
- * directly or by try-with-resources. Subclasses are responsible for the cleanup
- * of resources acquired by the subclass.
- * Subclasses that override {@link #finalize} in order to perform cleanup
- * should be modified to use alternative cleanup mechanisms such as
- * {@link java.lang.ref.Cleaner} and remove the overriding {@code finalize} method.
+ * The {@link #close} method should be called to release resources used by this
+ * stream, either directly, or with the {@code try}-with-resources statement.
  *
  * @implSpec
- * If this FileInputStream has been subclassed and the {@link #close}
- * method has been overridden, the {@link #close} method will be
- * called when the FileInputStream is unreachable.
- * Otherwise, it is implementation specific how the resource cleanup described in
- * {@link #close} is performed.
+ * Subclasses are responsible for the cleanup of resources acquired by the subclass.
+ * Subclasses requiring that resource cleanup take place after a stream becomes
+ * unreachable should use {@link java.lang.ref.Cleaner} or some other mechanism.
  *
  * @author  Arthur van Hoff
  * @see     java.io.File
@@ -73,6 +68,12 @@ import sun.nio.ch.FileChannelImpl;
 public class FileInputStream extends InputStream
 {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
+
+    /**
+     * Flag set by jdk.internal.event.JFRTracing to indicate if
+     * file reads should be traced by JFR.
+     */
+    private static boolean jfrTracing;
 
     /* File Descriptor - handle to the open file */
     private final FileDescriptor fd;
@@ -147,6 +148,7 @@ public class FileInputStream extends InputStream
      * @see        java.io.File#getPath()
      * @see        java.lang.SecurityManager#checkRead(java.lang.String)
      */
+    @SuppressWarnings("this-escape")
     public FileInputStream(File file) throws FileNotFoundException {
         String name = (file != null ? file.getPath() : null);
         @SuppressWarnings("removal")
@@ -191,6 +193,7 @@ public class FileInputStream extends InputStream
      *             file descriptor.
      * @see        SecurityManager#checkRead(java.io.FileDescriptor)
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias FileInputStream(@MustCallAlias FileDescriptor fdObj) {
         @SuppressWarnings("removal")
         SecurityManager security = System.getSecurityManager();
@@ -231,13 +234,39 @@ public class FileInputStream extends InputStream
      *
      * @return     the next byte of data, or {@code -1} if the end of the
      *             file is reached.
-     * @throws     IOException  if an I/O error occurs.
+     * @throws     IOException {@inheritDoc}
      */
+    @Override
     public @GTENegativeOne int read() throws IOException {
+        if (jfrTracing && FileReadEvent.enabled()) {
+            return traceRead0();
+        }
         return read0();
     }
 
     private native int read0() throws IOException;
+
+    private int traceRead0() throws IOException {
+        int result = 0;
+        boolean endOfFile = false;
+        long bytesRead = 0;
+        long start = 0;
+        try {
+            start = FileReadEvent.timestamp();
+            result = read0();
+            if (result < 0) {
+                endOfFile = true;
+            } else {
+                bytesRead = 1;
+            }
+        } finally {
+            long duration = FileReadEvent.timestamp() - start;
+            if (FileReadEvent.shouldCommit(duration)) {
+                FileReadEvent.commit(start, duration, path, bytesRead, endOfFile);
+            }
+        }
+        return result;
+    }
 
     /**
      * Reads a subarray as a sequence of bytes.
@@ -246,20 +275,43 @@ public class FileInputStream extends InputStream
      * @param     len the number of bytes that are written
      * @throws    IOException If an I/O error has occurred.
      */
-    private native int readBytes(byte b[], int off, int len) throws IOException;
+    private native int readBytes(byte[] b, int off, int len) throws IOException;
+
+    private int traceReadBytes(byte b[], int off, int len) throws IOException {
+        int bytesRead = 0;
+        long start = 0;
+        try {
+            start = FileReadEvent.timestamp();
+            bytesRead = readBytes(b, off, len);
+        } finally {
+            long duration = FileReadEvent.timestamp() - start;
+            if (FileReadEvent.shouldCommit(duration)) {
+                if (bytesRead < 0) {
+                    FileReadEvent.commit(start, duration, path, 0L, true);
+                } else {
+                    FileReadEvent.commit(start, duration, path, bytesRead, false);
+                }
+            }
+        }
+        return bytesRead;
+    }
 
     /**
      * Reads up to {@code b.length} bytes of data from this input
      * stream into an array of bytes. This method blocks until some input
      * is available.
      *
-     * @param      b   the buffer into which the data is read.
+     * @param      b   {@inheritDoc}
      * @return     the total number of bytes read into the buffer, or
      *             {@code -1} if there is no more data because the end of
      *             the file has been reached.
      * @throws     IOException  if an I/O error occurs.
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte b[]) throws IOException {
+    @Override
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b) throws IOException {
+        if (jfrTracing && FileReadEvent.enabled()) {
+            return traceReadBytes(b, 0, b.length);
+        }
         return readBytes(b, 0, b.length);
     }
 
@@ -269,22 +321,23 @@ public class FileInputStream extends InputStream
      * blocks until some input is available; otherwise, no
      * bytes are read and {@code 0} is returned.
      *
-     * @param      b     the buffer into which the data is read.
-     * @param      off   the start offset in the destination array {@code b}
-     * @param      len   the maximum number of bytes read.
-     * @return     the total number of bytes read into the buffer, or
-     *             {@code -1} if there is no more data because the end of
-     *             the file has been reached.
-     * @throws     NullPointerException If {@code b} is {@code null}.
-     * @throws     IndexOutOfBoundsException If {@code off} is negative,
-     *             {@code len} is negative, or {@code len} is greater than
-     *             {@code b.length - off}
+     * @param      b     {@inheritDoc}
+     * @param      off   {@inheritDoc}
+     * @param      len   {@inheritDoc}
+     * @return     {@inheritDoc}
+     * @throws     NullPointerException {@inheritDoc}
+     * @throws     IndexOutOfBoundsException {@inheritDoc}
      * @throws     IOException  if an I/O error occurs.
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte b[], @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    @Override
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+        if (jfrTracing && FileReadEvent.enabled()) {
+            return traceReadBytes(b, off, len);
+        }
         return readBytes(b, off, len);
     }
 
+    @Override
     public byte[] readAllBytes() throws IOException {
         long length = length();
         long position = position();
@@ -327,6 +380,7 @@ public class FileInputStream extends InputStream
         return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
     }
 
+    @Override
     public byte[] readNBytes(int len) throws IOException {
         if (len < 0)
             throw new IllegalArgumentException("len < 0");
@@ -348,7 +402,7 @@ public class FileInputStream extends InputStream
         int n;
         do {
             n = read(buf, nread, remaining);
-            if (n > 0 ) {
+            if (n > 0) {
                 nread += n;
                 remaining -= n;
             } else if (n == 0) {
@@ -361,6 +415,29 @@ public class FileInputStream extends InputStream
             }
         } while (n >= 0 && remaining > 0);
         return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long transferTo(OutputStream out) throws IOException {
+        long transferred = 0L;
+        if (out instanceof FileOutputStream fos) {
+            FileChannel fc = getChannel();
+            long pos = fc.position();
+            transferred = fc.transferTo(pos, Long.MAX_VALUE, fos.getChannel());
+            long newPos = pos + transferred;
+            fc.position(newPos);
+            if (newPos >= fc.size()) {
+                return transferred;
+            }
+        }
+        try {
+            return Math.addExact(transferred, super.transferTo(out));
+        } catch (ArithmeticException ignore) {
+            return Long.MAX_VALUE;
+        }
     }
 
     private long length() throws IOException {
@@ -392,11 +469,12 @@ public class FileInputStream extends InputStream
      * backing file. Attempting to read from the stream after skipping past
      * the end will result in -1 indicating the end of the file.
      *
-     * @param      n   the number of bytes to be skipped.
+     * @param      n   {@inheritDoc}
      * @return     the actual number of bytes skipped.
      * @throws     IOException  if n is negative, if the stream does not
      *             support seek, or if an I/O error occurs.
      */
+    @Override
     public @NonNegative long skip(long n) throws IOException {
         return skip0(n);
     }
@@ -420,6 +498,7 @@ public class FileInputStream extends InputStream
      * @throws     IOException  if this file input stream has been closed by calling
      *             {@code close} or an I/O error occurs.
      */
+    @Override
     public @NonNegative int available() throws IOException {
         return available0();
     }
@@ -436,15 +515,19 @@ public class FileInputStream extends InputStream
      * @apiNote
      * Overriding {@link #close} to perform cleanup actions is reliable
      * only when called directly or when called by try-with-resources.
-     * Do not depend on finalization to invoke {@code close};
-     * finalization is not reliable and is deprecated.
-     * If cleanup of native resources is needed, other mechanisms such as
-     * {@linkplain java.lang.ref.Cleaner} should be used.
      *
-     * @throws     IOException  if an I/O error occurs.
+     * @implSpec
+     * Subclasses requiring that resource cleanup take place after a stream becomes
+     * unreachable should use the {@link java.lang.ref.Cleaner} mechanism.
      *
-     * @revised 1.4
+     * <p>
+     * If this stream has an associated channel then this method will close the
+     * channel, which in turn will close this stream. Subclasses that override
+     * this method should be prepared to handle possible reentrant invocation.
+     *
+     * @throws     IOException  {@inheritDoc}
      */
+    @Override
     public void close() throws IOException {
         if (closed) {
             return;
@@ -508,8 +591,8 @@ public class FileInputStream extends InputStream
             synchronized (this) {
                 fc = this.channel;
                 if (fc == null) {
-                    this.channel = fc = FileChannelImpl.open(fd, path, true,
-                        false, false, this);
+                    fc = FileChannelImpl.open(fd, path, true, false, false, false, this);
+                    this.channel = fc;
                     if (closed) {
                         try {
                             // possible race with close(), benign since

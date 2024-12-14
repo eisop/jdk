@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2023, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2019, Azul Systems, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -76,6 +76,7 @@ import jdk.internal.perf.PerfCounter;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.misc.VM;
 import jdk.internal.reflect.CallerSensitive;
+import jdk.internal.reflect.CallerSensitiveAdapter;
 import jdk.internal.reflect.Reflection;
 import jdk.internal.util.StaticProperty;
 import sun.reflect.misc.ReflectUtil;
@@ -238,7 +239,6 @@ import sun.security.util.SecurityConstants;
  * @jls 13.1 The Form of a Binary
  * @see      #resolveClass(Class)
  * @since 1.0
- * @revised 9
  */
 @AnnotatedFor({"interning", "lock", "nullness", "signature"})
 public abstract @UsesObjectEquals class ClassLoader {
@@ -419,6 +419,11 @@ public abstract @UsesObjectEquals class ClassLoader {
         return nid;
     }
 
+    // Returns nameAndId string for exception message printing
+    String nameAndId() {
+        return nameAndId;
+    }
+
     /**
      * Creates a new class loader of the specified name and using the
      * specified parent class loader for delegation.
@@ -439,6 +444,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since  9
      */
+    @SuppressWarnings("this-escape")
     protected ClassLoader(@Nullable String name, @Nullable ClassLoader parent) {
         this(checkCreateClassLoader(name), name, parent);
     }
@@ -465,6 +471,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since  1.2
      */
+    @SuppressWarnings("this-escape")
     protected ClassLoader(@Nullable ClassLoader parent) {
         this(checkCreateClassLoader(), null, parent);
     }
@@ -484,6 +491,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          {@code checkCreateClassLoader} method doesn't allow creation
      *          of a new class loader.
      */
+    @SuppressWarnings("this-escape")
     protected ClassLoader() {
         this(checkCreateClassLoader(), null, getSystemClassLoader());
     }
@@ -506,7 +514,7 @@ public abstract @UsesObjectEquals class ClassLoader {
     }
 
     // package-private used by StackTraceElement to avoid
-    // calling the overrideable getName method
+    // calling the overridable getName method
     final String name() {
         return name;
     }
@@ -657,11 +665,20 @@ public abstract @UsesObjectEquals class ClassLoader {
 
     /**
      * Returns the lock object for class loading operations.
-     * For backward compatibility, the default implementation of this method
-     * behaves as follows. If this ClassLoader object is registered as
-     * parallel capable, the method returns a dedicated object associated
-     * with the specified class name. Otherwise, the method returns this
-     * ClassLoader object.
+     *
+     * @implSpec
+     * If this {@code ClassLoader} object is registered as parallel capable,
+     * this method returns a dedicated object associated with the specified
+     * class name. Otherwise, this method returns this {@code ClassLoader} object.
+     *
+     * @apiNote
+     * This method allows parallel capable class loaders to implement
+     * finer-grained locking schemes such that multiple threads may load classes
+     * concurrently without deadlocks.  For non-parallel-capable class loaders,
+     * the {@code ClassLoader} object is synchronized on during the class loading
+     * operations.  Class loaders with non-hierarchical delegation should be
+     * {@linkplain #registerAsParallelCapable() registered as parallel capable}
+     * to prevent deadlocks.
      *
      * @param  className
      *         The name of the to-be-loaded class
@@ -669,7 +686,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @return the lock for class loading operations
      *
      * @throws NullPointerException
-     *         If registered as parallel capable and {@code className} is null
+     *         If registered as parallel capable and {@code className} is {@code null}
      *
      * @see #loadClass(String, boolean)
      *
@@ -883,7 +900,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see  java.security.SecureClassLoader
      *
      * @since  1.1
-     * @revised 9
      */
     protected final Class<?> defineClass(@Nullable @BinaryName String name, byte[] b, int off, int len)
         throws ClassFormatError
@@ -1017,8 +1033,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          certificates than this class, or if {@code name} begins with
      *          "{@code java.}" and this class loader is not the platform
      *          class loader or its ancestor.
-     *
-     * @revised 9
      */
     protected final Class<?> defineClass(@Nullable @BinaryName String name, byte[] b, int off, int len,
                                          @Nullable ProtectionDomain protectionDomain)
@@ -1093,7 +1107,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see      #defineClass(String, byte[], int, int, ProtectionDomain)
      *
      * @since  1.5
-     * @revised 9
      */
     protected final Class<?> defineClass(@Nullable @BinaryName String name, java.nio.ByteBuffer b,
                                          @Nullable ProtectionDomain protectionDomain)
@@ -1406,7 +1419,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @throws  NullPointerException If {@code name} is {@code null}
      *
      * @since  1.1
-     * @revised 9
      */
     public @Nullable URL getResource(String name) {
         Objects.requireNonNull(name);
@@ -1471,7 +1483,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @throws  NullPointerException If {@code name} is {@code null}
      *
      * @since  1.2
-     * @revised 9
      */
     public Enumeration<URL> getResources(String name) throws IOException {
         Objects.requireNonNull(name);
@@ -1569,7 +1580,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          denied by the security manager.
      *
      * @since  1.2
-     * @revised 9
      */
     protected @Nullable URL findResource(String name) {
         return null;
@@ -1604,7 +1614,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          If I/O errors occur
      *
      * @since  1.2
-     * @revised 9
      */
     protected Enumeration<URL> findResources(String name) throws IOException {
         return Collections.emptyEnumeration();
@@ -1622,9 +1631,16 @@ public abstract @UsesObjectEquals class ClassLoader {
      * </ol>
      * <p>Note that once a class loader is registered as parallel capable, there
      * is no way to change it back.</p>
+     * <p>
+     * In cases where this method is called from a context where the caller is
+     * not a subclass of {@code ClassLoader} or there is no caller frame on the
+     * stack (e.g. when called directly from a JNI attached thread),
+     * {@code IllegalCallerException} is thrown.
+     * </p>
      *
      * @return  {@code true} if the caller is successfully registered as
      *          parallel capable and {@code false} if otherwise.
+     * @throws IllegalCallerException if the caller is not a subclass of {@code ClassLoader}
      *
      * @see #isRegisteredAsParallelCapable()
      *
@@ -1632,9 +1648,16 @@ public abstract @UsesObjectEquals class ClassLoader {
      */
     @CallerSensitive
     protected static boolean registerAsParallelCapable() {
-        Class<? extends ClassLoader> callerClass =
-            Reflection.getCallerClass().asSubclass(ClassLoader.class);
-        return ParallelLoaders.register(callerClass);
+        return registerAsParallelCapable(Reflection.getCallerClass());
+    }
+
+    // Caller-sensitive adapter method for reflective invocation
+    @CallerSensitiveAdapter
+    private static boolean registerAsParallelCapable(Class<?> caller) {
+        if ((caller == null) || !ClassLoader.class.isAssignableFrom(caller)) {
+            throw new IllegalCallerException(caller + " not a subclass of ClassLoader");
+        }
+        return ParallelLoaders.register(caller.asSubclass(ClassLoader.class));
     }
 
     /**
@@ -1675,7 +1698,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          denied by the security manager.
      *
      * @since  1.1
-     * @revised 9
      */
     public static @Nullable URL getSystemResource(String name) {
         return getSystemClassLoader().getResource(name);
@@ -1711,7 +1733,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          If I/O errors occur
      *
      * @since  1.2
-     * @revised 9
      */
     public static Enumeration<URL> getSystemResources(String name)
         throws IOException
@@ -1743,7 +1764,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @throws  NullPointerException If {@code name} is {@code null}
      *
      * @since  1.1
-     * @revised 9
      */
     public @Nullable InputStream getResourceAsStream(String name) {
         Objects.requireNonNull(name);
@@ -1776,7 +1796,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          denied by the security manager.
      *
      * @since  1.1
-     * @revised 9
      */
     public static @Nullable InputStream getSystemResourceAsStream(String name) {
         URL url = getSystemResource(name);
@@ -1936,9 +1955,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          exception is thrown by that constructor when it is invoked. The
      *          underlying cause of the error can be retrieved via the
      *          {@link Throwable#getCause()} method.
-     *
-     * @revised  1.4
-     * @revised 9
      */
     @CallerSensitive
     public static ClassLoader getSystemClassLoader() {
@@ -2205,7 +2221,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      *
      * @since  1.2
-     * @revised 9
      *
      * @jvms 5.3 Creation and Loading
      * @see <a href="{@docRoot}/../specs/jar/jar.html#package-sealing">
@@ -2264,7 +2279,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          for consistency with the existing {@link #getPackages} method.
      *
      * @return The array of {@code Package} objects that have been defined by
-     *         this class loader; or an zero length array if no package has been
+     *         this class loader; or a zero length array if no package has been
      *         defined by this class loader.
      *
      * @jvms 5.3 Creation and Loading
@@ -2314,7 +2329,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see ClassLoader#getDefinedPackage(String)
      *
      * @since  1.2
-     * @revised 9
      */
     @Deprecated(since="9")
     protected @Nullable Package getPackage(String name) {
@@ -2349,7 +2363,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see ClassLoader#getDefinedPackages()
      *
      * @since  1.2
-     * @revised 9
      */
     @CFComment({"nullness: The size of array passed to toArray",
      "method is of exact same size as of the map for which toArray method is invoked"})
@@ -2400,7 +2413,7 @@ public abstract @UsesObjectEquals class ClassLoader {
         return null;
     }
 
-    private final NativeLibraries libraries = NativeLibraries.jniNativeLibraries(this);
+    private final NativeLibraries libraries = NativeLibraries.newInstance(this);
 
     // Invoked in the java.lang.Runtime class to implement load and loadLibrary.
     @CFComment({"nulness: usr_paths and sys_paths are initialized",
@@ -2727,7 +2740,9 @@ public abstract @UsesObjectEquals class ClassLoader {
      * Called by the VM, during -Xshare:dump
      */
     private void resetArchivedStates() {
-        parallelLockMap.clear();
+        if (parallelLockMap != null) {
+            parallelLockMap.clear();
+        }
         packages.clear();
         package2certs.clear();
         classes.clear();

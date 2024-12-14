@@ -27,8 +27,8 @@
 
 #include "gc/g1/g1FullGCOopClosures.hpp"
 #include "gc/g1/g1FullGCTask.hpp"
+#include "gc/g1/g1HeapRegionManager.hpp"
 #include "gc/g1/g1RootProcessor.hpp"
-#include "gc/g1/heapRegionManager.hpp"
 #include "gc/shared/weakProcessor.hpp"
 #include "utilities/ticks.hpp"
 
@@ -36,7 +36,6 @@ class G1CollectedHeap;
 
 class G1FullGCAdjustTask : public G1FullGCTask {
   G1RootProcessor          _root_processor;
-  volatile bool            _references_done;
   WeakProcessor::Task      _weak_proc_task;
   HeapRegionClaimer        _hrclaimer;
   G1AdjustClosure          _adjust;
