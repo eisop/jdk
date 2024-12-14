@@ -163,6 +163,7 @@ public class SimpleTimeZone extends TimeZone {
      * @param rawOffset  The base time zone offset in milliseconds to GMT.
      * @param ID         The time zone name that is given to this instance.
      */
+    @SuppressWarnings("this-escape")
     public SimpleTimeZone(int rawOffset, String ID)
     {
         this.rawOffset = rawOffset;
@@ -333,6 +334,7 @@ public class SimpleTimeZone extends TimeZone {
      *
      * @since 1.4
      */
+    @SuppressWarnings("this-escape")
     public SimpleTimeZone(int rawOffset, String ID,
                           int startMonth, int startDay, int startDayOfWeek,
                           int startTime, int startTimeMode,

@@ -32,6 +32,7 @@ import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -1308,9 +1309,11 @@ public abstract class Symbol extends AnnoConstruct implements PoolConstant, Elem
         // sealed classes related fields
         /** The classes, or interfaces, permitted to extend this class, or interface
          */
-        public List<Symbol> permitted;
+        private java.util.List<PermittedClassWithPos> permitted;
 
         public boolean isPermittedExplicit = false;
+
+        private record PermittedClassWithPos(Symbol permittedClass, int pos) {}
 
         public ClassSymbol(long flags, Name name, Type type, Symbol owner) {
             super(TYP, flags, name, type, owner);
@@ -1320,7 +1323,7 @@ public abstract class Symbol extends AnnoConstruct implements PoolConstant, Elem
             this.sourcefile = null;
             this.classfile = null;
             this.annotationTypeMetadata = AnnotationTypeMetadata.notAnAnnotationType();
-            this.permitted = List.nil();
+            this.permitted = new ArrayList<>();
         }
 
         public ClassSymbol(long flags, Name name, Symbol owner) {
@@ -1330,6 +1333,37 @@ public abstract class Symbol extends AnnoConstruct implements PoolConstant, Elem
                 new ClassType(Type.noType, null, null),
                 owner);
             this.type.tsym = this;
+        }
+
+        public void addPermittedSubclass(ClassSymbol csym, int pos) {
+            Assert.check(!isPermittedExplicit);
+            // we need to insert at the right pos
+            PermittedClassWithPos element = new PermittedClassWithPos(csym, pos);
+            int index = Collections.binarySearch(permitted, element, java.util.Comparator.comparing(PermittedClassWithPos::pos));
+            if (index < 0) {
+                index = -index - 1;
+            }
+            permitted.add(index, element);
+        }
+
+        public boolean isPermittedSubclass(Symbol csym) {
+            for (PermittedClassWithPos permittedClassWithPos : permitted) {
+                if (permittedClassWithPos.permittedClass.equals(csym)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void clearPermittedSubclasses() {
+            permitted.clear();
+        }
+
+        public void setPermittedSubclasses(List<Symbol> permittedSubs) {
+            permitted.clear();
+            for (Symbol csym : permittedSubs) {
+                permitted.add(new PermittedClassWithPos(csym, 0));
+            }
         }
 
         /** The Java source which this symbol represents.
@@ -1523,9 +1557,11 @@ public abstract class Symbol extends AnnoConstruct implements PoolConstant, Elem
             RecordComponent toRemove = null;
             for (RecordComponent rc : recordComponents) {
                 /* it could be that a record erroneously declares two record components with the same name, in that
-                 * case we need to use the position to disambiguate
+                 * case we need to use the position to disambiguate, but if we loaded the record from a class file
+                 * all positions will be -1, in that case we have to ignore the position and match only based on the
+                 * name
                  */
-                if (rc.name == var.name && var.pos == rc.pos) {
+                if (rc.name == var.name && (var.pos == rc.pos || rc.pos == -1)) {
                     toRemove = rc;
                 }
             }
@@ -1648,7 +1684,7 @@ public abstract class Symbol extends AnnoConstruct implements PoolConstant, Elem
 
         @DefinedBy(Api.LANGUAGE_MODEL)
         public List<Type> getPermittedSubclasses() {
-            return permitted.map(s -> s.type);
+            return permitted.stream().map(s -> s.permittedClass().type).collect(List.collector());
         }
     }
 
@@ -1965,7 +2001,8 @@ public abstract class Symbol extends AnnoConstruct implements PoolConstant, Elem
 
         @Override @DefinedBy(Api.LANGUAGE_MODEL)
         public Set<Modifier> getModifiers() {
-            long flags = flags();
+            // just in case the method is restricted but that is not a modifier
+            long flags = flags() & ~RESTRICTED;
             return Flags.asModifierSet((flags & DEFAULT) != 0 ? flags & ~ABSTRACT : flags);
         }
 

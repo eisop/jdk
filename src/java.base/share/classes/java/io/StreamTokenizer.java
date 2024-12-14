@@ -238,6 +238,7 @@ public @UsesObjectEquals class StreamTokenizer {
      * @see        java.io.StreamTokenizer#StreamTokenizer(java.io.Reader)
      */
     @Deprecated
+    @SuppressWarnings("this-escape")
     public StreamTokenizer(InputStream is) {
         this();
         if (is == null) {
@@ -252,6 +253,7 @@ public @UsesObjectEquals class StreamTokenizer {
      * @param r  a Reader object providing the input stream.
      * @since   1.1
      */
+    @SuppressWarnings("this-escape")
     public StreamTokenizer(Reader r) {
         this();
         if (r == null) {

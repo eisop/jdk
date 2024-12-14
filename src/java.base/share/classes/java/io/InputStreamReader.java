@@ -94,6 +94,7 @@ public class InputStreamReader extends Reader {
      *
      * @see Charset#defaultCharset()
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias InputStreamReader(@MustCallAlias InputStream in) {
         super(in);
         Charset cs = Charset.defaultCharset();
@@ -112,6 +113,7 @@ public class InputStreamReader extends Reader {
      * @throws     UnsupportedEncodingException
      *             If the named charset is not supported
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias InputStreamReader(@MustCallAlias InputStream in, String charsetName)
         throws UnsupportedEncodingException
     {
@@ -129,6 +131,7 @@ public class InputStreamReader extends Reader {
      *
      * @since 1.4
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias InputStreamReader(@MustCallAlias InputStream in, Charset cs) {
         super(in);
         if (cs == null)
@@ -144,6 +147,7 @@ public class InputStreamReader extends Reader {
      *
      * @since 1.4
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias InputStreamReader(@MustCallAlias InputStream in, CharsetDecoder dec) {
         super(in);
         if (dec == null)

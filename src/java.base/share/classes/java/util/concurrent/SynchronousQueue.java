@@ -206,6 +206,8 @@ public class SynchronousQueue<E extends @NonNull Object> extends AbstractQueue<E
                     if ((m = s.await(e, ns, this,  // spin if (nearly) empty
                                      p == null || p.waiter == null)) == e)
                         unspliceLifo(s);           // cancelled
+                    else if (m != null)
+                        s.selfLinkItem();
                     break;
                 }
             }

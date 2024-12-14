@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -256,7 +256,7 @@ class ZipUtils {
     static final int  ENDTOT(byte[] b) { return SH(b, 10);}  // total number of entries
     static final long ENDSIZ(byte[] b) { return LG(b, 12);}  // central directory size
     static final long ENDOFF(byte[] b) { return LG(b, 16);}  // central directory offset
-    static final int  ENDCOM(byte[] b) { return SH(b, 20);}  // size of zip file comment
+    static final int  ENDCOM(byte[] b) { return SH(b, 20);}  // size of ZIP file comment
     static final int  ENDCOM(byte[] b, int off) { return SH(b, off + 20);}
 
     // zip64 end of central directory recoder fields
@@ -291,7 +291,7 @@ class ZipUtils {
     static final int READBLOCKSZ = 128;
 
     /**
-     * Loads zip native library, if not already loaded
+     * Loads ZIP native library, if not already loaded
      */
     static void loadLibrary() {
         jdk.internal.loader.BootLoader.loadLibrary("zip");

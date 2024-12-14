@@ -21,7 +21,6 @@
  * questions.
  */
 
-#include "memory/allocation.hpp"
 #include "precompiled.hpp"
 #include "classfile/classLoaderData.hpp"
 #include "gc/shared/gc_globals.hpp"
@@ -37,6 +36,7 @@
 #include "gc/z/zStoreBarrierBuffer.inline.hpp"
 #include "gc/z/zStat.hpp"
 #include "gc/z/zVerify.hpp"
+#include "memory/allocation.hpp"
 #include "memory/iterator.inline.hpp"
 #include "memory/resourceArea.hpp"
 #include "oops/oop.hpp"
@@ -237,16 +237,6 @@ public:
 
   virtual void do_oop(narrowOop*) {
     ShouldNotReachHere();
-  }
-};
-
-class ZVerifyCodeBlobClosure : public CodeBlobToOopClosure {
-public:
-  ZVerifyCodeBlobClosure(OopClosure* cl)
-    : CodeBlobToOopClosure(cl, false /* fix_relocations */) {}
-
-  virtual void do_code_blob(CodeBlob* cb) {
-    CodeBlobToOopClosure::do_code_blob(cb);
   }
 };
 
@@ -493,9 +483,6 @@ void ZVerify::after_mark() {
     roots_strong(true /* verify_after_old_mark */);
   }
   if (ZVerifyObjects) {
-    // Workaround OopMapCacheAlloc_lock reordering with the StackWatermark_lock
-    DisableIsGCActiveMark mark;
-
     objects(false /* verify_weaks */);
     guarantee(zverify_broken_object == zaddress::null, "Verification failed");
   }

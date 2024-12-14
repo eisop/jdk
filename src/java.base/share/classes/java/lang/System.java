@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -85,6 +85,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import jdk.internal.logger.LoggerFinderLoader.TemporaryLoggerFinder;
+import jdk.internal.misc.Blocker;
 import jdk.internal.misc.CarrierThreadLocal;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.util.StaticProperty;
@@ -94,7 +95,6 @@ import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
 import jdk.internal.access.JavaLangAccess;
 import jdk.internal.access.SharedSecrets;
-import jdk.internal.javac.PreviewFeature;
 import jdk.internal.logger.LoggerFinderLoader;
 import jdk.internal.logger.LazyLoggers;
 import jdk.internal.logger.LocalizedLoggerWrapper;
@@ -209,8 +209,9 @@ public final @UsesObjectEquals class System {
     @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null.")
     public static final @MustCall({}) PrintStream err = null;
 
-    // Holder for the initial value of `in`, set within `initPhase1()`.
-    private static InputStream initialIn;
+    // Initial values of System.in and System.err, set in initPhase1().
+    private static @Stable InputStream initialIn;
+    private static @Stable PrintStream initialErr;
 
     // indicates if a security manager is possible
     private static final int NEVER = 1;
@@ -376,9 +377,6 @@ public final @UsesObjectEquals class System {
             = Collections.synchronizedMap(new WeakHashMap<>());
     }
 
-    // Remember initial System.err. setSecurityManager() warning goes here
-    private static volatile @Stable PrintStream initialErrStream;
-
     private static URL codeSource(Class<?> clazz) {
         PrivilegedAction<ProtectionDomain> pa = clazz::getProtectionDomain;
         @SuppressWarnings("removal")
@@ -438,7 +436,7 @@ public final @UsesObjectEquals class System {
                 } else {
                     source = callerClass.getName() + " (" + url + ")";
                 }
-                initialErrStream.printf("""
+                initialErr.printf("""
                         WARNING: A terminally deprecated method in java.lang.System has been called
                         WARNING: System::setSecurityManager has been called by %s
                         WARNING: Please consider reporting this to the maintainers of %s
@@ -2218,16 +2216,17 @@ public final @UsesObjectEquals class System {
 
         lineSeparator = props.getProperty("line.separator");
 
-        FileInputStream fdIn = new FileInputStream(FileDescriptor.in);
-        FileOutputStream fdOut = new FileOutputStream(FileDescriptor.out);
-        FileOutputStream fdErr = new FileOutputStream(FileDescriptor.err);
+        FileInputStream fdIn = new In(FileDescriptor.in);
+        FileOutputStream fdOut = new Out(FileDescriptor.out);
+        FileOutputStream fdErr = new Out(FileDescriptor.err);
         initialIn = new BufferedInputStream(fdIn);
         setIn0(initialIn);
         // stdout/err.encoding are set when the VM is associated with the terminal,
         // thus they are equivalent to Console.charset(), otherwise the encodings
         // of those properties default to native.encoding
         setOut0(newPrintStream(fdOut, props.getProperty("stdout.encoding")));
-        setErr0(newPrintStream(fdErr, props.getProperty("stderr.encoding")));
+        initialErr = newPrintStream(fdErr, props.getProperty("stderr.encoding"));
+        setErr0(initialErr);
 
         // Setup Java signal handlers for HUP, TERM, and INT (where available).
         Terminator.setup();
@@ -2243,6 +2242,83 @@ public final @UsesObjectEquals class System {
 
         // system properties, java.lang and other core classes are now initialized
         VM.initLevel(1);
+    }
+
+    /**
+     * System.in.
+     */
+    private static class In extends FileInputStream {
+        In(FileDescriptor fd) {
+            super(fd);
+        }
+
+        @Override
+        public int read() throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read();
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read(b, off, len);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+    }
+
+    /**
+     * System.out/System.err wrap this output stream.
+     */
+    private static class Out extends FileOutputStream {
+        Out(FileDescriptor fd) {
+            super(fd);
+        }
+
+        public void write(int b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b, off, len);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
     }
 
     // @see #initPhase2()
@@ -2356,8 +2432,6 @@ public final @UsesObjectEquals class System {
                     notSupportedJnuEncoding);
         }
 
-        initialErrStream = System.err;
-
         // initializing the system class loader
         VM.initLevel(3);
 
@@ -2406,7 +2480,7 @@ public final @UsesObjectEquals class System {
                 return klass.getEnumConstantsShared();
             }
             public void blockedOn(Interruptible b) {
-                Thread.blockedOn(b);
+                Thread.currentThread().blockedOn(b);
             }
             public void registerShutdownHook(int slot, boolean registerShutdownInProgress, Runnable hook) {
                 Shutdown.add(slot, registerShutdownInProgress, hook);
@@ -2486,6 +2560,9 @@ public final @UsesObjectEquals class System {
             public Module addEnableNativeAccess(Module m) {
                 return m.implAddEnableNativeAccess();
             }
+            public boolean addEnableNativeAccess(ModuleLayer layer, String name) {
+                return layer.addEnableNativeAccess(name);
+            }
             public void addEnableNativeAccessToAllUnnamed() {
                 Module.implAddEnableNativeAccessToAllUnnamed();
             }
@@ -2513,6 +2590,9 @@ public final @UsesObjectEquals class System {
             }
             public char getUTF16Char(byte[] bytes, int index) {
                 return StringUTF16.getChar(bytes, index);
+            }
+            public void putCharUTF16(byte[] bytes, int index, int ch) {
+                StringUTF16.putChar(bytes, index, ch);
             }
             public byte[] getBytesNoRepl(String s, Charset cs) throws CharacterCodingException {
                 return String.getBytesNoRepl(s, cs);
@@ -2542,6 +2622,10 @@ public final @UsesObjectEquals class System {
                 return initialIn;
             }
 
+            public PrintStream initialSystemErr() {
+                return initialErr;
+            }
+
             public void setCause(Throwable t, Throwable cause) {
                 t.setCause(cause);
             }
@@ -2554,6 +2638,10 @@ public final @UsesObjectEquals class System {
                 return StringConcatHelper.lookupStatic(name, methodType);
             }
 
+            public long stringConcatHelperPrepend(long indexCoder, byte[] buf, String value) {
+                return StringConcatHelper.prepend(indexCoder, buf, value);
+            }
+
             public long stringConcatInitialCoder() {
                 return StringConcatHelper.initialCoder();
             }
@@ -2562,21 +2650,20 @@ public final @UsesObjectEquals class System {
                 return StringConcatHelper.mix(lengthCoder, constant);
             }
 
-            @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
-            public long stringConcatCoder(char value) {
-                return StringConcatHelper.coder(value);
+            public long stringConcatMix(long lengthCoder, char value) {
+                return StringConcatHelper.mix(lengthCoder, value);
             }
 
-            @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
-            public long stringBuilderConcatMix(long lengthCoder,
-                                               StringBuilder sb) {
-                return sb.mix(lengthCoder);
+            public int stringSize(long i) {
+                return Long.stringSize(i);
             }
 
-            @PreviewFeature(feature=PreviewFeature.Feature.STRING_TEMPLATES)
-            public long stringBuilderConcatPrepend(long lengthCoder, byte[] buf,
-                                                   StringBuilder sb) {
-                return sb.prepend(lengthCoder, buf);
+            public int getCharsLatin1(long i, int index, byte[] buf) {
+                return StringLatin1.getChars(i, index, buf);
+            }
+
+            public int getCharsUTF16(long i, int index, byte[] buf) {
+                return StringUTF16.getChars(i, index, buf);
             }
 
             public String join(String prefix, String suffix, String delimiter, String[] elements, int size) {
@@ -2713,6 +2800,11 @@ public final @UsesObjectEquals class System {
             @Override
             public boolean bytesCompatible(String string, Charset charset) {
                 return string.bytesCompatible(charset);
+            }
+
+            @Override
+            public boolean allowSecurityManager() {
+                return System.allowSecurityManager();
             }
         });
     }

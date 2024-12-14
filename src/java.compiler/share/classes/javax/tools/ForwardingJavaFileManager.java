@@ -155,6 +155,8 @@ public class ForwardingJavaFileManager<M extends JavaFileManager> implements Jav
      *
      * @throws IllegalArgumentException {@inheritDoc}
      * @throws IllegalStateException {@inheritDoc}
+     *
+     * @since 18
      */
     @Override
     public JavaFileObject getJavaFileForOutputForOriginatingFiles(Location location,
@@ -215,6 +217,8 @@ public class ForwardingJavaFileManager<M extends JavaFileManager> implements Jav
      *
      * @throws IllegalArgumentException {@inheritDoc}
      * @throws IllegalStateException {@inheritDoc}
+     *
+     * @since 18
      */
     @Override
     public FileObject getFileForOutputForOriginatingFiles(Location location,

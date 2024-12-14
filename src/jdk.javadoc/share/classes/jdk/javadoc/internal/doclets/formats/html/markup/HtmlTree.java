@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -232,6 +232,20 @@ public class HtmlTree extends Content {
     public HtmlTree add(List<? extends Content> list) {
         list.forEach(this::add);
         return this;
+    }
+
+    /**
+     * {@return the attributes of this node}
+     */
+    public Map<HtmlAttr, String> getAttrs() {
+        return attrs;
+    }
+
+    /**
+     * {@return the contents of this node}
+     */
+    public List<Content> getContents() {
+        return content;
     }
 
     /**
@@ -587,13 +601,26 @@ public class HtmlTree extends Content {
      * @param id    the id
      * @return the element
      */
-    public static HtmlTree INPUT(String type, HtmlId id) {
+    public static HtmlTree INPUT(HtmlAttr.InputType type, HtmlId id) {
         return new HtmlTree(TagName.INPUT)
-                .put(HtmlAttr.TYPE, type)
+                .put(HtmlAttr.TYPE, type.toString())
                 .setId(id)
                 .put(HtmlAttr.DISABLED, "");
     }
 
+    /**
+     * Creates an HTML {@code INPUT} element with the given type
+     * and style. The element is marked as initially disabled.
+     * @param type  the input type
+     * @param style the input style
+     * @return      the element
+     */
+    public static HtmlTree INPUT(HtmlAttr.InputType type, HtmlStyle style) {
+        return new HtmlTree(TagName.INPUT)
+                .put(HtmlAttr.TYPE, type.toString())
+                .setStyle(style)
+                .put(HtmlAttr.DISABLED, "");
+    }
     /**
      * Creates an HTML {@code LABEL} element with the given content.
      *
@@ -717,6 +744,17 @@ public class HtmlTree extends Content {
     public static HtmlTree NOSCRIPT(Content body) {
         return new HtmlTree(TagName.NOSCRIPT)
                 .add(body);
+    }
+
+    /**
+     * Creates an HTML {@code OL} element with the given style.
+     *
+     * @param style the style
+     * @return the element
+     */
+    public static HtmlTree OL(HtmlStyle style) {
+        return new HtmlTree(TagName.OL)
+                .setStyle(style);
     }
 
     /**
@@ -985,6 +1023,11 @@ public class HtmlTree extends Content {
     @Pure
     public boolean isEmpty() {
         return (!hasContent() && !hasAttrs());
+    }
+
+    @Override
+    public boolean isPhrasingContent() {
+        return tagName.phrasingContent;
     }
 
     /**

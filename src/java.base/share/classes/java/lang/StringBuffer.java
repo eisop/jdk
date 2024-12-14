@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -750,10 +750,13 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
         return this;
     }
 
-    @IntrinsicCandidate
     @Override
+    @IntrinsicCandidate
     @SideEffectFree
     public synchronized String toString(@GuardSatisfied StringBuffer this) {
+        if (length() == 0) {
+            return "";
+        }
         if (toStringCache == null) {
             return toStringCache = new String(this, null);
         }

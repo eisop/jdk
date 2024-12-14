@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -91,7 +91,7 @@ final class DESKey implements SecretKey {
         // Use the cleaner to zero the key when no longer referenced
         final byte[] k = this.key;
         CleanerFactory.cleaner().register(this,
-                () -> java.util.Arrays.fill(k, (byte)0x00));
+                () -> Arrays.fill(k, (byte)0x00));
     }
 
     public byte[] getEncoded() {
@@ -144,7 +144,7 @@ final class DESKey implements SecretKey {
 
             byte[] thatKey = that.getEncoded();
             boolean ret = MessageDigest.isEqual(this.key, thatKey);
-            java.util.Arrays.fill(thatKey, (byte)0x00);
+            Arrays.fill(thatKey, (byte)0x00);
             return ret;
         } finally {
             // prevent this from being cleaned for the above block
@@ -176,7 +176,7 @@ final class DESKey implements SecretKey {
         // Use the cleaner to zero the key when no longer referenced
         final byte[] k = this.key;
         CleanerFactory.cleaner().register(this,
-                () -> java.util.Arrays.fill(k, (byte)0x00));
+                () -> Arrays.fill(k, (byte)0x00));
     }
 
     /**

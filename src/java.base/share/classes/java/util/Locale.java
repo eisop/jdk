@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -56,18 +56,19 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.spi.LocaleNameProvider;
 import java.util.stream.Stream;
 
+import jdk.internal.util.ReferencedKeyMap;
+import jdk.internal.util.StaticProperty;
 import jdk.internal.vm.annotation.Stable;
 
-import sun.security.action.GetPropertyAction;
 import sun.util.locale.BaseLocale;
 import sun.util.locale.InternalLocaleBuilder;
 import sun.util.locale.LanguageTag;
 import sun.util.locale.LocaleExtensions;
 import sun.util.locale.LocaleMatcher;
-import sun.util.locale.LocaleObjectCache;
 import sun.util.locale.LocaleSyntaxException;
 import sun.util.locale.LocaleUtils;
 import sun.util.locale.ParseStatus;
@@ -989,38 +990,36 @@ public final class Locale implements Cloneable, Serializable {
         return getInstance(baseloc, extensions);
     }
 
+
     static Locale getInstance(BaseLocale baseloc, @Nullable LocaleExtensions extensions) {
         if (extensions == null) {
             Locale locale = CONSTANT_LOCALES.get(baseloc);
             if (locale != null) {
                 return locale;
             }
-            return Cache.LOCALECACHE.get(baseloc);
+            return LOCALE_CACHE.computeIfAbsent(baseloc, LOCALE_CREATOR);
         } else {
             LocaleKey key = new LocaleKey(baseloc, extensions);
-            return Cache.LOCALECACHE.get(key);
+            return LOCALE_CACHE.computeIfAbsent(key, LOCALE_CREATOR);
         }
     }
 
-    private static class Cache extends LocaleObjectCache<Object, Locale> {
+    private static final ReferencedKeyMap<Object, Locale> LOCALE_CACHE
+            = ReferencedKeyMap.create(true, ReferencedKeyMap.concurrentHashMapSupplier());
 
-        private static final Cache LOCALECACHE = new Cache();
-
-        private Cache() {
-        }
-
+    private static final Function<Object, Locale> LOCALE_CREATOR = new Function<>() {
         @Override
-        protected Locale createObject(Object key) {
-            if (key instanceof BaseLocale) {
-                return new Locale((BaseLocale)key, null);
-            } else {
-                LocaleKey lk = (LocaleKey)key;
-                return new Locale(lk.base, lk.exts);
+        public Locale apply(Object key) {
+            if (key instanceof BaseLocale base) {
+                return new Locale(base, null);
             }
+            LocaleKey lk = (LocaleKey)key;
+            return new Locale(lk.base, lk.exts);
         }
-    }
+    };
 
     private static final class LocaleKey {
+
         private final BaseLocale base;
         private final @Nullable LocaleExtensions exts;
         private final int hash;
@@ -1131,11 +1130,10 @@ public final class Locale implements Cloneable, Serializable {
 
     private static Locale initDefault() {
         String language, region, script, country, variant;
-        Properties props = GetPropertyAction.privilegedGetProperties();
-        language = props.getProperty("user.language", "en");
+        language = StaticProperty.USER_LANGUAGE;
         // for compatibility, check for old user.region property
-        region = props.getProperty("user.region");
-        if (region != null) {
+        region = StaticProperty.USER_REGION;
+        if (!region.isEmpty()) {
             // region can be of form country, country_variant, or _variant
             int i = region.indexOf('_');
             if (i >= 0) {
@@ -1147,30 +1145,24 @@ public final class Locale implements Cloneable, Serializable {
             }
             script = "";
         } else {
-            script = props.getProperty("user.script", "");
-            country = props.getProperty("user.country", "");
-            variant = props.getProperty("user.variant", "");
+            script = StaticProperty.USER_SCRIPT;
+            country = StaticProperty.USER_COUNTRY;
+            variant = StaticProperty.USER_VARIANT;
         }
 
         return getInstance(language, script, country, variant,
-                getDefaultExtensions(props.getProperty("user.extensions", ""))
+                getDefaultExtensions(StaticProperty.USER_EXTENSIONS)
                     .orElse(null));
     }
 
     private static Locale initDefault(Locale.Category category) {
-        Properties props = GetPropertyAction.privilegedGetProperties();
-
         Locale locale = Locale.defaultLocale;
         return getInstance(
-            props.getProperty(category.languageKey,
-                    locale.getLanguage()),
-            props.getProperty(category.scriptKey,
-                    locale.getScript()),
-            props.getProperty(category.countryKey,
-                    locale.getCountry()),
-            props.getProperty(category.variantKey,
-                    locale.getVariant()),
-            getDefaultExtensions(props.getProperty(category.extensionsKey, ""))
+            category == Category.DISPLAY ? StaticProperty.USER_LANGUAGE_DISPLAY : StaticProperty.USER_LANGUAGE_FORMAT,
+            category == Category.DISPLAY ? StaticProperty.USER_SCRIPT_DISPLAY : StaticProperty.USER_SCRIPT_FORMAT,
+            category == Category.DISPLAY ? StaticProperty.USER_COUNTRY_DISPLAY : StaticProperty.USER_COUNTRY_FORMAT,
+            category == Category.DISPLAY ? StaticProperty.USER_VARIANT_DISPLAY : StaticProperty.USER_VARIANT_FORMAT,
+            getDefaultExtensions(category == Category.DISPLAY ? StaticProperty.USER_EXTENSIONS_DISPLAY : StaticProperty.USER_EXTENSIONS_FORMAT)
                 .orElse(locale.getLocaleExtensions()));
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
-import sun.security.krb5.Config;
 import sun.security.krb5.Asn1Exception;
 import sun.security.util.*;
 import java.net.InetAddress;
@@ -47,6 +46,7 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static sun.security.krb5.internal.Krb5.DEBUG;
 /**
  * Implements the ASN.1 HostAddress type.
  *
@@ -69,7 +69,6 @@ public class HostAddress implements Cloneable {
     byte[] address = null;
 
     private static InetAddress localInetAddress; //caches local inet address
-    private static final boolean DEBUG = sun.security.krb5.internal.Krb5.DEBUG;
     private volatile int hashCode = 0;
 
     private HostAddress(int dummy) {}
@@ -199,10 +198,10 @@ public class HostAddress implements Cloneable {
         if (new_address != null) {
            address = new_address.clone();
         }
-        if (DEBUG) {
+        if (DEBUG != null) {
             if (addrType == Krb5.ADDRTYPE_INET ||
                     addrType == Krb5.ADDRTYPE_INET6) {
-                System.out.println("Host address is " +
+                DEBUG.println("Host address is " +
                         InetAddress.getByAddress(address));
             }
         }

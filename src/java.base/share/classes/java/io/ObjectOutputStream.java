@@ -255,6 +255,7 @@ public class ObjectOutputStream
      * @see     ObjectOutputStream#putFields()
      * @see     ObjectInputStream#ObjectInputStream(InputStream)
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias ObjectOutputStream(@MustCallAlias OutputStream out) throws IOException {
         verifySubclass();
         bout = new BlockDataOutputStream(out);
@@ -1035,7 +1036,7 @@ public class ObjectOutputStream
          *         calling the {@link java.io.ObjectOutputStream#writeFields()}
          *         method.
          */
-        @Deprecated
+        @Deprecated(forRemoval = true, since = "1.4")
         public abstract void write(ObjectOutput out) throws IOException;
     }
 

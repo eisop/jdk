@@ -363,9 +363,9 @@ public class GregorianCalendar extends Calendar {
      * accurate.
      */
 
-//////////////////
+//----------------
 // Class Variables
-//////////////////
+//----------------
 
     /**
      * Value of the {@code ERA} field indicating
@@ -522,9 +522,9 @@ public class GregorianCalendar extends Calendar {
     // The default value of gregorianCutover.
     static final long DEFAULT_GREGORIAN_CUTOVER = -12219292800000L;
 
-/////////////////////
+//-------------------
 // Instance Variables
-/////////////////////
+//-------------------
 
     /**
      * The point at which the Gregorian calendar rules are used, measured in
@@ -588,15 +588,16 @@ public class GregorianCalendar extends Calendar {
      */
     private transient int[] originalFields;
 
-///////////////
+//-------------
 // Constructors
-///////////////
+//-------------
 
     /**
      * Constructs a default {@code GregorianCalendar} using the current time
      * in the default time zone with the default
      * {@link Locale.Category#FORMAT FORMAT} locale.
      */
+    @SuppressWarnings("this-escape")
     public GregorianCalendar() {
         this(TimeZone.getDefaultRef(), Locale.getDefault(Locale.Category.FORMAT));
         setZoneShared(true);
@@ -621,6 +622,7 @@ public class GregorianCalendar extends Calendar {
      * @param aLocale the given locale.
      * @throws NullPointerException if {@code aLocale} is {@code null}
      */
+    @SuppressWarnings("this-escape")
     public GregorianCalendar(Locale aLocale) {
         this(TimeZone.getDefaultRef(), aLocale);
         setZoneShared(true);
@@ -634,6 +636,7 @@ public class GregorianCalendar extends Calendar {
      * @param aLocale the given locale.
      * @throws NullPointerException if {@code zone} or {@code aLocale} is {@code null}
      */
+    @SuppressWarnings("this-escape")
     public GregorianCalendar(TimeZone zone, Locale aLocale) {
         super(zone, aLocale);
         gdate = gcal.newCalendarDate(zone);
@@ -649,6 +652,7 @@ public class GregorianCalendar extends Calendar {
      * Month value is 0-based. e.g., 0 for January.
      * @param dayOfMonth the value used to set the {@code DAY_OF_MONTH} calendar field in the calendar.
      */
+    @SuppressWarnings("this-escape")
     public GregorianCalendar(int year, int month, int dayOfMonth) {
         this(year, month, dayOfMonth, 0, 0, 0, 0);
     }
@@ -666,6 +670,7 @@ public class GregorianCalendar extends Calendar {
      * @param minute the value used to set the {@code MINUTE} calendar field
      * in the calendar.
      */
+    @SuppressWarnings("this-escape")
     public GregorianCalendar(int year, int month, int dayOfMonth, int hourOfDay,
                              int minute) {
         this(year, month, dayOfMonth, hourOfDay, minute, 0, 0);
@@ -686,6 +691,7 @@ public class GregorianCalendar extends Calendar {
      * @param second the value used to set the {@code SECOND} calendar field
      * in the calendar.
      */
+    @SuppressWarnings("this-escape")
     public GregorianCalendar(int year, int month, int dayOfMonth, int hourOfDay,
                              int minute, int second) {
         this(year, month, dayOfMonth, hourOfDay, minute, second, 0);
@@ -751,9 +757,9 @@ public class GregorianCalendar extends Calendar {
         gdate = gcal.newCalendarDate(getZone());
     }
 
-/////////////////
+//---------------
 // Public methods
-/////////////////
+//---------------
 
     /**
      * Sets the {@code GregorianCalendar} change date. This is the point when the switch
@@ -2261,9 +2267,9 @@ public class GregorianCalendar extends Calendar {
         return gc.getActualMaximum(WEEK_OF_YEAR);
     }
 
-/////////////////////////////
+//---------------------------
 // Time => Fields computation
-/////////////////////////////
+//---------------------------
 
     /**
      * The fixed date corresponding to gdate. If the value is

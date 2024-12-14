@@ -131,6 +131,7 @@ public class HashSet<E>
      * @param c the collection whose elements are to be placed into this set
      * @throws NullPointerException if the specified collection is null
      */
+    @SuppressWarnings("this-escape")
     public @PolyNonEmpty HashSet(@PolyNonEmpty Collection<? extends E> c) {
         map = HashMap.newHashMap(Math.max(c.size(), 12));
         addAll(c);

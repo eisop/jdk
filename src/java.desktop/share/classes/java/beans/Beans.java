@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -107,8 +107,10 @@ public @UsesObjectEquals class Beans {
      *              object could not be found.
      * @throws IOException if an I/O error occurs.
      * @since 1.2
+     * @deprecated this method will be removed when java.beans.beancontext is removed
      */
-    @SuppressWarnings("deprecation")
+    @Deprecated(since = "23", forRemoval = true)
+    @SuppressWarnings({"deprecation", "removal"})
     public static Object instantiate(@Nullable ClassLoader cls, String beanName,
                                      @Nullable BeanContext beanContext)
             throws IOException, ClassNotFoundException {
@@ -357,7 +359,8 @@ public @UsesObjectEquals class Beans {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+    @Deprecated(since = "23", forRemoval = true)
+    @SuppressWarnings({ "unchecked", "removal" })
     private static void unsafeBeanContextAdd(BeanContext beanContext, Object res) {
         beanContext.add(res);
     }

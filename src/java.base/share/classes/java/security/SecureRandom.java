@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,7 +28,6 @@ package java.security;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-import jdk.internal.util.random.RandomSupport.RandomGeneratorProperties;
 import sun.security.jca.GetInstance;
 import sun.security.jca.GetInstance.Instance;
 import sun.security.jca.Providers;
@@ -153,10 +152,6 @@ import java.util.regex.Pattern;
  */
 
 @AnnotatedFor({"signedness"})
-@RandomGeneratorProperties(
-        name = "SecureRandom",
-        isStochastic = true
-)
 public class SecureRandom extends java.util.Random {
 
     private static final Debug pdebug =

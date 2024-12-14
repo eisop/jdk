@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -397,9 +397,9 @@ class KeepAliveKey {
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
-        if ((obj instanceof KeepAliveKey) == false)
+        if (!(obj instanceof KeepAliveKey kae))
             return false;
-        KeepAliveKey kae = (KeepAliveKey)obj;
+
         return host.equals(kae.host)
             && (port == kae.port)
             && protocol.equals(kae.protocol)
@@ -413,7 +413,7 @@ class KeepAliveKey {
     @Override
     public int hashCode() {
         String str = protocol+host+port;
-        return this.obj == null? str.hashCode() :
+        return this.obj == null ? str.hashCode() :
             str.hashCode() + this.obj.hashCode();
     }
 }

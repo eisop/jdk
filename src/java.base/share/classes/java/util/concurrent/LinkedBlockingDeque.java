@@ -209,6 +209,7 @@ public class LinkedBlockingDeque<E extends Object>
      * @throws NullPointerException if the specified collection or any
      *         of its elements are null
      */
+    @SuppressWarnings("this-escape")
     public LinkedBlockingDeque(Collection<? extends E> c) {
         this(Integer.MAX_VALUE);
         addAll(c);

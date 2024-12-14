@@ -72,6 +72,7 @@ public class DigestOutputStream extends FilterOutputStream {
      *
      * @param digest the message digest to associate with this stream.
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias DigestOutputStream(@MustCallAlias OutputStream stream, MessageDigest digest) {
         super(stream);
         setMessageDigest(digest);

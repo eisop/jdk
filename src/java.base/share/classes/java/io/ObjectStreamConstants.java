@@ -142,7 +142,7 @@ public interface ObjectStreamConstants {
     static final int baseWireHandle = 0x7e0000;
 
 
-    /******************************************************/
+    /* ****************************************************/
     /* Bit masks for ObjectStreamClass flag.*/
 
     /**

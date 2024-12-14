@@ -61,6 +61,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import jdk.internal.event.SerializationMisdeclarationEvent;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
@@ -467,6 +469,10 @@ public final class ObjectStreamClass implements Serializable {
             }
         }
         initialized = true;
+
+        if (SerializationMisdeclarationEvent.enabled() && serializable) {
+            SerializationMisdeclarationChecker.checkMisdeclarations(cl);
+        }
     }
 
     /**
