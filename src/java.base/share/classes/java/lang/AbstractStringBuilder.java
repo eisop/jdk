@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -143,6 +143,9 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
      * as the specified {@code CharSequence}. The initial capacity of
      * the string builder is {@code 16} plus the length of the
      * {@code CharSequence} argument.
+     * <p>
+     * The contents are unspecified if the {@code CharSequence}
+     * is modified during string construction.
      *
      * @param      seq   the sequence to copy.
      */
@@ -680,6 +683,10 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
      * If {@code s} is {@code null}, then this method appends
      * characters as if the s parameter was a sequence containing the four
      * characters {@code "null"}.
+     * <p>
+     * The contents are unspecified if the {@code CharSequence}
+     * is modified during the method call or an exception is thrown
+     * when accessing the {@code CharSequence}.
      *
      * @param   s the sequence to append.
      * @param   start   the starting index of the subsequence to be appended.
@@ -846,7 +853,7 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
         int spaceNeeded = count + Integer.stringSize(i);
         ensureCapacityInternal(spaceNeeded);
         if (isLatin1()) {
-            Integer.getChars(i, spaceNeeded, value);
+            StringLatin1.getChars(i, spaceNeeded, value);
         } else {
             StringUTF16.getChars(i, count, spaceNeeded, value);
         }
@@ -871,7 +878,7 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
         int spaceNeeded = count + Long.stringSize(l);
         ensureCapacityInternal(spaceNeeded);
         if (isLatin1()) {
-            Long.getChars(l, spaceNeeded, value);
+            StringLatin1.getChars(l, spaceNeeded, value);
         } else {
             StringUTF16.getChars(l, count, spaceNeeded, value);
         }
@@ -1255,6 +1262,10 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
      * invocation of this object's
      * {@link #insert(int,CharSequence,int,int) insert}(dstOffset, s, 0, s.length())
      * method.
+     * <p>
+     * The contents are unspecified if the {@code CharSequence}
+     * is modified during the method call or an exception is thrown
+     * when accessing the {@code CharSequence}.
      *
      * <p>If {@code s} is {@code null}, then the four characters
      * {@code "null"} are inserted into this sequence.
@@ -1303,6 +1314,10 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
      * <p>If {@code s} is {@code null}, then this method inserts
      * characters as if the s parameter was a sequence containing the four
      * characters {@code "null"}.
+     * <p>
+     * The contents are unspecified if the {@code CharSequence}
+     * is modified during the method call or an exception is thrown
+     * when accessing the {@code CharSequence}.
      *
      * @param      dstOffset   the offset in this sequence.
      * @param      s       the sequence to be inserted.
@@ -1694,11 +1709,10 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
     /* for readObject() */
     void initBytes(char[] value, int off, int len) {
         if (String.COMPACT_STRINGS) {
-            this.value = StringUTF16.compress(value, off, len);
-            if (this.value != null) {
-                this.coder = LATIN1;
-                return;
-            }
+            byte[] val = StringUTF16.compress(value, off, len);
+            this.coder = StringUTF16.coderFromArrayLen(val, len);
+            this.value = val;
+            return;
         }
         this.coder = UTF16;
         this.value = StringUTF16.toBytes(value, off, len);
@@ -1739,6 +1753,9 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
                     val[j++] = (byte)c;
                 } else {
                     inflate();
+                    // store c to make sure it has a UTF16 char
+                    StringUTF16.putChar(this.value, j++, c);
+                    i++;
                     StringUTF16.putCharsSB(this.value, j, s, i, end);
                     return;
                 }
@@ -1831,6 +1848,10 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
                 } else {
                     count = j;
                     inflate();
+                    // Store c to make sure sb has a UTF16 char
+                    StringUTF16.putChar(this.value, j++, c);
+                    count = j;
+                    i++;
                     StringUTF16.putCharsSB(this.value, j, s, i, end);
                     count += end - i;
                     return;
@@ -1942,6 +1963,10 @@ abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appenda
      * <p>
      * If {@code cs} is {@code null}, then the four characters
      * {@code "null"} are repeated into this sequence.
+     * <p>
+     * The contents are unspecified if the {@code CharSequence}
+     * is modified during the method call or an exception is thrown
+     * when accessing the {@code CharSequence}.
      *
      * @param cs     a {@code CharSequence}
      * @param count  number of times to copy

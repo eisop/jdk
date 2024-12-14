@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -242,9 +242,8 @@ abstract class UnixFileStore
     public boolean equals(@Nullable Object ob) {
         if (ob == this)
             return true;
-        if (!(ob instanceof UnixFileStore))
+        if (!(ob instanceof UnixFileStore other))
             return false;
-        UnixFileStore other = (UnixFileStore)ob;
         return (this.dev == other.dev) &&
                Arrays.equals(this.entry.dir(), other.entry.dir()) &&
                this.entry.name().equals(other.entry.name());
@@ -297,7 +296,7 @@ abstract class UnixFileStore
         if (value != null) {
             String[] values = value.split("\\s");
             for (String s: values) {
-                s = s.trim().toLowerCase();
+                s = s.trim().toLowerCase(Locale.ROOT);
                 if (s.equals(feature)) {
                     return FeatureStatus.PRESENT;
                 }

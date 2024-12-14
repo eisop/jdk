@@ -47,6 +47,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 import jdk.internal.misc.CDS;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
+import jdk.internal.vm.annotation.Stable;
 
 import java.lang.constant.Constable;
 import java.lang.constant.DynamicConstantDesc;
@@ -127,9 +128,10 @@ public final class Byte extends Number implements Comparable<Byte>, Constable {
         return Optional.of(DynamicConstantDesc.ofNamed(BSM_EXPLICIT_CAST, DEFAULT_NAME, CD_byte, intValue()));
     }
 
-    private static class ByteCache {
+    private static final class ByteCache {
         private ByteCache() {}
 
+        @Stable
         static final Byte[] cache;
         static Byte[] archivedCache;
 

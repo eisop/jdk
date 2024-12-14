@@ -482,6 +482,7 @@ public class GSSCredentialImpl implements GSSCredential {
         }
     }
 
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object another) {
@@ -520,10 +521,9 @@ public class GSSCredentialImpl implements GSSCredential {
     }
 
     /**
-     * Returns a hashcode value for this GSSCredential.
-     *
-     * @return a hashCode value
+     * {@return a hashcode value for this GSSCredential}
      */
+    @Override
     public int hashCode() {
 
         if (destroyed) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -183,6 +183,7 @@ public abstract class CertPath implements Serializable {
      * @return true if the specified object is equal to this certification path,
      * false otherwise
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object other) {
@@ -190,14 +191,14 @@ public abstract class CertPath implements Serializable {
             return true;
 
         return other instanceof CertPath that
-                && that.getType().equals(this.type)
+                && this.type.equals(that.getType())
                 && this.getCertificates().equals(that.getCertificates());
     }
 
     /**
-     * Returns the hashcode for this certification path. The hash code of
-     * a certification path is defined to be the result of the following
-     * calculation:
+     * {@return the hashcode value for this certification path}
+     * The hash code of a certification path is defined to be the result of
+     * the following calculation:
      * <pre>{@code
      *  hashCode = path.getType().hashCode();
      *  hashCode = 31*hashCode + path.getCertificates().hashCode();
@@ -206,9 +207,8 @@ public abstract class CertPath implements Serializable {
      * {@code path1.hashCode()==path2.hashCode()} for any two certification
      * paths, {@code path1} and {@code path2}, as required by the
      * general contract of {@code Object.hashCode}.
-     *
-     * @return the hashcode value for this certification path
      */
+    @Override
     public int hashCode() {
         int hashCode = type.hashCode();
         hashCode = 31*hashCode + getCertificates().hashCode();

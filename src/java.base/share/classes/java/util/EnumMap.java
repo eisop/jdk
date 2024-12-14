@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -672,10 +672,10 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
                     return false;
 
                 V ourValue = unmaskNull(vals[index]);
-                Object hisValue = e.getValue();
+                Object otherValue = e.getValue();
                 return (e.getKey() == keyUniverse[index] &&
-                        (ourValue == hisValue ||
-                         (ourValue != null && ourValue.equals(hisValue))));
+                        (ourValue == otherValue ||
+                         (ourValue != null && ourValue.equals(otherValue))));
             }
 
             public int hashCode() {
@@ -749,9 +749,9 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
         // Key types match, compare each value
         for (int i = 0; i < keyUniverse.length; i++) {
             Object ourValue =    vals[i];
-            Object hisValue = em.vals[i];
-            if (hisValue != ourValue &&
-                (hisValue == null || !hisValue.equals(ourValue)))
+            Object otherValue = em.vals[i];
+            if (otherValue != ourValue &&
+                (otherValue == null || !otherValue.equals(ourValue)))
                 return false;
         }
         return true;

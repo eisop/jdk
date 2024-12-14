@@ -42,6 +42,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Objects;
 
 import sun.security.util.HexDumpEncoder;
 import sun.security.util.*;
@@ -404,6 +405,7 @@ public class X509Key implements PublicKey, DerEncoder {
         }
     }
 
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
@@ -427,13 +429,9 @@ public class X509Key implements PublicKey, DerEncoder {
      * Calculates a hash code value for the object. Objects
      * which are equal will also have the same hashcode.
      */
+    @Override
     public int hashCode() {
-        byte[] b1 = getEncodedInternal();
-        int r = b1.length;
-        for (int i = 0; i < b1.length; i++) {
-            r += (b1[i] & 0xff) * 37;
-        }
-        return r;
+        return Arrays.hashCode(getEncodedInternal());
     }
 
     /*

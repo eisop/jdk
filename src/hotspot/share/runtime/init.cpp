@@ -32,20 +32,20 @@
 #include "interpreter/bytecodes.hpp"
 #include "logging/logAsyncWriter.hpp"
 #include "memory/universe.hpp"
+#include "nmt/memTracker.hpp"
+#include "prims/downcallLinker.hpp"
 #include "prims/jvmtiExport.hpp"
 #include "prims/methodHandles.hpp"
-#include "prims/downcallLinker.hpp"
-#include "runtime/globals.hpp"
 #include "runtime/atomic.hpp"
 #include "runtime/continuation.hpp"
 #include "runtime/flags/jvmFlag.hpp"
+#include "runtime/globals.hpp"
 #include "runtime/handles.inline.hpp"
 #include "runtime/icache.hpp"
 #include "runtime/init.hpp"
 #include "runtime/safepoint.hpp"
 #include "runtime/sharedRuntime.hpp"
 #include "sanitizers/leak.hpp"
-#include "services/memTracker.hpp"
 #include "utilities/macros.hpp"
 #if INCLUDE_JVMCI
 #include "jvmci/jvmci.hpp"
@@ -84,7 +84,7 @@ void vmStructs_init() NOT_DEBUG_RETURN;
 
 void vtableStubs_init();
 void InlineCacheBuffer_init();
-void compilerOracle_init();
+bool compilerOracle_init();
 bool compileBroker_init();
 void dependencyContext_init();
 void dependencies_init();
@@ -158,7 +158,9 @@ jint init_globals2() {
 
   vtableStubs_init();
   InlineCacheBuffer_init();
-  compilerOracle_init();
+  if (!compilerOracle_init()) {
+    return JNI_EINVAL;
+  }
   dependencyContext_init();
   dependencies_init();
 

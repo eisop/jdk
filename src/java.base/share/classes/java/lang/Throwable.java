@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -36,6 +36,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import java.io.*;
 import java.util.*;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.event.ThrowableTracer;
 import jdk.internal.misc.InternalLock;
 
 /**
@@ -126,6 +127,11 @@ public @UsesObjectEquals class Throwable implements Serializable {
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
     @java.io.Serial
     private static final long serialVersionUID = -3042686055658047285L;
+
+    /**
+     * Flag that determines if exceptions should be traced by JFR
+     */
+    static volatile boolean jfrTracing;
 
     /**
      * The JVM saves some indication of the stack backtrace in this slot.
@@ -266,6 +272,9 @@ public @UsesObjectEquals class Throwable implements Serializable {
     @SideEffectFree
     public Throwable() {
         fillInStackTrace();
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), null);
+        }
     }
 
     /**
@@ -283,6 +292,9 @@ public @UsesObjectEquals class Throwable implements Serializable {
     public Throwable(@Nullable String message) {
         fillInStackTrace();
         detailMessage = message;
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), message);
+        }
     }
 
     /**
@@ -307,6 +319,9 @@ public @UsesObjectEquals class Throwable implements Serializable {
         fillInStackTrace();
         detailMessage = message;
         this.cause = cause;
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), message);
+        }
     }
 
     /**
@@ -331,6 +346,9 @@ public @UsesObjectEquals class Throwable implements Serializable {
         fillInStackTrace();
         detailMessage = (cause==null ? null : cause.toString());
         this.cause = cause;
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), null);
+        }
     }
 
     /**
@@ -384,8 +402,12 @@ public @UsesObjectEquals class Throwable implements Serializable {
         }
         detailMessage = message;
         this.cause = cause;
-        if (!enableSuppression)
+        if (!enableSuppression) {
             suppressedExceptions = null;
+        }
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), message);
+        }
     }
 
     /**

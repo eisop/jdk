@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jdk.javadoc.internal.doclets.toolkit.BaseConfiguration;
@@ -353,7 +352,7 @@ public class VisibleMemberTable {
         // ... and finally the sorted superinterfaces.
         allSuperinterfaces.stream()
                 .map(vmt -> vmt.te)
-                .sorted(utils.comparators.makeGeneralPurposeComparator())
+                .sorted(utils.comparators.generalPurposeComparator())
                 .forEach(result::add);
 
         return result;

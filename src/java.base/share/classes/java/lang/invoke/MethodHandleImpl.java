@@ -60,6 +60,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.lang.invoke.LambdaForm.*;
+import static java.lang.invoke.MethodHandleNatives.Constants.MN_CALLER_SENSITIVE;
+import static java.lang.invoke.MethodHandleNatives.Constants.MN_HIDDEN_MEMBER;
 import static java.lang.invoke.MethodHandleStatics.*;
 import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
 import static java.lang.invoke.MethodHandles.Lookup.ClassOption.NESTMATE;
@@ -579,8 +581,8 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
             return;
         } else if (av == null) {
             throw new NullPointerException("null array reference");
-        } else if (av instanceof Object[]) {
-            int len = ((Object[])av).length;
+        } else if (av instanceof Object[] array) {
+            int len = array.length;
             if (len == n)  return;
         } else {
             int len = java.lang.reflect.Array.getLength(av);
@@ -1546,37 +1548,22 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
     static {
         SharedSecrets.setJavaLangInvokeAccess(new JavaLangInvokeAccess() {
             @Override
-            public Object newMemberName() {
-                return new MemberName();
+            public Class<?> getDeclaringClass(Object rmname) {
+                ResolvedMethodName method = (ResolvedMethodName)rmname;
+                return method.declaringClass();
             }
 
             @Override
-            public String getName(Object mname) {
-                MemberName memberName = (MemberName)mname;
-                return memberName.getName();
-            }
-            @Override
-            public Class<?> getDeclaringClass(Object mname) {
-                MemberName memberName = (MemberName)mname;
-                return memberName.getDeclaringClass();
+            public MethodType getMethodType(String descriptor, ClassLoader loader) {
+                return MethodType.fromDescriptor(descriptor, loader);
             }
 
-            @Override
-            public MethodType getMethodType(Object mname) {
-                MemberName memberName = (MemberName)mname;
-                return memberName.getMethodType();
+            public boolean isCallerSensitive(int flags) {
+                return (flags & MN_CALLER_SENSITIVE) == MN_CALLER_SENSITIVE;
             }
 
-            @Override
-            public String getMethodDescriptor(Object mname) {
-                MemberName memberName = (MemberName)mname;
-                return memberName.getMethodDescriptor();
-            }
-
-            @Override
-            public boolean isNative(Object mname) {
-                MemberName memberName = (MemberName)mname;
-                return memberName.isNative();
+            public boolean isHiddenMember(int flags) {
+                return (flags & MN_HIDDEN_MEMBER) == MN_HIDDEN_MEMBER;
             }
 
             @Override
@@ -1663,6 +1650,12 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
             public Class<?>[] exceptionTypes(MethodHandle handle) {
                 return VarHandles.exceptionTypes(handle);
             }
+
+            @Override
+            public MethodHandle serializableConstructor(Class<?> decl, Constructor<?> ctorToCall) throws IllegalAccessException {
+                return IMPL_LOOKUP.serializableConstructor(decl, ctorToCall);
+            }
+
         });
     }
 

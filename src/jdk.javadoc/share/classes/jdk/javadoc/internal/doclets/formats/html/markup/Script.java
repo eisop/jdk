@@ -29,8 +29,7 @@ import org.checkerframework.dataflow.qual.Pure;
 import java.io.IOException;
 import java.io.Writer;
 
-import jdk.javadoc.internal.doclets.toolkit.Content;
-import jdk.javadoc.internal.doclets.toolkit.util.DocletConstants;
+import jdk.javadoc.internal.doclets.formats.html.Content;
 
 /**
  * A builder for HTML script elements.
@@ -166,7 +165,7 @@ public class Script  {
                     sb.append("\\\"");
                     break;
                 case '\'':
-                    sb.append("\\\'");
+                    sb.append("\\'");
                     break;
                 case '\\':
                     sb.append("\\\\");

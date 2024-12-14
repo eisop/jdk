@@ -49,7 +49,6 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
 import jdk.internal.util.ArraysSupport;
-import jdk.internal.vm.annotation.ForceInline;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 
 import java.io.Serializable;
@@ -3859,8 +3858,9 @@ public final class Arrays {
     @SideEffectFree
     public static <T,U> @Nullable T[] copyOfRange(U[] original, @IndexOrHigh({"#1"}) int from, int to, Class<? extends T[]> newType) {
         int newLength = to - from;
-        if (newLength < 0)
+        if (newLength < 0) {
             throw new IllegalArgumentException(from + " > " + to);
+        }
         @SuppressWarnings("unchecked")
         T[] copy = ((Object)newType == (Object)Object[].class)
             ? (T[]) new Object[newLength]
@@ -3868,13 +3868,6 @@ public final class Arrays {
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
         return copy;
-    }
-
-    @ForceInline
-    private static void checkLength(int from, int to) {
-        if (to < from) {
-            throw new IllegalArgumentException(from + " > " + to);
-        }
     }
 
     /**
@@ -3905,20 +3898,16 @@ public final class Arrays {
      */
     @SideEffectFree
     public static @PolySigned byte[] copyOfRange(@PolySigned byte[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeByte(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static byte[] copyOfRangeByte(byte[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         byte[] copy = new byte[newLength];
         System.arraycopy(original, from, copy, 0,
-                         Math.min(original.length - from, newLength));
+                Math.min(original.length - from, newLength));
         return copy;
     }
 
@@ -3950,17 +3939,13 @@ public final class Arrays {
      */
     @SideEffectFree
     public static @PolySigned short[] copyOfRange(@PolySigned short[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeShort(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static short[] copyOfRangeShort(short[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         short[] copy = new short[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3995,17 +3980,13 @@ public final class Arrays {
      */
     @SideEffectFree
     public static @PolySigned int[] copyOfRange(@PolySigned int[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeInt(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static int[] copyOfRangeInt(int[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         int[] copy = new int[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -4040,17 +4021,13 @@ public final class Arrays {
      */
     @SideEffectFree
     public static @PolySigned long[] copyOfRange(@PolySigned long[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeLong(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static long[] copyOfRangeLong(long[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         long[] copy = new long[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -4085,17 +4062,13 @@ public final class Arrays {
      */
     @SideEffectFree
     public static @PolySigned char[] copyOfRange(@PolySigned char[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeChar(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static char[] copyOfRangeChar(char[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         char[] copy = new char[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -4130,17 +4103,13 @@ public final class Arrays {
      */
     @SideEffectFree
     public static float[] copyOfRange(float[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeFloat(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static float[] copyOfRangeFloat(float[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         float[] copy = new float[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -4175,17 +4144,13 @@ public final class Arrays {
      */
     @SideEffectFree
     public static double[] copyOfRange(double[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeDouble(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static double[] copyOfRangeDouble(double[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         double[] copy = new double[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -4220,17 +4185,13 @@ public final class Arrays {
      */
     @SideEffectFree
     public static boolean[] copyOfRange(boolean[] original, @IndexOrHigh({"#1"}) int from, int to) {
-        // Tickle the JIT to fold special cases optimally
-        if (from != 0 || to != original.length)
-            return copyOfRangeBoolean(original, from, to);
-        else // from == 0 && to == original.length
+        if (from == 0 && to == original.length) {
             return original.clone();
-    }
-
-    @ForceInline
-    private static boolean[] copyOfRangeBoolean(boolean[] original, int from, int to) {
-        checkLength(from, to);
+        }
         int newLength = to - from;
+        if (newLength < 0) {
+            throw new IllegalArgumentException(from + " > " + to);
+        }
         boolean[] copy = new boolean[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -4447,8 +4408,7 @@ public final class Arrays {
         }
         int result = 1;
         for (long element : a) {
-            int elementHash = (int)(element ^ (element >>> 32));
-            result = 31 * result + elementHash;
+            result = 31 * result + Long.hashCode(element);
         }
         return result;
     }
@@ -4588,7 +4548,7 @@ public final class Arrays {
 
         int result = 1;
         for (boolean element : a)
-            result = 31 * result + (element ? 1231 : 1237);
+            result = 31 * result + Boolean.hashCode(element);
 
         return result;
     }
@@ -4616,7 +4576,7 @@ public final class Arrays {
 
         int result = 1;
         for (float element : a)
-            result = 31 * result + Float.floatToIntBits(element);
+            result = 31 * result + Float.hashCode(element);
 
         return result;
     }
@@ -4644,8 +4604,7 @@ public final class Arrays {
 
         int result = 1;
         for (double element : a) {
-            long bits = Double.doubleToLongBits(element);
-            result = 31 * result + (int)(bits ^ (bits >>> 32));
+            result = 31 * result + Double.hashCode(element);
         }
         return result;
     }
@@ -4679,7 +4638,7 @@ public final class Arrays {
         int result = 1;
 
         for (Object element : a)
-            result = 31 * result + (element == null ? 0 : element.hashCode());
+            result = 31 * result + Objects.hashCode(element);
 
         return result;
     }

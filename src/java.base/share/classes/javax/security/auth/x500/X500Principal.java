@@ -466,6 +466,7 @@ public final class X500Principal implements Principal, java.io.Serializable {
      * @return {@code true} if the specified {@code Object} is equal
      *          to this {@code X500Principal}, {@code false} otherwise
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object o) {
@@ -479,13 +480,12 @@ public final class X500Principal implements Principal, java.io.Serializable {
     }
 
     /**
-     * Return a hash code for this {@code X500Principal}.
+     * {@return a hash code for this {@code X500Principal}}
      *
      * <p> The hash code is calculated via:
      * {@code getName(X500Principal.CANONICAL).hashCode()}
-     *
-     * @return a hash code for this {@code X500Principal}
      */
+    @Override
     public int hashCode() {
         return thisX500Name.hashCode();
     }

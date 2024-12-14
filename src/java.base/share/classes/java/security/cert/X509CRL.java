@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -133,6 +133,7 @@ public abstract class X509CRL extends CRL implements X509Extension {
      * @return true iff the encoded forms of the two CRLs
      * match, false otherwise.
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object other) {
@@ -153,19 +154,15 @@ public abstract class X509CRL extends CRL implements X509Extension {
     }
 
     /**
-     * Returns a hashcode value for this CRL from its
-     * encoded form.
-     *
-     * @return the hashcode value.
+     * {@return a hashcode value for this CRL from its
+     * encoded form}
      */
+    @Override
     public int hashCode() {
         int retval = 0;
         try {
             byte[] crlData = X509CRLImpl.getEncodedInternal(this);
-            for (int i = 1; i < crlData.length; i++) {
-                 retval += crlData[i] * i;
-            }
-            return retval;
+            return Arrays.hashCode(crlData);
         } catch (CRLException e) {
             return retval;
         }
