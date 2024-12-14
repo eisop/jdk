@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -65,7 +65,6 @@ import sun.awt.shell.ShellFolder;
 // PENDING(jeff) - need to provide a specification for
 // how Mac/OS2/BeOS/etc file systems can modify FileSystemView
 // to handle their particular type of file system.
-
 public abstract class FileSystemView {
 
     static FileSystemView windowsFileSystemView = null;
@@ -348,13 +347,14 @@ public abstract class FileSystemView {
     }
 
     /**
+     * Returns a <code>File</code> object which is normally constructed with <code>new
+     * File(parent, fileName)</code> except when the parent and child are both
+     * special folders, in which case the <code>File</code> is a wrapper containing
+     * a ShellFolder object.
      *
      * @param parent a <code>File</code> object representing a directory or special folder
      * @param fileName a name of a file or folder which exists in <code>parent</code>
-     * @return a File object. This is normally constructed with <code>new
-     * File(parent, fileName)</code> except when parent and child are both
-     * special folders, in which case the <code>File</code> is a wrapper containing
-     * a <code>ShellFolder</code> object.
+     * @return a File object.
      * @since 1.4
      */
     public File getChild(File parent, String fileName) {
@@ -773,11 +773,6 @@ public abstract class FileSystemView {
  */
 class UnixFileSystemView extends FileSystemView {
 
-    private static final String newFolderString =
-            UIManager.getString("FileChooser.other.newFolder");
-    private static final String newFolderNextString  =
-            UIManager.getString("FileChooser.other.newFolder.subsequent");
-
     /**
      * Creates a new folder with a default folder name.
      */
@@ -785,6 +780,10 @@ class UnixFileSystemView extends FileSystemView {
         if(containingDir == null) {
             throw new IOException("Containing directory is null:");
         }
+        String newFolderString =
+                UIManager.getString("FileChooser.other.newFolder");
+        String newFolderNextString =
+                UIManager.getString("FileChooser.other.newFolder.subsequent");
         File newFolder;
         // Unix - using OpenWindows' default folder name. Can't find one for Motif/CDE.
         newFolder = createFileObject(containingDir, newFolderString);
@@ -824,7 +823,7 @@ class UnixFileSystemView extends FileSystemView {
     public boolean isComputerNode(File dir) {
         if (dir != null) {
             String parent = dir.getParent();
-            if (parent != null && parent.equals("/net")) {
+            if ("/net".equals(parent)) {
                 return true;
             }
         }
@@ -837,11 +836,6 @@ class UnixFileSystemView extends FileSystemView {
  * FileSystemView that handles some specific windows concepts.
  */
 class WindowsFileSystemView extends FileSystemView {
-
-    private static final String newFolderString =
-            UIManager.getString("FileChooser.win32.newFolder");
-    private static final String newFolderNextString  =
-            UIManager.getString("FileChooser.win32.newFolder.subsequent");
 
     public Boolean isTraversable(File f) {
         return Boolean.valueOf(isFileSystemRoot(f) || isComputerNode(f) || f.isDirectory());
@@ -899,6 +893,10 @@ class WindowsFileSystemView extends FileSystemView {
             throw new IOException("Containing directory is null:");
         }
         // Using NT's default folder name
+        String newFolderString =
+                UIManager.getString("FileChooser.win32.newFolder");
+        String newFolderNextString =
+                UIManager.getString("FileChooser.win32.newFolder.subsequent");
         File newFolder = createFileObject(containingDir, newFolderString);
         int i = 2;
         while (newFolder.exists() && i < 100) {
@@ -966,9 +964,6 @@ class WindowsFileSystemView extends FileSystemView {
  */
 class GenericFileSystemView extends FileSystemView {
 
-    private static final String newFolderString =
-            UIManager.getString("FileChooser.other.newFolder");
-
     /**
      * Creates a new folder with a default folder name.
      */
@@ -976,6 +971,8 @@ class GenericFileSystemView extends FileSystemView {
         if(containingDir == null) {
             throw new IOException("Containing directory is null:");
         }
+        String newFolderString =
+                UIManager.getString("FileChooser.other.newFolder");
         // Using NT's default folder name
         File newFolder = createFileObject(containingDir, newFolderString);
 

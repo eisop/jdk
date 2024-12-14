@@ -471,7 +471,7 @@ public class MathBench {
     }
 
     @Benchmark
-    public double  sigNumDouble() {
+    public double  signumDouble() {
         return  Math.signum(double4Dot1);
     }
 
@@ -538,6 +538,11 @@ public class MathBench {
     @Benchmark
     public double  ulpFloat() {
         return  Math.ulp(float7);
+    }
+
+    @Benchmark
+    public long  unsignedMultiplyHighLongLong() {
+        return  Math.unsignedMultiplyHigh(long747, long13);
     }
 
 }

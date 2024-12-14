@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -124,7 +124,7 @@ final class GHASH implements Cloneable, GCM {
 
     // hashtable subkeyHtbl holds 2*9 powers of subkeyH computed using
     // carry-less multiplication
-    private long[] subkeyHtbl;
+    private final long[] subkeyHtbl;
 
     // buffer for storing hash
     private final long[] state;
@@ -143,6 +143,7 @@ final class GHASH implements Cloneable, GCM {
             throw new ProviderException("Internal error");
         }
         state = new long[2];
+        // 8 for avx-ghash implementation and 1 for the original key
         subkeyHtbl = new long[2*9];
         subkeyHtbl[0] = (long)asLongView.get(subkeyH, 0);
         subkeyHtbl[1] = (long)asLongView.get(subkeyH, 8);

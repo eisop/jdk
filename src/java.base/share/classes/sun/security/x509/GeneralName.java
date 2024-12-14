@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -55,10 +55,10 @@ import sun.security.util.*;
  * @author Amit Kapoor
  * @author Hemma Prafullchandra
  */
-public class GeneralName {
+public class GeneralName implements DerEncoder {
 
     // Private data members
-    private GeneralNameInterface name = null;
+    private final GeneralNameInterface name;
 
     /**
      * Default constructor for the class.
@@ -207,30 +207,30 @@ public class GeneralName {
     /**
      * Compare this GeneralName with another
      *
-     * @param other GeneralName to compare to this
+     * @param obj GeneralName to compare to this
      * @return true if match
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
-    public boolean equals(@Nullable Object other) {
-        if (this == other) {
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(other instanceof GeneralName))
+        if (!(obj instanceof GeneralName other))
             return false;
-        GeneralNameInterface otherGNI = ((GeneralName)other).name;
         try {
-            return name.constrains(otherGNI) == GeneralNameInterface.NAME_MATCH;
+            return name.constrains(other.name)
+                    == GeneralNameInterface.NAME_MATCH;
         } catch (UnsupportedOperationException ioe) {
             return false;
         }
     }
 
     /**
-     * Returns the hash code for this GeneralName.
-     *
-     * @return a hash code value.
+     * {@return the hash code for this GeneralName}
      */
+    @Override
     public int hashCode() {
         return name.hashCode();
     }
@@ -239,9 +239,9 @@ public class GeneralName {
      * Encode the name to the specified DerOutputStream.
      *
      * @param out the DerOutputStream to encode the GeneralName to.
-     * @exception IOException on encoding errors.
      */
-    public void encode(DerOutputStream out) throws IOException {
+    @Override
+    public void encode(DerOutputStream out) {
         DerOutputStream tmp = new DerOutputStream();
         name.encode(tmp);
         int nameType = name.getType();

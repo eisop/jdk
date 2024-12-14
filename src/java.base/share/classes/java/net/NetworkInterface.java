@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,6 +37,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -63,18 +64,12 @@ public final class NetworkInterface {
     private NetworkInterface parent = null;
     private boolean virtual = false;
     private static final NetworkInterface defaultInterface;
-    private static final int defaultIndex; /* index of defaultInterface */
 
     static {
         jdk.internal.loader.BootLoader.loadLibrary("net");
 
         init();
         defaultInterface = DefaultInterface.getDefault();
-        if (defaultInterface != null) {
-            defaultIndex = defaultInterface.getIndex();
-        } else {
-            defaultIndex = 0;
-        }
     }
 
     /**
@@ -603,20 +598,15 @@ public final class NetworkInterface {
      *          {@code false} otherwise.
      * @see     java.net.InetAddress#getAddress()
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof NetworkInterface that)) {
             return false;
         }
-        if (this.name != null ) {
-            if (!this.name.equals(that.name)) {
-                return false;
-            }
-        } else {
-            if (that.name != null) {
-                return false;
-            }
+        if (!Objects.equals(this.name, that.name)) {
+            return false;
         }
 
         if (this.addrs == null) {
@@ -631,13 +621,10 @@ public final class NetworkInterface {
             return false;
         }
 
-        InetAddress[] thatAddrs = that.addrs;
-        int count = thatAddrs.length;
-
-        for (int i=0; i<count; i++) {
+        for (InetAddress thisAddr : this.addrs) {
             boolean found = false;
-            for (int j=0; j<count; j++) {
-                if (addrs[i].equals(thatAddrs[j])) {
+            for (InetAddress thatAddr : that.addrs) {
+                if (thisAddr.equals(thatAddr)) {
                     found = true;
                     break;
                 }
@@ -649,8 +636,9 @@ public final class NetworkInterface {
         return true;
     }
 
+    @Override
     public int hashCode() {
-        return name == null? 0: name.hashCode();
+        return Objects.hashCode(name);
     }
 
     public String toString() {

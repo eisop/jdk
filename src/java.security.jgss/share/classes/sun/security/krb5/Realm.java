@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -78,6 +78,7 @@ public class Realm implements Cloneable {
         return this;
     }
 
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
@@ -85,14 +86,11 @@ public class Realm implements Cloneable {
             return true;
         }
 
-        if (!(obj instanceof Realm)) {
-            return false;
-        }
-
-        Realm that = (Realm)obj;
-        return this.realm.equals(that.realm);
+        return obj instanceof Realm that
+                && this.realm.equals(that.realm);
     }
 
+    @Override
     public int hashCode() {
         return realm.hashCode();
     }

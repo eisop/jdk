@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,18 +31,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
-import java.security.*;
-import java.security.spec.*;
+import sun.security.util.SignatureUtil;
+import sun.security.x509.X509CRLImpl;
 
 import javax.security.auth.x500.X500Principal;
-
 import java.math.BigInteger;
+import java.security.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
-import java.util.Arrays;
-
-import sun.security.x509.X509CRLImpl;
-import sun.security.util.SignatureUtil;
 
 /**
  * <p>
@@ -72,7 +69,7 @@ import sun.security.util.SignatureUtil;
  * </pre>
  * <p>
  * More information can be found in
- * <a href="http://tools.ietf.org/html/rfc5280">RFC 5280: Internet X.509
+ * <a href="https://tools.ietf.org/html/rfc5280">RFC 5280: Internet X.509
  * Public Key Infrastructure Certificate and CRL Profile</a>.
  * <p>
  * The ASN.1 definition of {@code tbsCertList} is:
@@ -136,6 +133,7 @@ public abstract class X509CRL extends CRL implements X509Extension {
      * @return true iff the encoded forms of the two CRLs
      * match, false otherwise.
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object other) {
@@ -156,19 +154,15 @@ public abstract class X509CRL extends CRL implements X509Extension {
     }
 
     /**
-     * Returns a hashcode value for this CRL from its
-     * encoded form.
-     *
-     * @return the hashcode value.
+     * {@return a hashcode value for this CRL from its
+     * encoded form}
      */
+    @Override
     public int hashCode() {
         int retval = 0;
         try {
             byte[] crlData = X509CRLImpl.getEncodedInternal(this);
-            for (int i = 1; i < crlData.length; i++) {
-                 retval += crlData[i] * i;
-            }
-            return retval;
+            return Arrays.hashCode(crlData);
         } catch (CRLException e) {
             return retval;
         }
@@ -265,7 +259,7 @@ public abstract class X509CRL extends CRL implements X509Extension {
         byte[] tbsCRL = getTBSCertList();
         sig.update(tbsCRL, 0, tbsCRL.length);
 
-        if (sig.verify(getSignature()) == false) {
+        if (!sig.verify(getSignature())) {
             throw new SignatureException("Signature does not match.");
         }
     }
@@ -398,7 +392,7 @@ public abstract class X509CRL extends CRL implements X509Extension {
     public X509CRLEntry getRevokedCertificate(X509Certificate certificate) {
         X500Principal certIssuer = certificate.getIssuerX500Principal();
         X500Principal crlIssuer = getIssuerX500Principal();
-        if (certIssuer.equals(crlIssuer) == false) {
+        if (!certIssuer.equals(crlIssuer)) {
             return null;
         }
         return getRevokedCertificate(certificate.getSerialNumber());

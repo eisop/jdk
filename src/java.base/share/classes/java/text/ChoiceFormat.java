@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -50,8 +50,9 @@ import java.io.ObjectInputStream;
 import java.util.Arrays;
 
 /**
- * A {@code ChoiceFormat} allows you to attach a format to a range of numbers.
- * It is generally used in a {@code MessageFormat} for handling plurals.
+ * {@code ChoiceFormat} is a concrete subclass of {@code NumberFormat} that
+ * allows you to attach a format to a range of numbers.
+ * It is generally used in a {@link MessageFormat} for handling plurals.
  * The choice is specified with an ascending list of doubles, where each item
  * specifies a half-open interval up to the next item:
  * <blockquote>
@@ -74,8 +75,10 @@ import java.util.Arrays;
  * {@code ChoiceFormat} doesn't implement any locale specific behavior.
  *
  * <p>
- * When creating a {@code ChoiceFormat}, you must specify an array of formats
- * and an array of limits. The length of these arrays must be the same.
+ * A {@code ChoiceFormat} can be constructed using either an array of formats
+ * and an array of limits or a string pattern. When constructing with
+ * format and limit arrays, the length of these arrays must be the same.
+ *
  * For example,
  * <ul>
  * <li>
@@ -89,9 +92,10 @@ import java.util.Arrays;
  * </ul>
  *
  * <p>
- * Here is a simple example that shows formatting and parsing:
+ * Below is an example of constructing a ChoiceFormat with arrays to format
+ * and parse values:
  * <blockquote>
- * <pre>{@code
+ * {@snippet lang=java :
  * double[] limits = {1,2,3,4,5,6,7};
  * String[] dayOfWeekNames = {"Sun","Mon","Tue","Wed","Thur","Fri","Sat"};
  * ChoiceFormat form = new ChoiceFormat(limits, dayOfWeekNames);
@@ -101,11 +105,12 @@ import java.util.Arrays;
  *     System.out.println(i + " -> " + form.format(i) + " -> "
  *                              + form.parse(form.format(i),status));
  * }
- * }</pre>
+ * }
  * </blockquote>
- * Here is a more complex example, with a pattern format:
+ * For more sophisticated patterns, {@code ChoiceFormat} can be used with
+ * {@link MessageFormat} to produce accurate forms for singular and plural:
  * <blockquote>
- * <pre>{@code
+ * {@snippet lang=java :
  * double[] filelimits = {0,1,2};
  * String[] filepart = {"are no files","is one file","are {2} files"};
  * ChoiceFormat fileform = new ChoiceFormat(filelimits, filepart);
@@ -114,47 +119,103 @@ import java.util.Arrays;
  * pattform.setFormats(testFormats);
  * Object[] testArgs = {null, "ADisk", null};
  * for (int i = 0; i < 4; ++i) {
- *     testArgs[0] = new Integer(i);
+ *     testArgs[0] = Integer.valueOf(i);
  *     testArgs[2] = testArgs[0];
  *     System.out.println(pattform.format(testArgs));
  * }
- * }</pre>
+ * }
  * </blockquote>
- * <p>
- * Specifying a pattern for ChoiceFormat objects is fairly straightforward.
- * For example:
+ * Would output the following:
  * <blockquote>
  * <pre>{@code
+ * There are no files on ADisk
+ * There is one file on ADisk
+ * There are 2 files on ADisk
+ * There are 3 files on ADisk
+ * }</pre>
+ * </blockquote>
+ *
+ * <h2><a id="patterns">Patterns</a></h2>
+ * A {@code ChoiceFormat} pattern has the following syntax:
+ * <blockquote>
+ * <dl>
+ * <dt><i>Pattern:</i>
+ * <dd>SubPattern *("|" SubPattern)
+ * <dd><i>Note: Each additional SubPattern must have a Limit greater than the previous SubPattern's Limit</i>
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>SubPattern:</i>
+ * <dd>Limit Relation Format
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>Limit:</i>
+ * <dd>Number / "&infin;" / "-&infin;"
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>Number:</i>
+ * <dd>["-"] *(Digit) 1*(Decimal / Digit) *(Digit) [Exponent]
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>Decimal:</i>
+ * <dd>1*(Digit ".") / 1*("." Digit)
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>Digit:</i>
+ * <dd>0 - 9
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>Exponent:</i>
+ * <dd>*(Digit) Digit ExponentSymbol Digit *(Digit)
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>ExponentSymbol:</i>
+ * <dd>"e" / "E"
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>Relation:</i>
+ * <dd>"#" / "&lt;" / "&le;"
+ * </dl>
+ *
+ * <dl>
+ * <dt><i>Format:</i>
+ * <dd>Any characters except the <i>Relation</i> symbols
+ * </dl>
+ *
+ * </blockquote>
+ *
+ * <i>Note:The relation &le; is not equivalent to &lt;&equals;</i>
+ *
+ * <p>If a <i>Relation</i> symbol is to be used within a <i>Format</i> pattern,
+ * it must be single quoted. For example,
+ * {@code new ChoiceFormat("1# '#'1 ").format(1)} returns {@code " #1 "}.
+ * Use two single quotes in a row to produce a literal single quote. For example,
+ * {@code new ChoiceFormat("1# ''one'' ").format(1)} returns {@code " 'one' "}.
+ *
+ * <p>Below is an example of constructing a ChoiceFormat with a pattern:
+ * <blockquote>
+ * {@snippet lang=java :
  * ChoiceFormat fmt = new ChoiceFormat(
  *      "-1#is negative| 0#is zero or fraction | 1#is one |1.0<is 1+ |2#is two |2<is more than 2.");
- * System.out.println("Formatter Pattern : " + fmt.toPattern());
  *
- * System.out.println("Format with -INF : " + fmt.format(Double.NEGATIVE_INFINITY));
- * System.out.println("Format with -1.0 : " + fmt.format(-1.0));
- * System.out.println("Format with 0 : " + fmt.format(0));
- * System.out.println("Format with 0.9 : " + fmt.format(0.9));
- * System.out.println("Format with 1.0 : " + fmt.format(1));
- * System.out.println("Format with 1.5 : " + fmt.format(1.5));
- * System.out.println("Format with 2 : " + fmt.format(2));
- * System.out.println("Format with 2.1 : " + fmt.format(2.1));
- * System.out.println("Format with NaN : " + fmt.format(Double.NaN));
- * System.out.println("Format with +INF : " + fmt.format(Double.POSITIVE_INFINITY));
- * }</pre>
- * </blockquote>
- * And the output result would be like the following:
- * <blockquote>
- * <pre>{@code
- * Format with -INF : is negative
- * Format with -1.0 : is negative
- * Format with 0 : is zero or fraction
- * Format with 0.9 : is zero or fraction
- * Format with 1.0 : is one
- * Format with 1.5 : is 1+
- * Format with 2 : is two
- * Format with 2.1 : is more than 2.
- * Format with NaN : is negative
- * Format with +INF : is more than 2.
- * }</pre>
+ * System.out.println(fmt.format(Double.NEGATIVE_INFINITY)); // outputs "is negative"
+ * System.out.println(fmt.format(-1.0)); // outputs "is negative"
+ * System.out.println(fmt.format(0)); // outputs "is zero or fraction"
+ * System.out.println(fmt.format(0.9)); // outputs "is zero or fraction"
+ * System.out.println(fmt.format(1)); // outputs "is one"
+ * System.out.println(fmt.format(1.5)); // outputs "is 1+"
+ * System.out.println(fmt.format(2)); // outputs "is two"
+ * System.out.println(fmt.format(2.1)); // outputs "is more than 2."
+ * System.out.println(fmt.format(Double.NaN)); // outputs "is negative"
+ * System.out.println(fmt.format(Double.POSITIVE_INFINITY)); // outputs "is more than 2."
+ * }
  * </blockquote>
  *
  * <h2><a id="synchronization">Synchronization</a></h2>
@@ -178,15 +239,33 @@ public class ChoiceFormat extends NumberFormat {
     private static final long serialVersionUID = 1795184449645032964L;
 
     /**
-     * Sets the pattern.
-     * @param newPattern See the class description.
+     * Apply the given pattern to this ChoiceFormat object. The syntax
+     * for the ChoiceFormat pattern can be seen in the {@linkplain ##patterns
+     * Patterns} section. Unlike {@link #setChoices(double[], String[])} this
+     * method will throw an {@code IllegalArgumentException} if the {@code
+     * limits} are not in ascending order.
+     * @param newPattern a pattern string
      * @throws    NullPointerException if {@code newPattern}
      *            is {@code null}
+     * @throws    IllegalArgumentException if {@code newPattern}
+     *            violates the pattern syntax
+     * @see #ChoiceFormat(String)
      */
     public void applyPattern(String newPattern) {
-        StringBuffer[] segments = new StringBuffer[2];
+        applyPatternImpl(newPattern);
+    }
+
+    /**
+     * Implementation of applying a pattern to this ChoiceFormat.
+     * This method processes a String pattern in accordance with the ChoiceFormat
+     * pattern syntax and populates the internal {@code limits} and {@code formats}
+     * array variables. See the {@linkplain ##patterns} section for
+     * further understanding of certain special characters: "#", "<", "\u2264", "|".
+     */
+    private void applyPatternImpl(String newPattern) {
+        StringBuilder[] segments = new StringBuilder[2];
         for (int i = 0; i < segments.length; ++i) {
-            segments[i] = new StringBuffer();
+            segments[i] = new StringBuilder();
         }
         double[] newChoiceLimits = new double[30];
         String[] newChoiceFormats = new String[30];
@@ -264,9 +343,14 @@ public class ChoiceFormat extends NumberFormat {
     }
 
     /**
-     * Gets the pattern.
+     * {@return a pattern {@code string} that represents the {@code limits} and
+     * {@code formats} of this ChoiceFormat object}
      *
-     * @return the pattern string
+     * The {@code string} returned is not guaranteed to be the same input
+     * {@code string} passed to either {@link #applyPattern(String)} or
+     * {@link #ChoiceFormat(String)}.
+     *
+     * @see #applyPattern(String)
      */
     public String toPattern() {
         StringBuilder result = new StringBuilder();
@@ -316,15 +400,20 @@ public class ChoiceFormat extends NumberFormat {
     }
 
     /**
-     * Constructs with limits and corresponding formats based on the pattern.
+     * Constructs a ChoiceFormat with limits and corresponding formats
+     * based on the pattern.
+     * The syntax for the ChoiceFormat pattern can be seen in the {@linkplain
+     * ##patterns Patterns} section.
      *
      * @param newPattern the new pattern string
      * @throws    NullPointerException if {@code newPattern} is
      *            {@code null}
+     * @throws    IllegalArgumentException if {@code newPattern}
+     *            violates the pattern syntax
      * @see #applyPattern
      */
     public ChoiceFormat(String newPattern)  {
-        applyPattern(newPattern);
+        applyPatternImpl(newPattern);
     }
 
     /**
@@ -334,14 +423,17 @@ public class ChoiceFormat extends NumberFormat {
      * @param formats corresponding format strings
      * @throws    NullPointerException if {@code limits} or {@code formats}
      *            is {@code null}
+     * @throws    IllegalArgumentException if the length of {@code limits}
+     *            and {@code formats} are not equal
      * @see #setChoices
      */
     public ChoiceFormat(double[] limits, String[] formats) {
-        setChoices(limits, formats);
+        setChoicesImpl(limits, formats);
     }
 
     /**
      * Set the choices to be used in formatting.
+     *
      * @param limits contains the top value that you want
      * parsed with that format, and should be in ascending sorted order. When
      * formatting X, the choice will be the i, where
@@ -349,49 +441,60 @@ public class ChoiceFormat extends NumberFormat {
      * If the limit array is not in ascending order, the results of formatting
      * will be incorrect.
      * @param formats are the formats you want to use for each limit.
-     * They can be either Format objects or Strings.
-     * When formatting with object Y,
-     * if the object is a NumberFormat, then ((NumberFormat) Y).format(X)
-     * is called. Otherwise Y.toString() is called.
      * @throws    NullPointerException if {@code limits} or
      *            {@code formats} is {@code null}
+     * @throws    IllegalArgumentException if the length of {@code limits}
+     *            and {@code formats} are not equal
      */
-    public void setChoices(double[] limits, String formats[]) {
+    public void setChoices(double[] limits, String[] formats) {
+        setChoicesImpl(limits, formats);
+    }
+
+    /**
+     * Implementation of populating the {@code limits} and
+     * {@code formats} of this ChoiceFormat. Defensive copies are made.
+     */
+    private void setChoicesImpl(double[] limits, String[] formats) {
         if (limits.length != formats.length) {
             throw new IllegalArgumentException(
-                "Array and limit arrays must be of the same length.");
+                    "Input arrays must be of the same length.");
         }
         choiceLimits = Arrays.copyOf(limits, limits.length);
         choiceFormats = Arrays.copyOf(formats, formats.length);
     }
 
     /**
-     * Get the limits passed in the constructor.
-     * @return the limits.
+     * {@return the limits of this ChoiceFormat}
      */
     public double[] getLimits() {
-        double[] newLimits = Arrays.copyOf(choiceLimits, choiceLimits.length);
-        return newLimits;
+        return Arrays.copyOf(choiceLimits, choiceLimits.length);
     }
 
     /**
-     * Get the formats passed in the constructor.
-     * @return the formats.
+     * {@return the formats of this ChoiceFormat}
      */
     public Object[] getFormats() {
-        Object[] newFormats = Arrays.copyOf(choiceFormats, choiceFormats.length);
-        return newFormats;
+        return Arrays.copyOf(choiceFormats, choiceFormats.length);
     }
 
     // Overrides
 
     /**
      * Specialization of format. This method really calls
-     * {@code format(double, StringBuffer, FieldPosition)}
-     * thus the range of longs that are supported is only equal to
+     * {@link #format(double, StringBuffer, FieldPosition)}.
+     * Thus, the range of longs that are supported is only equal to
      * the range that can be stored by double. This will never be
      * a practical limitation.
+     *
+     * @param number number to be formatted and substituted.
+     * @param toAppendTo where text is appended.
+     * @param status ignore no useful status is returned.
+     * @throws    ArrayIndexOutOfBoundsException if either the {@code limits}
+     *            or {@code formats} of this ChoiceFormat are empty
+     * @throws    NullPointerException if {@code toAppendTo}
+     *            is {@code null}
      */
+    @Override
     public StringBuffer format(long number, StringBuffer toAppendTo,
                                FieldPosition status) {
         return format((double)number, toAppendTo, status);
@@ -399,19 +502,23 @@ public class ChoiceFormat extends NumberFormat {
 
     /**
      * Returns pattern with formatted double.
+     *
      * @param number number to be formatted and substituted.
      * @param toAppendTo where text is appended.
      * @param status ignore no useful status is returned.
+     * @throws    ArrayIndexOutOfBoundsException if either the {@code limits}
+     *            or {@code formats} of this ChoiceFormat are empty
      * @throws    NullPointerException if {@code toAppendTo}
      *            is {@code null}
      */
-   public StringBuffer format(double number, StringBuffer toAppendTo,
+    @Override
+    public StringBuffer format(double number, StringBuffer toAppendTo,
                                FieldPosition status) {
         // find the number
         int i;
         for (i = 0; i < choiceLimits.length; ++i) {
             if (!(number >= choiceLimits[i])) {
-                // same as number < choiceLimits, except catchs NaN
+                // same as number < choiceLimits, except catches NaN
                 break;
             }
         }
@@ -436,6 +543,7 @@ public class ChoiceFormat extends NumberFormat {
      *            or if {@code text} is {@code null} and the list of
      *            choice strings is not empty.
      */
+    @Override
     public Number parse(String text, ParsePosition status) {
         // find the best number (defined as the one with the longest parse)
         int start = status.index;
@@ -470,7 +578,7 @@ public class ChoiceFormat extends NumberFormat {
      * {@link Math#nextUp(double) Math.nextUp(d)}
      *
      * @param d the reference value
-     * @return the least double value greather than {@code d}
+     * @return the least double value greater than {@code d}
      * @see #previousDouble
      */
     public static final double nextDouble (double d) {
@@ -495,6 +603,7 @@ public class ChoiceFormat extends NumberFormat {
     /**
      * Overrides Cloneable
      */
+    @Override
     public Object clone()
     {
         ChoiceFormat other = (ChoiceFormat) super.clone();
@@ -505,8 +614,13 @@ public class ChoiceFormat extends NumberFormat {
     }
 
     /**
-     * Generates a hash code for the message format object.
+     * {@return the hash code for this {@code ChoiceFormat}}
+     *
+     * @implSpec This method calculates the hash code value using the values returned by
+     * {@link #getFormats()} and {@link #getLimits()}.
+     * @see Object#hashCode()
      */
+    @Override
     public int hashCode() {
         int result = choiceLimits.length;
         if (choiceFormats.length > 0) {
@@ -517,15 +631,25 @@ public class ChoiceFormat extends NumberFormat {
     }
 
     /**
-     * Equality comparison between two
+     * Compares the specified object with this {@code ChoiceFormat} for equality.
+     * Returns true if the object is also a {@code ChoiceFormat} and the
+     * two formats would format any value the same.
+     *
+     * @implSpec This method performs an equality check with a notion of class
+     * identity based on {@code getClass()}, rather than {@code instanceof}.
+     * Therefore, in the equals methods in subclasses, no instance of this class
+     * should compare as equal to an instance of a subclass.
+     * @param  obj object to be compared for equality
+     * @return {@code true} if the specified object is equal to this {@code ChoiceFormat}
+     * @see Object#equals(Object)
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
-        if (obj == null) return false;
         if (this == obj)                      // quick check
             return true;
-        if (getClass() != obj.getClass())
+        if (obj == null || getClass() != obj.getClass())
             return false;
         ChoiceFormat other = (ChoiceFormat) obj;
         return (Arrays.equals(choiceLimits, other.choiceLimits)

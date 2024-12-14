@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2004, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -57,7 +57,7 @@ public final class DESedeWrapCipher extends CipherSpi {
     /*
      * internal cipher object which does the real work.
      */
-    private FeedbackCipher cipher;
+    private final FeedbackCipher cipher;
 
     /*
      * iv for (re-)initializing the internal cipher object.
@@ -181,10 +181,7 @@ public final class DESedeWrapCipher extends CipherSpi {
             engineInit(opmode, key, (AlgorithmParameterSpec) null, random);
         } catch (InvalidAlgorithmParameterException iape) {
             // should never happen
-            InvalidKeyException ike =
-                new InvalidKeyException("Parameters required");
-            ike.initCause(iape);
-            throw ike;
+            throw new InvalidKeyException("Parameters required", iape);
         }
     }
 
@@ -285,11 +282,8 @@ public final class DESedeWrapCipher extends CipherSpi {
                 paramsEng.engineInit(params.getEncoded());
                 ivSpec = paramsEng.engineGetParameterSpec(IvParameterSpec.class);
             } catch (Exception ex) {
-                InvalidAlgorithmParameterException iape =
-                    new InvalidAlgorithmParameterException
-                        ("Wrong parameter type: IV expected");
-                iape.initCause(ex);
-                throw iape;
+                throw new InvalidAlgorithmParameterException
+                    ("Wrong parameter type: IV expected", ex);
             }
         }
         engineInit(opmode, key, ivSpec, random);

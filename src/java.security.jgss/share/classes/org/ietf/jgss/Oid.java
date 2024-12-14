@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -56,7 +56,7 @@ import sun.security.util.ObjectIdentifier;
  */
 public class Oid {
 
-    private ObjectIdentifier oid;
+    private final ObjectIdentifier oid;
     private byte[] derEncoding;
 
     /**
@@ -106,7 +106,7 @@ public class Oid {
      * Creates an Oid object from its ASN.1 DER encoding.  This refers to
      * the full encoding including tag and length.  The structure and
      * encoding of Oids is defined in ISOIEC-8824 and ISOIEC-8825.  This
-     * method is identical in functionality to its InputStream conterpart.
+     * method is identical in functionality to its InputStream counterpart.
      *
      * @param data byte array containing the DER encoded oid
      * @exception GSSException may be thrown when the DER encoding does not
@@ -156,13 +156,14 @@ public class Oid {
      * value, <code>false</code> otherwise.
      * @param other the Oid object that has to be compared to this one
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object other) {
 
         //check if both reference the same object
         if (this == other)
-            return (true);
+            return true;
 
         if (other instanceof Oid)
             return this.oid.equals(((Oid) other).oid);
@@ -182,13 +183,12 @@ public class Oid {
      */
     public byte[] getDER() throws GSSException {
 
+        // Since JDK-8297065, this method no longer throws a GSSException.
+        // The throws clause in the method definition might be removed in
+        // a future Java GSS-API update.
         if (derEncoding == null) {
             DerOutputStream dout = new DerOutputStream();
-            try {
-                dout.putOID(oid);
-            } catch (IOException e) {
-                throw new GSSException(GSSException.FAILURE, e.getMessage());
-            }
+            dout.putOID(oid);
             derEncoding = dout.toByteArray();
         }
 
@@ -214,10 +214,9 @@ public class Oid {
 
 
     /**
-     * Returns a hashcode value for this Oid.
-     *
-     * @return a hashCode value
+     * {@return a hashcode value for this Oid}
      */
+    @Override
     public int hashCode() {
         return oid.hashCode();
     }

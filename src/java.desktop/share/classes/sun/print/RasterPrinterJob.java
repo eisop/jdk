@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,8 +28,6 @@ package sun.print;
 import java.io.FilePermission;
 
 import java.awt.Color;
-import java.awt.Dialog;
-import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
@@ -304,7 +302,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
      * The redrawing code needs to look at sx, sy to calculate the scale
      * to device resolution.
      */
-    private class GraphicsState {
+    private static class GraphicsState {
         Rectangle2D region;  // Area of page to repaint
         Shape theClip;       // image drawing clip.
         AffineTransform theTransform; // to transform clip to dev coords.
@@ -716,7 +714,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
      *            is cancelled, or a new PageFormat object containing
      *            the format indicated by the user if the dialog is
      *            acknowledged
-     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
+     * @throws HeadlessException if GraphicsEnvironment.isHeadless()
      * returns true.
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @since     1.2
@@ -840,7 +838,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
             attributes.add(onTop);
             Window owner = onTop.getOwner();
             if (owner != null) {
-                w = owner; // use the one specifed by the app
+                w = owner; // use the one specified by the app
             } else if (DialogOwnerAccessor.getID(onTop) == 0) {
                 setOnTop = true;
             }
@@ -949,7 +947,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
      *
      * @param attributes to store changed properties.
      * @return false if the user cancels the dialog and true otherwise.
-     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
+     * @throws HeadlessException if GraphicsEnvironment.isHeadless()
      * returns true.
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
@@ -1082,6 +1080,8 @@ public abstract class RasterPrinterJob extends PrinterJob {
             return false;
         }
 
+        this.attributes = attributes;
+
         if (!service.equals(newService)) {
             try {
                 setPrintService(newService);
@@ -1102,7 +1102,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
      * print job interactively.
      * @return false if the user cancels the dialog and
      *         true otherwise.
-     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
+     * @throws HeadlessException if GraphicsEnvironment.isHeadless()
      * returns true.
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
@@ -1185,7 +1185,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
      * for the number of pages as well as the PageFormat and
      * Printable for each page.
      * @param document The document to be printed. It may not be null.
-     * @exception NullPointerException the Pageable passed in was null.
+     * @throws NullPointerException the Pageable passed in was null.
      * @see PageFormat
      * @see Printable
      */
@@ -1479,7 +1479,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
 
     /**
      * Prints a set of pages.
-     * @exception java.awt.print.PrinterException an error in the print system
+     * @throws java.awt.print.PrinterException an error in the print system
      *                                          caused the job to be aborted
      * @see java.awt.print.Book
      * @see java.awt.print.Pageable
@@ -1547,7 +1547,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
          * PrintRequestAttributeSet while calling print(attributes)
          */
         JobSheets js = (JobSheets)psvc.getDefaultAttributeValue(JobSheets.class);
-        if (js != null && js.equals(JobSheets.NONE)) {
+        if (JobSheets.NONE.equals(js)) {
             noJobSheet = true;
         }
 
@@ -1723,7 +1723,7 @@ public abstract class RasterPrinterJob extends PrinterJob {
      * applies some validity checks, changes them only if they are
      * clearly unreasonable, then sets them into the new Paper.
      * Subclasses are expected to override this method to make more
-     * informed decisons.
+     * informed decisions.
      */
     protected void validatePaper(Paper origPaper, Paper newPaper) {
         if (origPaper == null || newPaper == null) {
@@ -2092,8 +2092,8 @@ public abstract class RasterPrinterJob extends PrinterJob {
     private AffineTransform defaultDeviceTransform;
     private PrinterGraphicsConfig pgConfig;
 
-    synchronized void setGraphicsConfigInfo(AffineTransform at,
-                                            double pw, double ph) {
+    protected synchronized void setGraphicsConfigInfo(AffineTransform at,
+                                                      double pw, double ph) {
         Point2D.Double pt = new Point2D.Double(pw, ph);
         at.transform(pt, pt);
 

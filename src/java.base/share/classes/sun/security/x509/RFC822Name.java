@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -48,7 +48,7 @@ import sun.security.util.*;
  */
 public class RFC822Name implements GeneralNameInterface
 {
-    private String name;
+    private final String name;
 
     /**
      * Create the RFC822Name object from the passed encoded Der value.
@@ -120,9 +120,9 @@ public class RFC822Name implements GeneralNameInterface
      * Encode the RFC822 name into the DerOutputStream.
      *
      * @param out the DER stream to encode the RFC822Name to.
-     * @exception IOException on encoding errors.
      */
-    public void encode(DerOutputStream out) throws IOException {
+    @Override
+    public void encode(DerOutputStream out) {
         out.putIA5String(name);
     }
 
@@ -139,16 +139,15 @@ public class RFC822Name implements GeneralNameInterface
      * @return true iff the names are equivalent
      * according to RFC 5280.
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
 
-        if (!(obj instanceof RFC822Name))
+        if (!(obj instanceof RFC822Name other))
             return false;
-
-        RFC822Name other = (RFC822Name)obj;
 
         // RFC 5280 mandates that these names are
         // not case-sensitive
@@ -156,10 +155,9 @@ public class RFC822Name implements GeneralNameInterface
     }
 
     /**
-     * Returns the hash code value for this object.
-     *
-     * @return a hash code value for this object.
+     * {@return the hash code value for this object}
      */
+    @Override
     public int hashCode() {
         return name.toUpperCase(Locale.ENGLISH).hashCode();
     }

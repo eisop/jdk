@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -45,6 +45,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 import jdk.internal.misc.CDS;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
+import jdk.internal.vm.annotation.Stable;
 
 import java.lang.constant.Constable;
 import java.lang.constant.DynamicConstantDesc;
@@ -110,7 +111,7 @@ public final class Short extends Number implements Comparable<Short>, Constable 
     @SideEffectFree
     @StaticallyExecutable
     public static @ArrayLen({1, 2, 3, 4, 5, 6}) String toString(short s) {
-        return Integer.toString((int)s, 10);
+        return Integer.toString(s);
     }
 
     /**
@@ -202,7 +203,7 @@ public final class Short extends Number implements Comparable<Short>, Constable 
      * equal to the value of:
      *
      * <blockquote>
-     *  {@code new Short(Short.parseShort(s, radix))}
+     *  {@code Short.valueOf(Short.parseShort(s, radix))}
      * </blockquote>
      *
      * @param s         the string to be parsed
@@ -233,7 +234,7 @@ public final class Short extends Number implements Comparable<Short>, Constable 
      * equal to the value of:
      *
      * <blockquote>
-     *  {@code new Short(Short.parseShort(s))}
+     *  {@code Short.valueOf(Short.parseShort(s))}
      * </blockquote>
      *
      * @param s the string to be parsed
@@ -260,9 +261,10 @@ public final class Short extends Number implements Comparable<Short>, Constable 
         return Optional.of(DynamicConstantDesc.ofNamed(BSM_EXPLICIT_CAST, DEFAULT_NAME, CD_short, intValue()));
     }
 
-    private static class ShortCache {
+    private static final class ShortCache {
         private ShortCache() {}
 
+        @Stable
         static final Short[] cache;
         static Short[] archivedCache;
 
@@ -490,10 +492,11 @@ public final class Short extends Number implements Comparable<Short>, Constable 
      * @return  a string representation of the value of this object in
      *          base&nbsp;10.
      */
+    @Override
     @SideEffectFree
     @StaticallyExecutable
     public @ArrayLen({1, 2, 3, 4, 5, 6}) String toString() {
-        return Integer.toString((int)value);
+        return Integer.toString(value);
     }
 
     /**

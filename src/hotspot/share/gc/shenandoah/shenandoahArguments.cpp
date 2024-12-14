@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2021, Red Hat, Inc. All rights reserved.
+ * Copyright (c) 2018, 2022, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,7 +35,7 @@
 #include "utilities/defaultStream.hpp"
 
 void ShenandoahArguments::initialize() {
-#if !(defined AARCH64 || defined AMD64 || defined IA32)
+#if !(defined AARCH64 || defined AMD64 || defined IA32 || defined PPC64 || defined RISCV64)
   vm_exit_during_initialization("Shenandoah GC is not supported on this platform.");
 #endif
 
@@ -111,6 +111,16 @@ void ShenandoahArguments::initialize() {
       // User settings error, report and ask user to rectify.
       vm_exit_during_initialization("Shenandoah expects ConcGCThreads <= ParallelGCThreads, check -XX:ParallelGCThreads, -XX:ConcGCThreads");
     }
+  }
+
+  // Disable support for dynamic number of GC threads. We do not let the runtime
+  // heuristics to misjudge how many threads we need during the heavy concurrent phase
+  // or a GC pause.
+  if (UseDynamicNumberOfGCThreads) {
+    if (FLAG_IS_CMDLINE(UseDynamicNumberOfGCThreads)) {
+      warning("Shenandoah does not support UseDynamicNumberOfGCThreads, disabling");
+    }
+    FLAG_SET_DEFAULT(UseDynamicNumberOfGCThreads, false);
   }
 
   if (ShenandoahRegionSampling && FLAG_IS_DEFAULT(PerfDataMemorySize)) {

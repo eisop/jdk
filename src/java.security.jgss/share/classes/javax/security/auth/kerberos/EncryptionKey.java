@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.Objects;
 import javax.crypto.SecretKey;
@@ -54,6 +55,7 @@ import javax.security.auth.DestroyFailedException;
  */
 public final class EncryptionKey implements SecretKey {
 
+    @Serial
     private static final long serialVersionUID = 9L;
 
    /**
@@ -147,7 +149,7 @@ public final class EncryptionKey implements SecretKey {
     /**
      * Destroys this key by clearing out the key material of this key.
      *
-     * @throws DestroyFailedException if some error occurs while destorying
+     * @throws DestroyFailedException if some error occurs while destroying
      * this key.
      */
     @Override
@@ -178,9 +180,7 @@ public final class EncryptionKey implements SecretKey {
     }
 
     /**
-     * Returns a hash code for this {@code EncryptionKey}.
-     *
-     * @return a hash code for this {@code EncryptionKey}.
+     * {@return a hash code for this {@code EncryptionKey}}
      */
     @Override
     public int hashCode() {
@@ -213,11 +213,10 @@ public final class EncryptionKey implements SecretKey {
         if (other == this)
             return true;
 
-        if (! (other instanceof EncryptionKey)) {
+        if (! (other instanceof EncryptionKey otherKey)) {
             return false;
         }
 
-        EncryptionKey otherKey = ((EncryptionKey) other);
         if (isDestroyed() || otherKey.isDestroyed()) {
             return false;
         }

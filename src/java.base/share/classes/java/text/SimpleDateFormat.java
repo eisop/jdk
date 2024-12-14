@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -1587,7 +1587,7 @@ public class SimpleDateFormat extends DateFormat {
     }
 
     /* If the next tag/pattern is a <Numeric_Field> then the parser
-     * should consider the count of digits while parsing the contigous digits
+     * should consider the count of digits while parsing the contiguous digits
      * for the current tag/pattern
      */
     private boolean shouldObeyCount(int tag, int count) {
@@ -2415,9 +2415,11 @@ public class SimpleDateFormat extends DateFormat {
     }
 
     /**
-     * Returns the hash code value for this {@code SimpleDateFormat} object.
+     * {@return the hash code value for this {@code SimpleDateFormat}}
      *
-     * @return the hash code value for this {@code SimpleDateFormat} object.
+     * @implSpec This method calculates the hash code value using the value returned by
+     * {@link #toPattern()}.
+     * @see Object#hashCode()
      */
     @Override
     public int hashCode()
@@ -2427,11 +2429,17 @@ public class SimpleDateFormat extends DateFormat {
     }
 
     /**
-     * Compares the given object with this {@code SimpleDateFormat} for
-     * equality.
+     * Compares the specified object with this {@code SimpleDateFormat} for equality.
+     * Returns true if the object is also a {@code SimpleDateFormat} and the
+     * two formats would format any value the same.
      *
-     * @return true if the given object is equal to this
-     * {@code SimpleDateFormat}
+     * @implSpec This method performs an equality check with a notion of class
+     * identity based on {@code getClass()}, rather than {@code instanceof}.
+     * Therefore, in the equals methods in subclasses, no instance of this class
+     * should compare as equal to an instance of a subclass.
+     * @param  obj object to be compared for equality
+     * @return {@code true} if the specified object is equal to this {@code SimpleDateFormat}
+     * @see Object#equals(Object)
      */
     @Override
     @Pure
@@ -2439,7 +2447,7 @@ public class SimpleDateFormat extends DateFormat {
     public boolean equals(@Nullable Object obj)
     {
         if (!super.equals(obj)) {
-            return false; // super does class check
+            return false; // super does null and class checks
         }
         SimpleDateFormat that = (SimpleDateFormat) obj;
         return (pattern.equals(that.pattern)

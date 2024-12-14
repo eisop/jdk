@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -47,6 +47,7 @@ import sun.security.util.*;
 public final class KerberosPrincipal
     implements java.security.Principal, java.io.Serializable {
 
+    @Serial
     private static final long serialVersionUID = -7374788026156829911L;
 
     //name types
@@ -196,7 +197,7 @@ public final class KerberosPrincipal
 
     public KerberosPrincipal(String name, int nameType) {
 
-        PrincipalName krb5Principal = null;
+        PrincipalName krb5Principal;
 
         try {
             // Appends the default realm if it is missing
@@ -232,14 +233,13 @@ public final class KerberosPrincipal
     }
 
     /**
-     * Returns a hash code for this {@code KerberosPrincipal}. The hash code
-     * is defined to be the result of the following calculation:
+     * {@return a hash code for this {@code KerberosPrincipal}}
+     * The hash code is defined to be the result of the following calculation:
      * <pre>{@code
      *  hashCode = getName().hashCode();
      * }</pre>
-     *
-     * @return a hash code for this {@code KerberosPrincipal}.
      */
+    @Override
     public int hashCode() {
         return getName().hashCode();
     }
@@ -252,23 +252,20 @@ public final class KerberosPrincipal
      * More formally two {@code KerberosPrincipal} instances are equal
      * if the values returned by {@code getName()} are equal.
      *
-     * @param other the object to compare to
+     * @param obj the object to compare to
      * @return true if the object passed in represents the same principal
      * as this one, false otherwise.
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
-    public boolean equals(@Nullable Object other) {
+    public boolean equals(@Nullable Object obj) {
 
-        if (other == this)
+        if (obj == this)
             return true;
 
-        if (! (other instanceof KerberosPrincipal)) {
-            return false;
-        }
-        String myFullName = getName();
-        String otherFullName = ((KerberosPrincipal) other).getName();
-        return myFullName.equals(otherFullName);
+        return obj instanceof KerberosPrincipal other
+                && getName().equals(other.getName());
     }
 
     /**
@@ -282,6 +279,7 @@ public final class KerberosPrincipal
      *          Realm in their DER-encoded form as specified in Section 5.2.2 of
      *          <a href=http://www.ietf.org/rfc/rfc4120.txt> RFC4120</a>.
      */
+    @Serial
     private void writeObject(ObjectOutputStream oos)
             throws IOException {
 
@@ -302,6 +300,7 @@ public final class KerberosPrincipal
      * @throws IOException if an I/O error occurs
      * @throws ClassNotFoundException if a serialized class cannot be loaded
      */
+    @Serial
     private void readObject(ObjectInputStream ois)
             throws IOException, ClassNotFoundException {
         byte[] asn1EncPrincipal = (byte [])ois.readObject();
