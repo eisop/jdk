@@ -28,9 +28,7 @@ package javax.lang.model.util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.AnnotationTypeMismatchException;
-import java.lang.annotation.IncompleteAnnotationException;
+
 import java.util.List;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
@@ -46,7 +44,7 @@ import javax.lang.model.type.*;
  * ExecutableType Executable types} and the pseudo-types for
  * {@linkplain TypeKind#PACKAGE packages} and {@linkplain
  * TypeKind#MODULE modules} are generally out of scope for these
- * methods. One or more out of scope arguments will typically result
+ * methods. One or more out-of-scope arguments will typically result
  * in a method throwing an {@link IllegalArgumentException}.
  *
  * <p>Where a method returns a type mirror or a collection of type
@@ -55,6 +53,11 @@ import javax.lang.model.type.*;
  *
  * <p><b>Compatibility Note:</b> Methods may be added to this interface
  * in future releases of the platform.
+ *
+ * @apiNote
+ * In the reference implementation, handling {@linkplain ErrorType
+ * error types} generally does not cause an {@code
+ * IllegalArgumentException} from the methods in this interface.
  *
  * @see javax.annotation.processing.ProcessingEnvironment#getTypeUtils
  * @since 1.6
@@ -173,7 +176,7 @@ public interface Types {
      * the direct supertypes of a type mirror representing {@code
      * java.lang.Object}.
      *
-     * Annotations on the direct super types are preserved.
+     * Annotations on the direct supertypes are preserved.
      *
      * @param t  the type being examined
      * @return the direct supertypes, or an empty list if none
@@ -193,7 +196,7 @@ public interface Types {
 
     /**
      * {@return the class of a boxed value of the primitive type argument}
-     * That is, <i>boxing conversion</i> is applied.
+     * That is, <dfn>boxing conversion</dfn> is applied.
      *
      * @param p  the primitive type to be converted
      * @jls 5.1.7 Boxing Conversion
@@ -206,8 +209,11 @@ public interface Types {
      *
      * @param t  the type to be unboxed
      * @return the type of an unboxed value of type {@code t}
+     *
      * @throws IllegalArgumentException if the given type has no
-     *          unboxing conversion
+     *         unboxing conversion. Only types for the {@linkplain
+     *         java.lang##wrapperClass wrapper classes} have an
+     *         unboxing conversion.
      * @jls 5.1.8 Unboxing Conversion
      */
     PrimitiveType unboxedType(TypeMirror t);
@@ -263,7 +269,10 @@ public interface Types {
      *
      * @param componentType  the component type
      * @throws IllegalArgumentException if the component type is not valid for
-     *          an array, including executable, package, module, and wildcard types
+     *          an array. All valid types are {@linkplain ReferenceType
+     *          reference types} or {@linkplain PrimitiveType primitive types}.
+     *          Invalid types include {@linkplain NullType null}, executable, package,
+     *          module, and wildcard types.
      * @jls 10.1 Array Types
      */
     ArrayType getArrayType(TypeMirror componentType);
@@ -276,7 +285,10 @@ public interface Types {
      *
      * @param extendsBound  the extends (upper) bound, or {@code null} if none
      * @param superBound    the super (lower) bound, or {@code null} if none
-     * @throws IllegalArgumentException if bounds are not valid
+     *
+     * @throws IllegalArgumentException if bounds are not valid. Invalid bounds
+     * include all types that are not {@linkplain ReferenceType
+     * reference types}.
      * @jls 4.5.1 Type Arguments of Parameterized Types
      */
     WildcardType getWildcardType(@Nullable TypeMirror extendsBound,
@@ -326,7 +338,7 @@ public interface Types {
      * Annotations on the type arguments are preserved.
      *
      * <p> If the containing type is a parameterized type,
-     * the number of type arguments must equal the
+     * the number of type arguments must be equal to the
      * number of {@code typeElem}'s formal type parameters.
      * If it is not parameterized or if it is {@code null}, this method is
      * equivalent to {@code getDeclaredType(typeElem, typeArgs)}.
@@ -362,7 +374,7 @@ public interface Types {
     /**
      * {@return a type mirror equivalent to the argument, but with no annotations}
      * If the type mirror is a composite type, such as an array type
-     * or a wildcard type, any constitute types, such as the
+     * or a wildcard type, any constituent types, such as the
      * component type of an array and the type of the bounds of a
      * wildcard type, also have no annotations, recursively.
      *

@@ -344,8 +344,7 @@ public @UsesObjectEquals class AtomicInteger extends Number implements java.io.S
     }
 
     /**
-     * Returns the String representation of the current value.
-     * @return the String representation of the current value
+     * {@return the String representation of the current value}
      */
     public String toString() {
         return Integer.toString(get());

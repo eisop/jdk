@@ -2185,11 +2185,6 @@ public final class Formatter implements Closeable, Flushable {
      *         zero size; otherwise, a new file will be created.  The output
      *         will be written to the file and is buffered.
      *
-     * @throws  SecurityException
-     *          If a security manager is present and {@link
-     *          SecurityManager#checkWrite checkWrite(fileName)} denies write
-     *          access to the file
-     *
      * @throws  FileNotFoundException
      *          If the given file name does not denote an existing, writable
      *          regular file and a new regular file of that name cannot be
@@ -2225,11 +2220,6 @@ public final class Formatter implements Closeable, Flushable {
      *          created, or if some other error occurs while opening or
      *          creating the file
      *
-     * @throws  SecurityException
-     *          If a security manager is present and {@link
-     *          SecurityManager#checkWrite checkWrite(fileName)} denies write
-     *          access to the file
-     *
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      */
@@ -2264,11 +2254,6 @@ public final class Formatter implements Closeable, Flushable {
      *          created, or if some other error occurs while opening or
      *          creating the file
      *
-     * @throws  SecurityException
-     *          If a security manager is present and {@link
-     *          SecurityManager#checkWrite checkWrite(fileName)} denies write
-     *          access to the file
-     *
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      */
@@ -2299,11 +2284,6 @@ public final class Formatter implements Closeable, Flushable {
      * @throws  IOException
      *          if an I/O error occurs while opening or creating the file
      *
-     * @throws  SecurityException
-     *          If a security manager is present and {@link
-     *          SecurityManager#checkWrite checkWrite(fileName)} denies write
-     *          access to the file
-     *
      * @throws NullPointerException
      *         if {@code fileName} or {@code charset} is {@code null}.
      *
@@ -2330,11 +2310,6 @@ public final class Formatter implements Closeable, Flushable {
      *         file exists then it will be truncated to zero size; otherwise,
      *         a new file will be created.  The output will be written to the
      *         file and is buffered.
-     *
-     * @throws  SecurityException
-     *          If a security manager is present and {@link
-     *          SecurityManager#checkWrite checkWrite(file.getPath())} denies
-     *          write access to the file
      *
      * @throws  FileNotFoundException
      *          If the given file object does not denote an existing, writable
@@ -2371,11 +2346,6 @@ public final class Formatter implements Closeable, Flushable {
      *          created, or if some other error occurs while opening or
      *          creating the file
      *
-     * @throws  SecurityException
-     *          If a security manager is present and {@link
-     *          SecurityManager#checkWrite checkWrite(file.getPath())} denies
-     *          write access to the file
-     *
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      */
@@ -2410,11 +2380,6 @@ public final class Formatter implements Closeable, Flushable {
      *          created, or if some other error occurs while opening or
      *          creating the file
      *
-     * @throws  SecurityException
-     *          If a security manager is present and {@link
-     *          SecurityManager#checkWrite checkWrite(file.getPath())} denies
-     *          write access to the file
-     *
      * @throws  UnsupportedEncodingException
      *          If the named charset is not supported
      */
@@ -2444,11 +2409,6 @@ public final class Formatter implements Closeable, Flushable {
      *
      * @throws IOException
      *         if an I/O error occurs while opening or creating the file
-     *
-     * @throws SecurityException
-     *         If a security manager is present and {@link
-     *         SecurityManager#checkWrite checkWrite(file.getPath())} denies
-     *         write access to the file
      *
      * @throws NullPointerException
      *         if {@code file} or {@code charset} is {@code null}.
@@ -3031,15 +2991,7 @@ public final class Formatter implements Closeable, Flushable {
         String toString();
     }
 
-    private static class FixedString implements FormatString {
-        private final String s;
-        private final int start;
-        private final int end;
-        FixedString(String s, int start, int end) {
-            this.s = s;
-            this.start = start;
-            this.end = end;
-        }
+    private record FixedString(String s, int start, int end) implements FormatString {
         public int index() { return -2; }
         public void print(Formatter fmt, Object arg, Locale l)
             throws IOException { fmt.a.append(s, start, end); }
@@ -4259,8 +4211,8 @@ public final class Formatter implements Closeable, Flushable {
 
         // Add trailing zeros
         private void trailingZeros(StringBuilder sb, int nzeros) {
-            for (int i = 0; i < nzeros; i++) {
-                sb.append('0');
+            if (nzeros > 0) {
+                sb.repeat('0', nzeros);
             }
         }
 
@@ -4981,9 +4933,9 @@ public final class Formatter implements Closeable, Flushable {
                      DECIMAL_FLOAT,
                      HEXADECIMAL_FLOAT,
                      HEXADECIMAL_FLOAT_UPPER,
-                     LINE_SEPARATOR,
-                     PERCENT_SIGN -> true;
-                default -> false;
+                     LINE_SEPARATOR -> true;
+                // Don't put PERCENT_SIGN inside switch, as that will make the method size exceed 325 and cannot be inlined.
+                default -> c == PERCENT_SIGN;
             };
         }
 

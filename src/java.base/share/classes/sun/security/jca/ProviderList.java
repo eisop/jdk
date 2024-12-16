@@ -30,8 +30,6 @@ import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.util.*;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.Provider;
 import java.security.Provider.Service;
 import java.security.Security;
@@ -90,15 +88,8 @@ public final class ProviderList {
 
     // construct a ProviderList from the security properties
     // (static provider configuration in the java.security file)
-    @SuppressWarnings("removal")
     static ProviderList fromSecurityProperties() {
-        // doPrivileged() because of Security.getProperty()
-        return AccessController.doPrivileged(
-                        new PrivilegedAction<ProviderList>() {
-            public ProviderList run() {
-                return new ProviderList();
-            }
-        });
+        return new ProviderList();
     }
 
     public static ProviderList add(ProviderList providerList, Provider p) {

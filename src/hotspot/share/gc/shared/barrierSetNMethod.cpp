@@ -100,6 +100,12 @@ bool BarrierSetNMethod::nmethod_entry_barrier(nmethod* nm) {
     virtual void do_oop(narrowOop* p) { ShouldNotReachHere(); }
   };
 
+  if (!is_armed(nm)) {
+    // Some other thread got here first and healed the oops
+    // and disarmed the nmethod. No need to continue.
+    return true;
+  }
+
   // If the nmethod is the only thing pointing to the oops, and we are using a
   // SATB GC, then it is important that this code marks them live.
   // Also, with concurrent GC, it is possible that frames in continuation stack

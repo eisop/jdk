@@ -36,8 +36,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.*;
 import java.nio.charset.Charset;
 import jdk.internal.access.JavaIOAccess;
@@ -45,8 +43,7 @@ import jdk.internal.access.SharedSecrets;
 import jdk.internal.io.JdkConsoleImpl;
 import jdk.internal.io.JdkConsoleProvider;
 import jdk.internal.javac.PreviewFeature;
-import jdk.internal.util.StaticProperty;
-import sun.security.action.GetPropertyAction;
+import sun.nio.cs.UTF_8;
 
 /**
  * Methods to access the character-based console device, if any, associated
@@ -185,6 +182,19 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
     }
 
     /**
+     * Terminates the current line in this console's output stream using
+     * {@link System#lineSeparator()} and then flushes the console.
+     *
+     * @return  This console
+     *
+     * @since 24
+     */
+    @PreviewFeature(feature = PreviewFeature.Feature.IMPLICIT_CLASSES)
+    public Console println() {
+        return println("");
+    }
+
+    /**
      * Writes a string representation of the specified object to this console's
      * output stream and then flushes the console.
      *
@@ -223,6 +233,24 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
      */
     @PreviewFeature(feature = PreviewFeature.Feature.IMPLICIT_CLASSES)
     public String readln(String prompt) {
+        throw newUnsupportedOperationException();
+    }
+
+    /**
+     * Reads a single line of text from this console.
+     *
+     * @throws IOError
+     *         If an I/O error occurs.
+     *
+     * @return  A string containing the line read from the console, not
+     *          including any line-termination characters, or {@code null}
+     *          if an end of stream has been reached without having read
+     *          any characters.
+     *
+     * @since 24
+     */
+    @PreviewFeature(feature = PreviewFeature.Feature.IMPLICIT_CLASSES)
+    public String readln() {
         throw newUnsupportedOperationException();
     }
 
@@ -595,7 +623,8 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
      * the {@code Console}.
      * <p>
      * The returned charset corresponds to the input and output source
-     * (e.g., keyboard and/or display) specified by the host environment or user.
+     * (e.g., keyboard and/or display) specified by the host environment or user,
+     * which defaults to the one based on {@link System##stdout.encoding stdout.encoding}.
      * It may not necessarily be the same as the default charset returned from
      * {@link java.nio.charset.Charset#defaultCharset() Charset.defaultCharset()}.
      *
@@ -630,30 +659,11 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
                 "Console class itself does not provide implementation");
     }
 
-    private static native String encoding();
     private static final boolean istty = istty();
-    static final Charset CHARSET;
+    static final Charset CHARSET =
+        Charset.forName(System.getProperty("stdout.encoding"), UTF_8.INSTANCE);
+    private static final Console cons = instantiateConsole();
     static {
-        Charset cs = null;
-
-        if (istty) {
-            String csname = encoding();
-            if (csname == null) {
-                csname = GetPropertyAction.privilegedGetProperty("stdout.encoding");
-            }
-            if (csname != null) {
-                cs = Charset.forName(csname, null);
-            }
-        }
-        if (cs == null) {
-            cs = Charset.forName(StaticProperty.nativeEncoding(),
-                    Charset.defaultCharset());
-        }
-
-        CHARSET = cs;
-
-        cons = instantiateConsole();
-
         // Set up JavaIOAccess in SharedSecrets
         SharedSecrets.setJavaIOAccess(new JavaIOAccess() {
             public Console console() {
@@ -662,9 +672,8 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
         });
     }
 
-    @SuppressWarnings("removal")
     private static Console instantiateConsole() {
-        Console c;
+        Console c = null;
 
         try {
             /*
@@ -676,25 +685,19 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
              * If no providers are available, or instantiation failed, java.base built-in
              * Console implementation is used.
              */
-            c = AccessController.doPrivileged(new PrivilegedAction<Console>() {
-                public Console run() {
-                    var consModName = System.getProperty("jdk.console",
-                            JdkConsoleProvider.DEFAULT_PROVIDER_MODULE_NAME);
+            var consModName = System.getProperty("jdk.console",
+                    JdkConsoleProvider.DEFAULT_PROVIDER_MODULE_NAME);
 
-                    for (var jcp : ServiceLoader.load(ModuleLayer.boot(), JdkConsoleProvider.class)) {
-                        if (consModName.equals(jcp.getClass().getModule().getName())) {
-                            var jc = jcp.console(istty, CHARSET);
-                            if (jc != null) {
-                                return new ProxyingConsole(jc);
-                            }
-                            break;
-                        }
+            for (var jcp : ServiceLoader.load(ModuleLayer.boot(), JdkConsoleProvider.class)) {
+                if (consModName.equals(jcp.getClass().getModule().getName())) {
+                    var jc = jcp.console(istty, CHARSET);
+                    if (jc != null) {
+                        c = new ProxyingConsole(jc);
                     }
-                    return null;
+                    break;
                 }
-            });
+            }
         } catch (ServiceConfigurationError _) {
-            c = null;
         }
 
         // If not found, default to built-in Console
@@ -705,6 +708,5 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
         return c;
     }
 
-    private static final Console cons;
     private static native boolean istty();
 }

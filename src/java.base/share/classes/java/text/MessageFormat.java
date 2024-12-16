@@ -49,6 +49,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,17 +118,21 @@ import java.util.Objects;
  * </pre></blockquote>
  *
  * <p>
- * The <i>ArgumentIndex</i> value is a non-negative integer written
+ * The {@code ArgumentIndex} value is a non-negative integer written
  * using the digits {@code '0'} through {@code '9'}, and represents an index into the
  * {@code arguments} array passed to the {@code format} methods
  * or the result array returned by the {@code parse} methods.
  * <p>
- * The <i>FormatType</i> and <i>FormatStyle</i> values are used to create
+ * Any constructor or method that takes a String pattern parameter will throw an {@code IllegalArgumentException} if the
+ * pattern contains an {@code ArgumentIndex} value that is equal to or exceeds an implementation limit.
+ * <p>
+ * The {@code FormatType} and {@code FormatStyle} values are used to create
  * a {@code Format} instance for the format element. The following
  * table shows how the values map to {@code Format} instances. These values
  * are case-insensitive when passed to {@link #applyPattern(String)}. Combinations
  * not shown in the table are illegal. A <i>SubformatPattern</i> must
  * be a valid pattern string for the {@code Format} subclass used.
+ * @implNote In the reference implementation, the limit of {@code ArgumentIndex} is 10,000.
  *
  * <table class="plain">
  * <caption style="display:none">Shows how FormatType and FormatStyle values map to Format instances</caption>
@@ -375,12 +380,11 @@ import java.util.Objects;
  *
  * <h2>Usage Information</h2>
  *
- * <p>
+ *
  * The following example demonstrates a general usage of {@code MessageFormat}.
  * In internationalized programs, the message format pattern and other
  * static strings will likely be obtained from resource bundles.
  *
- * <p>
  * {@snippet lang=java :
  * int planet = 7;
  * String event = "a disturbance in the Force";
@@ -528,13 +532,6 @@ public class MessageFormat extends Format {
      * creates a list of subformats for the format elements contained in it.
      * Patterns and their interpretation are specified in the
      * {@linkplain ##patterns class description}.
-     *
-     * @implSpec The default implementation throws a
-     * {@code NullPointerException} if {@code locale} is {@code null}
-     * either during the creation of the {@code MessageFormat} object or later
-     * when {@code format()} is called by a {@code MessageFormat}
-     * instance with a null locale and the implementation utilizes a
-     * locale-dependent subformat.
      *
      * @implSpec The default implementation throws a
      * {@code NullPointerException} if {@code locale} is {@code null}
@@ -709,7 +706,10 @@ public class MessageFormat extends Format {
      * represents the current state of this {@code MessageFormat}}
      *
      * The string is constructed from internal information and therefore
-     * does not necessarily equal the previously applied pattern.
+     * does not necessarily equal the previously applied pattern. The order of
+     * {@code FormatStyle} matching is not guaranteed. That is, a {@code
+     * FormatStyle} produced may not be equivalent to the corresponding style passed,
+     * in the instance that multiple styles are equivalent.
      *
      * @implSpec The implementation in {@link MessageFormat} returns a
      * string that, when passed to a {@code MessageFormat()} constructor
@@ -1043,12 +1043,13 @@ public class MessageFormat extends Format {
     public final StringBuffer format(@Nullable Object @Nullable [] arguments, StringBuffer result,
                                      @Nullable FieldPosition pos)
     {
-        return subformat(arguments, result, pos, null);
+        return subformat(arguments, StringBufFactory.of(result), pos, null).asStringBuffer();
     }
 
     /**
      * Creates a MessageFormat with the given pattern and uses it
-     * to format the given arguments. This is equivalent to
+     * to format the given arguments.
+     * This method returns a string that would be equal to the string returned by
      * <blockquote>
      *     <code>(new {@link #MessageFormat(String) MessageFormat}(pattern)).{@link #format(java.lang.Object[], java.lang.StringBuffer, java.text.FieldPosition) format}(arguments, new StringBuffer(), null).toString()</code>
      * </blockquote>
@@ -1092,6 +1093,12 @@ public class MessageFormat extends Format {
     public final StringBuffer format(Object arguments, StringBuffer result,
                                      FieldPosition pos)
     {
+        return subformat((Object[]) arguments, StringBufFactory.of(result), pos, null).asStringBuffer();
+    }
+
+    @Override
+    final StringBuf format(Object arguments, StringBuf result,
+                           FieldPosition pos) {
         return subformat((Object[]) arguments, result, pos, null);
     }
 
@@ -1132,7 +1139,7 @@ public class MessageFormat extends Format {
      */
     public AttributedCharacterIterator formatToCharacterIterator(Object arguments) {
         Objects.requireNonNull(arguments, "arguments must not be null");
-        StringBuffer result = new StringBuffer();
+        StringBuf result = StringBufFactory.of();
         ArrayList<AttributedCharacterIterator> iterators = new ArrayList<>();
 
         subformat((Object[]) arguments, result, null, iterators);
@@ -1188,6 +1195,8 @@ public class MessageFormat extends Format {
                 maximumArgumentNumber = argumentNumbers[i];
             }
         }
+
+        // Constructors/applyPattern ensure that resultArray.length < MAX_ARGUMENT_INDEX
         Object[] resultArray = new Object[maximumArgumentNumber + 1];
 
         int patternOffset = 0;
@@ -1468,6 +1477,9 @@ public class MessageFormat extends Format {
      * @serial
      */
     private int[] argumentNumbers = new int[INITIAL_FORMATS];
+    // Implementation limit for ArgumentIndex pattern element. Valid indices must
+    // be less than this value
+    private static final int MAX_ARGUMENT_INDEX = 10000;
 
     /**
      * One less than the number of entries in {@code offsets}.  Can also be thought of
@@ -1490,7 +1502,7 @@ public class MessageFormat extends Format {
      *            {@code arguments} array is not of the type
      *            expected by the format element(s) that use it.
      */
-    private StringBuffer subformat(@Nullable Object @Nullable [] arguments, StringBuffer result,
+    private StringBuf subformat(@Nullable Object @Nullable [] arguments, StringBuf result,
                                    FieldPosition fp, List<AttributedCharacterIterator> characterIterators) {
         // note: this implementation assumes a fast substring & index.
         // if this is not true, would be better to append chars one by one.
@@ -1600,9 +1612,9 @@ public class MessageFormat extends Format {
 
     /**
      * Convenience method to append all the characters in
-     * {@code iterator} to the StringBuffer {@code result}.
+     * {@code iterator} to the StringBuf {@code result}.
      */
-    private void append(StringBuffer result, CharacterIterator iterator) {
+    private void append(StringBuf result, CharacterIterator iterator) {
         if (iterator.first() != CharacterIterator.DONE) {
             char aChar;
 
@@ -1646,6 +1658,11 @@ public class MessageFormat extends Format {
         if (argumentNumber < 0) {
             throw new IllegalArgumentException("negative argument number: "
                                                + argumentNumber);
+        }
+
+        if (argumentNumber >= MAX_ARGUMENT_INDEX) {
+            throw new IllegalArgumentException(
+                    argumentNumber + " exceeds the ArgumentIndex implementation limit");
         }
 
         // resize format information arrays if necessary
@@ -2015,24 +2032,53 @@ public class MessageFormat extends Format {
      */
     @java.io.Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        boolean isValid = maxOffset >= -1
-                && formats.length > maxOffset
-                && offsets.length > maxOffset
-                && argumentNumbers.length > maxOffset;
+        ObjectInputStream.GetField fields = in.readFields();
+        if (fields.defaulted("argumentNumbers") || fields.defaulted("offsets")
+                || fields.defaulted("formats") || fields.defaulted("locale")
+                || fields.defaulted("pattern") || fields.defaulted("maxOffset")){
+            throw new InvalidObjectException("Stream has missing data");
+        }
+
+        locale = (Locale) fields.get("locale", null);
+        String patt = (String) fields.get("pattern", null);
+        int maxOff = fields.get("maxOffset", -2);
+        int[] argNums = ((int[]) fields.get("argumentNumbers", null)).clone();
+        int[] offs = ((int[]) fields.get("offsets", null)).clone();
+        Format[] fmts = ((Format[]) fields.get("formats", null)).clone();
+
+        // Check arrays/maxOffset have correct value/length
+        boolean isValid = maxOff >= -1 && argNums.length > maxOff
+                && offs.length > maxOff && fmts.length > maxOff;
+
+        // Check the correctness of arguments and offsets
         if (isValid) {
-            int lastOffset = pattern.length() + 1;
-            for (int i = maxOffset; i >= 0; --i) {
-                if ((offsets[i] < 0) || (offsets[i] > lastOffset)) {
+            int lastOffset = patt.length();
+            for (int i = maxOff; i >= 0; --i) {
+                if (argNums[i] < 0 || argNums[i] >= MAX_ARGUMENT_INDEX
+                        || offs[i] < 0 || offs[i] > lastOffset) {
                     isValid = false;
                     break;
                 } else {
-                    lastOffset = offsets[i];
+                    lastOffset = offs[i];
                 }
             }
         }
+
         if (!isValid) {
-            throw new InvalidObjectException("Could not reconstruct MessageFormat from corrupt stream.");
+            throw new InvalidObjectException("Stream has invalid data");
         }
+        maxOffset = maxOff;
+        pattern = patt;
+        offsets = offs;
+        formats = fmts;
+        argumentNumbers = argNums;
+    }
+
+    /**
+     * Serialization without data not supported for this class.
+     */
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throw new InvalidObjectException("Deserialized MessageFormat objects need data");
     }
 }

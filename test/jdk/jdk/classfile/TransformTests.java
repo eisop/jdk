@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,18 +23,27 @@
 
 /*
  * @test
- * @bug 8336010
+ * @bug 8335935 8336588
  * @summary Testing ClassFile transformations.
  * @run junit TransformTests
  */
+
 import java.lang.classfile.ClassBuilder;
+import java.lang.classfile.ClassElement;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.ClassModel;
+import java.lang.classfile.ClassTransform;
 import java.lang.classfile.CodeBuilder;
 import java.lang.classfile.CodeElement;
+import java.lang.classfile.CodeModel;
+import java.lang.classfile.CodeTransform;
 import java.lang.classfile.FieldModel;
 import java.lang.classfile.FieldTransform;
 import java.lang.classfile.Label;
+import java.lang.classfile.MethodModel;
 import java.lang.classfile.MethodTransform;
 import java.lang.classfile.instruction.BranchInstruction;
+import java.lang.classfile.instruction.ConstantInstruction;
 import java.lang.classfile.instruction.LabelTarget;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
@@ -43,18 +52,10 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import helpers.ByteArrayClassLoader;
-import java.lang.classfile.ClassModel;
-import java.lang.classfile.ClassTransform;
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.CodeModel;
-import java.lang.classfile.CodeTransform;
-import java.lang.classfile.MethodModel;
-import java.lang.classfile.instruction.ConstantInstruction;
 import java.util.HashSet;
 import java.util.Set;
 
+import helpers.ByteArrayClassLoader;
 import org.junit.jupiter.api.Test;
 
 import static java.lang.classfile.ClassFile.*;
@@ -115,8 +116,8 @@ class TransformTests {
         ClassModel cm = cc.parse(bytes);
 
         assertEquals(invoke(bytes), "foo");
-        assertEquals(invoke(cc.transform(cm, transformCode(foo2foo))), "foo");
-        assertEquals(invoke(cc.transform(cm, transformCode(foo2bar))), "bar");
+        assertEquals(invoke(cc.transformClass(cm, transformCode(foo2foo))), "foo");
+        assertEquals(invoke(cc.transformClass(cm, transformCode(foo2bar))), "bar");
     }
 
     @Test
@@ -128,7 +129,7 @@ class TransformTests {
 
         assertEquals(invoke(bytes), "foo");
         ClassTransform transform = transformCode(foo2bar.andThen(bar2baz));
-        assertEquals(invoke(cc.transform(cm, transform)), "baz");
+        assertEquals(invoke(cc.transformClass(cm, transform)), "baz");
     }
 
     @Test
@@ -139,9 +140,9 @@ class TransformTests {
         ClassModel cm = cc.parse(bytes);
 
         assertEquals(invoke(bytes), "foo");
-        assertEquals(invoke(cc.transform(cm, transformCode(foo2bar.andThen(bar2baz).andThen(baz2foo)))), "foo");
-        assertEquals(invoke(cc.transform(cm, transformCode(foo2bar.andThen(bar2baz).andThen(baz2quux)))), "quux");
-        assertEquals(invoke(cc.transform(cm, transformCode(foo2foo.andThen(foo2bar).andThen(bar2baz)))), "baz");
+        assertEquals(invoke(cc.transformClass(cm, transformCode(foo2bar.andThen(bar2baz).andThen(baz2foo)))), "foo");
+        assertEquals(invoke(cc.transformClass(cm, transformCode(foo2bar.andThen(bar2baz).andThen(baz2quux)))), "quux");
+        assertEquals(invoke(cc.transformClass(cm, transformCode(foo2foo.andThen(foo2bar).andThen(bar2baz)))), "baz");
     }
 
     /**
@@ -185,7 +186,7 @@ class TransformTests {
             cb.with(ce);
         };
 
-        cf.transform(cm, transform1.andThen(transform2));
+        cf.transformClass(cm, transform1.andThen(transform2));
 
         assertEquals(Set.of(INIT_NAME, "foo", "bar", "baz"), methodNames);
         assertEquals(Set.of("bar", "baz"), fieldNames);
@@ -218,7 +219,7 @@ class TransformTests {
             mb.with(me);
         };
 
-        cf.transform(cm, ClassTransform.transformingMethods(transform1.andThen(transform2)));
+        cf.transformClass(cm, ClassTransform.transformingMethods(transform1.andThen(transform2)));
 
         assertTrue(sawWithCode[0], "Code attribute generated not visible");
 
@@ -241,7 +242,7 @@ class TransformTests {
             mb.with(me);
         };
 
-        cf.transform(cm, ClassTransform.transformingMethods(transform3.andThen(transform4)));
+        cf.transformClass(cm, ClassTransform.transformingMethods(transform3.andThen(transform4)));
 
         assertTrue(sawTransformCode[0], "Code attribute transformed not visible");
     }
@@ -282,11 +283,50 @@ class TransformTests {
             cb.with(ce);
         };
 
-        cf.transform(cm, ClassTransform.transformingMethods(MethodTransform
+        cf.transformClass(cm, ClassTransform.transformingMethods(MethodTransform
             .transformingCode(transform1.andThen(transform2))));
 
         leaveLabels.removeIf(targetedLabels::contains);
         assertTrue(leaveLabels.isEmpty(), () -> "Some labels are not bounded: " + leaveLabels);
+    }
+
+    @Test
+    void testStateOrder() throws Exception {
+        var bytes = Files.readAllBytes(testClassPath);
+        var cf = ClassFile.of();
+        var cm = cf.parse(bytes);
+
+        int[] counter = {0};
+
+        enum TransformState { START, ONGOING, ENDED }
+
+        var ct = ClassTransform.ofStateful(() -> new ClassTransform() {
+            TransformState state = TransformState.START;
+
+            @Override
+            public void atStart(ClassBuilder builder) {
+                assertSame(TransformState.START, state);
+                builder.withField("f" + counter[0]++, CD_int, 0);
+                state = TransformState.ONGOING;
+            }
+
+            @Override
+            public void atEnd(ClassBuilder builder) {
+                assertSame(TransformState.ONGOING, state);
+                builder.withField("f" + counter[0]++, CD_int, 0);
+                state = TransformState.ENDED;
+            }
+
+            @Override
+            public void accept(ClassBuilder builder, ClassElement element) {
+                assertSame(TransformState.ONGOING, state);
+                builder.with(element);
+            }
+        });
+
+        cf.transformClass(cm, ct);
+        cf.transformClass(cm, ct.andThen(ct));
+        cf.transformClass(cm, ct.andThen(ct).andThen(ct));
     }
 
     public static class TestClass {

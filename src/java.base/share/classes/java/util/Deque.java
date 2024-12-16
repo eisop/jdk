@@ -175,7 +175,7 @@ import org.checkerframework.framework.qual.CFComment;
  *  </tr>
  *  <tr>
  *    <th scope="row">{@link #peek() peek()}</th>
- *    <td>{@link #getFirst() getFirst()}</td>
+ *    <td>{@link #peekFirst() peekFirst()}</td>
  *  </tr>
  *  </tbody>
  * </table>

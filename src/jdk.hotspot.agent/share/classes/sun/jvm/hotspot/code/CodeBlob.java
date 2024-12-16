@@ -144,6 +144,8 @@ public class CodeBlob extends VMObject {
 
   public boolean isRuntimeStub()        { return false; }
 
+  public boolean isUpcallStub()         { return false; }
+
   public boolean isDeoptimizationStub() { return false; }
 
   public boolean isUncommonTrapStub()   { return false; }
