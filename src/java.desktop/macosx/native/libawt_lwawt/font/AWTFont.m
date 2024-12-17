@@ -379,6 +379,9 @@ JNI_COCOA_ENTER(env);
     CTFontRef ctfont = (CTFontRef)nsFont;
     CFArrayRef tagsArray =
         CTFontCopyAvailableTables(ctfont, kCTFontTableOptionNoOptions);
+    if (tagsArray == NULL) {
+        return NULL;
+    }
     CFIndex numTags = CFArrayGetCount(tagsArray);
     for (i=0; i<numTags; i++) {
         if (tag ==
@@ -574,7 +577,7 @@ JNI_COCOA_ENTER(env);
         jstring jFontName = (jstring)NSStringToJavaString(env, fontname);
         CFRelease(fontname);
         (*env)->CallBooleanMethod(env, arrayListOfString, addMID, jFontName);
-        if ((*env)->ExceptionOccurred(env)) {
+        if ((*env)->ExceptionCheck(env)) {
             CFRelease(fds);
             return;
         }

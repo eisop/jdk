@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,47 +31,51 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import jdk.jfr.FlightRecorder;
 import jdk.jfr.Recording;
 import jdk.jfr.internal.JVM;
+import jdk.jfr.internal.util.Output.LinePrinter;
+import jdk.jfr.internal.util.Output;
+import jdk.jfr.internal.JVMSupport;
 import jdk.jfr.internal.LogLevel;
 import jdk.jfr.internal.LogTag;
 import jdk.jfr.internal.Logger;
 import jdk.jfr.internal.SecuritySupport;
 import jdk.jfr.internal.SecuritySupport.SafePath;
-import jdk.jfr.internal.Utils;
+import jdk.jfr.internal.util.ValueFormatter;
 
 /**
  * Base class for JFR diagnostic commands
  *
  */
 abstract class AbstractDCmd {
-
-    private final StringBuilder currentLine = new StringBuilder(80);
-    private final List<String> lines = new ArrayList<>();
+    private final LinePrinter output = new LinePrinter();
     private String source;
 
     // Called by native
-    public abstract String[] printHelp();
+    public abstract String[] getHelp();
 
-    // Called by native
+    // Called by native. The number of arguments for each command is
+    // reported to the DCmdFramework as a hardcoded number in native.
+    // This is to avoid an upcall as part of DcmdFramework enumerating existing commands.
+    // Remember to keep the two sides in synch.
     public abstract Argument[] getArgumentInfos();
 
-    // Called by native
     protected abstract void execute(ArgumentParser parser) throws DCmdException;
 
 
     // Called by native
     public final String[] execute(String source, String arg, char delimiter) throws DCmdException {
         this.source = source;
+        if (isInteractive()) {
+            JVM.exclude(Thread.currentThread());
+        }
         try {
             boolean log = Logger.shouldLog(LogTag.JFR_DCMD, LogLevel.DEBUG);
             if (log) {
-                System.out.println(arg);
                 Logger.log(LogTag.JFR_DCMD, LogLevel.DEBUG, "Executing " + this.getClass().getSimpleName() + ": " + arg);
             }
             ArgumentParser parser = new ArgumentParser(getArgumentInfos(), arg, delimiter);
@@ -89,16 +93,29 @@ abstract class AbstractDCmd {
             DCmdException e = new DCmdException(iae.getMessage());
             e.addSuppressed(iae);
             throw e;
-        }
+       } finally {
+           if (isInteractive()) {
+               JVM.include(Thread.currentThread());
+           }
+       }
     }
 
+    // Diagnostic commands that are meant to be used interactively
+    // should turn off events to avoid noise in the output.
+    protected boolean isInteractive() {
+        return false;
+    }
+
+    protected final Output getOutput() {
+        return output;
+    }
 
     protected final FlightRecorder getFlightRecorder() {
         return FlightRecorder.getFlightRecorder();
     }
 
     protected final String[] getResult() {
-        return lines.toArray(new String[lines.size()]);
+        return output.getLines().toArray(new String[0]);
     }
 
     protected void logWarning(String message) {
@@ -111,10 +128,10 @@ abstract class AbstractDCmd {
 
     public String getPid() {
         // Invoking ProcessHandle.current().pid() would require loading more
-        // classes during startup so instead JVM.getJVM().getPid() is used.
+        // classes during startup so instead JVM.getPid() is used.
         // The pid will not be exposed to running Java application, only when starting
         // JFR from command line (-XX:StartFlightRecording) or jcmd (JFR.start and JFR.check)
-        return JVM.getJVM().getPid();
+        return JVM.getPid();
     }
 
     protected final SafePath resolvePath(Recording recording, String filename) throws InvalidPathException {
@@ -129,7 +146,7 @@ abstract class AbstractDCmd {
     }
 
     private SafePath makeGenerated(Recording recording, Path directory) {
-        return new SafePath(directory.toAbsolutePath().resolve(Utils.makeFilename(recording)).normalize());
+        return new SafePath(directory.toAbsolutePath().resolve(JVMSupport.makeFilename(recording)).normalize());
     }
 
     protected final Recording findRecording(String name) throws DCmdException {
@@ -166,7 +183,7 @@ abstract class AbstractDCmd {
 
     protected final List<Recording> getRecordings() {
         List<Recording> list = new ArrayList<>(getFlightRecorder().getRecordings());
-        Collections.sort(list, Comparator.comparing(Recording::getId));
+        list.sort(Comparator.comparingLong(Recording::getId));
         return list;
     }
 
@@ -179,29 +196,27 @@ abstract class AbstractDCmd {
     }
 
     protected final void println() {
-        lines.add(currentLine.toString());
-        currentLine.setLength(0);
+        output.println();
     }
 
     protected final void print(String s) {
-        currentLine.append(s);
+        output.print(s);
     }
 
     protected final void print(String s, Object... args) {
-        currentLine.append(String.format(s, args));
+        output.print(s, args);
     }
 
     protected final void println(String s, Object... args) {
-        print(s, args);
-        println();
+        output.println(s, args);
     }
 
     protected final void printBytes(long bytes) {
-        print(Utils.formatBytes(bytes));
+        print(ValueFormatter.formatBytes(bytes));
     }
 
     protected final void printTimespan(Duration timespan, String separator) {
-        print(Utils.formatTimespan(timespan, separator));
+        print(ValueFormatter.formatTimespan(timespan, separator));
     }
 
     protected final void printPath(SafePath path) {
@@ -213,6 +228,12 @@ abstract class AbstractDCmd {
             printPath(SecuritySupport.getAbsolutePath(path).toPath());
         } catch (IOException ioe) {
             printPath(path.toPath());
+        }
+    }
+
+    protected final void printHelpText() {
+        for (String line : getHelp()) {
+            println(line);
         }
     }
 

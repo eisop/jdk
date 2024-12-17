@@ -32,7 +32,7 @@ import jdk.test.lib.jfr.EventNames;
 import jdk.test.lib.jfr.Events;
 
 /**
- * @test TestZRelocationSetGroupEvent
+ * @test
  * @requires vm.hasJFR & vm.gc.Z
  * @key jfr
  * @library /test/lib /test/jdk /test/hotspot/jtreg

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,22 +27,27 @@
  *      5026830 5023243 5070673 4052517 4811767 6192449 6397034 6413313
  *      6464154 6523983 6206031 4960438 6631352 6631966 6850957 6850958
  *      4947220 7018606 7034570 4244896 5049299 8003488 8054494 8058464
- *      8067796 8224905 8263729 8265173
+ *      8067796 8224905 8263729 8265173 8272600 8231297 8282219 8285517
  * @key intermittent
  * @summary Basic tests for Process and Environment Variable code
  * @modules java.base/java.lang:open
+ *          java.base/java.io:open
+ * @requires !vm.musl
+ * @requires vm.flagless
  * @library /test/lib
- * @run main/othervm/timeout=300 -Djava.security.manager=allow Basic
- * @run main/othervm/timeout=300 -Djava.security.manager=allow -Djdk.lang.Process.launchMechanism=fork Basic
+ * @run main/othervm/native/timeout=300 Basic
+ * @run main/othervm/native/timeout=300 -Djdk.lang.Process.launchMechanism=fork Basic
  * @author Martin Buchholz
  */
 
 /*
  * @test
  * @modules java.base/java.lang:open
- * @requires (os.family == "linux")
+ *          java.base/java.io:open
+ *          java.base/jdk.internal.misc
+ * @requires (os.family == "linux" & !vm.musl)
  * @library /test/lib
- * @run main/othervm/timeout=300 -Djava.security.manager=allow -Djdk.lang.Process.launchMechanism=posix_spawn Basic
+ * @run main/othervm/timeout=300 -Djdk.lang.Process.launchMechanism=posix_spawn Basic
  */
 
 import java.lang.ProcessBuilder.Redirect;
@@ -51,13 +56,14 @@ import static java.lang.ProcessBuilder.Redirect.*;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.security.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import static java.lang.System.getenv;
@@ -85,7 +91,7 @@ public class Basic {
     /**
      * Returns the number of milliseconds since time given by
      * startNanoTime, which must have been previously returned from a
-     * call to {@link System.nanoTime()}.
+     * call to {@link System#nanoTime()}.
      */
     private static long millisElapsedSince(long startNanoTime) {
         return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
@@ -486,15 +492,15 @@ public class Basic {
                             equal(run(pb).exitValue(),
                                   False.exitValue());
                             // Traditional shell scripts without #!
-                            setFileContents(prog, "exec /bin/true\n");
-                            prog.setExecutable(true);
-                            equal(run(pb).exitValue(),
-                                  True.exitValue());
-                            prog.delete();
-                            setFileContents(prog, "exec /bin/false\n");
-                            prog.setExecutable(true);
-                            equal(run(pb).exitValue(),
-                                  False.exitValue());
+                            if (!(Platform.isLinux() && Platform.isMusl())) {
+                                setFileContents(prog, "exec /bin/true\n");
+                                prog.setExecutable(true);
+                                equal(run(pb).exitValue(), True.exitValue());
+                                prog.delete();
+                                setFileContents(prog, "exec /bin/false\n");
+                                prog.setExecutable(true);
+                                equal(run(pb).exitValue(), False.exitValue());
+                            }
                             prog.delete();
                         }
 
@@ -511,14 +517,16 @@ public class Basic {
                         pb.command(cmd);
 
                         // Test traditional shell scripts without #!
-                        setFileContents(dir1Prog, "/bin/echo \"$@\"\n");
-                        pb.command(new String[] {"prog", "hello", "world"});
-                        checkPermissionDenied(pb);
-                        dir1Prog.setExecutable(true);
-                        equal(run(pb).out(), "hello world\n");
-                        equal(run(pb).exitValue(), True.exitValue());
-                        dir1Prog.delete();
-                        pb.command(cmd);
+                        if (!(Platform.isLinux() && Platform.isMusl())) {
+                            setFileContents(dir1Prog, "/bin/echo \"$@\"\n");
+                            pb.command(new String[] {"prog", "hello", "world"});
+                            checkPermissionDenied(pb);
+                            dir1Prog.setExecutable(true);
+                            equal(run(pb).out(), "hello world\n");
+                            equal(run(pb).exitValue(), True.exitValue());
+                            dir1Prog.delete();
+                            pb.command(cmd);
+                        }
 
                         // If prog found on both parent and child's PATH,
                         // parent's is used.
@@ -598,7 +606,11 @@ public class Basic {
         try {
             // If round trip conversion works, should be able to set env vars
             // correctly in child.
-            if (new String(tested.getBytes()).equals(tested)) {
+            String jnuEncoding = System.getProperty("sun.jnu.encoding");
+            Charset cs = jnuEncoding != null
+                ? Charset.forName(jnuEncoding, Charset.defaultCharset())
+                : Charset.defaultCharset();
+            if (new String(tested.getBytes(cs), cs).equals(tested)) {
                 out.println("Testing " + encoding + " environment values");
                 ProcessBuilder pb = new ProcessBuilder();
                 pb.environment().put("ASCIINAME",tested);
@@ -899,6 +911,7 @@ public class Basic {
         } catch (Throwable t) { unexpected(t); return ""; }
     }
 
+    @SuppressWarnings("removal")
     static void testIORedirection() throws Throwable {
         final File ifile = new File("ifile");
         final File ofile = new File("ofile");
@@ -1203,77 +1216,6 @@ public class Basic {
             equal(r.out(), "standard output");
             equal(r.err(), "standard error");
         }
-
-        //----------------------------------------------------------------
-        // Test security implications of I/O redirection
-        //----------------------------------------------------------------
-
-        // Read access to current directory is always granted;
-        // So create a tmpfile for input instead.
-        final File tmpFile = File.createTempFile("Basic", "tmp");
-        setFileContents(tmpFile, "standard input");
-
-        final Policy policy = new Policy();
-        Policy.setPolicy(policy);
-        System.setSecurityManager(new SecurityManager());
-        try {
-            final Permission xPermission
-                = new FilePermission("<<ALL FILES>>", "execute");
-            final Permission rxPermission
-                = new FilePermission("<<ALL FILES>>", "read,execute");
-            final Permission wxPermission
-                = new FilePermission("<<ALL FILES>>", "write,execute");
-            final Permission rwxPermission
-                = new FilePermission("<<ALL FILES>>", "read,write,execute");
-
-            THROWS(SecurityException.class,
-                   () -> { policy.setPermissions(xPermission);
-                           redirectIO(pb, from(tmpFile), PIPE, PIPE);
-                           pb.start();},
-                   () -> { policy.setPermissions(rxPermission);
-                           redirectIO(pb, PIPE, to(ofile), PIPE);
-                           pb.start();},
-                   () -> { policy.setPermissions(rxPermission);
-                           redirectIO(pb, PIPE, PIPE, to(efile));
-                           pb.start();});
-
-            {
-                policy.setPermissions(rxPermission);
-                redirectIO(pb, from(tmpFile), PIPE, PIPE);
-                ProcessResults r = run(pb);
-                equal(r.out(), "standard output");
-                equal(r.err(), "standard error");
-            }
-
-            {
-                policy.setPermissions(wxPermission);
-                redirectIO(pb, PIPE, to(ofile), to(efile));
-                Process p = pb.start();
-                new PrintStream(p.getOutputStream()).print("standard input");
-                p.getOutputStream().close();
-                ProcessResults r = run(p);
-                policy.setPermissions(rwxPermission);
-                equal(fileContents(ofile), "standard output");
-                equal(fileContents(efile), "standard error");
-            }
-
-            {
-                policy.setPermissions(rwxPermission);
-                redirectIO(pb, from(tmpFile), to(ofile), to(efile));
-                ProcessResults r = run(pb);
-                policy.setPermissions(rwxPermission);
-                equal(fileContents(ofile), "standard output");
-                equal(fileContents(efile), "standard error");
-            }
-
-        } finally {
-            policy.setPermissions(new RuntimePermission("setSecurityManager"));
-            System.setSecurityManager(null);
-            tmpFile.delete();
-            ifile.delete();
-            ofile.delete();
-            efile.delete();
-        }
     }
 
     static void checkProcessPid() {
@@ -1303,6 +1245,7 @@ public class Basic {
 
     }
 
+    @SuppressWarnings("removal")
     private static void realMain(String[] args) throws Throwable {
         if (Windows.is())
             System.out.println("This appears to be a Windows system.");
@@ -1868,6 +1811,8 @@ public class Basic {
             String[] envpOth = {"=ExitValue=3", "=C:=\\"};
             if (Windows.is()) {
                 envp = envpWin;
+            } else if (AIX.is()) {
+                envp = new String[] {"=ExitValue=3", "=C:=\\", "LIBPATH=" + libpath};
             } else {
                 envp = envpOth;
             }
@@ -1916,6 +1861,9 @@ public class Basic {
             String[] envp;
             if (Windows.is()) {
                 envp = envpWin;
+            } else if (AIX.is()) {
+                envp = new String[] {"LC_ALL=C\u0000\u0000", // Yuck!
+                        "FO\u0000=B\u0000R", "LIBPATH=" + libpath};
             } else {
                 envp = envpOth;
             }
@@ -2135,34 +2083,8 @@ public class Basic {
             final int cases = 4;
             for (int i = 0; i < cases; i++) {
                 final int action = i;
-                List<String> childArgs = new ArrayList<>(javaChildArgs);
+                List<String> childArgs = getSleepArgs();
                 final ProcessBuilder pb = new ProcessBuilder(childArgs);
-                {
-                    // Redirect any child VM error output away from the stream being tested
-                    // and to the log file. For background see:
-                    // 8231297: java/lang/ProcessBuilder/Basic.java test fails intermittently
-                    // Destroying the process may, depending on the timing, cause some output
-                    // from the child VM.
-                    // This test requires the thread reading from the subprocess be blocked
-                    // in the read from the subprocess; there should be no bytes to read.
-                    // Modify the argument list shared with ProcessBuilder to redirect VM output.
-                    assert (childArgs.get(1).equals("-XX:+DisplayVMOutputToStderr")) : "Expected arg 1 to be \"-XX:+DisplayVMOutputToStderr\"";
-                    switch (action & 0x1) {
-                        case 0:
-                            childArgs.set(1, "-XX:+DisplayVMOutputToStderr");
-                            childArgs.add(2, "-Xlog:all=warning:stderr");
-                            pb.redirectError(INHERIT);
-                            break;
-                        case 1:
-                            childArgs.set(1, "-XX:+DisplayVMOutputToStdout");
-                            childArgs.add(2, "-Xlog:all=warning:stdout");
-                            pb.redirectOutput(INHERIT);
-                            break;
-                        default:
-                            throw new Error();
-                    }
-                }
-                childArgs.add("sleep");
                 final byte[] bytes = new byte[10];
                 final Process p = pb.start();
                 final CountDownLatch latch = new CountDownLatch(1);
@@ -2184,7 +2106,9 @@ public class Basic {
                             }
                             if (r >= 0) {
                                 // The child sent unexpected output; print it to diagnose
-                                System.out.println("Unexpected child output:");
+                                System.out.println("Unexpected child output, to: " +
+                                        ((action & 0x1) == 0 ? "getInputStream" : "getErrorStream"));
+                                System.out.println("Child args: " + childArgs);
                                 if ((action & 0x2) == 0) {
                                     System.out.write(r);    // Single character
 
@@ -2205,13 +2129,13 @@ public class Basic {
 
                 thread.start();
                 latch.await();
-                Thread.sleep(10);
+                Thread.sleep(30);
 
                 if (s instanceof BufferedInputStream) {
                     // Wait until after the s.read occurs in "thread" by
                     // checking when the input stream monitor is acquired
                     // (BufferedInputStream.read is synchronized)
-                    while (!isLocked(s, 10)) {
+                    while (!isLocked((BufferedInputStream) s)) {
                         Thread.sleep(100);
                     }
                 }
@@ -2233,9 +2157,10 @@ public class Basic {
                 // our child) but not our grandchild (i.e. '/bin/sleep'). So
                 // pay attention that the grandchild doesn't run too long to
                 // avoid polluting the process space with useless processes.
-                // Running the grandchild for 60s should be more than enough.
-                final String[] cmd = { "/bin/bash", "-c", "(/bin/sleep 60)" };
-                final String[] cmdkill = { "/bin/bash", "-c", "(/usr/bin/pkill -f \"sleep 60\")" };
+                // Running the grandchild for 59s should be more than enough.
+                // A unique (59s) time is needed to avoid killing other sleep processes.
+                final String[] cmd = { "/bin/bash", "-c", "(/bin/sleep 59)" };
+                final String[] cmdkill = { "/bin/bash", "-c", "(/usr/bin/pkill -f \"sleep 59\")" };
                 final ProcessBuilder pb = new ProcessBuilder(cmd);
                 final Process p = pb.start();
                 final InputStream stdout = p.getInputStream();
@@ -2350,95 +2275,11 @@ public class Basic {
         new File("emptyCommand").delete();
 
         //----------------------------------------------------------------
-        // Check for correct security permission behavior
-        //----------------------------------------------------------------
-        final Policy policy = new Policy();
-        Policy.setPolicy(policy);
-        System.setSecurityManager(new SecurityManager());
-
-        try {
-            // No permissions required to CREATE a ProcessBuilder
-            policy.setPermissions(/* Nothing */);
-            new ProcessBuilder("env").directory(null).directory();
-            new ProcessBuilder("env").directory(new File("dir")).directory();
-            new ProcessBuilder("env").command("??").command();
-        } catch (Throwable t) { unexpected(t); }
-
-        THROWS(SecurityException.class,
-               () -> { policy.setPermissions(/* Nothing */);
-                       System.getenv("foo");},
-               () -> { policy.setPermissions(/* Nothing */);
-                       System.getenv();},
-               () -> { policy.setPermissions(/* Nothing */);
-                       new ProcessBuilder("echo").start();},
-               () -> { policy.setPermissions(/* Nothing */);
-                       Runtime.getRuntime().exec("echo");},
-               () -> { policy.setPermissions(
-                               new RuntimePermission("getenv.bar"));
-                       System.getenv("foo");});
-
-        try {
-            policy.setPermissions(new RuntimePermission("getenv.foo"));
-            System.getenv("foo");
-
-            policy.setPermissions(new RuntimePermission("getenv.*"));
-            System.getenv("foo");
-            System.getenv();
-            new ProcessBuilder().environment();
-        } catch (Throwable t) { unexpected(t); }
-
-
-        final Permission execPermission
-            = new FilePermission("<<ALL FILES>>", "execute");
-
-        THROWS(SecurityException.class,
-               () -> { // environment permission by itself insufficient
-                       policy.setPermissions(new RuntimePermission("getenv.*"));
-                       ProcessBuilder pb = new ProcessBuilder("env");
-                       pb.environment().put("foo","bar");
-                       pb.start();},
-               () -> { // exec permission by itself insufficient
-                       policy.setPermissions(execPermission);
-                       ProcessBuilder pb = new ProcessBuilder("env");
-                       pb.environment().put("foo","bar");
-                       pb.start();});
-
-        try {
-            // Both permissions? OK.
-            policy.setPermissions(new RuntimePermission("getenv.*"),
-                                  execPermission);
-            ProcessBuilder pb = new ProcessBuilder("env");
-            pb.environment().put("foo","bar");
-            Process p = pb.start();
-            closeStreams(p);
-        } catch (IOException e) { // OK
-        } catch (Throwable t) { unexpected(t); }
-
-        try {
-            // Don't need environment permission unless READING environment
-            policy.setPermissions(execPermission);
-            Runtime.getRuntime().exec("env", new String[]{});
-        } catch (IOException e) { // OK
-        } catch (Throwable t) { unexpected(t); }
-
-        try {
-            // Don't need environment permission unless READING environment
-            policy.setPermissions(execPermission);
-            new ProcessBuilder("env").start();
-        } catch (IOException e) { // OK
-        } catch (Throwable t) { unexpected(t); }
-
-        // Restore "normal" state without a security manager
-        policy.setPermissions(new RuntimePermission("setSecurityManager"));
-        System.setSecurityManager(null);
-
-        //----------------------------------------------------------------
         // Check that Process.isAlive() &
         // Process.waitFor(0, TimeUnit.MILLISECONDS) work as expected.
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process p = new ProcessBuilder(childArgs).start();
             long start = System.nanoTime();
             if (!p.isAlive() || p.waitFor(0, TimeUnit.MILLISECONDS)) {
@@ -2467,17 +2308,19 @@ public class Basic {
         // works as expected.
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process p = new ProcessBuilder(childArgs).start();
             long start = System.nanoTime();
 
-            p.waitFor(10, TimeUnit.MILLISECONDS);
-
-            long end = System.nanoTime();
-            if ((end - start) < TimeUnit.MILLISECONDS.toNanos(10))
-                fail("Test failed: waitFor didn't take long enough (" + (end - start) + "ns)");
-
+            if (p.waitFor(10, TimeUnit.MILLISECONDS)) {
+                var msg = "External sleep process terminated early: exitValue: %d, (%dns)%n"
+                        .formatted(p.exitValue(), (System.nanoTime() - start));
+                fail(msg);
+            } else {
+                long end = System.nanoTime();
+                if ((end - start) < TimeUnit.MILLISECONDS.toNanos(10))
+                    fail("Test failed: waitFor didn't take long enough (" + (end - start) + "ns)");
+            }
             p.destroy();
         } catch (Throwable t) { unexpected(t); }
 
@@ -2486,8 +2329,7 @@ public class Basic {
         // interrupt works as expected, if interrupted while waiting.
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process p = new ProcessBuilder(childArgs).start();
             final long start = System.nanoTime();
             final CountDownLatch aboutToWaitFor = new CountDownLatch(1);
@@ -2518,8 +2360,7 @@ public class Basic {
         // interrupt works as expected, if interrupted while waiting.
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process p = new ProcessBuilder(childArgs).start();
             final long start = System.nanoTime();
             final CountDownLatch aboutToWaitFor = new CountDownLatch(1);
@@ -2550,8 +2391,7 @@ public class Basic {
         // interrupt works as expected, if interrupted before waiting.
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process p = new ProcessBuilder(childArgs).start();
             final long start = System.nanoTime();
             final CountDownLatch threadStarted = new CountDownLatch(1);
@@ -2582,8 +2422,7 @@ public class Basic {
         // Check that Process.waitFor(timeout, null) throws NPE.
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process p = new ProcessBuilder(childArgs).start();
             THROWS(NullPointerException.class,
                     () ->  p.waitFor(10L, null));
@@ -2606,8 +2445,7 @@ public class Basic {
         // Check that default implementation of Process.waitFor(timeout, null) throws NPE.
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process proc = new ProcessBuilder(childArgs).start();
             final DelegatingProcess p = new DelegatingProcess(proc);
 
@@ -2633,22 +2471,73 @@ public class Basic {
         // Process.waitFor(long, TimeUnit)
         //----------------------------------------------------------------
         try {
-            List<String> childArgs = new ArrayList<String>(javaChildArgs);
-            childArgs.add("sleep");
+            List<String> childArgs = getSleepArgs();
             final Process proc = new ProcessBuilder(childArgs).start();
             DelegatingProcess p = new DelegatingProcess(proc);
             long start = System.nanoTime();
 
-            p.waitFor(1000, TimeUnit.MILLISECONDS);
-
-            long end = System.nanoTime();
-            if ((end - start) < 500000000)
-                fail("Test failed: waitFor didn't take long enough");
-
+            if (p.waitFor(1000, TimeUnit.MILLISECONDS)) {
+                var msg = "External sleep process terminated early: exitValue: %02x, (%dns)"
+                        .formatted(p.exitValue(), (System.nanoTime() - start));
+                fail(msg);
+            } else {
+                long end = System.nanoTime();
+                if ((end - start) < 500000000)
+                    fail("Test failed: waitFor didn't take long enough (" + (end - start) + "ns)");
+            }
             p.destroy();
 
             p.waitFor(1000, TimeUnit.MILLISECONDS);
         } catch (Throwable t) { unexpected(t); }
+    }
+
+    // Path to native executables, if any
+    private static final String TEST_NATIVEPATH = System.getProperty("test.nativepath");
+
+    // Path where "sleep" program may be found" or null
+    private static final Path SLEEP_PATH = initSleepPath();
+
+    /**
+     * Compute the Path to a sleep executable.
+     * @return a Path to sleep or BasicSleep(.exe) or null if none
+     */
+    private static Path initSleepPath() {
+        if (Windows.is() && TEST_NATIVEPATH != null) {
+            // exeBasicSleep is equivalent to sleep on Unix
+            Path exePath = Path.of(TEST_NATIVEPATH).resolve("BasicSleep.exe");
+            if (Files.isExecutable(exePath)) {
+                return exePath;
+            }
+        }
+
+        List<String> binPaths = List.of("/bin", "/usr/bin");
+        for (String dir : binPaths) {
+            Path exePath = Path.of(dir).resolve("sleep");
+            if (Files.isExecutable(exePath)) {
+                return exePath;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the list of process arguments for a child to sleep 10 minutes (600 seconds).
+     *
+     * @return A list of process arguments to sleep 10 minutes.
+     */
+    private static List<String> getSleepArgs() {
+        List<String> childArgs = null;
+        if (SLEEP_PATH != null) {
+            childArgs = List.of(SLEEP_PATH.toString(), "600");
+        } else {
+            // Fallback to the JavaChild ; its 'sleep' command is for 10 minutes.
+            // The fallback the Java$Child is used if the test is run without building
+            // the BasicSleep native executable (for Windows).
+            childArgs = new ArrayList<>(javaChildArgs);
+            childArgs.add("sleep");
+            System.out.println("Sleep not found, fallback to JavaChild: " + childArgs);
+        }
+        return childArgs;
     }
 
     static void closeStreams(Process p) {
@@ -2657,37 +2546,6 @@ public class Basic {
             p.getInputStream().close();
             p.getErrorStream().close();
         } catch (Throwable t) { unexpected(t); }
-    }
-
-    //----------------------------------------------------------------
-    // A Policy class designed to make permissions fiddling very easy.
-    //----------------------------------------------------------------
-    private static class Policy extends java.security.Policy {
-        static final java.security.Policy DEFAULT_POLICY = java.security.Policy.getPolicy();
-
-        private Permissions perms;
-
-        public void setPermissions(Permission...permissions) {
-            perms = new Permissions();
-            for (Permission permission : permissions)
-                perms.add(permission);
-        }
-
-        public Policy() { setPermissions(/* Nothing */); }
-
-        public PermissionCollection getPermissions(CodeSource cs) {
-            return perms;
-        }
-
-        public PermissionCollection getPermissions(ProtectionDomain pd) {
-            return perms;
-        }
-
-        public boolean implies(ProtectionDomain pd, Permission p) {
-            return perms.implies(p) || DEFAULT_POLICY.implies(pd, p);
-        }
-
-        public void refresh() {}
     }
 
     private static class StreamAccumulator extends Thread {
@@ -2816,18 +2674,18 @@ public class Basic {
                 if (k.isAssignableFrom(t.getClass())) pass();
                 else unexpected(t);}}
 
-    static boolean isLocked(final Object monitor, final long millis) throws InterruptedException {
+    static boolean isLocked(BufferedInputStream bis) throws Exception {
         return new Thread() {
             volatile boolean unlocked;
 
             @Override
             public void run() {
-                synchronized (monitor) { unlocked = true; }
+                synchronized (bis) { unlocked = true; }
             }
 
             boolean isLocked() throws InterruptedException {
                 start();
-                join(millis);
+                join(10);
                 return !unlocked;
             }
         }.isLocked();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,11 +28,9 @@ package java.security.cert;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-import java.security.AccessController;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivilegedAction;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Objects;
@@ -152,7 +150,7 @@ public @UsesObjectEquals class CertPathValidator {
      * {@code jdk.security.provider.preferred}
      * {@link Security#getProperty(String) Security} property to determine
      * the preferred provider order for the specified algorithm. This
-     * may be different than the order of providers returned by
+     * may be different from the order of providers returned by
      * {@link Security#getProviders() Security.getProviders()}.
      *
      * @param algorithm the name of the requested {@code CertPathValidator}
@@ -333,13 +331,7 @@ public @UsesObjectEquals class CertPathValidator {
      * {@literal "PKIX"} if no such property exists.
      */
     public static final String getDefaultType() {
-        @SuppressWarnings("removal")
-        String cpvtype =
-            AccessController.doPrivileged(new PrivilegedAction<>() {
-                public String run() {
-                    return Security.getProperty(CPV_TYPE);
-                }
-            });
+        String cpvtype = Security.getProperty(CPV_TYPE);
         return (cpvtype == null) ? "PKIX" : cpvtype;
     }
 

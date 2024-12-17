@@ -25,12 +25,11 @@
  * @test
  * @bug 8026791 8042451
  * @summary Test population of reference info for constructor results
- * @modules jdk.jdeps/com.sun.tools.classfile
  * @compile -g Driver.java ReferenceInfoUtil.java Constructors.java
  * @run main Driver Constructors
  */
 
-import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
+import static java.lang.classfile.TypeAnnotation.TargetType.*;
 
 public class Constructors {
 

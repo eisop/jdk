@@ -47,8 +47,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.text.BreakIterator;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -227,16 +225,8 @@ public abstract class InfoWindow extends Window {
                             textLabel.setText(tooltipString);
                         }
 
-                        @SuppressWarnings("removal")
-                        Point pointer = AccessController.doPrivileged(
-                            new PrivilegedAction<Point>() {
-                                public Point run() {
-                                    if (!isPointerOverTrayIcon(liveArguments.getBounds())) {
-                                        return null;
-                                    }
-                                    return MouseInfo.getPointerInfo().getLocation();
-                                }
-                            });
+                        Point pointer = !isPointerOverTrayIcon(liveArguments.getBounds())
+                                        ? null : MouseInfo.getPointerInfo().getLocation();
                         if (pointer == null) {
                             return;
                         }
@@ -267,7 +257,7 @@ public abstract class InfoWindow extends Window {
     public static class Balloon extends InfoWindow {
 
         public interface LiveArguments extends InfoWindow.LiveArguments {
-            /** The action to be performed upon clicking the baloon. */
+            /** The action to be performed upon clicking the balloon. */
             String getActionCommand();
         }
 
@@ -389,7 +379,7 @@ public abstract class InfoWindow extends Window {
                     if (nLines == BALLOON_WORD_LINE_MAX_COUNT) {
                         if (end != BreakIterator.DONE) {
                             lineLabels[nLines - 1].setText(
-                                new String(lineLabels[nLines - 1].getText() + " ..."));
+                                lineLabels[nLines - 1].getText() + " ...");
                         }
                         break;
                     }

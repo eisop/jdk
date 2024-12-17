@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -41,8 +41,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamConstants;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 import sun.rmi.server.MarshalInputStream;
 import sun.rmi.server.MarshalOutputStream;
@@ -221,8 +219,7 @@ public final class MarshalledObject<T> implements Serializable {
         if (obj == this)
             return true;
 
-        if (obj != null && obj instanceof MarshalledObject) {
-            MarshalledObject<?> other = (MarshalledObject<?>) obj;
+        if (obj instanceof MarshalledObject<?> other) {
 
             // if either is a ref to null, both must be
             if (objBytes == null || other.objBytes == null)
@@ -232,7 +229,7 @@ public final class MarshalledObject<T> implements Serializable {
             if (objBytes.length != other.objBytes.length)
                 return false;
 
-            //!! There is talk about adding an array comparision method
+            //!! There is talk about adding an array comparison method
             //!! at 1.2 -- if so, this should be rewritten.  -arnold
             for (int i = 0; i < objBytes.length; ++i) {
                 if (objBytes[i] != other.objBytes[i])
@@ -326,7 +323,6 @@ public final class MarshalledObject<T> implements Serializable {
          * <code>null</code>, then all annotations will be
          * <code>null</code>.
          */
-        @SuppressWarnings("removal")
         MarshalledObjectInputStream(InputStream objIn, InputStream locIn,
                     ObjectInputFilter filter)
             throws IOException
@@ -334,13 +330,10 @@ public final class MarshalledObject<T> implements Serializable {
             super(objIn);
             this.locIn = (locIn == null ? null : new ObjectInputStream(locIn));
             if (filter != null) {
-                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-                    MarshalledObjectInputStream.this.setObjectInputFilter(filter);
-                    if (MarshalledObjectInputStream.this.locIn != null) {
-                        MarshalledObjectInputStream.this.locIn.setObjectInputFilter(filter);
-                    }
-                    return null;
-                });
+                MarshalledObjectInputStream.this.setObjectInputFilter(filter);
+                if (MarshalledObjectInputStream.this.locIn != null) {
+                    MarshalledObjectInputStream.this.locIn.setObjectInputFilter(filter);
+                }
             }
         }
 

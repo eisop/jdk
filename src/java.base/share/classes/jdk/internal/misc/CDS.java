@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,43 +38,46 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import jdk.internal.access.JavaLangInvokeAccess;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.util.StaticProperty;
 
 public class CDS {
-    private static final boolean isDumpingClassList;
-    private static final boolean isDumpingArchive;
-    private static final boolean isSharingEnabled;
-    static {
-        isDumpingClassList = isDumpingClassList0();
-        isDumpingArchive = isDumpingArchive0();
-        isSharingEnabled = isSharingEnabled0();
-    }
+    // Must be in sync with cdsConfig.hpp
+    private static final int IS_DUMPING_ARCHIVE              = 1 << 0;
+    private static final int IS_DUMPING_STATIC_ARCHIVE       = 1 << 1;
+    private static final int IS_LOGGING_LAMBDA_FORM_INVOKERS = 1 << 2;
+    private static final int IS_USING_ARCHIVE                = 1 << 3;
+    private static final int configStatus = getCDSConfigStatus();
 
     /**
-      * indicator for dumping class list.
-      */
-    public static boolean isDumpingClassList() {
-        return isDumpingClassList;
+     * Should we log the use of lambda form invokers?
+     */
+    public static boolean isLoggingLambdaFormInvokers() {
+        return (configStatus & IS_LOGGING_LAMBDA_FORM_INVOKERS) != 0;
     }
 
     /**
       * Is the VM writing to a (static or dynamic) CDS archive.
       */
     public static boolean isDumpingArchive() {
-        return isDumpingArchive;
+        return (configStatus & IS_DUMPING_ARCHIVE) != 0;
     }
 
     /**
-      * Is sharing enabled via the UseSharedSpaces flag.
+      * Is the VM using at least one CDS archive?
       */
-    public static boolean isSharingEnabled() {
-        return isSharingEnabled;
+    public static boolean isUsingArchive() {
+        return (configStatus & IS_USING_ARCHIVE) != 0;
     }
 
-    private static native boolean isDumpingClassList0();
-    private static native boolean isDumpingArchive0();
-    private static native boolean isSharingEnabled0();
+    /**
+      * Is dumping static archive.
+      */
+    public static boolean isDumpingStaticArchive() {
+        return (configStatus & IS_DUMPING_STATIC_ARCHIVE) != 0;
+    }
+
+    private static native int getCDSConfigStatus();
     private static native void logLambdaFormInvoker(String line);
 
     /**
@@ -104,8 +107,8 @@ public class CDS {
     /**
      * log lambda form invoker holder, name and method type
      */
-    public static void traceLambdaFormInvoker(String prefix, String holder, String name, String type) {
-        if (isDumpingClassList) {
+    public static void logLambdaFormInvoker(String prefix, String holder, String name, String type) {
+        if (isLoggingLambdaFormInvokers()) {
             logLambdaFormInvoker(prefix + " " + holder + " " + name + " " + type);
         }
     }
@@ -113,8 +116,8 @@ public class CDS {
     /**
       * log species
       */
-    public static void traceSpeciesType(String prefix, String cn) {
-        if (isDumpingClassList) {
+    public static void logSpeciesType(String prefix, String cn) {
+        if (isLoggingLambdaFormInvokers()) {
             logLambdaFormInvoker(prefix + " " + cn);
         }
     }
@@ -224,7 +227,7 @@ public class CDS {
                     prt.println(line);
                 }
             } catch (IOException e) {
-                throw new RuntimeException("IOExeption happens during drain stream to file " +
+                throw new RuntimeException("IOException happens during drain stream to file " +
                                            fileName + ": " + e.getMessage());
             }}).start();
         return fileName;
@@ -232,15 +235,11 @@ public class CDS {
 
     private static String[] excludeFlags = {
          "-XX:DumpLoadedClassList=",
-         "-XX:+DumpSharedSpaces",
-         "-XX:+DynamicDumpSharedSpaces",
          "-XX:+RecordDynamicDumpInfo",
          "-Xshare:",
          "-XX:SharedClassListFile=",
          "-XX:SharedArchiveFile=",
-         "-XX:ArchiveClassesAtExit=",
-         "-XX:+UseSharedSpaces",
-         "-XX:+RequireSharedSpaces"};
+         "-XX:ArchiveClassesAtExit="};
     private static boolean containsExcludedFlags(String testStr) {
        for (String e : excludeFlags) {
            if (testStr.contains(e)) {
@@ -254,8 +253,10 @@ public class CDS {
     * called from jcmd VM.cds to dump static or dynamic shared archive
     * @param isStatic true for dump static archive or false for dynnamic archive.
     * @param fileName user input archive name, can be null.
+    * @return The archive name if successfully dumped.
     */
-    private static void dumpSharedArchive(boolean isStatic, String fileName) throws Exception {
+    private static String dumpSharedArchive(boolean isStatic, String fileName) throws Exception {
+        String cwd = new File("").getAbsolutePath(); // current dir used for printing message.
         String currentPid = String.valueOf(ProcessHandle.current().pid());
         String archiveFileName =  fileName != null ? fileName :
             "java_pid" + currentPid + (isStatic ? "_static.jsa" : "_dynamic.jsa");
@@ -275,7 +276,7 @@ public class CDS {
                 listFile.delete();
             }
             dumpClassList(listFileName);
-            String jdkHome = System.getProperty("java.home");
+            String jdkHome = StaticProperty.javaHome();
             String classPath = System.getProperty("java.class.path");
             List<String> cmds = new ArrayList<String>();
             cmds.add(jdkHome + File.separator + "bin" + File.separator + "java"); // java
@@ -299,8 +300,8 @@ public class CDS {
             Process proc = Runtime.getRuntime().exec(cmds.toArray(new String[0]));
 
             // Drain stdout/stderr to files in new threads.
-            String stdOutFile = drainOutput(proc.getInputStream(), proc.pid(), "stdout", cmds);
-            String stdErrFile = drainOutput(proc.getErrorStream(), proc.pid(), "stderr", cmds);
+            String stdOutFileName = drainOutput(proc.getInputStream(), proc.pid(), "stdout", cmds);
+            String stdErrFileName = drainOutput(proc.getErrorStream(), proc.pid(), "stderr", cmds);
 
             proc.waitFor();
             // done, delete classlist file.
@@ -311,14 +312,15 @@ public class CDS {
             if (!tempArchiveFile.exists()) {
                 throw new RuntimeException("Archive file " + tempArchiveFileName +
                                            " is not created, please check stdout file " +
-                                            stdOutFile + " or stderr file " +
-                                            stdErrFile + " for more detail");
+                                            cwd + File.separator + stdOutFileName + " or stderr file " +
+                                            cwd + File.separator + stdErrFileName + " for more detail");
             }
         } else {
             dumpDynamicArchive(tempArchiveFileName);
             if (!tempArchiveFile.exists()) {
                 throw new RuntimeException("Archive file " + tempArchiveFileName +
-                                           " is not created, please check process " +
+                                           " is not created, please check current working directory " +
+                                           cwd  + " for process " +
                                            currentPid + " output for more detail");
             }
         }
@@ -330,7 +332,9 @@ public class CDS {
         if (!tempArchiveFile.renameTo(archiveFile)) {
             throw new RuntimeException("Cannot rename temp file " + tempArchiveFileName + " to archive file" + archiveFileName);
         }
-        // Everyting goes well, print out the file name.
-        System.out.println((isStatic ? "Static" : " Dynamic") + " dump to file " + archiveFileName);
+        // Everything goes well, print out the file name.
+        String archiveFilePath = new File(archiveFileName).getAbsolutePath();
+        System.out.println("The process was attached by jcmd and dumped a " + (isStatic ? "static" : "dynamic") + " archive " + archiveFilePath);
+        return archiveFilePath;
     }
 }

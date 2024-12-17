@@ -40,7 +40,6 @@ import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.peer.ComponentPeer;
-import java.security.AccessController;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -50,7 +49,6 @@ import sun.font.FontManager;
 import sun.font.FontManagerFactory;
 import sun.font.FontManagerForSGE;
 import sun.java2d.pipe.Region;
-import sun.security.action.GetPropertyAction;
 
 /**
  * This is an implementation of a GraphicsEnvironment object for the
@@ -59,21 +57,17 @@ import sun.security.action.GetPropertyAction;
  * @see GraphicsDevice
  * @see GraphicsConfiguration
  */
-@SuppressWarnings("removal")
 public abstract class SunGraphicsEnvironment extends GraphicsEnvironment
     implements DisplayChangedListener {
 
     /** Establish the default font to be used by SG2D. */
     private final Font defaultFont = new Font(Font.DIALOG, Font.PLAIN, 12);
 
-    private static final boolean uiScaleEnabled;
-    private static final double debugScale;
+    private static final boolean uiScaleEnabled
+            = "true".equals(System.getProperty("sun.java2d.uiScale.enabled", "true"));
 
-    static {
-        uiScaleEnabled = "true".equals(AccessController.doPrivileged(
-                new GetPropertyAction("sun.java2d.uiScale.enabled", "true")));
-        debugScale = uiScaleEnabled ? getScaleFactor("sun.java2d.uiScale") : -1;
-    }
+    private static final double debugScale =
+            uiScaleEnabled ? getScaleFactor("sun.java2d.uiScale") : -1;
 
     protected GraphicsDevice[] screens;
 
@@ -188,11 +182,7 @@ public abstract class SunGraphicsEnvironment extends GraphicsEnvironment
                 map.put(installed[i].toLowerCase(requestedLocale),
                         installed[i]);
             }
-            String[] retval =  new String[map.size()];
-            Object [] keyNames = map.keySet().toArray();
-            for (int i=0; i < keyNames.length; i++) {
-                retval[i] = map.get(keyNames[i]);
-            }
+            String[] retval = map.values().toArray(new String[0]);
             return retval;
         }
     }
@@ -299,8 +289,7 @@ public abstract class SunGraphicsEnvironment extends GraphicsEnvironment
 
     public static double getScaleFactor(String propertyName) {
 
-        String scaleFactor = AccessController.doPrivileged(
-                new GetPropertyAction(propertyName, "-1"));
+        String scaleFactor = System.getProperty(propertyName, "-1");
 
         if (scaleFactor == null || scaleFactor.equals("-1")) {
             return -1;

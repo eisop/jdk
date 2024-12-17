@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,8 +33,6 @@ import org.checkerframework.framework.qual.CFComment;
 
 import java.util.Objects;
 import java.io.UnsupportedEncodingException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * A {@code Handler} object takes log messages from a {@code Logger} and
@@ -57,6 +55,8 @@ import java.security.PrivilegedAction;
 @AnnotatedFor({"interning", "nullness"})
 public abstract @UsesObjectEquals class Handler {
     private static final int offValue = Level.OFF.intValue();
+
+    // ensure log manager is initialized
     private final LogManager manager = LogManager.getLogManager();
 
     // We're using volatile here to avoid synchronizing getters, which
@@ -78,8 +78,7 @@ public abstract @UsesObjectEquals class Handler {
      * {@code Filter}.  A default {@code ErrorManager} instance is installed
      * as the {@code ErrorManager}.
      */
-    protected Handler() {
-    }
+    protected Handler() { }
 
     /**
      * Package-private constructor for chaining from subclass constructors
@@ -93,9 +92,9 @@ public abstract @UsesObjectEquals class Handler {
      *                           nor found in LogManager configuration properties
      * @param specifiedFormatter if not null, this is the formatter to configure
      */
-    @SuppressWarnings("removal")
     Handler(Level defaultLevel, Formatter defaultFormatter,
             Formatter specifiedFormatter) {
+        this();
 
         LogManager manager = LogManager.getLogManager();
         String cname = getClass().getName();
@@ -103,29 +102,23 @@ public abstract @UsesObjectEquals class Handler {
         final Level level = manager.getLevelProperty(cname + ".level", defaultLevel);
         final Filter filter = manager.getFilterProperty(cname + ".filter", null);
         final Formatter formatter = specifiedFormatter == null
-                                    ? manager.getFormatterProperty(cname + ".formatter", defaultFormatter)
-                                    : specifiedFormatter;
+                ? manager.getFormatterProperty(cname + ".formatter", defaultFormatter)
+                : specifiedFormatter;
         final String encoding = manager.getStringProperty(cname + ".encoding", null);
 
-        AccessController.doPrivileged(new PrivilegedAction<Void>() {
-            @Override
-            public Void run() {
-                setLevel(level);
-                setFilter(filter);
-                setFormatter(formatter);
-                try {
-                    setEncoding(encoding);
-                } catch (Exception ex) {
-                    try {
-                        setEncoding(null);
-                    } catch (Exception ex2) {
-                        // doing a setEncoding with null should always work.
-                        // assert false;
-                    }
-                }
-                return null;
+        setLevel(level);
+        setFilter(filter);
+        setFormatter(formatter);
+        try {
+            setEncoding(encoding);
+        } catch (Exception ex) {
+            try {
+                setEncoding(null);
+            } catch (Exception ex2) {
+                // doing a setEncoding with null should always work.
+                // assert false;
             }
-        }, null, LogManager.controlPermission);
+        }
     }
 
     /**
@@ -156,11 +149,8 @@ public abstract @UsesObjectEquals class Handler {
      * {@code Handler}.   After close has been called this {@code Handler}
      * should no longer be used.  Method calls may either be silently
      * ignored or may throw runtime exceptions.
-     *
-     * @throws  SecurityException  if a security manager exists and if
-     *             the caller does not have {@code LoggingPermission("control")}.
      */
-    public abstract void close() throws SecurityException;
+    public abstract void close();
 
     /**
      * Set a {@code Formatter}.  This {@code Formatter} will be used
@@ -170,11 +160,8 @@ public abstract @UsesObjectEquals class Handler {
      * which case the {@code Formatter} will be remembered, but not used.
      *
      * @param newFormatter the {@code Formatter} to use (may not be null)
-     * @throws  SecurityException  if a security manager exists and if
-     *             the caller does not have {@code LoggingPermission("control")}.
      */
-    public synchronized void setFormatter(Formatter newFormatter) throws SecurityException {
-        checkPermission();
+    public synchronized void setFormatter(Formatter newFormatter) {
         formatter = Objects.requireNonNull(newFormatter);
     }
 
@@ -194,14 +181,11 @@ public abstract @UsesObjectEquals class Handler {
      *
      * @param encoding  The name of a supported character encoding.
      *        May be null, to indicate the default platform encoding.
-     * @throws  SecurityException  if a security manager exists and if
-     *             the caller does not have {@code LoggingPermission("control")}.
      * @throws  UnsupportedEncodingException if the named encoding is
      *          not supported.
      */
     public synchronized void setEncoding(@Nullable String encoding)
-                        throws SecurityException, java.io.UnsupportedEncodingException {
-        checkPermission();
+            throws java.io.UnsupportedEncodingException {
         if (encoding != null) {
             try {
                 if(!java.nio.charset.Charset.isSupported(encoding)) {
@@ -232,11 +216,8 @@ public abstract @UsesObjectEquals class Handler {
      * {@code LogRecord} should be published or discarded.
      *
      * @param   newFilter  a {@code Filter} object (may be null)
-     * @throws  SecurityException  if a security manager exists and if
-     *             the caller does not have {@code LoggingPermission("control")}.
      */
-    public synchronized void setFilter(@Nullable Filter newFilter) throws SecurityException {
-        checkPermission();
+    public synchronized void setFilter(@Nullable Filter newFilter) {
         filter = newFilter;
     }
 
@@ -256,11 +237,8 @@ public abstract @UsesObjectEquals class Handler {
      * errors occur while using this Handler.
      *
      * @param em  the new ErrorManager
-     * @throws  SecurityException  if a security manager exists and if
-     *             the caller does not have {@code LoggingPermission("control")}.
      */
     public synchronized void setErrorManager(ErrorManager em) {
-        checkPermission();
         if (em == null) {
            throw new NullPointerException();
         }
@@ -271,19 +249,14 @@ public abstract @UsesObjectEquals class Handler {
      * Retrieves the ErrorManager for this Handler.
      *
      * @return the ErrorManager for this Handler
-     * @throws  SecurityException  if a security manager exists and if
-     *             the caller does not have {@code LoggingPermission("control")}.
      */
     public ErrorManager getErrorManager() {
-        checkPermission();
         return errorManager;
     }
 
    /**
      * Protected convenience method to report an error to this Handler's
-     * ErrorManager.  Note that this method retrieves and uses the ErrorManager
-     * without doing a security check.  It can therefore be used in
-     * environments where the caller may be non-privileged.
+     * ErrorManager.
      *
      * @param msg    a descriptive string (may be null)
      * @param ex     an exception (may be null)
@@ -308,16 +281,15 @@ public abstract @UsesObjectEquals class Handler {
      * {@code Handlers}.
      *
      * @param newLevel   the new value for the log level
-     * @throws  SecurityException  if a security manager exists and if
-     *             the caller does not have {@code LoggingPermission("control")}.
      */
-    public synchronized void setLevel(Level newLevel) throws SecurityException {
+    public synchronized void setLevel(Level newLevel) {
         if (newLevel == null) {
             throw new NullPointerException();
         }
-        checkPermission();
         logLevel = newLevel;
     }
+
+
 
     /**
      * Get the log level specifying which messages will be
@@ -356,10 +328,4 @@ public abstract @UsesObjectEquals class Handler {
         return filter.isLoggable(record);
     }
 
-    // Package-private support method for security checks.
-    // We check that the caller has appropriate security privileges
-    // to update Handler state and if not throw a SecurityException.
-    void checkPermission() throws SecurityException {
-        manager.checkPermission();
-    }
 }

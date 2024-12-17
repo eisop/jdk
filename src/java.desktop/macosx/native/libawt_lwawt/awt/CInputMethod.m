@@ -115,9 +115,7 @@ static void initializeInputMethodController() {
     AWT_ASSERT_APPKIT_THREAD;
 
     if (!view) return;
-    if (!inputMethod) return;
-
-    [view setInputMethod:inputMethod]; // inputMethod is a GlobalRef
+    [view setInputMethod:inputMethod]; // inputMethod is a GlobalRef or null to disable.
 }
 
 + (void) _nativeEndComposition:(AWTView *)view {
@@ -318,10 +316,10 @@ JNI_COCOA_ENTER(env);
         }
 
         if ((*env)->CallBooleanMethod(env, returnValue, jm_listContains, localeObj) == JNI_FALSE) {
-            if ((*env)->ExceptionOccurred(env)) (*env)->ExceptionClear(env);
+            if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
             (*env)->CallBooleanMethod(env, returnValue, jm_listAdd, localeObj);
         }
-        if ((*env)->ExceptionOccurred(env)) (*env)->ExceptionClear(env);
+        if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
 
         (*env)->DeleteLocalRef(env, localeObj);
     }

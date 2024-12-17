@@ -234,7 +234,7 @@ class Example implements Comparable<Example> {
                 //automatic modules:
                 Map<String, List<Path>> module2Files =
                         modulePathFiles.stream()
-                                       .map(f -> f.toPath())
+                                       .map(f -> f.toPath().toAbsolutePath())
                                        .collect(Collectors.groupingBy(p -> modulePath.relativize(p)
                                                                             .getName(0)
                                                                             .toString()));
@@ -292,15 +292,6 @@ class Example implements Comparable<Example> {
 
         if (procFiles.size() > 0) {
             List<String> pOpts = new ArrayList<>(Arrays.asList("-d", classesDir.getPath()));
-
-            // hack to automatically add exports; a better solution would be to grep the
-            // source for import statements or a magic comment
-            for (File pf: procFiles) {
-                if (pf.getName().equals("CreateBadClassFile.java")) {
-                    pOpts.add("--add-modules=jdk.jdeps");
-                    pOpts.add("--add-exports=jdk.jdeps/com.sun.tools.classfile=ALL-UNNAMED");
-                }
-            }
 
             new Jsr199Compiler(verbose).run(null, null, false, pOpts, procFiles);
             opts.add("-classpath"); // avoid using -processorpath for now
@@ -429,11 +420,8 @@ class Example implements Comparable<Example> {
      */
     private String read(File f) throws IOException {
         byte[] bytes = new byte[(int) f.length()];
-        DataInputStream in = new DataInputStream(new FileInputStream(f));
-        try {
+        try (DataInputStream in = new DataInputStream(new FileInputStream(f))) {
             in.readFully(bytes);
-        } finally {
-            in.close();
         }
         return new String(bytes);
     }

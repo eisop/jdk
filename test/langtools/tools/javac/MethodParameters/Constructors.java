@@ -25,7 +25,6 @@
  * @test
  * @bug 8006582
  * @summary javac should generate method parameters correctly.
- * @modules jdk.jdeps/com.sun.tools.classfile
  * @build MethodParametersTester ClassFileVisitor ReflectionVisitor
  * @compile -parameters Constructors.java
  * @run main MethodParametersTester Constructors Constructors.out

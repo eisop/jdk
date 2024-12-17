@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,6 +35,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.*;
 import java.util.*;
+import jdk.internal.event.ThrowableTracer;
 
 /**
  * The {@code Throwable} class is the superclass of all errors and
@@ -124,6 +125,12 @@ public @UsesObjectEquals class Throwable implements Serializable {
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
     @java.io.Serial
     private static final long serialVersionUID = -3042686055658047285L;
+
+    /**
+     * Flag set by jdk.internal.event.JFRTracing to indicate if
+     * exceptions should be traced by JFR.
+     */
+    static volatile boolean jfrTracing;
 
     /**
      * The JVM saves some indication of the stack backtrace in this slot.
@@ -262,8 +269,12 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * the stack trace data in the newly created throwable.
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable() {
         fillInStackTrace();
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), null);
+        }
     }
 
     /**
@@ -278,9 +289,13 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *          later retrieval by the {@link #getMessage()} method.
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable(@Nullable String message) {
         fillInStackTrace();
         detailMessage = message;
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), message);
+        }
     }
 
     /**
@@ -301,10 +316,14 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since  1.4
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable(@Nullable String message, @Nullable Throwable cause) {
         fillInStackTrace();
         detailMessage = message;
         this.cause = cause;
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), message);
+        }
     }
 
     /**
@@ -325,10 +344,14 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since  1.4
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable(@Nullable Throwable cause) {
         fillInStackTrace();
         detailMessage = (cause==null ? null : cause.toString());
         this.cause = cause;
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), null);
+        }
     }
 
     /**
@@ -363,9 +386,8 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @param  message the detail message.
      * @param cause the cause.  (A {@code null} value is permitted,
      * and indicates that the cause is nonexistent or unknown.)
-     * @param enableSuppression whether or not suppression is enabled or disabled
-     * @param writableStackTrace whether or not the stack trace should be
-     *                           writable
+     * @param enableSuppression whether or not suppression is enabled
+     * @param writableStackTrace whether or not the stack trace is writable
      *
      * @see OutOfMemoryError
      * @see NullPointerException
@@ -373,6 +395,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since 1.7
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     protected Throwable(@Nullable String message, @Nullable Throwable cause,
                         boolean enableSuppression,
                         boolean writableStackTrace) {
@@ -383,8 +406,12 @@ public @UsesObjectEquals class Throwable implements Serializable {
         }
         detailMessage = message;
         this.cause = cause;
-        if (!enableSuppression)
+        if (!enableSuppression) {
             suppressedExceptions = null;
+        }
+        if (jfrTracing) {
+            ThrowableTracer.traceThrowable(getClass(), message);
+        }
     }
 
     /**
@@ -570,7 +597,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * stack trace of the exception that was caused by this exception (the
      * "enclosing" exception).  This shorthand can greatly reduce the length
      * of the output in the common case where a wrapped exception is thrown
-     * from same method as the "causative exception" is caught.  The above
+     * from the same method as the "causative exception" is caught.  The above
      * example was produced by running the program:
      * <pre>
      * public class Junk {
@@ -627,12 +654,12 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *
      * <pre>
      * Exception in thread "main" java.lang.Exception: Something happened
-     *  at Foo.bar(Foo.java:10)
-     *  at Foo.main(Foo.java:5)
-     *  Suppressed: Resource$CloseFailException: Resource ID = 0
-     *          at Resource.close(Resource.java:26)
-     *          at Foo.bar(Foo.java:9)
-     *          ... 1 more
+     *         at Foo.bar(Foo.java:10)
+     *         at Foo.main(Foo.java:5)
+     *         Suppressed: Resource$CloseFailException: Resource ID = 0
+     *                 at Resource.close(Resource.java:26)
+     *                 at Foo.bar(Foo.java:9)
+     *                 ... 1 more
      * </pre>
      * Note that the "... n more" notation is used on suppressed exceptions
      * just as it is used on causes. Unlike causes, suppressed exceptions are
@@ -642,26 +669,26 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * exceptions:
      * <pre>
      * Exception in thread "main" java.lang.Exception: Main block
-     *  at Foo3.main(Foo3.java:7)
-     *  Suppressed: Resource$CloseFailException: Resource ID = 2
-     *          at Resource.close(Resource.java:26)
-     *          at Foo3.main(Foo3.java:5)
-     *  Suppressed: Resource$CloseFailException: Resource ID = 1
-     *          at Resource.close(Resource.java:26)
-     *          at Foo3.main(Foo3.java:5)
+     *         at Foo3.main(Foo3.java:7)
+     *         Suppressed: Resource$CloseFailException: Resource ID = 2
+     *                 at Resource.close(Resource.java:26)
+     *                 at Foo3.main(Foo3.java:5)
+     *         Suppressed: Resource$CloseFailException: Resource ID = 1
+     *                 at Resource.close(Resource.java:26)
+     *                 at Foo3.main(Foo3.java:5)
      * Caused by: java.lang.Exception: I did it
-     *  at Foo3.main(Foo3.java:8)
+     *         at Foo3.main(Foo3.java:8)
      * </pre>
      * Likewise, a suppressed exception can have a cause:
      * <pre>
      * Exception in thread "main" java.lang.Exception: Main block
-     *  at Foo4.main(Foo4.java:6)
-     *  Suppressed: Resource2$CloseFailException: Resource ID = 1
-     *          at Resource2.close(Resource2.java:20)
-     *          at Foo4.main(Foo4.java:5)
-     *  Caused by: java.lang.Exception: Rats, you caught me
-     *          at Resource2$CloseFailException.&lt;init&gt;(Resource2.java:45)
-     *          ... 2 more
+     *         at Foo4.main(Foo4.java:6)
+     *         Suppressed: Resource2$CloseFailException: Resource ID = 1
+     *                 at Resource2.close(Resource2.java:20)
+     *                 at Foo4.main(Foo4.java:5)
+     *         Caused by: java.lang.Exception: Rats, you caught me
+     *                 at Resource2$CloseFailException.&lt;init&gt;(Resource2.java:45)
+     *                 ... 2 more
      * </pre>
      */
     public void printStackTrace() {
@@ -683,7 +710,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
         Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
         dejaVu.add(this);
 
-        synchronized (s.lock()) {
+        synchronized(s.lock()) {
             // Print our stack trace
             s.println(this);
             StackTraceElement[] trace = getOurStackTrace();
@@ -852,11 +879,13 @@ public @UsesObjectEquals class Throwable implements Serializable {
     private synchronized StackTraceElement[] getOurStackTrace() {
         // Initialize stack trace field with information from
         // backtrace if this is the first call to this method
-        if (stackTrace == UNASSIGNED_STACK ||
-            (stackTrace == null && backtrace != null) /* Out of protocol state */) {
-            stackTrace = StackTraceElement.of(this, depth);
-        } else if (stackTrace == null) {
-            return UNASSIGNED_STACK;
+        if (stackTrace == UNASSIGNED_STACK || stackTrace == null) {
+            if (backtrace != null) { /* Out of protocol state */
+                stackTrace = StackTraceElement.of(backtrace, depth);
+            } else {
+                // no backtrace, fillInStackTrace overridden or not called
+                return UNASSIGNED_STACK;
+            }
         }
         return stackTrace;
     }
@@ -880,7 +909,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @param   stackTrace the stack trace elements to be associated with
      * this {@code Throwable}.  The specified array is copied by this
      * call; changes in the specified array after the method invocation
-     * returns will have no affect on this {@code Throwable}'s stack
+     * returns will have no effect on this {@code Throwable}'s stack
      * trace.
      *
      * @throws NullPointerException if {@code stackTrace} is

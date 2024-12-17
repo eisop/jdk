@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,6 +32,7 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Arrays;
 
 /**
  * This class specifies the parameters used with the
@@ -44,6 +45,8 @@ import java.security.spec.AlgorithmParameterSpec;
  * <p> This class can be used to initialize a {@code Cipher} object that
  * implements the <i>RC2</i> algorithm.
  *
+ * @spec https://www.rfc-editor.org/info/rfc2268
+ *      RFC 2268: A Description of the RC2(r) Encryption Algorithm
  * @author Jan Luehe
  *
  * @since 1.4
@@ -51,7 +54,7 @@ import java.security.spec.AlgorithmParameterSpec;
 public class RC2ParameterSpec implements AlgorithmParameterSpec {
 
     private byte[] iv = null;
-    private int effectiveKeyBits;
+    private final int effectiveKeyBits;
 
     /**
      * Constructs a parameter set for RC2 from the given effective key size
@@ -137,32 +140,27 @@ public class RC2ParameterSpec implements AlgorithmParameterSpec {
      * @return true if the objects are considered equal, false if
      * {@code obj} is null or otherwise.
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof RC2ParameterSpec)) {
+        if (!(obj instanceof RC2ParameterSpec other)) {
             return false;
         }
-        RC2ParameterSpec other = (RC2ParameterSpec) obj;
 
         return ((effectiveKeyBits == other.effectiveKeyBits) &&
-                java.util.Arrays.equals(iv, other.iv));
+                Arrays.equals(iv, other.iv));
     }
 
     /**
      * Calculates a hash code value for the object.
      * Objects that are equal will also have the same hashcode.
      */
+    @Override
     public int hashCode() {
-        int retval = 0;
-        if (iv != null) {
-            for (int i = 1; i < iv.length; i++) {
-                retval += iv[i] * i;
-            }
-        }
-        return (retval += effectiveKeyBits);
+        return Arrays.hashCode(iv) + effectiveKeyBits;
     }
 }

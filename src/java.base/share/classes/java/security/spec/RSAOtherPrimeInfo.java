@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -45,6 +45,8 @@ import java.math.BigInteger;
  *
  * </pre>
  *
+ * @spec https://www.rfc-editor.org/info/rfc8017
+ *      RFC 8017: PKCS #1: RSA Cryptography Specifications Version 2.2
  * @author Valerie Peng
  *
  *
@@ -57,9 +59,9 @@ import java.math.BigInteger;
 @AnnotatedFor({"interning"})
 public @UsesObjectEquals class RSAOtherPrimeInfo {
 
-    private BigInteger prime;
-    private BigInteger primeExponent;
-    private BigInteger crtCoefficient;
+    private final BigInteger prime;
+    private final BigInteger primeExponent;
+    private final BigInteger crtCoefficient;
 
 
    /**

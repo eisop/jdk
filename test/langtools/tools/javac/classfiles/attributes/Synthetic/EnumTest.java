@@ -27,7 +27,6 @@
  * @summary Checking ACC_SYNTHETIC flag is generated for enum members.
  * @modules jdk.compiler/com.sun.tools.javac.api
  *          jdk.compiler/com.sun.tools.javac.main
- *          jdk.jdeps/com.sun.tools.classfile
  * @library /tools/lib /tools/javac/lib ../lib
  * @build toolbox.ToolBox InMemoryFileManager TestResult TestBase
  * @build EnumTest SyntheticTestDriver ExpectedClass ExpectedClasses

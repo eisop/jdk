@@ -79,6 +79,7 @@ public class AssertionError extends Error {
      * @see   Throwable#getCause()
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public AssertionError(@Nullable Object detailMessage) {
         this(String.valueOf(detailMessage));
         if (detailMessage instanceof Throwable)

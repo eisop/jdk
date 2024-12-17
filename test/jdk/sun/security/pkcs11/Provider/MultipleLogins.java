@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,6 +21,7 @@
  * questions.
  */
 
+
 import sun.security.pkcs11.SunPKCS11;
 
 import javax.security.auth.Subject;
@@ -31,32 +32,37 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.security.KeyStore;
-import java.security.Provider;
-import java.security.Security;
-import java.util.Iterator;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
+import java.security.*;
 
 import jdk.test.lib.util.ForceGC;
+import jtreg.SkippedException;
 
 public class MultipleLogins {
     private static final String KS_TYPE = "PKCS11";
     private static final int NUM_PROVIDERS = 20;
     private static final SunPKCS11[] providers = new SunPKCS11[NUM_PROVIDERS];
 
-
     public static void main(String[] args) throws Exception {
+        String nssConfig = null;
+        try {
+            nssConfig = PKCS11Test.getNssConfig();
+        } catch (SkippedException exc) {
+            System.out.println("Skipping test: " + exc.getMessage());
+        }
+
+        if (nssConfig == null) {
+            // No test framework support yet. Ignore
+            System.out.println("No NSS config found. Skipping.");
+            return;
+        }
+
         for (int i =0; i < NUM_PROVIDERS; i++) {
-            String nssConfig = PKCS11Test.getNssConfig();
-            if (nssConfig == null) {
-                // No test framework support yet. Ignore
-                System.out.println("No NSS config found. Skipping.");
-                return;
-            }
-            providers[i] =
-                    (SunPKCS11)PKCS11Test.newPKCS11Provider()
-                    .configure(nssConfig);
+            // loop to set up test without security manger
+            providers[i] = (SunPKCS11)PKCS11Test.newPKCS11Provider();
+        }
+
+        for (int i =0; i < NUM_PROVIDERS; i++) {
+            providers[i] = (SunPKCS11)providers[i].configure(nssConfig);
             Security.addProvider(providers[i]);
             test(providers[i]);
         }
@@ -81,10 +87,8 @@ public class MultipleLogins {
             Security.removeProvider(providers[i].getName());
             providers[i] = null;
 
-            ForceGC gc = new ForceGC();
             int finalI = i;
-            gc.await(() -> weakRef[finalI].get() == null);
-            if (!weakRef[i].refersTo(null)) {
+            if (!ForceGC.wait(() -> weakRef[finalI].refersTo(null))) {
                 throw new RuntimeException("Expected SunPKCS11 Provider to be GC'ed..");
             }
         }
@@ -92,7 +96,6 @@ public class MultipleLogins {
 
     private static void test(SunPKCS11 p) throws Exception {
         KeyStore ks = KeyStore.getInstance(KS_TYPE, p);
-
         p.setCallbackHandler(new PasswordCallbackHandler());
         try {
             ks.load(null, (char[]) null);

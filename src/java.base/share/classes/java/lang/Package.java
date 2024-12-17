@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,8 +38,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Objects;
 
 import jdk.internal.loader.BootLoader;
@@ -122,7 +120,6 @@ import jdk.internal.reflect.Reflection;
  * @see ClassLoader#definePackage(String, String, String, String, String, String, String, URL)
  *
  * @since 1.2
- * @revised 9
  */
 @AnnotatedFor({"interning", "lock", "nullness", "signature"})
 public @UsesObjectEquals class Package extends NamedPackage implements java.lang.reflect.AnnotatedElement {
@@ -220,8 +217,6 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
      * is returned if it is not known.
      * @return the vendor that implemented this package, {@code null}
      * is returned if it is not known.
-     *
-     * @revised 9
      */
     public @Nullable String getImplementationVendor() {
         return versionInfo.implVendor;
@@ -367,8 +362,6 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
      * a {@code Package} for the specified class loader.
      *
      * @see ClassLoader#getDefinedPackage
-     *
-     * @revised 9
      */
     @Pure
     @CallerSensitive
@@ -392,8 +385,6 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
      *          class loader and its ancestors
      *
      * @see ClassLoader#getDefinedPackages
-     *
-     * @revised 9
      */
     @Pure
     @CallerSensitive
@@ -440,9 +431,7 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
             // find package-info.class defined by loader
             String cn = packageName() + ".package-info";
             Module module = module();
-            PrivilegedAction<ClassLoader> pa = module::getClassLoader;
-            @SuppressWarnings("removal")
-            ClassLoader loader = AccessController.doPrivileged(pa);
+            ClassLoader loader = module.getClassLoader();
             Class<?> c;
             if (loader != null) {
                 c = loader.loadClass(module, cn);

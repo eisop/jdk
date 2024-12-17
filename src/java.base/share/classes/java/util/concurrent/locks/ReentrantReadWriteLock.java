@@ -147,6 +147,7 @@ import jdk.internal.vm.annotation.ReservedStackAccess;
  *
  *   void processCachedData() {
  *     rwl.readLock().lock();
+ *     // Code between the lock() above, and the unlock() below must not throw
  *     if (!cacheValid) {
  *       // Must release read lock before acquiring write lock
  *       rwl.readLock().unlock();
@@ -164,7 +165,7 @@ import jdk.internal.vm.annotation.ReservedStackAccess;
  *         rwl.writeLock().unlock(); // Unlock write, still hold read
  *       }
  *     }
- *
+ *     // Make sure that code that could throw is executed inside the try block
  *     try {
  *       use(data);
  *     } finally {

@@ -21,12 +21,11 @@
  * questions.
  */
 
-import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
+import static java.lang.classfile.TypeAnnotation.TargetType.*;
 
 /*
  * @test
  * @summary Test population of reference info for repeating type annotations
- * @modules jdk.jdeps/com.sun.tools.classfile
  * @compile -g Driver.java ReferenceInfoUtil.java RepeatingTypeAnnotations.java
  * @run main Driver RepeatingTypeAnnotations
  * @author Werner Dietl

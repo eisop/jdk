@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -58,22 +58,28 @@ import java.util.stream.StreamSupport;
  *
  * <p> In general, each read request made of a Reader causes a corresponding
  * read request to be made of the underlying character or byte stream.  It is
- * therefore advisable to wrap a BufferedReader around any Reader whose read()
- * operations may be costly, such as FileReaders and InputStreamReaders.  For
+ * therefore advisable to wrap a {@code BufferedReader} around any
+ * {@code Reader} whose {@code read()} operations may be costly, such as
+ * {@code FileReader}s and {@code InputStreamReader}s.  For
  * example,
  *
- * <pre>
- * BufferedReader in
- *   = new BufferedReader(new FileReader("foo.in"));
- * </pre>
+ * {@snippet lang=java :
+ *     BufferedReader in = new BufferedReader(new FileReader("foo.in"));
+ * }
  *
  * will buffer the input from the specified file.  Without buffering, each
- * invocation of read() or readLine() could cause bytes to be read from the
- * file, converted into characters, and then returned, which can be very
- * inefficient.
+ * invocation of {@code read()} or {@code readLine()} could cause bytes to be
+ * read from the file, converted into characters, and then returned, which can
+ * be very inefficient.
  *
- * <p> Programs that use DataInputStreams for textual input can be localized by
- * replacing each DataInputStream with an appropriate BufferedReader.
+ * <p> Programs that use {@code DataInputStream}s for textual input can be
+ * localized by replacing each {@code DataInputStream} with an appropriate
+ * {@code BufferedReader}.
+ *
+ * @apiNote
+ * Once wrapped in a {@code BufferedReader}, the underlying
+ * {@code Reader} should not be used directly nor wrapped with
+ * another reader.
  *
  * @see FileReader
  * @see InputStreamReader
@@ -85,7 +91,6 @@ import java.util.stream.StreamSupport;
 
 @AnnotatedFor({"index", "initialization", "lock", "mustcall", "nullness"})
 public class BufferedReader extends Reader {
-
     private Reader in;
 
     private char[] cb;
@@ -102,8 +107,8 @@ public class BufferedReader extends Reader {
     /** The skipLF flag when the mark was set */
     private boolean markedSkipLF = false;
 
-    private static int defaultCharBufferSize = 8192;
-    private static int defaultExpectedLineLength = 80;
+    private static final int DEFAULT_CHAR_BUFFER_SIZE = 8192;
+    private static final int DEFAULT_EXPECTED_LINE_LENGTH = 80;
 
     /**
      * Creates a buffering character-input stream that uses an input buffer of
@@ -130,7 +135,7 @@ public class BufferedReader extends Reader {
      * @param  in   A Reader
      */
     public @MustCallAlias BufferedReader(@MustCallAlias Reader in) {
-        this(in, defaultCharBufferSize);
+        this(in, DEFAULT_CHAR_BUFFER_SIZE);
     }
 
     /** Checks to make sure that the stream has not been closed */
@@ -330,15 +335,15 @@ public class BufferedReader extends Reader {
      * @throws     IOException  If an I/O error occurs
      */
     String readLine(@GuardSatisfied BufferedReader this, boolean ignoreLF, boolean @Nullable [] term) throws IOException {
-        StringBuilder s = null;
-        int startChar;
-
         synchronized (lock) {
+            StringBuilder s = null;
+            int startChar;
+
             ensureOpen();
             boolean omitLF = ignoreLF || skipLF;
             if (term != null) term[0] = false;
 
-        bufferLoop:
+            bufferLoop:
             for (;;) {
 
                 if (nextChar >= nChars)
@@ -359,7 +364,7 @@ public class BufferedReader extends Reader {
                 skipLF = false;
                 omitLF = false;
 
-            charLoop:
+                charLoop:
                 for (i = nextChar; i < nChars; i++) {
                     c = cb[i];
                     if ((c == '\n') || (c == '\r')) {
@@ -388,7 +393,7 @@ public class BufferedReader extends Reader {
                 }
 
                 if (s == null)
-                    s = new StringBuilder(defaultExpectedLineLength);
+                    s = new StringBuilder(DEFAULT_EXPECTED_LINE_LENGTH);
                 s.append(cb, startChar, i - startChar);
             }
         }
@@ -435,7 +440,7 @@ public class BufferedReader extends Reader {
                 }
                 long d = nChars - nextChar;
                 if (r <= d) {
-                    nextChar += r;
+                    nextChar += (int)r;
                     r = 0;
                     break;
                 }

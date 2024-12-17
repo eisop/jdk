@@ -44,10 +44,8 @@ define_pd_global(intx, OnStackReplacePercentage,     140);
 define_pd_global(intx, ConditionalMoveLimit,         3);
 define_pd_global(intx, FreqInlineSize,               325);
 define_pd_global(intx, MinJumpTableSize,             10);
-define_pd_global(intx, LoopPercentProfileLimit,      30);
+define_pd_global(intx, LoopPercentProfileLimit,      10);
 #ifdef AMD64
-define_pd_global(intx,  INTPRESSURE,                 13);
-define_pd_global(intx,  FLOATPRESSURE,               14);
 define_pd_global(intx,  InteriorEntryAlignment,      16);
 define_pd_global(size_t, NewSizeThreadIncrease,     ScaleForWordSize(4*K));
 define_pd_global(intx,  LoopUnrollLimit,             60);
@@ -58,8 +56,6 @@ define_pd_global(uintx, CodeCacheExpansionSize,      64*K);
 // Ergonomics related flags
 define_pd_global(uint64_t, MaxRAM,                   128ULL*G);
 #else
-define_pd_global(intx,  INTPRESSURE,                 6);
-define_pd_global(intx,  FLOATPRESSURE,               6);
 define_pd_global(intx,  InteriorEntryAlignment,      4);
 define_pd_global(size_t, NewSizeThreadIncrease,      4*K);
 define_pd_global(intx,  LoopUnrollLimit,             50);     // Design center runs on 1.3.1
@@ -80,6 +76,7 @@ define_pd_global(bool, OptoScheduling,               false);
 define_pd_global(bool, OptoBundling,                 false);
 define_pd_global(bool, OptoRegScheduling,            true);
 define_pd_global(bool, SuperWordLoopUnrollAnalysis,  true);
+define_pd_global(uint, SuperWordStoreToLoadForwardingFailureDetection, 16);
 define_pd_global(bool, IdealizeClearArrayNode,       true);
 
 define_pd_global(uintx, ReservedCodeCacheSize,       48*M);

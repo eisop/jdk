@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -76,8 +76,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serial;
 import java.io.Serializable;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashSet;
@@ -115,7 +113,6 @@ import sun.java2d.SunGraphics2D;
 import sun.java2d.SunGraphicsEnvironment;
 import sun.java2d.pipe.Region;
 import sun.java2d.pipe.hw.ExtendedBufferCapabilities;
-import sun.security.action.GetPropertyAction;
 import sun.swing.SwingAccessor;
 import sun.util.logging.PlatformLogger;
 
@@ -403,7 +400,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @see #validate
      * @see #invalidate
      */
-    private volatile boolean valid = false;
+    private volatile boolean valid;
 
     /**
      * The {@code DropTarget} associated with this component.
@@ -509,13 +506,6 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      */
     static final Object LOCK = new AWTTreeLock();
     static class AWTTreeLock {}
-
-    /*
-     * The component's AccessControlContext.
-     */
-    @SuppressWarnings("removal")
-    private transient volatile AccessControlContext acc =
-        AccessController.getContext();
 
     /**
      * Minimum size.
@@ -635,14 +625,10 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
             initIDs();
         }
 
-        @SuppressWarnings("removal")
-        String s = java.security.AccessController.doPrivileged(
-                                                               new GetPropertyAction("awt.image.incrementaldraw"));
+        String s = System.getProperty("awt.image.incrementaldraw");
         isInc = (s == null || s.equals("true"));
 
-        @SuppressWarnings("removal")
-        String s2 = java.security.AccessController.doPrivileged(
-                                                        new GetPropertyAction("awt.image.redrawrate"));
+        String s2 = System.getProperty("awt.image.redrawrate");
         incRate = (s2 != null) ? Integer.parseInt(s2) : 100;
     }
 
@@ -717,17 +703,6 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
     private transient Object objectLock = new Object();
     Object getObjectLock() {
         return objectLock;
-    }
-
-    /*
-     * Returns the acc this component was constructed with.
-     */
-    @SuppressWarnings("removal")
-    final AccessControlContext getAccessControlContext() {
-        if (acc == null) {
-            throw new SecurityException("Component is missing AccessControlContext");
-        }
-        return acc;
     }
 
     /**
@@ -983,11 +958,6 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
             }
             public void processEvent(Component comp, AWTEvent e) {
                 comp.processEvent(e);
-            }
-
-            @SuppressWarnings("removal")
-            public AccessControlContext getAccessControlContext(Component comp) {
-                return comp.getAccessControlContext();
             }
 
             public void revalidateSynchronously(Component comp) {
@@ -1428,7 +1398,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * pointer. If the return value of this method is {@code null}, mouse
      * pointer is not directly above the {@code Component}.
      *
-     * @exception HeadlessException if GraphicsEnvironment.isHeadless() returns true
+     * @throws HeadlessException if GraphicsEnvironment.isHeadless() returns true
      * @see       #isShowing
      * @see       Container#getMousePosition
      * @return    mouse coordinates relative to this {@code Component}, or null
@@ -1439,15 +1409,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
             throw new HeadlessException();
         }
 
-        @SuppressWarnings("removal")
-        PointerInfo pi = java.security.AccessController.doPrivileged(
-                                                                     new java.security.PrivilegedAction<PointerInfo>() {
-                                                                         public PointerInfo run() {
-                                                                             return MouseInfo.getPointerInfo();
-                                                                         }
-                                                                     }
-                                                                     );
-
+        PointerInfo pi = MouseInfo.getPointerInfo();
         synchronized (getTreeLock()) {
             Component inTheSameWindow = findUnderMouseInWindow(pi);
             if (!isSameOrAncestorOf(inTheSameWindow, true)) {
@@ -1992,7 +1954,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @return this component's locale; if this component does not
      *          have a locale, the locale of its parent is returned
      * @see #setLocale
-     * @exception IllegalComponentStateException if the {@code Component}
+     * @throws IllegalComponentStateException if the {@code Component}
      *          does not have its own locale and has not yet been added to
      *          a containment hierarchy such that the locale can be determined
      *          from the containing parent
@@ -2273,7 +2235,8 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @param d the dimension specifying the new size
      *          of this component
      * @throws NullPointerException if {@code d} is {@code null}
-     * @see #setSize
+     * @see #setSize(int, int)
+     * @see #getSize
      * @see #setBounds
      * @see #invalidate
      * @since 1.1
@@ -3185,17 +3148,6 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @since     1.0
      */
     public FontMetrics getFontMetrics(Font font) {
-        // This is an unsupported hack, but left in for a customer.
-        // Do not remove.
-        FontManager fm = FontManagerFactory.getInstance();
-        if (fm instanceof SunFontManager
-            && ((SunFontManager) fm).usePlatformFontMetrics()) {
-
-            if (peer != null &&
-                !(peer instanceof LightweightPeer)) {
-                return peer.getFontMetrics(font);
-            }
-        }
         return sun.font.FontDesignMetrics.getMetrics(font);
     }
 
@@ -3850,8 +3802,8 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * Each time this method is called,
      * the existing buffer strategy for this component is discarded.
      * @param numBuffers number of buffers to create, including the front buffer
-     * @exception IllegalArgumentException if numBuffers is less than 1.
-     * @exception IllegalStateException if the component is not displayable
+     * @throws IllegalArgumentException if numBuffers is less than 1.
+     * @throws IllegalStateException if the component is not displayable
      * @see #isDisplayable
      * @see Window#getBufferStrategy()
      * @see Canvas#getBufferStrategy()
@@ -3907,11 +3859,11 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @param numBuffers number of buffers to create
      * @param caps the required capabilities for creating the buffer strategy;
      * cannot be {@code null}
-     * @exception AWTException if the capabilities supplied could not be
+     * @throws AWTException if the capabilities supplied could not be
      * supported or met; this may happen, for example, if there is not enough
      * accelerated memory currently available, or if page flipping is specified
      * but not possible.
-     * @exception IllegalArgumentException if numBuffers is less than 1, or if
+     * @throws IllegalArgumentException if numBuffers is less than 1, or if
      * caps is {@code null}
      * @see Window#getBufferStrategy()
      * @see Canvas#getBufferStrategy()
@@ -3954,7 +3906,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      *
      * @see sun.java2d.SunGraphicsEnvironment#isFlipStrategyPreferred(ComponentPeer)
      */
-    private class ProxyCapabilities extends ExtendedBufferCapabilities {
+    private static class ProxyCapabilities extends ExtendedBufferCapabilities {
         private BufferCapabilities orig;
         private ProxyCapabilities(BufferCapabilities orig) {
             super(orig.getFrontBufferCapabilities(),
@@ -4055,12 +4007,12 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
          * @see Applet
          * @param numBuffers the number of buffers
          * @param caps the capabilities of the buffers
-         * @exception AWTException if the capabilities supplied could not be
+         * @throws AWTException if the capabilities supplied could not be
          * supported or met
-         * @exception ClassCastException if the component is not a canvas or
+         * @throws ClassCastException if the component is not a canvas or
          * window.
-         * @exception IllegalStateException if the component has no peer
-         * @exception IllegalArgumentException if {@code numBuffers} is less than two,
+         * @throws IllegalStateException if the component has no peer
+         * @throws IllegalArgumentException if {@code numBuffers} is less than two,
          * or if {@code BufferCapabilities.isPageFlipping} is not
          * {@code true}.
          * @see #createBuffers(int, BufferCapabilities)
@@ -4089,10 +4041,10 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
          * @param caps the capabilities of the buffers.
          * {@code BufferCapabilities.isPageFlipping} must be
          * {@code true}.
-         * @exception AWTException if the capabilities supplied could not be
+         * @throws AWTException if the capabilities supplied could not be
          * supported or met
-         * @exception IllegalStateException if the component has no peer
-         * @exception IllegalArgumentException if numBuffers is less than two,
+         * @throws IllegalStateException if the component has no peer
+         * @throws IllegalArgumentException if numBuffers is less than two,
          * or if {@code BufferCapabilities.isPageFlipping} is not
          * {@code true}.
          * @see java.awt.BufferCapabilities#isPageFlipping()
@@ -4155,8 +4107,10 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
         }
 
         /**
-         * @return direct access to the back buffer, as an image.
-         * @exception IllegalStateException if the buffers have not yet
+         * Provides direct access to the back buffer as an image.
+         *
+         * @return the back buffer as an image
+         * @throws IllegalStateException if the buffers have not yet
          * been created
          */
         protected Image getBackBuffer() {
@@ -4175,7 +4129,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
          * for the contents of the back buffer.  This should be one of the
          * values of the {@code BufferCapabilities.FlipContents}
          * property.
-         * @exception IllegalStateException if the buffers have not yet
+         * @throws IllegalStateException if the buffers have not yet
          * been created
          * @see java.awt.BufferCapabilities#getFlipContents()
          */
@@ -4715,8 +4669,11 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
     }
 
     /**
-     * @return whether or not paint messages received from the operating system
+     * Returns whether or not paint messages received from the operating system
      * should be ignored.
+     *
+     * @return whether or not paint messages received from the operating system
+     * should be ignored
      *
      * @since 1.4
      * @see #setIgnoreRepaint
@@ -4967,8 +4924,8 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
             // the active/passive/peered clients loose focus.
             if (id == FocusEvent.FOCUS_GAINED) {
                 InputContext inputContext = getInputContext();
-                if (inputContext != null && inputContext instanceof sun.awt.im.InputContext) {
-                    ((sun.awt.im.InputContext)inputContext).disableNativeIM();
+                if (inputContext instanceof sun.awt.im.InputContext ctx) {
+                    ctx.disableNativeIM();
                 }
             }
         }
@@ -6078,7 +6035,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @return an array of all objects registered as
      *          <code><em>Foo</em>Listener</code>s on this component,
      *          or an empty array if no such listeners have been added
-     * @exception ClassCastException if {@code listenerType}
+     * @throws ClassCastException if {@code listenerType}
      *          doesn't specify a class or interface that implements
      *          {@code java.util.EventListener}
      * @throws NullPointerException if {@code listenerType} is {@code null}
@@ -6243,7 +6200,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
 
     /**
      * Weak map of known coalesceEvent overriders.
-     * Value indicates whether overriden.
+     * Value indicates whether overridden.
      * Bootstrap classes are not included.
      */
     private static final Map<Class<?>, Boolean> coalesceMap =
@@ -6270,14 +6227,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
              }
 
              // Need to check non-bootstraps.
-             @SuppressWarnings("removal")
-             Boolean enabled = java.security.AccessController.doPrivileged(
-                 new java.security.PrivilegedAction<Boolean>() {
-                     public Boolean run() {
-                         return isCoalesceEventsOverriden(clazz);
-                     }
-                 }
-                 );
+             Boolean enabled = isCoalesceEventsOverriden(clazz);
              coalesceMap.put(clazz, enabled);
              return enabled;
          }
@@ -6319,7 +6269,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
         }
 
         try {
-            // Throws if not overriden.
+            // Throws if not overridden.
             clazz.getDeclaredMethod(
                 "coalesceEvents", coalesceEventsParams
                 );
@@ -7451,7 +7401,6 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
     }
     final Set<AWTKeyStroke> getFocusTraversalKeys_NoIDCheck(int id) {
         // Okay to return Set directly because it is an unmodifiable view
-        @SuppressWarnings("unchecked")
         Set<AWTKeyStroke> keystrokes = (focusTraversalKeys != null)
             ? focusTraversalKeys[id]
             : null;
@@ -8104,7 +8053,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
         {
             return true;
         }
-    };
+    }
 
     static synchronized void setRequestFocusController(RequestFocusController requestController)
     {
@@ -8370,7 +8319,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * Adds the specified popup menu to the component.
      * @param     popup the popup menu to be added to the component.
      * @see       #remove(MenuComponent)
-     * @exception NullPointerException if {@code popup} is {@code null}
+     * @throws NullPointerException if {@code popup} is {@code null}
      * @since     1.1
      */
     public void add(PopupMenu popup) {
@@ -8398,7 +8347,6 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @see       #add(PopupMenu)
      * @since     1.1
      */
-    @SuppressWarnings("unchecked")
     public void remove(MenuComponent popup) {
         synchronized (getTreeLock()) {
             if (popups == null) {
@@ -8580,7 +8528,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      *
      * @see #addPropertyChangeListener
      * @see #getPropertyChangeListeners
-     * @see #removePropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)
+     * @see #removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
      */
     public void removePropertyChangeListener(
                                                           PropertyChangeListener listener) {
@@ -8644,7 +8592,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      *
      * @see #removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
      * @see #getPropertyChangeListeners(java.lang.String)
-     * @see #addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+     * @see #addPropertyChangeListener(java.beans.PropertyChangeListener)
      */
     public void addPropertyChangeListener(
                                                        String propertyName,
@@ -9006,14 +8954,11 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * @throws IOException if an I/O error occurs
      * @see #writeObject(ObjectOutputStream)
      */
-    @SuppressWarnings("removal")
     @Serial
     private void readObject(ObjectInputStream s)
       throws ClassNotFoundException, IOException
     {
         objectLock = new Object();
-
-        acc = AccessController.getContext();
 
         s.defaultReadObject();
 
@@ -9210,7 +9155,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      *
      * @param orientation the new component orientation of this component and
      *        the components contained within it.
-     * @exception NullPointerException if {@code orientation} is null.
+     * @throws NullPointerException if {@code orientation} is null.
      * @see #setComponentOrientation
      * @see #getComponentOrientation
      * @see #invalidate
@@ -9352,7 +9297,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
          * to add/remove ComponentListener and FocusListener to track
          * target Component's state.
          */
-        private transient volatile int propertyListenersCount = 0;
+        private transient volatile int propertyListenersCount;
 
         /**
          * A component listener to track show/hide/resize events
@@ -10174,7 +10119,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
      * needs to be cut off of the heavyweight components in order to mix this
      * lightweight component correctly with them.
      *
-     * The method is overriden in the java.awt.Container to handle non-opaque
+     * The method is overridden in the java.awt.Container to handle non-opaque
      * containers containing opaque children.
      *
      * See 6637655 for details.
@@ -10443,7 +10388,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
     }
 
     void mixOnValidating() {
-        // This method gets overriden in the Container. Obviously, a plain
+        // This method gets overridden in the Container. Obviously, a plain
         // non-container components don't need to handle validation.
     }
 
@@ -10546,7 +10491,7 @@ public abstract @UsesObjectEquals @UIType class Component implements ImageObserv
 
     // ****************** END OF MIXING CODE ********************************
 
-    // Note that the method is overriden in the Window class,
+    // Note that the method is overridden in the Window class,
     // a window doesn't need to be updated in the Z-order.
     void updateZOrder() {
         peer.setZOrder(getHWPeerAboveMe());

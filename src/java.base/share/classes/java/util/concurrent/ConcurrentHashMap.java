@@ -87,6 +87,8 @@ import java.util.function.ToLongBiFunction;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 import jdk.internal.misc.Unsafe;
+import jdk.internal.util.ArraysSupport;
+import jdk.internal.vm.annotation.Stable;
 
 /**
  * A hash table supporting full concurrency of retrievals and
@@ -536,7 +538,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
      * The largest possible (non-power of two) array size.
      * Needed by toArray and related methods.
      */
-    static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+    static final int MAX_ARRAY_SIZE = ArraysSupport.SOFT_MAX_ARRAY_LENGTH;
 
     /**
      * The default concurrency level for this table. Unused but
@@ -613,7 +615,16 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     static final int HASH_BITS = 0x7fffffff; // usable bits of normal node hash
 
     /** Number of CPUS, to place bounds on some sizings */
-    static final int NCPU = Runtime.getRuntime().availableProcessors();
+    static @Stable int NCPU;
+
+    static {
+        runtimeSetup();
+    }
+
+    // Called from JVM when loading an AOT cache.
+    private static void runtimeSetup() {
+        NCPU = Runtime.getRuntime().availableProcessors();
+    }
 
     /**
      * Serialized pseudo-fields, provided only for jdk7 compatibility.
@@ -866,8 +877,9 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
      *
      * @param m the map
      */
+    @SuppressWarnings("this-escape")
     public ConcurrentHashMap(Map<? extends K, ? extends V> m) {
-        this.sizeCtl = DEFAULT_CAPACITY;
+        this(m.size());
         putAll(m);
     }
 
@@ -1111,7 +1123,9 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
      * @param m mappings to be stored in this map
      */
     public void putAll(Map<? extends K, ? extends V> m) {
-        tryPresize(m.size());
+        if (table != null) {
+            tryPresize(size() + m.size());
+        }
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
             putVal(e.getKey(), e.getValue(), false);
     }
@@ -1563,7 +1577,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     // ConcurrentMap methods
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @return the previous value associated with the specified key,
      *         or {@code null} if there was no mapping for the key
@@ -1575,9 +1589,10 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @throws NullPointerException if the specified key is null
+     * @return {@inheritDoc ConcurrentMap}
      */
     public boolean remove(@GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
         if (key == null)
@@ -1586,9 +1601,10 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @throws NullPointerException if any of the arguments are null
+     * @return {@inheritDoc ConcurrentMap}
      */
     public boolean replace(K key, V oldValue, V newValue) {
         if (key == null || oldValue == null || newValue == null)
@@ -1597,7 +1613,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @return the previous value associated with the specified key,
      *         or {@code null} if there was no mapping for the key
@@ -2900,22 +2916,20 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
          * Possibly blocks awaiting root lock.
          */
         private final void contendedLock() {
-            boolean waiting = false;
+            Thread current = Thread.currentThread(), w;
             for (int s;;) {
                 if (((s = lockState) & ~WAITER) == 0) {
                     if (U.compareAndSetInt(this, LOCKSTATE, s, WRITER)) {
-                        if (waiting)
-                            waiter = null;
+                        if (waiter == current)
+                            U.compareAndSetReference(this, WAITERTHREAD, current, null);
                         return;
                     }
                 }
-                else if ((s & WAITER) == 0) {
-                    if (U.compareAndSetInt(this, LOCKSTATE, s, s | WAITER)) {
-                        waiting = true;
-                        waiter = Thread.currentThread();
-                    }
-                }
-                else if (waiting)
+                else if ((s & WAITER) == 0)
+                    U.compareAndSetInt(this, LOCKSTATE, s, s | WAITER);
+                else if ((w = waiter) == null)
+                    U.compareAndSetReference(this, WAITERTHREAD, null, current);
+                else if (w == current)
                     LockSupport.park(this);
             }
         }
@@ -3334,6 +3348,8 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
 
         private static final long LOCKSTATE
             = U.objectFieldOffset(TreeBin.class, "lockState");
+        private static final long WAITERTHREAD
+            = U.objectFieldOffset(TreeBin.class, "waiter");
     }
 
     /* ----------------Table Traversal -------------- */
@@ -4456,8 +4472,8 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     /**
      * Base class for views.
      */
-    abstract static class CollectionView<K,V,E>
-        implements Collection<E>, java.io.Serializable {
+    abstract static sealed class CollectionView<K,V,E>
+        implements Collection<E>, java.io.Serializable permits EntrySetView, KeySetView, ValuesView {
         private static final long serialVersionUID = 7249069246763182397L;
         final ConcurrentHashMap<K,V> map;
         CollectionView(ConcurrentHashMap<K,V> map)  { this.map = map; }
@@ -4636,9 +4652,12 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
      * {@link #newKeySet() newKeySet()},
      * {@link #newKeySet(int) newKeySet(int)}.
      *
+     * @param <K> the type of keys
+     * @param <V> the type of values in the backing map
+     *
      * @since 1.8
      */
-    public static class KeySetView<K,V> extends CollectionView<K,V,K>
+    public static final class KeySetView<K,V> extends CollectionView<K,V,K>
         implements Set<K>, java.io.Serializable {
         private static final long serialVersionUID = 7249069246763182397L;
         @SuppressWarnings("serial") // Conditionally serializable
@@ -6437,7 +6456,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
         ASHIFT = 31 - Integer.numberOfLeadingZeros(scale);
 
         // Reduce the risk of rare disastrous classloading in first call to
-        // LockSupport.park: https://bugs.openjdk.java.net/browse/JDK-8074773
+        // LockSupport.park: https://bugs.openjdk.org/browse/JDK-8074773
         Class<?> ensureLoaded = LockSupport.class;
 
         // Eager class load observed to help JIT during startup

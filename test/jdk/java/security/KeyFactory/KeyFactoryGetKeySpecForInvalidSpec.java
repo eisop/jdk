@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Amazon.com, Inc. or its affiliates. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -69,7 +69,8 @@ public class KeyFactoryGetKeySpecForInvalidSpec {
     }
 
     public static void main(String[] args) throws Exception {
-        KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
+        KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA",
+                System.getProperty("test.provider.name", "SunRsaSign"));
         kg.initialize(2048);
         KeyPair pair = kg.generateKeyPair();
 
