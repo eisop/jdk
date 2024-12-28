@@ -34,6 +34,8 @@ import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.checker.tainting.qual.Untainted;
 import org.checkerframework.common.aliasing.qual.Unique;
@@ -55,6 +57,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  */
 @AnnotatedFor({"aliasing", "guieffect", "index", "lock", "nullness"})
 @PolyUIType
+@ReceiverDependentMutable
 public class Object {
 
     /**
@@ -62,6 +65,7 @@ public class Object {
      */
     @Pure
     @IntrinsicCandidate
+    @ReceiverDependentMutable
     public @Unique @Untainted Object() {}
 
     /**
@@ -87,7 +91,7 @@ public class Object {
     @SafeEffect
     @Pure
     @IntrinsicCandidate
-    public final native Class<? extends @MustCall() Object> getClass(@PolyUI @GuardSatisfied @UnknownInitialization @UnknownSignedness Object this);
+    public final native Class<? extends @MustCall() Object> getClass(@Readonly @PolyUI @GuardSatisfied @UnknownInitialization @UnknownSignedness Object this);
 
     /**
      * Returns a hash code value for the object. This method is
@@ -124,7 +128,7 @@ public class Object {
      */
     @Pure
     @IntrinsicCandidate
-    public native int hashCode(@GuardSatisfied @UnknownSignedness Object this);
+    public native int hashCode(@Readonly @GuardSatisfied @UnknownSignedness Object this);
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -186,7 +190,7 @@ public class Object {
      */
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
-    public boolean equals(@GuardSatisfied Object this, @GuardSatisfied @Nullable Object obj) {
+    public boolean equals(@Readonly @GuardSatisfied Object this, @Readonly @GuardSatisfied @Nullable Object obj) {
         return (this == obj);
     }
 
@@ -253,7 +257,7 @@ public class Object {
      */
     @SideEffectFree
     @IntrinsicCandidate
-    protected native Object clone(@GuardSatisfied Object this) throws CloneNotSupportedException;
+    protected native @ReceiverDependentMutable Object clone(@ReceiverDependentMutable @GuardSatisfied Object this) throws CloneNotSupportedException;
 
     /**
      * Returns a string representation of the object.
@@ -284,7 +288,7 @@ public class Object {
     "that differs according to ==, and @Deterministic requires that the results of",
     "two calls of the method are ==."})
     @SideEffectFree
-    public String toString(@GuardSatisfied Object this) {
+    public String toString(@Readonly @GuardSatisfied Object this) {
         return getClass().getName() + "@" + Integer.toHexString(hashCode());
     }
 
