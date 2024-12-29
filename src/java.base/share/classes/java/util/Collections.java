@@ -37,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.EnsuresKeyForIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.common.value.qual.ArrayLen;
@@ -1387,7 +1388,7 @@ public class Collections {
         @SuppressWarnings("serial") // Conditionally serializable
         final List<? extends E> list;
 
-        UnmodifiableList(List<? extends E> list) {
+        UnmodifiableList(@Readonly List<? extends E> list) {
             super(list);
             this.list = list;
         }
@@ -5162,7 +5163,7 @@ public class Collections {
 
         @SuppressWarnings({"inconsistent.constructor.type", "super.invocation.invalid"})
         @CFComment("index: every SingletonList is @ArrayLen(1)")
-        SingletonList(E obj)                {element = obj;}
+        SingletonList(@Readonly E obj)                {element = obj;}
 
         @SideEffectFree
         public Iterator<E> iterator() {
