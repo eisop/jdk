@@ -36,6 +36,9 @@ import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -152,7 +155,7 @@ import jdk.internal.access.SharedSecrets;
  */
 @CFComment({"lock: This collection can only contain nonnull values"})
 @AnnotatedFor({"lock", "nullness", "index"})
-public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
+public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull Object>
     extends Dictionary<K,V>
     implements Map<K,V>, Cloneable, java.io.Serializable {
 
@@ -331,7 +334,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public synchronized boolean contains(@GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
+    public synchronized boolean contains(@Readonly  @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
         if (value == null) {
             throw new NullPointerException();
         }
@@ -360,7 +363,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      * @since 1.2
      */
     @Pure
-    public boolean containsValue(@GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
+    public boolean containsValue(@Readonly @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
         return contains(value);
     }
 
@@ -376,7 +379,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      */
     @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
     @Pure
-    public synchronized boolean containsKey(@GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
+    public synchronized boolean containsKey(@Readonly @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
         Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -405,7 +408,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      */
     @Pure
     @SuppressWarnings("unchecked")
-    public synchronized @Nullable V get(@GuardSatisfied Hashtable<K, V> this, @UnknownSignedness @GuardSatisfied Object key) {
+    public synchronized @Nullable V get(@Readonly @GuardSatisfied Hashtable<K, V> this, @UnknownSignedness @GuardSatisfied Object key) {
         Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -500,7 +503,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      * @see     #get(Object)
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public synchronized @Nullable V put(@GuardSatisfied Hashtable<K, V> this, K key, V value) {
+    public synchronized @Nullable V put(@Mutable @GuardSatisfied Hashtable<K, V> this, K key, V value) {
         // Make sure the value is not null
         if (value == null) {
             throw new NullPointerException();
@@ -533,7 +536,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      *          or {@code null} if the key did not have a mapping
      * @throws  NullPointerException  if the key is {@code null}
      */
-    public synchronized @Nullable V remove(@GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
+    public synchronized @Nullable V remove(@Mutable @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
         Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -565,7 +568,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      * @throws NullPointerException if the specified map is null
      * @since 1.2
      */
-    public synchronized void putAll(@GuardSatisfied Hashtable<K, V> this, Map<? extends K, ? extends V> t) {
+    public synchronized void putAll(@Mutable @GuardSatisfied Hashtable<K, V> this, Map<? extends K, ? extends V> t) {
         for (Map.Entry<? extends K, ? extends V> e : t.entrySet())
             put(e.getKey(), e.getValue());
     }
@@ -573,7 +576,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
     /**
      * Clears this hashtable so that it contains no keys.
      */
-    public synchronized void clear(@GuardSatisfied Hashtable<K, V> this) {
+    public synchronized void clear(@Mutable @GuardSatisfied Hashtable<K, V> this) {
         Entry<?,?> tab[] = table;
         for (int index = tab.length; --index >= 0; )
             tab[index] = null;
