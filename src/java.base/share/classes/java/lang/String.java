@@ -1910,7 +1910,7 @@ public final class String
     @EnsuresNonNullIf(expression={"#1"}, result=true)
     @Pure
     @StaticallyExecutable
-    public boolean equals(@GuardSatisfied @Nullable Object anObject) {
+    public boolean equals(@Immutable @GuardSatisfied @Nullable Object anObject) {
         if (this == anObject) {
             return true;
         }
@@ -4327,7 +4327,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     @FormatMethod
-    public static String format(String format, @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
+    public static String format(String format, @Readonly @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
         return new Formatter().format(format, args).toString();
     }
 
@@ -4371,7 +4371,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     @FormatMethod
-    public static String format(@GuardSatisfied @Nullable Locale l, String format, @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
+    public static String format(@Readonly @GuardSatisfied @Nullable Locale l, String format, @Readonly @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
         return new Formatter(l).format(format, args).toString();
     }
 
@@ -4408,7 +4408,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static @NewObject String valueOf(@GuardSatisfied @Nullable Object obj) {
+    public static @NewObject String valueOf(@Readonly @GuardSatisfied @Nullable Object obj) {
         return (obj == null) ? "null" : obj.toString();
     }
 
