@@ -33,6 +33,8 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -87,13 +89,13 @@ import java.util.function.Consumer;
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
 @AnnotatedFor({"lock", "nullness", "index"})
-public abstract class AbstractList<E> extends AbstractCollection<E> implements List<E> {
+public @ReceiverDependentMutable abstract class AbstractList<E> extends AbstractCollection<E> implements List<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
      */
     @SideEffectFree
-    protected AbstractList() {
+    protected @ReceiverDependentMutable AbstractList() {
     }
 
     /**
@@ -126,7 +128,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      *         prevents it from being added to this list
      */
     @EnsuresNonEmpty("this")
-    public boolean add(@GuardSatisfied AbstractList<E> this, E e) {
+    public boolean add(@Mutable @GuardSatisfied AbstractList<E> this, E e) {
         add(size(), e);
         return true;
     }
@@ -169,7 +171,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws IllegalArgumentException      {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public void add(@GuardSatisfied AbstractList<E> this, @IndexOrHigh({"this"}) int index, E element) {
+    public void add(@Mutable @GuardSatisfied AbstractList<E> this, @IndexOrHigh({"this"}) int index, E element) {
         throw new UnsupportedOperationException();
     }
 
@@ -183,7 +185,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws UnsupportedOperationException {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public E remove(@GuardSatisfied AbstractList<E> this, @IndexFor({"this"}) int index) {
+    public E remove(@Mutable @GuardSatisfied AbstractList<E> this, @IndexFor({"this"}) int index) {
         throw new UnsupportedOperationException();
     }
 
@@ -261,7 +263,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws UnsupportedOperationException if the {@code clear} operation
      *         is not supported by this list
      */
-    public void clear(@GuardSatisfied AbstractList<E> this) {
+    public void clear(@Mutable @GuardSatisfied AbstractList<E> this) {
         removeRange(0, size());
     }
 
@@ -285,7 +287,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws IllegalArgumentException      {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public boolean addAll(@GuardSatisfied AbstractList<E> this, @IndexOrHigh({"this"}) int index, Collection<? extends E> c) {
+    public boolean addAll(@Mutable  @GuardSatisfied AbstractList<E> this, @IndexOrHigh({"this"}) int index, Collection<? extends E> c) {
         rangeCheckForAdd(index);
         boolean modified = false;
         for (E e : c) {
