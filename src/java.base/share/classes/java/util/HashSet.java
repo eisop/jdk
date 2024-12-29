@@ -33,11 +33,15 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.io.InvalidObjectException;
 import jdk.internal.access.SharedSecrets;
@@ -102,7 +106,8 @@ import jdk.internal.access.SharedSecrets;
  */
 
 @AnnotatedFor({"lock", "nullness", "index"})
-public class HashSet<E>
+@DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable class HashSet<E>
     extends AbstractSet<E>
     implements Set<E>, Cloneable, java.io.Serializable
 {
@@ -240,7 +245,7 @@ public class HashSet<E>
      */
     @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
-    public boolean add(@GuardSatisfied HashSet<E> this, E e) {
+    public boolean add(@Mutable @GuardSatisfied HashSet<E> this, E e) {
         return map.put(e, PRESENT)==null;
     }
 
@@ -257,7 +262,7 @@ public class HashSet<E>
      * @return {@code true} if the set contained the specified element
      */
     @SideEffectsOnly("this")
-    public boolean remove(@GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean remove(@Mutable @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return map.remove(o)==PRESENT;
     }
 
@@ -266,7 +271,7 @@ public class HashSet<E>
      * The set will be empty after this call returns.
      */
     @SideEffectsOnly("this")
-    public void clear(@GuardSatisfied HashSet<E> this) {
+    public void clear(@Mutable @GuardSatisfied HashSet<E> this) {
         map.clear();
     }
 
