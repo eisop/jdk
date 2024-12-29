@@ -28,6 +28,7 @@ package java.util;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -69,6 +70,7 @@ import java.util.function.Consumer;
 })
 @AnnotatedFor({"lock", "nullness"})
 @Covariant({0})
+@ReceiverDependentMutable
 public interface Iterator<E> {
     /**
      * Returns {@code true} if the iteration has more elements.
