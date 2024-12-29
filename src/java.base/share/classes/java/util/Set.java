@@ -33,12 +33,16 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 /**
  * A collection that contains no duplicate elements.  More formally, sets
@@ -129,7 +133,8 @@ import org.checkerframework.framework.qual.CFComment;
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness", "index"})
-public interface Set<E> extends Collection<E> {
+@DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
     // Query Operations
 
     /**
@@ -278,7 +283,7 @@ public interface Set<E> extends Collection<E> {
      *         prevents it from being added to this set
      */
     @EnsuresNonEmpty("this")
-    boolean add(@GuardSatisfied Set<E> this, E e);
+    boolean add(@Mutable @GuardSatisfied Set<E> this, E e);
 
 
     /**
@@ -302,7 +307,7 @@ public interface Set<E> extends Collection<E> {
      * @throws UnsupportedOperationException if the {@code remove} operation
      *         is not supported by this set
      */
-    boolean remove(@GuardSatisfied Set<E> this, @UnknownSignedness Object o);
+    boolean remove(@Mutable @GuardSatisfied Set<E> this, @UnknownSignedness Object o);
 
 
     // Bulk Operations
@@ -352,7 +357,7 @@ public interface Set<E> extends Collection<E> {
      * @see #add(Object)
      */
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean addAll(@GuardSatisfied Set<E> this, Collection<? extends E> c);
+    boolean addAll(@Mutable @GuardSatisfied Set<E> this, Collection<? extends E> c);
 
     /**
      * Retains only the elements in this set that are contained in the
@@ -375,7 +380,7 @@ public interface Set<E> extends Collection<E> {
      *         or if the specified collection is null
      * @see #remove(Object)
      */
-    boolean retainAll(@GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean retainAll(@Mutable @GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Removes from this set all of its elements that are contained in the
@@ -398,7 +403,7 @@ public interface Set<E> extends Collection<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    boolean removeAll(@GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean removeAll(@Mutable @GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Removes all of the elements from this set (optional operation).
@@ -407,7 +412,7 @@ public interface Set<E> extends Collection<E> {
      * @throws UnsupportedOperationException if the {@code clear} method
      *         is not supported by this set
      */
-    void clear(@GuardSatisfied Set<E> this);
+    void clear(@Mutable @GuardSatisfied Set<E> this);
 
 
     // Comparison and hashing
