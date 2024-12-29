@@ -38,6 +38,9 @@ import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.common.aliasing.qual.NonLeaked;
 import org.checkerframework.dataflow.qual.Pure;
@@ -45,6 +48,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 import org.checkerframework.framework.qual.Covariant;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -181,7 +185,8 @@ import java.io.Serializable;
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness", "index", "aliasing", "nonempty"})
-public interface Map<K, V> {
+@DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
     // Query Operations
 
     /**
@@ -306,7 +311,7 @@ public interface Map<K, V> {
     @ReleasesNoLocks
     @EnsuresKeyFor(value={"#1"}, map={"this"})
     @EnsuresNonEmpty("this")
-    @Nullable V put(@GuardSatisfied Map<K, V> this, K key, V value);
+    @Nullable V put(@Mutable @GuardSatisfied Map<K, V> this, K key, V value);
 
     /**
      * Removes the mapping for a key from this map if it is present
@@ -339,7 +344,7 @@ public interface Map<K, V> {
      * (<a href="{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     @CFComment("nullness: key is not @Nullable because this map might not permit null values")
-    @Nullable V remove(@GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
+    @Nullable V remove(@Mutable @GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
 
 
     // Bulk Operations
@@ -363,7 +368,7 @@ public interface Map<K, V> {
      * @throws IllegalArgumentException if some property of a key or value in
      *         the specified map prevents it from being stored in this map
      */
-    void putAll(@GuardSatisfied Map<K, V> this, Map<? extends K, ? extends V> m);
+    void putAll(@Mutable @GuardSatisfied Map<K, V> this, Map<? extends K, ? extends V> m);
 
     /**
      * Removes all of the mappings from this map (optional operation).
@@ -372,7 +377,7 @@ public interface Map<K, V> {
      * @throws UnsupportedOperationException if the {@code clear} operation
      *         is not supported by this map
      */
-    void clear(@GuardSatisfied Map<K, V> this);
+    void clear(@Mutable @GuardSatisfied Map<K, V> this);
 
 
     // Views
