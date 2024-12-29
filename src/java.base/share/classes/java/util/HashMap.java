@@ -36,12 +36,16 @@ import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -154,7 +158,8 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.2
  */
 @AnnotatedFor({"lock", "nullness", "index"})
-public class HashMap<K,V> extends AbstractMap<K,V>
+@DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     implements Map<K,V>, Cloneable, Serializable {
 
     @java.io.Serial
@@ -631,7 +636,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      *         previously associated {@code null} with {@code key}.)
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@GuardSatisfied HashMap<K, V> this, K key, V value) {
+    public @Nullable V put(@Mutable @GuardSatisfied HashMap<K, V> this, K key, V value) {
         return putVal(hash(key), key, value, false, true);
     }
 
@@ -805,7 +810,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
      */
-    public void putAll(@GuardSatisfied HashMap<K, V> this, Map<? extends K, ? extends V> m) {
+    public void putAll(@Mutable @GuardSatisfied HashMap<K, V> this, Map<? extends K, ? extends V> m) {
         putMapEntries(m, true);
     }
 
@@ -818,7 +823,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      *         (A {@code null} return can also indicate that the map
      *         previously associated {@code null} with {@code key}.)
      */
-    public @Nullable V remove(@GuardSatisfied HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness Object key) {
+    public @Nullable V remove(@Mutable @GuardSatisfied HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness Object key) {
         Node<K,V> e;
         return (e = removeNode(hash(key), key, null, false, true)) == null ?
             null : e.value;
@@ -879,7 +884,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
      */
-    public void clear(@GuardSatisfied HashMap<K, V> this) {
+    public void clear(@Mutable @GuardSatisfied HashMap<K, V> this) {
         Node<K,V>[] tab;
         modCount++;
         if ((tab = table) != null && size > 0) {
