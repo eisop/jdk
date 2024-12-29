@@ -33,6 +33,7 @@ import org.checkerframework.checker.index.qual.Positive;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -68,7 +69,7 @@ import static java.lang.String.checkOffset;
  * @since       1.5
  */
 @AnnotatedFor({"index", "initialization", "interning", "lock", "nullness"})
-abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, CharSequence {
+abstract @UsesObjectEquals @Mutable class AbstractStringBuilder implements Appendable, CharSequence {
     /**
      * The value is used for character storage.
      */
