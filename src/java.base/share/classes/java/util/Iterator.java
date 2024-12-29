@@ -29,6 +29,7 @@ import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -81,7 +82,7 @@ public interface Iterator<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean hasNext(@GuardSatisfied Iterator<E> this);
+    boolean hasNext(@Readonly @GuardSatisfied Iterator<E> this);
 
     /**
      * Returns the next element in the iteration.
@@ -90,7 +91,7 @@ public interface Iterator<E> {
      * @throws NoSuchElementException if the iteration has no more elements
      */
     @SideEffectsOnly("this")
-    E next(@GuardSatisfied @NonEmpty Iterator<E> this);
+    E next(@Readonly @GuardSatisfied @NonEmpty Iterator<E> this);
 
     /**
      * Removes from the underlying collection the last element returned
@@ -117,7 +118,7 @@ public interface Iterator<E> {
      *         been called after the last call to the {@code next}
      *         method
      */
-    default void remove(@GuardSatisfied Iterator<E> this) {
+    default void remove(@Mutable @GuardSatisfied Iterator<E> this) {
         throw new UnsupportedOperationException("remove");
     }
 
