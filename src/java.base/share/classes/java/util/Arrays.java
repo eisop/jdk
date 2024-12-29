@@ -2395,7 +2395,7 @@ public class Arrays {
      * @return {@code true} if the two arrays are equal
      */
     @Pure
-    public static boolean equals(@PolySigned long @Nullable [] a, @PolySigned long @Nullable [] a2) {
+    public static boolean equals(@PolySigned long @Nullable @Readonly [] a, @PolySigned long @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2440,8 +2440,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(@PolySigned long[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 @PolySigned long[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(@PolySigned long @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 @PolySigned long @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -2468,7 +2468,7 @@ public class Arrays {
      * @return {@code true} if the two arrays are equal
      */
     @Pure
-    public static boolean equals(@PolySigned int @Nullable [] a, @PolySigned int @Nullable [] a2) {
+    public static boolean equals(@PolySigned int @Nullable @Readonly [] a, @PolySigned int @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2513,8 +2513,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(@PolySigned int[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 @PolySigned int[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(@PolySigned int @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 @PolySigned int @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -2541,7 +2541,7 @@ public class Arrays {
      * @return {@code true} if the two arrays are equal
      */
     @Pure
-    public static boolean equals(@PolySigned short @Nullable [] a, @PolySigned short a2 @Nullable []) {
+    public static boolean equals(@PolySigned short @Nullable @Readonly [] a, @PolySigned short a2 @Nullable @Readonly []) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2586,8 +2586,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(@PolySigned short[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 @PolySigned short[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(@PolySigned short @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 @PolySigned short @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -2615,7 +2615,7 @@ public class Arrays {
      */
     @Pure
     @IntrinsicCandidate
-    public static boolean equals(@PolySigned char @Nullable [] a, @PolySigned char @Nullable [] a2) {
+    public static boolean equals(@PolySigned char @Nullable @Readonly [] a, @PolySigned char @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2660,8 +2660,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(@PolySigned char[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 @PolySigned char[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(@PolySigned char @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 @PolySigned char @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -2689,7 +2689,7 @@ public class Arrays {
      */
     @Pure
     @IntrinsicCandidate
-    public static boolean equals(@PolySigned byte @Nullable [] a, @PolySigned byte @Nullable [] a2) {
+    public static boolean equals(@PolySigned byte @Nullable @Readonly [] a, @PolySigned byte @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2734,8 +2734,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(@PolySigned byte[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 @PolySigned byte[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(@PolySigned byte @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 @PolySigned byte @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -2762,7 +2762,7 @@ public class Arrays {
      * @return {@code true} if the two arrays are equal
      */
     @Pure
-    public static boolean equals(boolean @Nullable [] a, boolean @Nullable [] a2) {
+    public static boolean equals(boolean @Nullable @Readonly [] a, boolean @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2807,8 +2807,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(boolean[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 boolean[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(boolean @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 boolean @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -2841,7 +2841,7 @@ public class Arrays {
      * @see Double#equals(Object)
      */
     @Pure
-    public static boolean equals(double @Nullable [] a, double @Nullable [] a2) {
+    public static boolean equals(double @Nullable @Readonly [] a, double @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2892,8 +2892,8 @@ public class Arrays {
      * @see Double#equals(Object)
      * @since 9
      */
-    public static boolean equals(double[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 double[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(double @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 double @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -2925,7 +2925,7 @@ public class Arrays {
      * @see Float#equals(Object)
      */
     @Pure
-    public static boolean equals(float @Nullable [] a, float @Nullable [] a2) {
+    public static boolean equals(float @Nullable @Readonly [] a, float @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -2976,8 +2976,8 @@ public class Arrays {
      * @see Float#equals(Object)
      * @since 9
      */
-    public static boolean equals(float[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 float[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(float @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 float @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -3006,7 +3006,7 @@ public class Arrays {
      * @return {@code true} if the two arrays are equal
      */
     @Pure
-    public static boolean equals(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable [] a, @PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable [] a2) {
+    public static boolean equals(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable @Readonly  [] a, @PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable @Readonly [] a2) {
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -3059,8 +3059,8 @@ public class Arrays {
      *         if either array is {@code null}
      * @since 9
      */
-    public static boolean equals(@PolyNull Object[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                 @PolyNull Object[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
+    public static boolean equals(@PolyNull Object @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                 @PolyNull Object @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex) {
         rangeCheck(a.length, aFromIndex, aToIndex);
         rangeCheck(b.length, bFromIndex, bToIndex);
 
@@ -3098,7 +3098,7 @@ public class Arrays {
      * @throws NullPointerException if the comparator is {@code null}
      * @since 9
      */
-    public static <T> boolean equals(T @Nullable [] a, T @Nullable [] a2, Comparator<? super T> cmp) {
+    public static <T> boolean equals(T @Nullable @Readonly [] a, T @Nullable @Readonly [] a2, Comparator<? super T> cmp) {
         Objects.requireNonNull(cmp);
         if (a==a2)
             return true;
@@ -3154,8 +3154,8 @@ public class Arrays {
      *         if either array or the comparator is {@code null}
      * @since 9
      */
-    public static <T> boolean equals(T[] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
-                                     T[] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex,
+    public static <T> boolean equals(T @Readonly [] a, @IndexOrHigh({"#1"}) int aFromIndex, @IndexOrHigh({"#1"}) int aToIndex,
+                                     T @Readonly [] b, @IndexOrHigh({"#4"}) int bFromIndex, @IndexOrHigh({"#4"}) int bToIndex,
                                      Comparator<? super T> cmp) {
         Objects.requireNonNull(cmp);
         rangeCheck(a.length, aFromIndex, aToIndex);
