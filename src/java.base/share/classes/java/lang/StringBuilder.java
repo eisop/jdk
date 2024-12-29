@@ -31,6 +31,8 @@ import org.checkerframework.checker.index.qual.LTLengthOf;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.regex.qual.PolyRegex;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -97,7 +99,7 @@ import java.io.IOException;
  * @since       1.5
  */
 @AnnotatedFor({"lock", "nullness", "index", "regex", "sideeffectsonly"})
-public final class StringBuilder
+public final @Mutable class StringBuilder
     extends AbstractStringBuilder
     implements java.io.Serializable, Comparable<StringBuilder>, CharSequence
 {
@@ -179,7 +181,7 @@ public final class StringBuilder
 
     @Override
     @SideEffectsOnly("this")
-    public StringBuilder append(@GuardSatisfied @Nullable Object obj) {
+    public StringBuilder append(@Readonly @GuardSatisfied @Nullable Object obj) {
         return append(String.valueOf(obj));
     }
 
@@ -351,7 +353,7 @@ public final class StringBuilder
      */
     @Override
     @SideEffectsOnly("this")
-    public StringBuilder insert(@NonNegative int offset, @GuardSatisfied @Nullable Object obj) {
+    public StringBuilder insert(@NonNegative int offset, @Readonly @GuardSatisfied @Nullable Object obj) {
             super.insert(offset, obj);
             return this;
     }
