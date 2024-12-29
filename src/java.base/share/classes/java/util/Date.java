@@ -27,6 +27,8 @@ package java.util;
 
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -137,6 +139,7 @@ import sun.util.calendar.ZoneInfo;
  * @since   1.0
  */
 @AnnotatedFor({"lock", "nullness", "index"})
+@ReceiverDependentMutable
 public class Date
     implements java.io.Serializable, Cloneable, Comparable<Date>
 {
@@ -171,7 +174,7 @@ public class Date
      *
      * @see     java.lang.System#currentTimeMillis()
      */
-    public Date() {
+    @ReceiverDependentMutable public Date() {
         this(System.currentTimeMillis());
     }
 
@@ -184,7 +187,7 @@ public class Date
      * @param   date   the milliseconds since January 1, 1970, 00:00:00 GMT.
      * @see     java.lang.System#currentTimeMillis()
      */
-    public Date(long date) {
+    @ReceiverDependentMutable public Date(long date) {
         fastTime = date;
     }
 
@@ -795,7 +798,7 @@ public class Date
      * replaced by {@code Calendar.get(Calendar.HOUR_OF_DAY)}.
      */
     @Deprecated
-    public int getHours(@GuardSatisfied Date this) {
+    public int getHours(@Readonly @GuardSatisfied Date this) {
         return normalize().getHours();
     }
 
@@ -888,7 +891,7 @@ public class Date
      * @return  the number of milliseconds since January 1, 1970, 00:00:00 GMT
      *          represented by this date.
      */
-    public long getTime(@GuardSatisfied Date this) {
+    public long getTime(@Readonly @GuardSatisfied Date this) {
         return getTimeImpl();
     }
 
