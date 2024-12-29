@@ -25,6 +25,7 @@
 
 package java.lang;
 
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -52,5 +53,5 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since   1.0
  */
 @AnnotatedFor({"nullness"})
-public interface Cloneable {
+public @ReceiverDependentMutable interface Cloneable {
 }
