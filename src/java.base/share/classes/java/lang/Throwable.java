@@ -29,6 +29,7 @@ import org.checkerframework.checker.initialization.qual.PolyInitialized;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -120,7 +121,7 @@ import java.util.*;
  * @since 1.0
  */
 @AnnotatedFor({"interning", "lock", "nullness"})
-public @UsesObjectEquals class Throwable implements Serializable {
+public @UsesObjectEquals @ReceiverDependentMutable class Throwable implements Serializable {
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
     @java.io.Serial
     private static final long serialVersionUID = -3042686055658047285L;
@@ -394,7 +395,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *          (which may be {@code null}).
      */
     @Pure
-    public @Nullable String getMessage(@GuardSatisfied Throwable this) {
+    public @Nullable String getMessage(@ReceiverDependentMutable @GuardSatisfied Throwable this) {
         return detailMessage;
     }
 
@@ -409,7 +410,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since   1.1
      */
     @SideEffectFree
-    public @Nullable String getLocalizedMessage(@GuardSatisfied Throwable this) {
+    public @Nullable String getLocalizedMessage(@ReceiverDependentMutable @GuardSatisfied Throwable this) {
         return getMessage();
     }
 
@@ -434,7 +435,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since 1.4
      */
     @Pure
-    public synchronized @Nullable Throwable getCause(@GuardSatisfied Throwable this) {
+    public synchronized @Nullable Throwable getCause(@ReceiverDependentMutable @GuardSatisfied Throwable this) {
         return (cause==this ? null : cause);
     }
 
@@ -664,7 +665,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *          ... 2 more
      * </pre>
      */
-    public void printStackTrace() {
+    public void printStackTrace(@ReceiverDependentMutable Throwable this) {
         printStackTrace(System.err);
     }
 
@@ -673,11 +674,11 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *
      * @param s {@code PrintStream} to use for output
      */
-    public void printStackTrace(PrintStream s) {
+    public void printStackTrace(@ReceiverDependentMutable Throwable this, PrintStream s) {
         printStackTrace(new WrappedPrintStream(s));
     }
 
-    private void printStackTrace(PrintStreamOrWriter s) {
+    private void printStackTrace(@ReceiverDependentMutable Throwable this, PrintStreamOrWriter s) {
         // Guard against malicious overrides of Throwable.equals by
         // using a Set with identity equality semantics.
         Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());

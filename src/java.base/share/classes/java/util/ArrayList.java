@@ -36,6 +36,8 @@ import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -127,7 +129,7 @@ import jdk.internal.util.ArraysSupport;
  */
 @CFComment("lock/nullness: Permit null elements")
 @AnnotatedFor({"index", "initialization", "lock", "nullness"})
-public class ArrayList<E> extends AbstractList<E>
+public @ReceiverDependentMutable class ArrayList<E> extends AbstractList<E>
         implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 {
     @java.io.Serial
@@ -501,7 +503,7 @@ public class ArrayList<E> extends AbstractList<E>
      */
     @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
-    public boolean add(@GuardSatisfied ArrayList<E> this, E e) {
+    public boolean add(@Mutable @GuardSatisfied ArrayList<E> this, E e) {
         modCount++;
         add(e, elementData, size);
         return true;
@@ -517,7 +519,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @SideEffectsOnly("this")
-    public void add(@GuardSatisfied ArrayList<E> this, @NonNegative int index, E element) {
+    public void add(@Mutable @GuardSatisfied ArrayList<E> this, @NonNegative int index, E element) {
         rangeCheckForAdd(index);
         modCount++;
         final int s;
@@ -540,7 +542,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @return the element that was removed from the list
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public E remove(@GuardSatisfied ArrayList<E> this, @NonNegative int index) {
+    public E remove(@Mutable @GuardSatisfied ArrayList<E> this, @NonNegative int index) {
         Objects.checkIndex(index, size);
         final Object[] es = elementData;
 
@@ -688,7 +690,7 @@ public class ArrayList<E> extends AbstractList<E>
      * Removes all of the elements from this list.  The list will
      * be empty after this call returns.
      */
-    public void clear(@GuardSatisfied ArrayList<E> this) {
+    public void clear(@Mutable @GuardSatisfied ArrayList<E> this) {
         modCount++;
         final Object[] es = elementData;
         for (int to = size, i = size = 0; i < to; i++)
@@ -709,7 +711,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @throws NullPointerException if the specified collection is null
      */
     @SideEffectsOnly("this")
-    public boolean addAll(@GuardSatisfied ArrayList<E> this, Collection<? extends E> c) {
+    public boolean addAll(@Mutable @GuardSatisfied ArrayList<E> this, Collection<? extends E> c) {
         Object[] a = c.toArray();
         modCount++;
         int numNew = a.length;
@@ -740,7 +742,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @throws NullPointerException if the specified collection is null
      */
     @SideEffectsOnly("this")
-    public boolean addAll(@GuardSatisfied ArrayList<E> this, @NonNegative int index, Collection<? extends E> c) {
+    public boolean addAll(@Mutable @GuardSatisfied ArrayList<E> this, @NonNegative int index, Collection<? extends E> c) {
         rangeCheckForAdd(index);
 
         Object[] a = c.toArray();

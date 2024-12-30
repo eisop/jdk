@@ -38,6 +38,10 @@ import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.common.aliasing.qual.NonLeaked;
 import org.checkerframework.dataflow.qual.Pure;
@@ -45,6 +49,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 import org.checkerframework.framework.qual.Covariant;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -181,7 +186,8 @@ import java.io.Serializable;
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness", "index", "aliasing", "nonempty"})
-public interface Map<K, V> {
+@DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
     // Query Operations
 
     /**
@@ -306,7 +312,7 @@ public interface Map<K, V> {
     @ReleasesNoLocks
     @EnsuresKeyFor(value={"#1"}, map={"this"})
     @EnsuresNonEmpty("this")
-    @Nullable V put(@GuardSatisfied Map<K, V> this, K key, V value);
+    @Nullable V put(@Mutable @GuardSatisfied Map<K, V> this, K key, V value);
 
     /**
      * Removes the mapping for a key from this map if it is present
@@ -339,7 +345,7 @@ public interface Map<K, V> {
      * (<a href="{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     @CFComment("nullness: key is not @Nullable because this map might not permit null values")
-    @Nullable V remove(@GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
+    @Nullable V remove(@Mutable @GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
 
 
     // Bulk Operations
@@ -363,7 +369,7 @@ public interface Map<K, V> {
      * @throws IllegalArgumentException if some property of a key or value in
      *         the specified map prevents it from being stored in this map
      */
-    void putAll(@GuardSatisfied Map<K, V> this, Map<? extends K, ? extends V> m);
+    void putAll(@Mutable @GuardSatisfied Map<K, V> this, Map<? extends K, ? extends V> m);
 
     /**
      * Removes all of the mappings from this map (optional operation).
@@ -372,7 +378,7 @@ public interface Map<K, V> {
      * @throws UnsupportedOperationException if the {@code clear} operation
      *         is not supported by this map
      */
-    void clear(@GuardSatisfied Map<K, V> this);
+    void clear(@Mutable @GuardSatisfied Map<K, V> this);
 
 
     // Views
@@ -430,7 +436,7 @@ public interface Map<K, V> {
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
-    @PolyNonEmpty Set<Map.Entry<@KeyFor({"this"}) K, V>> entrySet(@GuardSatisfied @PolyNonEmpty Map<K, V> this);
+    @PolyNonEmpty Set<Map.Entry<@KeyFor({"this"}) K, V>> entrySet(@Readonly @GuardSatisfied @PolyNonEmpty Map<K, V> this);
 
     /**
      * A map entry (key-value pair). The Entry may be unmodifiable, or the
@@ -806,7 +812,7 @@ public interface Map<K, V> {
      * removed during iteration
      * @since 1.8
      */
-    default void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    default void replaceAll(@Mutable Map<K, V> this, BiFunction<? super K, ? super V, ? extends V> function) {
         Objects.requireNonNull(function);
         for (Map.Entry<K, V> entry : entrySet()) {
             K k;
@@ -874,7 +880,7 @@ public interface Map<K, V> {
      * @since 1.8
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    default @Nullable V putIfAbsent(K key, V value) {
+    default @Nullable V putIfAbsent(@Mutable Map<K, V> this, K key, V value) {
         V v = get(key);
         if (v == null) {
             v = put(key, value);
@@ -918,7 +924,7 @@ public interface Map<K, V> {
      * @since 1.8
      */
     @CFComment("nullness: key and value are not @Nullable because this map might not permit null values")
-    default boolean remove(@GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
+    default boolean remove(@Mutable Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
         Object curValue = (key);
         if (!Objects.equals(curValue, value) ||
             (curValue == null && !containsKey(key))) {
@@ -970,7 +976,7 @@ public interface Map<K, V> {
      *         or value prevents it from being stored in this map
      * @since 1.8
      */
-    default boolean replace(K key, V oldValue, V newValue) {
+    default boolean replace(@Mutable Map<K, V> this, K key, V oldValue, V newValue) {
         Object curValue = get(key);
         if (!Objects.equals(curValue, oldValue) ||
             (curValue == null && !containsKey(key))) {
@@ -1018,7 +1024,7 @@ public interface Map<K, V> {
      *         or value prevents it from being stored in this map
      * @since 1.8
      */
-    default @Nullable V replace(K key, V value) {
+    default @Nullable V replace(@Mutable Map<K, V> this, K key, V value) {
         V curValue;
         if (((curValue = get(key)) != null) || containsKey(key)) {
             curValue = put(key, value);

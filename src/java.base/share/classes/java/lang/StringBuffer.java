@@ -30,6 +30,7 @@ import org.checkerframework.checker.index.qual.IndexOrHigh;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -117,7 +118,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * @since   1.0
  */
 @AnnotatedFor({"aliasing", "lock", "nullness", "index"})
- public final class StringBuffer
+ public final @Mutable class StringBuffer
     extends AbstractStringBuilder
     implements java.io.Serializable, Comparable<StringBuffer>, CharSequence
 {

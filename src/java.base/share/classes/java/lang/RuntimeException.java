@@ -26,6 +26,8 @@
 package java.lang;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -45,7 +47,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since   1.0
  */
 @AnnotatedFor({"nullness"})
-public class RuntimeException extends Exception {
+public @ReceiverDependentMutable class RuntimeException extends Exception {
     @java.io.Serial
     static final long serialVersionUID = -7034897190745766939L;
 
@@ -102,7 +104,7 @@ public class RuntimeException extends Exception {
      * @since  1.4
      */
     @SideEffectFree
-    public RuntimeException(@Nullable Throwable cause) {
+    public @ReceiverDependentMutable RuntimeException(@Readonly @Nullable Throwable cause) {
         super(cause);
     }
 
@@ -121,7 +123,7 @@ public class RuntimeException extends Exception {
      *
      * @since 1.7
      */
-    protected RuntimeException(@Nullable String message, @Nullable Throwable cause,
+    protected @ReceiverDependentMutable RuntimeException(@Nullable String message, @Readonly @Nullable Throwable cause,
                                boolean enableSuppression,
                                boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
