@@ -71,8 +71,7 @@ import java.util.function.Consumer;
 })
 @AnnotatedFor({"lock", "nullness"})
 @Covariant({0})
-@ReceiverDependentMutable
-public interface Iterator<E> {
+public @ReceiverDependentMutable interface Iterator<E> {
     /**
      * Returns {@code true} if the iteration has more elements.
      * (In other words, returns {@code true} if {@link #next} would

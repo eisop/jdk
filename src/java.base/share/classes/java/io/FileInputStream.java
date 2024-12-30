@@ -72,8 +72,7 @@ import sun.nio.ch.FileChannelImpl;
  * @since   1.0
  */
 @AnnotatedFor({"index", "initialization", "mustcall", "nullness"})
-@ReceiverDependentMutable
-public class FileInputStream extends InputStream
+public @ReceiverDependentMutable class FileInputStream extends InputStream
 {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 

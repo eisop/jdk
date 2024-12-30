@@ -139,8 +139,7 @@ import sun.util.calendar.ZoneInfo;
  * @since   1.0
  */
 @AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable
-public class Date
+public @ReceiverDependentMutable class Date
     implements java.io.Serializable, Cloneable, Comparable<Date>
 {
     private static final BaseCalendar gcal =
@@ -174,7 +173,7 @@ public class Date
      *
      * @see     java.lang.System#currentTimeMillis()
      */
-    @ReceiverDependentMutable public Date() {
+     public @ReceiverDependentMutable Date() {
         this(System.currentTimeMillis());
     }
 
@@ -187,7 +186,7 @@ public class Date
      * @param   date   the milliseconds since January 1, 1970, 00:00:00 GMT.
      * @see     java.lang.System#currentTimeMillis()
      */
-    @ReceiverDependentMutable public Date(long date) {
+     public @ReceiverDependentMutable Date(long date) {
         fastTime = date;
     }
 
