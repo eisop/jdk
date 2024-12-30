@@ -27,6 +27,7 @@ package java.util;
 
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.dataflow.qual.Pure;
@@ -677,7 +678,7 @@ public @ReceiverDependentMutable class Date
      * replaced by {@code Calendar.set(Calendar.YEAR, year + 1900)}.
      */
     @Deprecated
-    public void setYear(@GuardSatisfied Date this, int year) {
+    public void setYear(@Mutable @GuardSatisfied Date this, int year) {
         getCalendarDate().setNormalizedYear(year + 1900);
     }
 
@@ -712,7 +713,7 @@ public @ReceiverDependentMutable class Date
      * replaced by {@code Calendar.set(Calendar.MONTH, int month)}.
      */
     @Deprecated
-    public void setMonth(@GuardSatisfied Date this, int month) {
+    public void setMonth(@Mutable @GuardSatisfied Date this, int month) {
         int y = 0;
         if (month >= 12) {
             y = month / 12;
@@ -761,7 +762,7 @@ public @ReceiverDependentMutable class Date
      * replaced by {@code Calendar.set(Calendar.DAY_OF_MONTH, int date)}.
      */
     @Deprecated
-    public void setDate(@GuardSatisfied Date this, int date) {
+    public void setDate(@Mutable @GuardSatisfied Date this, int date) {
         getCalendarDate().setDayOfMonth(date);
     }
 
@@ -814,7 +815,7 @@ public @ReceiverDependentMutable class Date
      * replaced by {@code Calendar.set(Calendar.HOUR_OF_DAY, int hours)}.
      */
     @Deprecated
-    public void setHours(@GuardSatisfied Date this, int hours) {
+    public void setHours(@Mutable @GuardSatisfied Date this, int hours) {
         getCalendarDate().setHours(hours);
     }
 
@@ -846,7 +847,7 @@ public @ReceiverDependentMutable class Date
      * replaced by {@code Calendar.set(Calendar.MINUTE, int minutes)}.
      */
     @Deprecated
-    public void setMinutes(@GuardSatisfied Date this, int minutes) {
+    public void setMinutes(@Mutable @GuardSatisfied Date this, int minutes) {
         getCalendarDate().setMinutes(minutes);
     }
 
@@ -879,7 +880,7 @@ public @ReceiverDependentMutable class Date
      * replaced by {@code Calendar.set(Calendar.SECOND, int seconds)}.
      */
     @Deprecated
-    public void setSeconds(@GuardSatisfied Date this, int seconds) {
+    public void setSeconds(@Mutable @GuardSatisfied Date this, int seconds) {
         getCalendarDate().setSeconds(seconds);
     }
 
@@ -907,7 +908,7 @@ public @ReceiverDependentMutable class Date
      *
      * @param   time   the number of milliseconds.
      */
-    public void setTime(@GuardSatisfied Date this, long time) {
+    public void setTime(@Mutable @GuardSatisfied Date this, long time) {
         fastTime = time;
         cdate = null;
     }
