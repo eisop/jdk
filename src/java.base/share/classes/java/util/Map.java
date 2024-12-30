@@ -436,7 +436,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
-    @PolyNonEmpty Set<Map.Entry<@KeyFor({"this"}) K, V>> entrySet(@GuardSatisfied @PolyNonEmpty Map<K, V> this);
+    @PolyNonEmpty Set<Map.Entry<@KeyFor({"this"}) K, V>> entrySet(@Readonly @GuardSatisfied @PolyNonEmpty Map<K, V> this);
 
     /**
      * A map entry (key-value pair). The Entry may be unmodifiable, or the
@@ -812,7 +812,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * removed during iteration
      * @since 1.8
      */
-    default void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    default void replaceAll(@Mutable Map<K, V> this, BiFunction<? super K, ? super V, ? extends V> function) {
         Objects.requireNonNull(function);
         for (Map.Entry<K, V> entry : entrySet()) {
             K k;
@@ -880,7 +880,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @since 1.8
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    default @Nullable V putIfAbsent(K key, V value) {
+    default @Nullable V putIfAbsent(@Mutable Map<K, V> this, K key, V value) {
         V v = get(key);
         if (v == null) {
             v = put(key, value);
@@ -924,7 +924,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @since 1.8
      */
     @CFComment("nullness: key and value are not @Nullable because this map might not permit null values")
-    default boolean remove(@GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
+    default boolean remove(@Mutable Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
         Object curValue = (key);
         if (!Objects.equals(curValue, value) ||
             (curValue == null && !containsKey(key))) {
@@ -976,7 +976,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *         or value prevents it from being stored in this map
      * @since 1.8
      */
-    default boolean replace(K key, V oldValue, V newValue) {
+    default boolean replace(@Mutable Map<K, V> this, K key, V oldValue, V newValue) {
         Object curValue = get(key);
         if (!Objects.equals(curValue, oldValue) ||
             (curValue == null && !containsKey(key))) {
@@ -1024,7 +1024,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *         or value prevents it from being stored in this map
      * @since 1.8
      */
-    default @Nullable V replace(K key, V value) {
+    default @Nullable V replace(@Mutable Map<K, V> this, K key, V value) {
         V curValue;
         if (((curValue = get(key)) != null) || containsKey(key)) {
             curValue = put(key, value);
