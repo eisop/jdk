@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,9 +38,6 @@ import java.awt.peer.ComponentPeer;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 import java.util.EmptyStackException;
 
 import sun.awt.*;
@@ -50,11 +47,6 @@ import sun.util.logging.PlatformLogger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import java.security.AccessControlContext;
-
-import jdk.internal.access.SharedSecrets;
-import jdk.internal.access.JavaSecurityAccess;
 
 /**
  * {@code EventQueue} is a platform-independent class
@@ -102,7 +94,6 @@ import jdk.internal.access.JavaSecurityAccess;
  */
 @UIType
 @AnnotatedFor({"interning"})
-@SuppressWarnings("removal")
 public @UsesObjectEquals class EventQueue {
     private static final AtomicInteger threadInitNumber = new AtomicInteger();
 
@@ -200,8 +191,6 @@ public @UsesObjectEquals class EventQueue {
         return eventLog;
     }
 
-    private static boolean fxAppThreadIsDispatchThread;
-
     static {
         AWTAccessor.setEventQueueAccessor(
             new AWTAccessor.EventQueueAccessor() {
@@ -238,14 +227,10 @@ public @UsesObjectEquals class EventQueue {
                     return eventQueue.getMostRecentEventTimeImpl();
                 }
             });
-        AccessController.doPrivileged(new PrivilegedAction<Object>() {
-            public Object run() {
-                fxAppThreadIsDispatchThread =
-                        "true".equals(System.getProperty("javafx.embed.singleThread"));
-                return null;
-            }
-        });
     }
+
+    private static boolean fxAppThreadIsDispatchThread =
+            "true".equals(System.getProperty("javafx.embed.singleThread"));
 
     /**
      * Initializes a new instance of {@code EventQueue}.
@@ -554,7 +539,7 @@ public @UsesObjectEquals class EventQueue {
      * returns it.  This method will block until an event has
      * been posted by another thread.
      * @return the next {@code AWTEvent}
-     * @exception InterruptedException
+     * @throws InterruptedException
      *            if any thread has interrupted this thread
      */
     public AWTEvent getNextEvent() throws InterruptedException {
@@ -678,9 +663,6 @@ public @UsesObjectEquals class EventQueue {
         return null;
     }
 
-    private static final JavaSecurityAccess javaSecurityAccess =
-        SharedSecrets.getJavaSecurityAccess();
-
     /**
      * Dispatches an event. The manner in which the event is
      * dispatched depends upon the type of the event and the
@@ -721,55 +703,25 @@ public @UsesObjectEquals class EventQueue {
      */
     protected void dispatchEvent(final AWTEvent event) {
         final Object src = event.getSource();
-        final PrivilegedAction<Void> action = new PrivilegedAction<Void>() {
-            public Void run() {
-                // In case fwDispatcher is installed and we're already on the
-                // dispatch thread (e.g. performing DefaultKeyboardFocusManager.sendMessage),
-                // dispatch the event straight away.
-                if (fwDispatcher == null || isDispatchThreadImpl()) {
-                    dispatchEventImpl(event, src);
-                } else {
-                    fwDispatcher.scheduleDispatch(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (dispatchThread.filterAndCheckEvent(event)) {
-                                dispatchEventImpl(event, src);
-                            }
-                        }
-                    });
-                }
-                return null;
-            }
-        };
-
-        final AccessControlContext stack = AccessController.getContext();
-        final AccessControlContext srcAcc = getAccessControlContextFrom(src);
-        final AccessControlContext eventAcc = event.getAccessControlContext();
-        if (srcAcc == null) {
-            javaSecurityAccess.doIntersectionPrivilege(action, stack, eventAcc);
+        // In case fwDispatcher is installed and we're already on the
+        // dispatch thread (e.g. performing DefaultKeyboardFocusManager.sendMessage),
+        // dispatch the event straight away.
+        if (fwDispatcher == null || isDispatchThreadImpl()) {
+            dispatchEventImpl(event, src);
         } else {
-            javaSecurityAccess.doIntersectionPrivilege(
-                new PrivilegedAction<Void>() {
-                    public Void run() {
-                        javaSecurityAccess.doIntersectionPrivilege(action, eventAcc);
-                        return null;
+            fwDispatcher.scheduleDispatch(new Runnable() {
+                @Override
+                public void run() {
+                    if (dispatchThread.filterAndCheckEvent(event)) {
+                        dispatchEventImpl(event, src);
                     }
-                }, stack, srcAcc);
+                }
+            });
         }
     }
 
-    private static AccessControlContext getAccessControlContextFrom(Object src) {
-        return src instanceof Component ?
-            ((Component)src).getAccessControlContext() :
-            src instanceof MenuComponent ?
-                ((MenuComponent)src).getAccessControlContext() :
-                src instanceof TrayIcon ?
-                    ((TrayIcon)src).getAccessControlContext() :
-                    null;
-    }
-
     /**
-     * Called from dispatchEvent() under a correct AccessControlContext
+     * Called from dispatchEvent()
      */
     private void dispatchEventImpl(final AWTEvent event, final Object src) {
         event.isPosted = true;
@@ -952,7 +904,7 @@ public @UsesObjectEquals class EventQueue {
      * Warning: To avoid deadlock, do not declare this method
      * synchronized in a subclass.
      *
-     * @exception EmptyStackException if no previous push was made
+     * @throws EmptyStackException if no previous push was made
      *  on this {@code EventQueue}
      * @see      java.awt.EventQueue#push
      * @since           1.2
@@ -1114,26 +1066,17 @@ public @UsesObjectEquals class EventQueue {
         }
     }
 
-    @SuppressWarnings({"deprecation", "removal"})
+    @SuppressWarnings("removal")
     final void initDispatchThread() {
         pushPopLock.lock();
         try {
             if (dispatchThread == null && !threadGroup.isDestroyed() && !appContext.isDisposed()) {
-                dispatchThread = AccessController.doPrivileged(
-                    new PrivilegedAction<EventDispatchThread>() {
-                        public EventDispatchThread run() {
-                            EventDispatchThread t =
-                                new EventDispatchThread(threadGroup,
-                                                        name,
-                                                        EventQueue.this);
-                            t.setContextClassLoader(classLoader);
-                            t.setPriority(Thread.NORM_PRIORITY + 1);
-                            t.setDaemon(false);
-                            AWTAutoShutdown.getInstance().notifyThreadBusy(t);
-                            return t;
-                        }
-                    }
-                );
+                EventDispatchThread t = new EventDispatchThread(threadGroup, name, EventQueue.this);
+                t.setContextClassLoader(classLoader);
+                t.setPriority(Thread.NORM_PRIORITY + 1);
+                t.setDaemon(false);
+                AWTAutoShutdown.getInstance().notifyThreadBusy(t);
+                dispatchThread = t;
                 dispatchThread.start();
             }
         } finally {
@@ -1338,9 +1281,9 @@ public @UsesObjectEquals class EventQueue {
      *                  synchronously in the
      *                  {@link #isDispatchThread event dispatch thread}
      *                  of {@link Toolkit#getSystemEventQueue the system EventQueue}
-     * @exception       InterruptedException  if any thread has
+     * @throws       InterruptedException  if any thread has
      *                  interrupted this thread
-     * @exception       InvocationTargetException  if an throwable is thrown
+     * @throws       InvocationTargetException  if an throwable is thrown
      *                  when running {@code runnable}
      * @see             #invokeLater
      * @see             Toolkit#getSystemEventQueue

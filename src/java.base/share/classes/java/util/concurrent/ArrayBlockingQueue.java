@@ -48,6 +48,7 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.AbstractQueue;
 import java.util.Arrays;
@@ -695,7 +696,7 @@ public class ArrayBlockingQueue<E extends Object> extends AbstractQueue<E>
     }
 
     /**
-     * Nulls out slots starting at array index i, upto index end.
+     * Nulls out slots starting at array index i, up to index end.
      * Condition i == end means "full" - the entire array is cleared.
      */
     private static void circularClear(Object[] items, int i, int end) {
@@ -1637,6 +1638,23 @@ public class ArrayBlockingQueue<E extends Object> extends AbstractQueue<E>
             && (count == 0 || items[takeIndex] != null)
             && (count == capacity || items[putIndex] == null)
             && (count == 0 || items[dec(putIndex, capacity)] != null);
+    }
+
+    /**
+     * Writes the queue to the stream whilst holding the locks to prevent
+     * broken invariants.
+     *
+     * @param s the stream
+     * @throws java.io.IOException if an I/O error occurs
+     */
+    private void writeObject(java.io.ObjectOutputStream s) throws IOException {
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            s.defaultWriteObject();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

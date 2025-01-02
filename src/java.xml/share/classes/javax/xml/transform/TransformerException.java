@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,13 +29,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.Objects;
 
@@ -50,6 +47,7 @@ public class TransformerException extends Exception {
     private static final long serialVersionUID = 975798773772956428L;
 
     /** Field locator specifies where the error occurred */
+    @SuppressWarnings("serial") // Type of field is not Serializable
     SourceLocator locator;
 
     /**
@@ -231,19 +229,11 @@ public class TransformerException extends Exception {
      * @return A string with location info, or null
      * if there is no location information.
      */
-    @SuppressWarnings("removal")
     public String getLocationAsString() {
         if (locator == null) {
             return null;
         }
-
-        if (System.getSecurityManager() == null) {
-            return getLocationString();
-        } else {
-            return AccessController.doPrivileged((PrivilegedAction<String>) () ->
-                getLocationString(),
-                new AccessControlContext(new ProtectionDomain[] {getNonPrivDomain()}));
-        }
+        return getLocationString();
     }
 
     /**
@@ -279,7 +269,7 @@ public class TransformerException extends Exception {
     }
 
     /**
-     * Print the the trace of methods from where the error
+     * Print the trace of methods from where the error
      * originated.  This will trace all nested exception
      * objects, as well as this object.
      */
@@ -289,7 +279,7 @@ public class TransformerException extends Exception {
     }
 
     /**
-     * Print the the trace of methods from where the error
+     * Print the trace of methods from where the error
      * originated.  This will trace all nested exception
      * objects, as well as this object.
      * @param s The stream where the dump will be sent to.
@@ -300,7 +290,7 @@ public class TransformerException extends Exception {
     }
 
     /**
-     * Print the the trace of methods from where the error
+     * Print the trace of methods from where the error
      * originated.  This will trace all nested exception
      * objects, as well as this object.
      * @param s The writer where the dump will be sent to.

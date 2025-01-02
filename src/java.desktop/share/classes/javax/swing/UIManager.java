@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -40,8 +40,6 @@ import java.awt.Toolkit;
 
 import java.awt.event.KeyEvent;
 
-import java.security.AccessController;
-
 import javax.swing.plaf.ComponentUI;
 import javax.swing.border.Border;
 
@@ -60,9 +58,7 @@ import java.util.Locale;
 
 import sun.awt.SunToolkit;
 import sun.awt.OSInfo;
-import sun.security.action.GetPropertyAction;
 import sun.swing.SwingUtilities2;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Objects;
 import sun.awt.AppContext;
@@ -300,8 +296,6 @@ public class UIManager implements Serializable
      */
     private static String makeSwingPropertiesFilename() {
         String sep = File.separator;
-        // No need to wrap this in a doPrivileged as it's called from
-        // a doPrivileged.
         String javaHome = System.getProperty("java.home");
         if (javaHome == null) {
             javaHome = "<java.home undefined>";
@@ -387,9 +381,8 @@ public class UIManager implements Serializable
         iLAFs.add(new LookAndFeelInfo("CDE/Motif",
                   "com.sun.java.swing.plaf.motif.MotifLookAndFeel"));
 
-        // Only include windows on Windows boxs.
-        @SuppressWarnings("removal")
-        OSInfo.OSType osType = AccessController.doPrivileged(OSInfo.getOSTypeAction());
+        // Only include windows on Windows boxes.
+        OSInfo.OSType osType = OSInfo.getOSType();
         if (osType == OSInfo.OSType.WINDOWS) {
             iLAFs.add(new LookAndFeelInfo("Windows",
                         "com.sun.java.swing.plaf.windows.WindowsLookAndFeel"));
@@ -455,9 +448,7 @@ public class UIManager implements Serializable
      * @see #getInstalledLookAndFeels
      * @throws NullPointerException if {@code infos} is {@code null}
      */
-    public static void setInstalledLookAndFeels(LookAndFeelInfo[] infos)
-        throws SecurityException
-    {
+    public static void setInstalledLookAndFeels(LookAndFeelInfo[] infos) {
         maybeInitialize();
         LookAndFeelInfo[] newInfos = new LookAndFeelInfo[infos.length];
         System.arraycopy(infos, 0, newInfos, 0, infos.length);
@@ -653,7 +644,7 @@ public class UIManager implements Serializable
      * Returns the name of the <code>LookAndFeel</code> class that implements
      * the native system look and feel if there is one, otherwise
      * the name of the default cross platform <code>LookAndFeel</code>
-     * class. This value can be overriden by setting the
+     * class. This value can be overridden by setting the
      * <code>swing.systemlaf</code> system property.
      *
      * @return the <code>String</code> of the <code>LookAndFeel</code>
@@ -663,14 +654,11 @@ public class UIManager implements Serializable
      * @see #getCrossPlatformLookAndFeelClassName
      */
     public static String getSystemLookAndFeelClassName() {
-        @SuppressWarnings("removal")
-        String systemLAF = AccessController.doPrivileged(
-                             new GetPropertyAction("swing.systemlaf"));
+        String systemLAF = System.getProperty("swing.systemlaf");
         if (systemLAF != null) {
             return systemLAF;
         }
-        @SuppressWarnings("removal")
-        OSInfo.OSType osType = AccessController.doPrivileged(OSInfo.getOSTypeAction());
+        OSInfo.OSType osType = OSInfo.getOSType();
         if (osType == OSInfo.OSType.WINDOWS) {
             return "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         } else {
@@ -697,7 +685,7 @@ public class UIManager implements Serializable
     /**
      * Returns the name of the <code>LookAndFeel</code> class that implements
      * the default cross platform look and feel -- the Java
-     * Look and Feel (JLF).  This value can be overriden by setting the
+     * Look and Feel (JLF).  This value can be overridden by setting the
      * <code>swing.crossplatformlaf</code> system property.
      *
      * @return  a string with the JLF implementation-class
@@ -705,9 +693,7 @@ public class UIManager implements Serializable
      * @see #getSystemLookAndFeelClassName
      */
     public static String getCrossPlatformLookAndFeelClassName() {
-        @SuppressWarnings("removal")
-        String laf = AccessController.doPrivileged(
-                             new GetPropertyAction("swing.crossplatformlaf"));
+        String laf = System.getProperty("swing.crossplatformlaf");
         if (laf != null) {
             return laf;
         }
@@ -1284,7 +1270,6 @@ public class UIManager implements Serializable
         }
     }
 
-    @SuppressWarnings("removal")
     private static Properties loadSwingProperties()
     {
         /* Don't bother checking for Swing properties if untrusted, as
@@ -1296,47 +1281,38 @@ public class UIManager implements Serializable
         else {
             final Properties props = new Properties();
 
-            java.security.AccessController.doPrivileged(
-                new java.security.PrivilegedAction<Object>() {
-                public Object run() {
-                    OSInfo.OSType osType = AccessController.doPrivileged(OSInfo.getOSTypeAction());
-                    if (osType == OSInfo.OSType.MACOSX) {
-                        props.put(defaultLAFKey, getSystemLookAndFeelClassName());
-                    }
+            if (OSInfo.getOSType() == OSInfo.OSType.MACOSX) {
+                props.put(defaultLAFKey, getSystemLookAndFeelClassName());
+            }
 
-                    try {
-                        File file = new File(makeSwingPropertiesFilename());
+            try {
+                File file = new File(makeSwingPropertiesFilename());
 
-                        if (file.exists()) {
-                            // InputStream has been buffered in Properties
-                            // class
-                            FileInputStream ins = new FileInputStream(file);
-                            props.load(ins);
-                            ins.close();
-                        }
+                if (file.exists()) {
+                    // InputStream has been buffered in Properties
+                    // class
+                    try (FileInputStream ins = new FileInputStream(file)) {
+                        props.load(ins);
                     }
-                    catch (Exception e) {
-                        // No such file, or file is otherwise non-readable.
-                    }
-
-                    // Check whether any properties were overridden at the
-                    // command line.
-                    checkProperty(props, defaultLAFKey);
-                    checkProperty(props, auxiliaryLAFsKey);
-                    checkProperty(props, multiplexingLAFKey);
-                    checkProperty(props, installedLAFsKey);
-                    checkProperty(props, disableMnemonicKey);
-                    // Don't care about return value.
-                    return null;
                 }
-            });
+            }
+            catch (Exception e) {
+                // No such file, or file is otherwise non-readable.
+            }
+
+            // Check whether any properties were overridden at the
+            // command line.
+            checkProperty(props, defaultLAFKey);
+            checkProperty(props, auxiliaryLAFsKey);
+            checkProperty(props, multiplexingLAFKey);
+            checkProperty(props, installedLAFsKey);
+            checkProperty(props, disableMnemonicKey);
+
             return props;
         }
     }
 
     private static void checkProperty(Properties props, String key) {
-        // No need to do catch the SecurityException here, this runs
-        // in a doPrivileged.
         String value = System.getProperty(key);
         if (value != null) {
             props.put(key, value);
@@ -1362,28 +1338,28 @@ public class UIManager implements Serializable
          * property.  For example given "swing.installedlafs=motif,windows"
          * lafs = {"motif", "windows"}.
          */
-        Vector<String> lafs = new Vector<String>();
+        ArrayList<String> lafs = new ArrayList<String>();
         StringTokenizer st = new StringTokenizer(ilafsString, ",", false);
         while (st.hasMoreTokens()) {
-            lafs.addElement(st.nextToken());
+            lafs.add(st.nextToken());
         }
 
         /* Look up the name and class for each name in the "swing.installedlafs"
          * list.  If they both exist then add a LookAndFeelInfo to
          * the installedLafs array.
          */
-        Vector<LookAndFeelInfo> ilafs = new Vector<LookAndFeelInfo>(lafs.size());
+        ArrayList<LookAndFeelInfo> ilafs = new ArrayList<LookAndFeelInfo>(lafs.size());
         for (String laf : lafs) {
             String name = swingProps.getProperty(makeInstalledLAFKey(laf, "name"), laf);
             String cls = swingProps.getProperty(makeInstalledLAFKey(laf, "class"));
             if (cls != null) {
-                ilafs.addElement(new LookAndFeelInfo(name, cls));
+                ilafs.add(new LookAndFeelInfo(name, cls));
             }
         }
 
         LookAndFeelInfo[] installedLAFs = new LookAndFeelInfo[ilafs.size()];
         for(int i = 0; i < ilafs.size(); i++) {
-            installedLAFs[i] = ilafs.elementAt(i);
+            installedLAFs[i] = ilafs.get(i);
         }
         getLAFState().installedLAFs = installedLAFs;
     }

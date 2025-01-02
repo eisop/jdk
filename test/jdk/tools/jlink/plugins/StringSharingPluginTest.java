@@ -33,7 +33,6 @@
  *          jdk.jlink/jdk.tools.jlink.plugin
  *          jdk.jlink/jdk.tools.jmod
  *          jdk.jlink/jdk.tools.jimage
- *          jdk.jdeps/com.sun.tools.classfile
  *          jdk.compiler
  * @run build tests.*
  * @run main StringSharingPluginTest

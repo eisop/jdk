@@ -27,7 +27,6 @@
  * @author Andrei Eremeev
  * @library ../lib
  * @modules java.base/jdk.internal.jimage
- *          jdk.jdeps/com.sun.tools.classfile
  *          jdk.jlink/jdk.tools.jlink.internal
  *          jdk.jlink/jdk.tools.jmod
  *          jdk.jlink/jdk.tools.jimage

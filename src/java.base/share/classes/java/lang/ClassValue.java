@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,6 +43,7 @@ import static java.lang.ClassValue.ClassValueMap.probeBackupLocations;
  * table for each class encountered at a message send call site,
  * it can use a {@code ClassValue} to cache information needed to
  * perform the message send quickly, for each class encountered.
+ * @param <T> the type of the derived value
  * @author John Rose, JSR 292 EG
  * @since 1.7
  */
@@ -184,9 +185,9 @@ public abstract @UsesObjectEquals class ClassValue<T> {
         map.changeEntry(this, value);
     }
 
-    /// --------
-    /// Implementation...
-    /// --------
+    //| --------
+    //| Implementation...
+    //| --------
 
     /** Return the cache, if it exists, else a dummy empty cache. */
     private static Entry<?>[] getCacheCarefully(Class<?> type) {
@@ -538,9 +539,9 @@ public abstract @UsesObjectEquals class ClassValue<T> {
             addToCache(classValue, e);
         }
 
-        /// --------
-        /// Cache management.
-        /// --------
+        //| --------
+        //| Cache management.
+        //| --------
 
         // Statics do not need synchronization.
 
@@ -689,7 +690,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
             if (haveReplacement >= 0) {
                 if (cache[(replacementPos+1) & mask] != null) {
                     // Be conservative, to avoid breaking up a non-null run.
-                    cache[replacementPos & mask] = (Entry<?>) Entry.DEAD_ENTRY;
+                    cache[replacementPos & mask] = Entry.DEAD_ENTRY;
                 } else {
                     cache[replacementPos & mask] = null;
                     cacheLoad -= 1;

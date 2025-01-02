@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,7 +28,9 @@
 #include "gc/parallel/psPromotionLAB.hpp"
 #include "gc/shared/copyFailedInfo.hpp"
 #include "gc/shared/gcTrace.hpp"
+#include "gc/shared/partialArrayTaskStepper.hpp"
 #include "gc/shared/preservedMarks.hpp"
+#include "gc/shared/stringdedup/stringDedup.hpp"
 #include "gc/shared/taskqueue.hpp"
 #include "memory/padded.hpp"
 #include "utilities/globalDefinitions.hpp"
@@ -48,6 +50,8 @@
 class MutableSpace;
 class PSOldGen;
 class ParCompactionManager;
+class PartialArrayState;
+class PartialArrayStateAllocator;
 
 class PSPromotionManager {
   friend class PSScavenge;
@@ -81,16 +85,18 @@ class PSPromotionManager {
   bool                                _old_gen_is_full;
 
   PSScannerTasksQueue                 _claimed_stack_depth;
-  OverflowTaskQueue<oop, mtGC>        _claimed_stack_breadth;
 
-  bool                                _totally_drain;
   uint                                _target_stack_size;
 
-  uint                                _array_chunk_size;
+  static PartialArrayStateAllocator*  _partial_array_state_allocator;
+  PartialArrayTaskStepper             _partial_array_stepper;
+  uint                                _partial_array_state_allocator_index;
   uint                                _min_array_size_for_chunking;
 
   PreservedMarks*                     _preserved_marks;
   PromotionFailedInfo                 _promotion_failed_info;
+
+  StringDedup::Requests _string_dedup_requests;
 
   // Accessors
   static PSOldGen* old_gen()         { return _old_gen; }
@@ -100,11 +106,12 @@ class PSPromotionManager {
 
   template <class T> void  process_array_chunk_work(oop obj,
                                                     int start, int end);
-  void process_array_chunk(PartialArrayScanTask task);
+  void process_array_chunk(PartialArrayState* state);
+  void push_objArray(oop old_obj, oop new_obj);
 
   void push_depth(ScannerTask task);
 
-  inline void promotion_trace_event(oop new_obj, oop old_obj, size_t obj_size,
+  inline void promotion_trace_event(oop new_obj, Klass* klass, size_t obj_size,
                                     uint age, bool tenured,
                                     const PSPromotionLAB* lab);
 
@@ -132,11 +139,6 @@ class PSPromotionManager {
     return &_claimed_stack_depth;
   }
 
-  bool young_gen_is_full()             { return _young_gen_is_full; }
-
-  bool old_gen_is_full()               { return _old_gen_is_full; }
-  void set_old_gen_is_full(bool state) { _old_gen_is_full = state; }
-
   // Promotion methods
   template<bool promote_immediately> oop copy_to_survivor_space(oop o);
   oop oop_promotion_failed(oop obj, markWord obj_mark);
@@ -146,6 +148,8 @@ class PSPromotionManager {
   static void restore_preserved_marks();
 
   void flush_labs();
+  void flush_string_dedup_requests() { _string_dedup_requests.flush(); }
+
   void drain_stacks(bool totally_drain) {
     drain_stacks_depth(totally_drain);
   }
@@ -174,6 +178,7 @@ class PSPromotionManager {
   TASKQUEUE_STATS_ONLY(inline void record_steal(ScannerTask task);)
 
   void push_contents(oop obj);
+  void push_contents_bounded(oop obj, HeapWord* left, HeapWord* right);
 };
 
 #endif // SHARE_GC_PARALLEL_PSPROMOTIONMANAGER_HPP

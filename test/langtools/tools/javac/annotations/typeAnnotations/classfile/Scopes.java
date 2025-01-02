@@ -25,14 +25,13 @@ import java.lang.annotation.*;
 import java.io.*;
 import java.net.URL;
 import java.util.List;
-
-import com.sun.tools.classfile.*;
+import java.lang.classfile.*;
+import java.lang.classfile.attribute.*;
 
 /*
  * @test
  * @bug 6843077 8006775
  * @summary Qualified inner type annotation accessible to the class.
- * @modules jdk.jdeps/com.sun.tools.classfile
  */
 
 @Scopes.UniqueInner
@@ -45,8 +44,8 @@ public class Scopes<T extends @Scopes.UniqueInner Object> extends ClassfileTestH
         expected_tinvisibles = 1;
         expected_invisibles = 1;
 
-        ClassFile cf = getClassFile("Scopes.class");
-        test(cf);
+        ClassModel cm = getClassFile("Scopes.class");
+        test(cm);
 
         countAnnotations();
 

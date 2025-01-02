@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -36,11 +36,10 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.MalformedInputException;
 import sun.nio.cs.DelegatableDecoder;
 import sun.nio.cs.HistoricallyNamedCharset;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import sun.nio.cs.*;
 import static java.lang.Character.UnicodeBlock;
 
+import jdk.internal.util.OperatingSystem;
 
 public class JISAutoDetect
     extends Charset
@@ -62,7 +61,8 @@ public class JISAutoDetect
         return ((cs.name().equals("US-ASCII"))
                 || (cs instanceof SJIS)
                 || (cs instanceof EUC_JP)
-                || (cs instanceof ISO2022_JP));
+                || (cs instanceof ISO2022_JP)
+                || (cs instanceof JISAutoDetect));
     }
 
     public boolean canEncode() {
@@ -95,9 +95,6 @@ public class JISAutoDetect
     }
 
     private static class Decoder extends CharsetDecoder {
-        @SuppressWarnings("removal")
-        private static final String osName = AccessController.doPrivileged(
-            (PrivilegedAction<String>) () -> System.getProperty("os.name"));
 
         private static final String SJISName = getSJISName();
         private static final String EUCJPName = "EUC_JP";
@@ -228,7 +225,7 @@ public class JISAutoDetect
          * Returned Shift_JIS Charset name is OS dependent
          */
         private static String getSJISName() {
-            if (osName.startsWith("Windows"))
+            if (OperatingSystem.isWindows())
                 return("windows-31J");
             else
                 return("Shift_JIS");

@@ -6,7 +6,7 @@ jobs:
 - job: build_jdk
   pool:
     vmImage: 'ubuntu-latest'
-  container: wmdietl/cf-ubuntu-jdk17-plus:latest
+  container: mdernst/cf-ubuntu-jdk23-plus:latest
   steps:
   - bash: |
       whoami
@@ -15,7 +15,11 @@ jobs:
       ls -al
       env | sort
     displayName: show environment
-  - bash: pwd && ls && bash ./configure --with-jtreg=/usr/share/jtreg --disable-warnings-as-errors
+  - bash: |
+      wget https://builds.shipilev.net/jtreg/jtreg-7.5%2B1.zip -O /tmp/jtreg.zip
+      unzip /tmp/jtreg.zip -d /tmp/
+    displayName: Install jtreg7
+  - bash: pwd && ls && bash ./configure --with-jtreg=/tmp/jtreg --disable-warnings-as-errors
     displayName: configure
   - bash: make jdk
     timeoutInMinutes: 90

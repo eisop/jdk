@@ -26,6 +26,7 @@
 package jdk.jfr.internal.consumer;
 
 import java.io.IOException;
+import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
@@ -45,9 +46,10 @@ import jdk.jfr.internal.LogTag;
 import jdk.jfr.internal.Logger;
 import jdk.jfr.internal.Repository;
 import jdk.jfr.internal.SecuritySupport.SafePath;
+import jdk.jfr.internal.management.HiddenWait;;
 
 public final class RepositoryFiles {
-    private static final Object WAIT_OBJECT = new Object();
+    private static final HiddenWait WAIT_OBJECT = new HiddenWait();
     private static final String DIRECTORY_PATTERN = "DDDD_DD_DD_DD_DD_DD_";
     public static void notifyNewFile() {
         synchronized (WAIT_OBJECT) {
@@ -58,7 +60,7 @@ public final class RepositoryFiles {
     private final FileAccess fileAccess;
     private final NavigableMap<Long, Path> pathSet = new TreeMap<>();
     private final Map<Path, Long> pathLookup = new HashMap<>();
-    private final Object waitObject;
+    private final HiddenWait waitObject;
     private boolean allowSubDirectory;
     private volatile boolean closed;
     private Path repository;
@@ -66,7 +68,7 @@ public final class RepositoryFiles {
     public RepositoryFiles(FileAccess fileAccess, Path repository, boolean allowSubDirectory) {
         this.repository = repository;
         this.fileAccess = fileAccess;
-        this.waitObject = repository == null ? WAIT_OBJECT : new Object();
+        this.waitObject = repository == null ? WAIT_OBJECT : new HiddenWait();
         this.allowSubDirectory = allowSubDirectory;
     }
 
@@ -100,15 +102,14 @@ public final class RepositoryFiles {
                 if (updatePaths()) {
                     break;
                 }
-            } catch (IOException e) {
-                Logger.log(LogTag.JFR_SYSTEM_STREAMING, LogLevel.DEBUG, "IOException during repository file scan " + e.getMessage());
+            } catch (IOException | DirectoryIteratorException e) {
+                Logger.log(LogTag.JFR_SYSTEM_STREAMING, LogLevel.DEBUG, "Exception during repository file scan " + e.getMessage());
                 // This can happen if a chunk is being removed
                 // between the file was discovered and an instance
-                // was accessed, or if new file has been written yet
-                // Just ignore, and retry later.
+                // was accessed. Just ignore, and retry later.
             }
             if (wait) {
-                nap();
+                waitObject.takeNap(1000);
             } else {
                 return pathLookup.size() > beforeSize;
             }
@@ -131,7 +132,7 @@ public final class RepositoryFiles {
         // Update paths
         try {
             updatePaths();
-        } catch (IOException e) {
+        } catch (IOException | DirectoryIteratorException e) {
             // ignore
         }
         // try to get the next file
@@ -157,17 +158,7 @@ public final class RepositoryFiles {
         }
     }
 
-    private void nap() {
-        try {
-            synchronized (waitObject) {
-                waitObject.wait(1000);
-            }
-        } catch (InterruptedException e) {
-            // ignore
-        }
-    }
-
-    private boolean updatePaths() throws IOException {
+    private boolean updatePaths() throws IOException, DirectoryIteratorException {
         boolean foundNew = false;
         Path repoPath = repository;
 
@@ -213,7 +204,7 @@ public final class RepositoryFiles {
                 pathSet.remove(time);
                 pathLookup.remove(remove);
             }
-            Collections.sort(added, (p1, p2) -> p1.compareTo(p2));
+            Collections.sort(added);
             for (Path p : added) {
                 // Only add files that have a complete header
                 // as the JVM may be in progress writing the file
@@ -254,7 +245,7 @@ public final class RepositoryFiles {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | DirectoryIteratorException e) {
             // Ignore
         }
         return latestPath;

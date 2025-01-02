@@ -266,7 +266,7 @@ public class WWindowPeer extends WPanelPeer implements WindowPeer,
         return (WComponentPeer) WToolkit.targetToPeer(owner);
     }
 
-    // should be overriden in WDialogPeer
+    // should be overridden in WDialogPeer
     protected void realShow() {
         super.show();
     }
@@ -600,6 +600,10 @@ public class WWindowPeer extends WPanelPeer implements WindowPeer,
             newDev.addDisplayChangedListener(this);
         }
 
+        if (((Window)target).isVisible()) {
+            updateIconImages();
+        }
+
         AWTAccessor.getComponentAccessor().
             setGraphicsConfiguration((Component)target, winGraphicsConfig);
     }
@@ -647,16 +651,9 @@ public class WWindowPeer extends WPanelPeer implements WindowPeer,
      private native void nativeGrab();
      private native void nativeUngrab();
 
-     private boolean hasWarningWindow() {
-         return ((Window)target).getWarningString() != null;
-     }
-
      boolean isTargetUndecorated() {
          return true;
      }
-
-     @Override
-     public native void repositionSecurityWarning();
 
     @Override
     public void print(Graphics g) {

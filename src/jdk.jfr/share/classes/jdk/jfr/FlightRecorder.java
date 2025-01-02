@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -44,8 +44,9 @@ import jdk.jfr.internal.Options;
 import jdk.jfr.internal.PlatformRecorder;
 import jdk.jfr.internal.PlatformRecording;
 import jdk.jfr.internal.Repository;
-import jdk.jfr.internal.RequestEngine;
-import jdk.jfr.internal.Utils;
+import jdk.jfr.internal.SecuritySupport;
+import jdk.jfr.internal.util.Utils;
+import jdk.jfr.internal.periodic.PeriodicEvents;
 
 /**
  * Class for accessing, controlling, and managing Flight Recorder.
@@ -92,15 +93,7 @@ public final class FlightRecorder {
      * <p>
      * The following example shows how to create a snapshot and write a subset of the data to a file.
      *
-     * <pre>{@literal
-     * try (Recording snapshot = FlightRecorder.getFlightRecorder().takeSnapshot()) {
-     *   if (snapshot.getSize() > 0) {
-     *     snapshot.setMaxSize(100_000_000);
-     *     snapshot.setMaxAge(Duration.ofMinutes(5));
-     *     snapshot.dump(Paths.get("snapshot.jfr"));
-     *   }
-     * }
-     * }</pre>
+     * {@snippet class="Snippets" region="FlightRecorderTakeSnapshot"}
      *
      * The caller must close the recording when access to the data is no longer
      * needed.
@@ -124,11 +117,9 @@ public final class FlightRecorder {
      *
      * @throws IllegalArgumentException if class is abstract or not a subclass
      *         of {@link Event}
-     * @throws SecurityException if a security manager exists and the caller
-     *         does not have {@code FlightRecorderPermission("registerEvent")}
      */
     public static void register(Class<? extends Event> eventClass) {
-        Objects.requireNonNull(eventClass);
+        Objects.requireNonNull(eventClass, "eventClass");
         if (JVMSupport.isNotAvailable()) {
             return;
         }
@@ -145,12 +136,9 @@ public final class FlightRecorder {
      * @param eventClass the event class to unregistered, not {@code null}
      * @throws IllegalArgumentException if a class is abstract or not a subclass
      *         of {@link Event}
-     *
-     * @throws SecurityException if a security manager exists and the caller
-     *         does not have {@code FlightRecorderPermission("registerEvent")}
      */
     public static void unregister(Class<? extends Event> eventClass) {
-        Objects.requireNonNull(eventClass);
+        Objects.requireNonNull(eventClass, "eventClass");
         if (JVMSupport.isNotAvailable()) {
             return;
         }
@@ -166,13 +154,10 @@ public final class FlightRecorder {
      * @throws IllegalStateException if Flight Recorder can't be created (for
      *         example, if the Java Virtual Machine (JVM) lacks Flight Recorder
      *         support, or if the file repository can't be created or accessed)
-     *
-     * @throws SecurityException if a security manager exists and the caller does
-     *         not have {@code FlightRecorderPermission("accessFlightRecorder")}
      */
-    public static FlightRecorder getFlightRecorder() throws IllegalStateException, SecurityException {
+    public static FlightRecorder getFlightRecorder() throws IllegalStateException {
         synchronized (PlatformRecorder.class) {
-            Utils.checkAccessFlightRecorder();
+            SecuritySupport.checkAccessFlightRecorder();
             JVMSupport.ensureWithIllegalStateException();
             if (platformRecorder == null) {
                 try {
@@ -192,7 +177,6 @@ public final class FlightRecorder {
                     Logger.log(JFR, DEBUG, "globalbuffersize: " + Options.getGlobalBufferSize()+ " bytes");
                     Logger.log(JFR, DEBUG, "globalbuffercount: " + Options.getGlobalBufferCount());
                     Logger.log(JFR, DEBUG, "dumppath: " + Options.getDumpPath());
-                    Logger.log(JFR, DEBUG, "samplethreads: " + Options.getSampleThreads());
                     Logger.log(JFR, DEBUG, "stackdepth: " + Options.getStackDepth());
                     Logger.log(JFR, DEBUG, "threadbuffersize: " + Options.getThreadBufferSize());
                 }
@@ -220,21 +204,19 @@ public final class FlightRecorder {
      *         {@link Event}, is abstract, or the hook is already added
      * @throws IllegalStateException if the event class has the
      *         {@code Registered(false)} annotation and is not registered manually
-     * @throws SecurityException if a security manager exists and the caller
-     *         does not have {@code FlightRecorderPermission("registerEvent")}
      */
-    public static void addPeriodicEvent(Class<? extends Event> eventClass, Runnable hook) throws SecurityException {
-        Objects.requireNonNull(eventClass);
-        Objects.requireNonNull(hook);
+    public static void addPeriodicEvent(Class<? extends Event> eventClass, Runnable hook) {
+        Objects.requireNonNull(eventClass, "eventClass");
+        Objects.requireNonNull(hook, "hook");
         if (JVMSupport.isNotAvailable()) {
             return;
         }
 
         Utils.ensureValidEventSubclass(eventClass);
-        Utils.checkRegisterPermission();
+        SecuritySupport.checkRegisterPermission();
         @SuppressWarnings("removal")
         AccessControlContext acc = AccessController.getContext();
-        RequestEngine.addHook(acc, EventType.getEventType(eventClass).getPlatformEventType(), hook);
+        PeriodicEvents.addUserEvent(acc, eventClass, hook);
     }
 
     /**
@@ -242,16 +224,14 @@ public final class FlightRecorder {
      *
      * @param hook the hook to remove, not {@code null}
      * @return {@code true} if hook is removed, {@code false} otherwise
-     * @throws SecurityException if a security manager exists and the caller
-     *         does not have {@code FlightRecorderPermission("registerEvent")}
      */
-    public static boolean removePeriodicEvent(Runnable hook) throws SecurityException {
-        Objects.requireNonNull(hook);
-        Utils.checkRegisterPermission();
+    public static boolean removePeriodicEvent(Runnable hook) {
+        Objects.requireNonNull(hook, "hook");
+        SecuritySupport.checkRegisterPermission();
         if (JVMSupport.isNotAvailable()) {
             return false;
         }
-        return RequestEngine.removeHook(hook);
+        return PeriodicEvents.removeEvent(hook);
     }
 
     /**
@@ -277,14 +257,10 @@ public final class FlightRecorder {
      * invoked before returning from this method.
      *
      * @param changeListener the listener to add, not {@code null}
-     *
-     * @throws SecurityException if a security manager exists and the caller
-     *         does not have
-     *         {@code FlightRecorderPermission("accessFlightRecorder")}
      */
     public static void addListener(FlightRecorderListener changeListener) {
-        Objects.requireNonNull(changeListener);
-        Utils.checkAccessFlightRecorder();
+        Objects.requireNonNull(changeListener, "changeListener");
+        SecuritySupport.checkAccessFlightRecorder();
         if (JVMSupport.isNotAvailable()) {
             return;
         }
@@ -299,16 +275,12 @@ public final class FlightRecorder {
      *
      * @param changeListener listener to remove, not {@code null}
      *
-     * @throws SecurityException if a security manager exists and the caller
-     *         does not have
-     *         {@code FlightRecorderPermission("accessFlightRecorder")}
-     *
      * @return {@code true}, if the listener could be removed, {@code false}
      *         otherwise
      */
     public static boolean removeListener(FlightRecorderListener changeListener) {
-        Objects.requireNonNull(changeListener);
-        Utils.checkAccessFlightRecorder();
+        Objects.requireNonNull(changeListener, "changeListener");
+        SecuritySupport.checkAccessFlightRecorder();
         if (JVMSupport.isNotAvailable()) {
             return false;
         }
@@ -333,7 +305,7 @@ public final class FlightRecorder {
         if (JVMSupport.isNotAvailable()) {
             return false;
         }
-        return JVM.getJVM().isAvailable();
+        return JVM.isAvailable();
     }
 
     /**

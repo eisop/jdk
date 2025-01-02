@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,6 +27,7 @@ package com.sun.tools.javac.code;
 
 import com.sun.tools.javac.code.Lint.LintCategory;
 import com.sun.tools.javac.code.Source.Feature;
+import com.sun.tools.javac.code.Symbol.ModuleSymbol;
 import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.resources.CompilerProperties.Errors;
 import com.sun.tools.javac.resources.CompilerProperties.Warnings;
@@ -38,6 +39,7 @@ import com.sun.tools.javac.util.JCDiagnostic.SimpleDiagnosticPosition;
 import com.sun.tools.javac.util.JCDiagnostic.Warning;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.MandatoryWarningHandler;
+import com.sun.tools.javac.util.Names;
 import com.sun.tools.javac.util.Options;
 
 import javax.tools.JavaFileObject;
@@ -46,9 +48,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.sun.tools.javac.code.Flags.RECORD;
-import static com.sun.tools.javac.code.Flags.SEALED;
-import static com.sun.tools.javac.code.Flags.NON_SEALED;
 import static com.sun.tools.javac.main.Option.PREVIEW;
 import com.sun.tools.javac.util.JCDiagnostic;
 
@@ -78,11 +77,12 @@ public class Preview {
 
     private final Set<JavaFileObject> sourcesWithPreviewFeatures = new HashSet<>();
 
+    private final Names names;
     private final Lint lint;
     private final Log log;
     private final Source source;
 
-    private static final Context.Key<Preview> previewKey = new Context.Key<>();
+    protected static final Context.Key<Preview> previewKey = new Context.Key<>();
 
     public static Preview instance(Context context) {
         Preview instance = context.get(previewKey);
@@ -92,9 +92,11 @@ public class Preview {
         return instance;
     }
 
-    Preview(Context context) {
+    @SuppressWarnings("this-escape")
+    protected Preview(Context context) {
         context.put(previewKey, this);
         Options options = Options.instance(context);
+        names = Names.instance(context);
         enabled = options.isSet(PREVIEW);
         log = Log.instance(context);
         lint = Lint.instance(context);
@@ -115,7 +117,41 @@ public class Preview {
             }
         }
         return majorVersionToSource;
-   }
+    }
+
+    /**
+     * Returns true if {@code s} is deemed to participate in the preview of {@code previewSymbol}, and
+     * therefore no warnings or errors will be produced.
+     *
+     * @param syms the symbol table
+     * @param s the symbol depending on the preview symbol
+     * @param previewSymbol the preview symbol marked with @Preview
+     * @return true if {@code s} is participating in the preview of {@code previewSymbol}
+     */
+    public boolean participatesInPreview(Symtab syms, Symbol s, Symbol previewSymbol) {
+        // All symbols in the same module as the preview symbol participate in the preview API
+        if (previewSymbol.packge().modle == s.packge().modle) {
+            return true;
+        }
+
+        return participatesInPreview(syms, s.packge().modle);
+    }
+
+    /**
+     * Returns true if module {@code m} is deemed to participate in the preview, and
+     * therefore no warnings or errors will be produced.
+     *
+     * @param syms the symbol table
+     * @param m the module to check
+     * @return true if {@code m} is participating in the preview of {@code previewSymbol}
+     */
+    public boolean participatesInPreview(Symtab syms, ModuleSymbol m) {
+        // If java.base's jdk.internal.javac package is exported to s's module then
+        // s participates in the preview API
+        return syms.java_base.exports.stream()
+                .filter(ed -> ed.packge.fullname == names.jdk_internal_javac)
+                .anyMatch(ed -> ed.modules.contains(m));
+    }
 
     /**
      * Report usage of a preview feature. Usages reported through this method will affect the
@@ -152,7 +188,6 @@ public class Preview {
     public void warnPreview(JavaFileObject classfile, int majorVersion) {
         Assert.check(isEnabled());
         if (lint.isEnabled(LintCategory.PREVIEW)) {
-            sourcesWithPreviewFeatures.add(log.currentSourceFile());
             log.mandatoryWarning(LintCategory.PREVIEW, null,
                     Warnings.PreviewFeatureUseClassfile(classfile, majorVersionToSource.get(majorVersion).name));
         }
@@ -185,9 +220,11 @@ public class Preview {
      */
     public boolean isPreview(Feature feature) {
         return switch (feature) {
-            case CASE_NULL -> true;
-            case PATTERN_SWITCH -> true;
-
+            case IMPLICIT_CLASSES -> true;
+            case FLEXIBLE_CONSTRUCTORS -> true;
+            case PRIMITIVE_PATTERNS -> true;
+            case MODULE_IMPORTS -> true;
+            case JAVA_BASE_TRANSITIVE -> true;
             //Note: this is a backdoor which allows to optionally treat all features as 'preview' (for testing).
             //When real preview features will be added, this method can be implemented to return 'true'
             //for those selected features, and 'false' for all the others.

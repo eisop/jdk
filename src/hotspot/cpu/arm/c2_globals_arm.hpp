@@ -34,7 +34,7 @@
 
 define_pd_global(bool, BackgroundCompilation,        true);
 define_pd_global(bool, CICompileOSR,                 true);
-define_pd_global(bool, InlineIntrinsics,             false);
+define_pd_global(bool, InlineIntrinsics,             true);
 define_pd_global(bool, PreferInterpreterNativeStubs, false);
 define_pd_global(bool, ProfileTraps,                 true);
 define_pd_global(bool, UseOnStackReplacement,        true);
@@ -45,9 +45,7 @@ define_pd_global(intx, CompileThreshold,             10000);
 define_pd_global(intx, OnStackReplacePercentage,     140);
 define_pd_global(intx, ConditionalMoveLimit,         4);
 // C2 gets to use all the float/double registers
-define_pd_global(intx, FLOATPRESSURE,                30);
 define_pd_global(intx, FreqInlineSize,               175);
-define_pd_global(intx, INTPRESSURE,                  12);
 define_pd_global(intx, InteriorEntryAlignment,       16);  // = CodeEntryAlignment
 define_pd_global(size_t, NewSizeThreadIncrease,      ScaleForWordSize(4*K));
 // The default setting 16/16 seems to work best.
@@ -66,6 +64,7 @@ define_pd_global(bool, OptoBundling,                 false);
 define_pd_global(bool, OptoScheduling,               true);
 define_pd_global(bool, OptoRegScheduling,            false);
 define_pd_global(bool, SuperWordLoopUnrollAnalysis,  false);
+define_pd_global(uint, SuperWordStoreToLoadForwardingFailureDetection, 16);
 define_pd_global(bool, IdealizeClearArrayNode,       true);
 
 #ifdef _LP64

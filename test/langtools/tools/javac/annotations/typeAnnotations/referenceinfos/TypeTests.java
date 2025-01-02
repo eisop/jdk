@@ -21,13 +21,12 @@
  * questions.
  */
 
-import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
+import static java.lang.classfile.TypeAnnotation.TargetType.*;
 
 /*
  * @test
  * @bug 8042451
  * @summary Test population of reference info for class literals
- * @modules jdk.jdeps/com.sun.tools.classfile
  * @compile -g Driver.java ReferenceInfoUtil.java TypeTests.java
  * @run main Driver TypeTests
  */

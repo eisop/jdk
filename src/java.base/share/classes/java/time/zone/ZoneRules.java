@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -146,8 +146,7 @@ public final class ZoneRules implements Serializable {
     /**
      * The map of recent transitions.
      */
-    private final transient ConcurrentMap<Integer, ZoneOffsetTransition[]> lastRulesCache =
-                new ConcurrentHashMap<Integer, ZoneOffsetTransition[]>();
+    private final transient ConcurrentMap<Integer, ZoneOffsetTransition[]> lastRulesCache;
     /**
      * The zero-length long array.
      */
@@ -259,12 +258,18 @@ public final class ZoneRules implements Serializable {
         }
 
         // last rules
-        Object[] temp = lastRules.toArray();
-        ZoneOffsetTransitionRule[] rulesArray = Arrays.copyOf(temp, temp.length, ZoneOffsetTransitionRule[].class);
-        if (rulesArray.length > 16) {
-            throw new IllegalArgumentException("Too many transition rules");
+        if (lastRules.size() > 0) {
+            Object[] temp = lastRules.toArray();
+            ZoneOffsetTransitionRule[] rulesArray = Arrays.copyOf(temp, temp.length, ZoneOffsetTransitionRule[].class);
+            if (rulesArray.length > 16) {
+                throw new IllegalArgumentException("Too many transition rules");
+            }
+            this.lastRules = rulesArray;
+            this.lastRulesCache = new ConcurrentHashMap<>();
+        } else {
+            this.lastRules = EMPTY_LASTRULES;
+            this.lastRulesCache = null;
         }
-        this.lastRules = rulesArray;
     }
 
     /**
@@ -288,6 +293,7 @@ public final class ZoneRules implements Serializable {
         this.savingsInstantTransitions = savingsInstantTransitions;
         this.wallOffsets = wallOffsets;
         this.lastRules = lastRules;
+        this.lastRulesCache = (lastRules.length > 0) ? new ConcurrentHashMap<>() : null;
 
         if (savingsInstantTransitions.length == 0) {
             this.savingsLocalTransitions = EMPTY_LDT_ARRAY;
@@ -324,6 +330,7 @@ public final class ZoneRules implements Serializable {
         this.savingsLocalTransitions = EMPTY_LDT_ARRAY;
         this.wallOffsets = standardOffsets;
         this.lastRules = EMPTY_LASTRULES;
+        this.lastRulesCache = null;
     }
 
     /**
@@ -821,9 +828,9 @@ public final class ZoneRules implements Serializable {
      * This default implementation compares the {@link #getOffset(java.time.Instant) actual}
      * and {@link #getStandardOffset(java.time.Instant) standard} offsets.
      *
-     * @param instant  the instant to find the offset information for, not null, but null
+     * @param instant  the instant to check the daylight savings for, not null, but null
      *  may be ignored if the rules have a single offset for all instants
-     * @return the standard offset, not null
+     * @return true if the specified instant is in daylight savings, false otherwise.
      */
     public boolean isDaylightSavings(Instant instant) {
         return (getStandardOffset(instant).equals(getOffset(instant)) == false);
@@ -967,11 +974,11 @@ public final class ZoneRules implements Serializable {
             doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
         }
         yearEst += adjust;  // reset any negative year
-        int marchDoy0 = (int) doyEst;
 
-        // convert march-based values back to january-based
-        int marchMonth0 = (marchDoy0 * 5 + 2) / 153;
-        yearEst += marchMonth0 / 10;
+        // convert march-based values back to january-based, adjust year
+        if (doyEst >= 306) {
+            yearEst++;
+        }
 
         // Cap to the max value
         return (int)Math.min(yearEst, Year.MAX_VALUE);

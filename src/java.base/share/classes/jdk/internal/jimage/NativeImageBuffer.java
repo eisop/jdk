@@ -38,6 +38,7 @@ class NativeImageBuffer {
     static {
         java.security.AccessController.doPrivileged(
                 new java.security.PrivilegedAction<Void>() {
+                    @SuppressWarnings("restricted")
                     public Void run() {
                         System.loadLibrary("jimage");
                         return null;
@@ -45,5 +46,5 @@ class NativeImageBuffer {
                 });
     }
 
-    native static ByteBuffer getNativeMap(String imagePath);
+    static native ByteBuffer getNativeMap(String imagePath);
 }

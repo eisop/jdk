@@ -21,13 +21,12 @@
  * questions.
  */
 
-import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
+import static java.lang.classfile.TypeAnnotation.TargetType.*;
 
 /*
  * @test
  * @bug 8042451
  * @summary Test that the examples from the manual are stored as expected
- * @modules jdk.jdeps/com.sun.tools.classfile
  * @compile -g Driver.java ReferenceInfoUtil.java FromSpecification.java
  * @run main Driver FromSpecification
  */

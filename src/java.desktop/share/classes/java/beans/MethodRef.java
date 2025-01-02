@@ -32,8 +32,6 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 
-import static sun.reflect.misc.ReflectUtil.isPackageAccessible;
-
 @AnnotatedFor({"nullness"})
 final class MethodRef {
     private @Nullable String signature;
@@ -72,7 +70,7 @@ final class MethodRef {
             }
             this.methodRef = new SoftReference<>(method);
         }
-        return isPackageAccessible(method.getDeclaringClass()) ? method : null;
+        return method;
     }
 
     private static @Nullable Method find(@Nullable Class<?> type, String signature) {

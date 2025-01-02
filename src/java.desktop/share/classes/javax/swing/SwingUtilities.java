@@ -29,7 +29,6 @@ import org.checkerframework.checker.guieffect.qual.UI;
 import org.checkerframework.checker.guieffect.qual.UIType;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-import sun.reflect.misc.ReflectUtil;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
 
@@ -45,8 +44,6 @@ import javax.accessibility.*;
 import javax.swing.event.MenuDragMouseEvent;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.View;
-import java.security.AccessController;
-import sun.security.action.GetPropertyAction;
 
 import sun.awt.AppContext;
 import sun.awt.AWTAccessor;
@@ -72,7 +69,7 @@ public class SwingUtilities implements SwingConstants
     private static boolean suppressDropSupport;
 
     /**
-     * Indiciates if we've checked the system property for suppressing
+     * Indicates if we've checked the system property for suppressing
      * drop support.
      */
     private static boolean checkedSuppressDropSupport;
@@ -82,12 +79,9 @@ public class SwingUtilities implements SwingConstants
      * Returns true if <code>setTransferHandler</code> should change the
      * <code>DropTarget</code>.
      */
-    @SuppressWarnings("removal")
     private static boolean getSuppressDropTarget() {
         if (!checkedSuppressDropSupport) {
-            suppressDropSupport = Boolean.valueOf(
-                AccessController.doPrivileged(
-                    new GetPropertyAction("suppressSwingDropSupport")));
+            suppressDropSupport = Boolean.getBoolean("suppressSwingDropSupport");
             checkedSuppressDropSupport = true;
         }
         return suppressDropSupport;
@@ -113,12 +107,12 @@ public class SwingUtilities implements SwingConstants
     }
 
     /**
-     * Return {@code true} if @{code a} contains {@code b}
+     * Return {@code true} if {@code a} contains {@code b}
      *
      * @param a the first rectangle
      * @param b the second rectangle
      *
-     * @return {@code true} if @{code a} contains {@code b}
+     * @return {@code true} if {@code a} contains {@code b}
      */
     public static final boolean isRectangleContainingRectangle(Rectangle a,Rectangle b) {
         return b.x >= a.x && (b.x + b.width) <= (a.x + a.width) &&
@@ -861,14 +855,14 @@ public class SwingUtilities implements SwingConstants
     }
 
     /**
-     * Check whether MouseEvent contains speficied mouse button or
+     * Check whether MouseEvent contains specified mouse button or
      * mouse button down mask based on MouseEvent ID.
      *
      * @param anEvent  a MouseEvent object
      * @param mouseButton mouse button type
      * @param mouseButtonDownMask mouse button down mask event modifier
      *
-     * @return true if the anEvent contains speficied mouseButton or
+     * @return true if the anEvent contains specified mouseButton or
      * mouseButtonDownMask based on MouseEvent ID.
      */
     private static boolean checkMouseButton(MouseEvent anEvent,
@@ -1474,10 +1468,10 @@ public class SwingUtilities implements SwingConstants
      * <code>java.awt.EventQueue.invokeAndWait()</code>.
      *
      * @param doRun the instance of {@code Runnable}
-     * @exception  InterruptedException if we're interrupted while waiting for
+     * @throws  InterruptedException if we're interrupted while waiting for
      *             the event dispatching thread to finish executing
      *             <code>doRun.run()</code>
-     * @exception  InvocationTargetException  if an exception is thrown
+     * @throws  InvocationTargetException  if an exception is thrown
      *             while running <code>doRun</code>
      *
      * @see #invokeLater
@@ -1819,6 +1813,12 @@ public class SwingUtilities implements SwingConstants
         action.actionPerformed(new ActionEvent(sender,
                         ActionEvent.ACTION_PERFORMED, command, event.getWhen(),
                         modifiers));
+        if (event.getSource() instanceof JToggleButton tb) {
+            commandO = action.getValue(Action.SELECTED_KEY);
+            if (commandO != null) {
+                tb.setSelected(!tb.isSelected());
+            }
+        }
         return true;
     }
 
@@ -1979,21 +1979,13 @@ public class SwingUtilities implements SwingConstants
         public void show() {
             // This frame can never be shown
         }
-        public void dispose() {
-            try {
-                getToolkit().getSystemEventQueue();
-                super.dispose();
-            } catch (Exception e) {
-                // untrusted code not allowed to dispose
-            }
-        }
     }
 
     /**
      * Returns a toolkit-private, shared, invisible Frame
      * to be the owner for JDialogs and JWindows created with
      * {@code null} owners.
-     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
+     * @throws HeadlessException if GraphicsEnvironment.isHeadless()
      * returns true.
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
@@ -2011,7 +2003,7 @@ public class SwingUtilities implements SwingConstants
     /**
      * Returns a SharedOwnerFrame's shutdown listener to dispose the SharedOwnerFrame
      * if it has no more displayable children.
-     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
+     * @throws HeadlessException if GraphicsEnvironment.isHeadless()
      * returns true.
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
@@ -2041,7 +2033,6 @@ public class SwingUtilities implements SwingConstants
 
 
     static Class<?> loadSystemClass(String className) throws ClassNotFoundException {
-        ReflectUtil.checkPackageAccess(className);
         return Class.forName(className, true, Thread.currentThread().
                              getContextClassLoader());
     }
@@ -2063,8 +2054,8 @@ public class SwingUtilities implements SwingConstants
      * ImageIcon, and the image it contains is the same as <code>image</code>.
      */
     static boolean doesIconReferenceImage(Icon icon, Image image) {
-        Image iconImage = (icon != null && (icon instanceof ImageIcon)) ?
-                           ((ImageIcon)icon).getImage() : null;
+        Image iconImage = (icon instanceof ImageIcon i) ?
+                           i.getImage() : null;
         return (iconImage == image);
     }
 
@@ -2079,6 +2070,10 @@ public class SwingUtilities implements SwingConstants
      */
     static int findDisplayedMnemonicIndex(String text, int mnemonic) {
         if (text == null || mnemonic == '\0') {
+            return -1;
+        }
+
+        if (mnemonic >= 'a' && mnemonic <= 'z') {
             return -1;
         }
 

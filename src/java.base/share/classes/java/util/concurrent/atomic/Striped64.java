@@ -35,6 +35,8 @@
 
 package java.util.concurrent.atomic;
 
+import jdk.internal.invoke.MhUtil;
+
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
@@ -47,7 +49,7 @@ import java.util.function.LongBinaryOperator;
  * for classes supporting dynamic striping on 64bit values. The class
  * extends Number so that concrete subclasses must publicly do so.
  */
-@SuppressWarnings({"removal","serial"})
+@SuppressWarnings("serial")
 abstract class Striped64 extends Number {
     /*
      * This class maintains a lazily-initialized table of atomically
@@ -138,15 +140,8 @@ abstract class Striped64 extends Number {
         }
 
         // VarHandle mechanics
-        private static final VarHandle VALUE;
-        static {
-            try {
-                MethodHandles.Lookup l = MethodHandles.lookup();
-                VALUE = l.findVarHandle(Cell.class, "value", long.class);
-            } catch (ReflectiveOperationException e) {
-                throw new ExceptionInInitializerError(e);
-            }
-        }
+        private static final VarHandle VALUE = MhUtil.findVarHandle(
+                MethodHandles.lookup(), "value", long.class);
     }
 
     /** Number of CPUS, to place bound on table size */
@@ -381,23 +376,13 @@ abstract class Striped64 extends Number {
     private static final VarHandle CELLSBUSY;
     private static final VarHandle THREAD_PROBE;
     static {
+        MethodHandles.Lookup l1 = MethodHandles.lookup();
+
+        BASE = MhUtil.findVarHandle(l1, "base", long.class);
+        CELLSBUSY = MhUtil.findVarHandle(l1, "cellsBusy", int.class);
         try {
-            MethodHandles.Lookup l = MethodHandles.lookup();
-            BASE = l.findVarHandle(Striped64.class,
-                    "base", long.class);
-            CELLSBUSY = l.findVarHandle(Striped64.class,
-                    "cellsBusy", int.class);
-            l = java.security.AccessController.doPrivileged(
-                    new java.security.PrivilegedAction<>() {
-                        public MethodHandles.Lookup run() {
-                            try {
-                                return MethodHandles.privateLookupIn(Thread.class, MethodHandles.lookup());
-                            } catch (ReflectiveOperationException e) {
-                                throw new ExceptionInInitializerError(e);
-                            }
-                        }});
-            THREAD_PROBE = l.findVarHandle(Thread.class,
-                    "threadLocalRandomProbe", int.class);
+            MethodHandles.Lookup l2 = MethodHandles.privateLookupIn(Thread.class, l1);
+            THREAD_PROBE = MhUtil.findVarHandle(l2, "threadLocalRandomProbe", int.class);
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }

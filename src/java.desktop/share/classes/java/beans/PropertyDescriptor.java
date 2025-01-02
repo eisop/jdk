@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,7 +35,6 @@ import java.lang.reflect.Constructor;
 import java.util.Map.Entry;
 
 import com.sun.beans.introspect.PropertyInfo;
-import sun.reflect.misc.ReflectUtil;
 
 /**
  * A PropertyDescriptor describes one property that a Java Bean
@@ -72,7 +71,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
      * @param propertyName The programmatic name of the property.
      * @param beanClass The Class object for the target bean.  For
      *          example sun.beans.OurButton.class.
-     * @exception IntrospectionException if an exception occurs during
+     * @throws IntrospectionException if an exception occurs during
      *              introspection.
      */
     @SideEffectFree
@@ -94,7 +93,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
      *           value.  May be null if the property is write-only.
      * @param writeMethodName The name of the method used for writing the property
      *           value.  May be null if the property is read-only.
-     * @exception IntrospectionException if an exception occurs during
+     * @throws IntrospectionException if an exception occurs during
      *              introspection.
      */
     @SideEffectFree
@@ -137,7 +136,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
      *          May be null if the property is write-only.
      * @param writeMethod The method used for writing the property value.
      *          May be null if the property is read-only.
-     * @exception IntrospectionException if an exception occurs during
+     * @throws IntrospectionException if an exception occurs during
      *              introspection.
      */
     @SideEffectFree
@@ -483,8 +482,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
         Object editor = null;
 
         final Class<?> cls = getPropertyEditorClass();
-        if (cls != null && PropertyEditor.class.isAssignableFrom(cls)
-                && ReflectUtil.isPackageAccessible(cls)) {
+        if (cls != null && PropertyEditor.class.isAssignableFrom(cls)) {
             Constructor<?> ctor = null;
             if (bean != null) {
                 try {
@@ -520,8 +518,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
         if (this == obj) {
             return true;
         }
-        if (obj != null && obj instanceof PropertyDescriptor) {
-            PropertyDescriptor other = (PropertyDescriptor)obj;
+        if (obj instanceof PropertyDescriptor other) {
             Method otherReadMethod = other.getReadMethod();
             Method otherWriteMethod = other.getWriteMethod();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,11 +33,6 @@ class ClassListParser;
 
 class ClassLoaderExt: public ClassLoader { // AllStatic
 public:
-  static bool should_verify(int classpath_index) {
-    CDS_ONLY(return (classpath_index >= _app_class_paths_start_index);)
-    NOT_CDS(return false;)
-  }
-
 #if INCLUDE_CDS
 private:
   enum SomeConstants {
@@ -53,21 +48,26 @@ private:
   static jshort _app_module_paths_start_index;
   // the largest path index being used during CDS dump time
   static jshort _max_used_path_index;
+  // number of module paths
+  static int _num_module_paths;
 
   static bool _has_app_classes;
   static bool _has_platform_classes;
+  static bool _has_non_jar_in_classpath;
 
   static char* read_manifest(JavaThread* current, ClassPathEntry* entry, jint *manifest_size, bool clean_text);
-  static ClassPathEntry* find_classpath_entry_from_cache(JavaThread* current, const char* path);
+  static bool has_jar_suffix(const char* filename);
 
 public:
-  static void process_jar_manifest(JavaThread* current, ClassPathEntry* entry, bool check_for_duplicates);
+  static void process_jar_manifest(JavaThread* current, ClassPathEntry* entry);
 
   // Called by JVMTI code to add boot classpath
   static void append_boot_classpath(ClassPathEntry* new_entry);
 
   static void setup_search_paths(JavaThread* current);
   static void setup_module_paths(JavaThread* current);
+  static void extract_jar_files_from_path(const char* path, GrowableArray<const char*>* module_paths);
+  static int compare_module_names(const char** p1, const char** p2);
 
   static char* read_manifest(JavaThread* current, ClassPathEntry* entry, jint *manifest_size) {
     // Remove all the new-line continuations (which wrap long lines at 72 characters, see
@@ -87,6 +87,8 @@ public:
 
   static jshort max_used_path_index() { return _max_used_path_index; }
 
+  static int num_module_paths() { return _num_module_paths; }
+
   static void set_max_used_path_index(jshort used_index) {
     _max_used_path_index = used_index;
   }
@@ -99,6 +101,10 @@ public:
     _app_module_paths_start_index = module_start;
   }
 
+  static void init_num_module_paths(int num_module_paths) {
+    _num_module_paths = num_module_paths;
+  }
+
   static bool is_boot_classpath(int classpath_index) {
     return classpath_index < _app_class_paths_start_index;
   }
@@ -107,15 +113,21 @@ public:
     return _has_app_classes || _has_platform_classes;
   }
 
-  static void record_result(const s2 classpath_index, InstanceKlass* result);
-  static InstanceKlass* load_class(Symbol* h_name, const char* path, TRAPS);
+  static bool has_non_jar_in_classpath() {
+    return _has_non_jar_in_classpath;
+  }
+
+  static void record_result(const s2 classpath_index, InstanceKlass* result, bool redefined);
   static void set_has_app_classes() {
     _has_app_classes = true;
   }
   static void set_has_platform_classes() {
     _has_platform_classes = true;
   }
-#endif
+  static void set_has_non_jar_in_classpath() {
+    _has_non_jar_in_classpath = true;
+  }
+#endif // INCLUDE_CDS
 };
 
 #endif // SHARE_CLASSFILE_CLASSLOADEREXT_HPP

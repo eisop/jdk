@@ -32,15 +32,13 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.ImageProducer;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * This is a support class to make it easier for people to provide
  * BeanInfo classes.
  * <p>
  * It defaults to providing "noop" information, and can be selectively
- * overriden to provide more explicit information on chosen topics.
+ * overridden to provide more explicit information on chosen topics.
  * When the introspector sees the "noop" values, it will apply low
  * level introspection and design patterns to automatically analyze
  * the target bean.
@@ -158,10 +156,8 @@ public @UsesObjectEquals class SimpleBeanInfo implements BeanInfo {
      * @return an image object. May be null if the load failed.
      * @see java.beans.SimpleBeanInfo#loadImage(String)
      */
-    @SuppressWarnings("removal")
     private Image loadStandardImage(final String resourceName) {
-        return AccessController.doPrivileged(
-                (PrivilegedAction<Image>) () -> loadImage(resourceName));
+        return loadImage(resourceName);
     }
 
     /**

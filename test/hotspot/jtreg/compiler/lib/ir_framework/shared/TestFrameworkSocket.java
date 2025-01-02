@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,6 +29,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
@@ -39,22 +41,26 @@ import java.util.concurrent.FutureTask;
  */
 public class TestFrameworkSocket implements AutoCloseable {
     public static final String STDOUT_PREFIX = "[STDOUT]";
+    public static final String TESTLIST_TAG = "[TESTLIST]";
+    public static final String DEFAULT_REGEX_TAG = "[DEFAULT_REGEX]";
+
     // Static fields used for test VM only.
     private static final String SERVER_PORT_PROPERTY = "ir.framework.server.port";
     private static final int SERVER_PORT = Integer.getInteger(SERVER_PORT_PROPERTY, -1);
 
     private static final boolean REPRODUCE = Boolean.getBoolean("Reproduce");
-    private static final String HOSTNAME = null;
     private static Socket clientSocket = null;
     private static PrintWriter clientWriter = null;
 
     private final String serverPortPropertyFlag;
     private FutureTask<String> socketTask;
     private final ServerSocket serverSocket;
+    private boolean receivedStdOut = false;
 
     public TestFrameworkSocket() {
         try {
-            serverSocket = new ServerSocket(0);
+            serverSocket = new ServerSocket();
+            serverSocket.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
         } catch (IOException e) {
             throw new TestFrameworkException("Failed to create TestFramework server socket", e);
         }
@@ -88,6 +94,9 @@ public class TestFrameworkSocket implements AutoCloseable {
                 String next;
                 while ((next = in.readLine()) != null) {
                     builder.append(next).append(System.lineSeparator());
+                    if (next.startsWith(STDOUT_PREFIX)) {
+                        receivedStdOut = true;
+                    }
                 }
                 return builder.toString();
             } catch (IOException e) {
@@ -108,14 +117,14 @@ public class TestFrameworkSocket implements AutoCloseable {
     /**
      * Only called by test VM to write to server socket.
      */
-    public static void write(String msg, String type) {
-        write(msg, type, false);
+    public static void write(String msg, String tag) {
+        write(msg, tag, false);
     }
 
     /**
      * Only called by test VM to write to server socket.
      */
-    public static void write(String msg, String type, boolean stdout) {
+    public static void write(String msg, String tag, boolean stdout) {
         if (REPRODUCE) {
             System.out.println("Debugging Test VM: Skip writing due to -DReproduce");
             return;
@@ -125,11 +134,11 @@ public class TestFrameworkSocket implements AutoCloseable {
         try {
             // Keep the client socket open until the test VM terminates (calls closeClientSocket before exiting main()).
             if (clientSocket == null) {
-                clientSocket = new Socket(HOSTNAME, SERVER_PORT);
+                clientSocket = new Socket(InetAddress.getLoopbackAddress(), SERVER_PORT);
                 clientWriter = new PrintWriter(clientSocket.getOutputStream(), true);
             }
             if (stdout) {
-                msg = STDOUT_PREFIX + msg;
+                msg = STDOUT_PREFIX + tag + " " + msg;
             }
             clientWriter.println(msg);
         } catch (Exception e) {
@@ -145,7 +154,7 @@ public class TestFrameworkSocket implements AutoCloseable {
             throw new TestRunException(failMsg, e);
         }
         if (TestFramework.VERBOSE) {
-            System.out.println("Written " + type + " to socket:");
+            System.out.println("Written " + tag + " to socket:");
             System.out.println(msg);
         }
     }
@@ -177,5 +186,12 @@ public class TestFrameworkSocket implements AutoCloseable {
         } catch (Exception e) {
             throw new TestFrameworkException("Could not read from socket task", e);
         }
+    }
+
+    /**
+     * Return whether test VM sent messages to be put on stdout (starting with {@link ::STDOUT_PREFIX}).
+     */
+    public boolean hasStdOut() {
+        return receivedStdOut;
     }
 }

@@ -41,20 +41,20 @@ import javax.print.attribute.PrintServiceAttribute;
 import javax.print.attribute.PrintServiceAttributeSet;
 import javax.print.attribute.standard.PrinterName;
 
-@SuppressWarnings("removal")
+import sun.awt.util.ThreadGroupUtils;
+
 public class PrintServiceLookupProvider extends PrintServiceLookup {
 
     private PrintService defaultPrintService;
     private PrintService[] printServices; /* includes the default printer */
 
     static {
-        java.security.AccessController.doPrivileged(
-            new java.security.PrivilegedAction<Void>() {
-                public Void run() {
-                    System.loadLibrary("awt");
-                    return null;
-                }
-            });
+        loadAWTLibrary();
+    }
+
+    @SuppressWarnings("restricted")
+    private static void loadAWTLibrary() {
+        System.loadLibrary("awt");
     }
 
     /* The singleton win32 print lookup service.
@@ -83,16 +83,20 @@ public class PrintServiceLookupProvider extends PrintServiceLookup {
             win32PrintLUS = this;
 
             // start the local printer listener thread
-            Thread thr = new Thread(null, new PrinterChangeListener(),
+            Thread thr = new Thread(ThreadGroupUtils.getRootThreadGroup(),
+                                    new PrinterChangeListener(),
                                     "PrinterListener", 0, false);
+            thr.setContextClassLoader(null);
             thr.setDaemon(true);
             thr.start();
 
             // start the remote printer listener thread
-            Thread remThr = new Thread(null, new RemotePrinterChangeListener(),
-                                       "RemotePrinterListener", 0, false);
-            remThr.setDaemon(true);
-            remThr.start();
+            Thread thr1 = new Thread(ThreadGroupUtils.getRootThreadGroup(),
+                                    new RemotePrinterChangeListener(),
+                                    "RemotePrinterListener", 0, false);
+            thr1.setContextClassLoader(null);
+            thr1.setDaemon(true);
+            thr1.start();
         } /* else condition ought to never happen! */
     }
 
@@ -102,10 +106,6 @@ public class PrintServiceLookupProvider extends PrintServiceLookup {
      * lead people to assume its guaranteed.
      */
     public synchronized PrintService[] getPrintServices() {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkPrintJobAccess();
-        }
         if (printServices == null) {
             refreshServices();
         }
@@ -202,10 +202,6 @@ public class PrintServiceLookupProvider extends PrintServiceLookup {
     public PrintService[] getPrintServices(DocFlavor flavor,
                                            AttributeSet attributes) {
 
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-          security.checkPrintJobAccess();
-        }
         PrintRequestAttributeSet requestSet = null;
         PrintServiceAttributeSet serviceSet = null;
 
@@ -267,20 +263,11 @@ public class PrintServiceLookupProvider extends PrintServiceLookup {
     public MultiDocPrintService[]
         getMultiDocPrintServices(DocFlavor[] flavors,
                                  AttributeSet attributes) {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-          security.checkPrintJobAccess();
-        }
         return new MultiDocPrintService[0];
     }
 
 
     public synchronized PrintService getDefaultPrintService() {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-          security.checkPrintJobAccess();
-        }
-
 
         // Windows does not have notification for a change in default
         // so we always get the latest.

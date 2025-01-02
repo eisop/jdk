@@ -42,16 +42,6 @@ import sun.awt.AppContext;
 import sun.swing.*;
 import sun.awt.SunToolkit;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
-import java.security.AccessControlContext;
-
-import jdk.internal.access.SharedSecrets;
-import jdk.internal.access.JavaSecurityAccess;
-
-import sun.awt.AWTAccessor;
-
 /**
  * This class is used to handle the transfer of a <code>Transferable</code>
  * to and from Swing components.  The <code>Transferable</code> is used to
@@ -188,7 +178,7 @@ public class TransferHandler implements Serializable {
         public String toString() {
             return getClass().getName() + "[dropPoint=" + dropPoint + "]";
         }
-    };
+    }
 
     /**
      * This class encapsulates all relevant details of a clipboard
@@ -1172,9 +1162,9 @@ public class TransferHandler implements Serializable {
          *
          * @param flavor the requested flavor for the data
          * @see DataFlavor#getRepresentationClass
-         * @exception IOException                if the data is no longer available
+         * @throws IOException                if the data is no longer available
          *              in the requested flavor.
-         * @exception UnsupportedFlavorException if the requested data flavor is
+         * @throws UnsupportedFlavorException if the requested data flavor is
          *              not supported.
          */
         public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
@@ -1272,9 +1262,9 @@ public class TransferHandler implements Serializable {
                 // If the Drop target is inactive the dragExit will not be dispatched to the dtListener,
                 // so make sure that we clean up the dtListener anyway.
                 DropTargetListener dtListener = getDropTargetListener();
-                    if (dtListener != null && dtListener instanceof DropHandler) {
-                        ((DropHandler)dtListener).cleanup(false);
-                    }
+                if (dtListener instanceof DropHandler dropHandler) {
+                    dropHandler.cleanup(false);
+                }
             }
         }
 
@@ -1701,40 +1691,7 @@ public class TransferHandler implements Serializable {
                     && ((JComponent)sender).getTransferHandler() == null);
         }
 
-        private static final JavaSecurityAccess javaSecurityAccess =
-            SharedSecrets.getJavaSecurityAccess();
-
         public void actionPerformed(final ActionEvent e) {
-            final Object src = e.getSource();
-
-            final PrivilegedAction<Void> action = new PrivilegedAction<Void>() {
-                public Void run() {
-                    actionPerformedImpl(e);
-                    return null;
-                }
-            };
-
-            @SuppressWarnings("removal")
-            final AccessControlContext stack = AccessController.getContext();
-            @SuppressWarnings("removal")
-            final AccessControlContext srcAcc = AWTAccessor.getComponentAccessor().getAccessControlContext((Component)src);
-            @SuppressWarnings("removal")
-            final AccessControlContext eventAcc = AWTAccessor.getAWTEventAccessor().getAccessControlContext(e);
-
-                if (srcAcc == null) {
-                    javaSecurityAccess.doIntersectionPrivilege(action, stack, eventAcc);
-                } else {
-                    javaSecurityAccess.doIntersectionPrivilege(
-                        new PrivilegedAction<Void>() {
-                            public Void run() {
-                                javaSecurityAccess.doIntersectionPrivilege(action, eventAcc);
-                                return null;
-                             }
-                    }, stack, srcAcc);
-                }
-        }
-
-        private void actionPerformedImpl(ActionEvent e) {
             Object src = e.getSource();
             if (src instanceof JComponent) {
                 JComponent c = (JComponent) src;

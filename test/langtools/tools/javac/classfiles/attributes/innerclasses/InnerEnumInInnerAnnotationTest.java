@@ -28,7 +28,7 @@
  * @library /tools/lib /tools/javac/lib ../lib
  * @modules jdk.compiler/com.sun.tools.javac.api
  *          jdk.compiler/com.sun.tools.javac.main
- *          jdk.jdeps/com.sun.tools.classfile
+ *          java.base/jdk.internal.classfile.impl
  * @build toolbox.ToolBox InMemoryFileManager TestResult TestBase
  * @build InnerClassesInInnerClassTestBase InnerClassesTestBase
  * @run main InnerEnumInInnerAnnotationTest

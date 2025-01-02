@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017, 2021, Red Hat, Inc. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,7 +24,7 @@
  */
 
 /*
- * @test TestStringDedup
+ * @test id=passive
  * @summary Test Shenandoah string deduplication implementation
  * @key randomness
  * @requires vm.gc.Shenandoah
@@ -44,12 +45,11 @@
  */
 
 /*
- * @test TestStringDedup
+ * @test id=default
  * @summary Test Shenandoah string deduplication implementation
  * @key randomness
  * @requires vm.gc.Shenandoah
  * @library /test/lib
- * @modules java.base/jdk.internal.misc:open
  * @modules java.base/java.lang:open
  *          java.management
  *
@@ -67,21 +67,16 @@
  */
 
 /*
- * @test TestStringDedup
+ * @test id=generational
  * @summary Test Shenandoah string deduplication implementation
  * @key randomness
  * @requires vm.gc.Shenandoah
  * @library /test/lib
- * @modules java.base/jdk.internal.misc:open
  * @modules java.base/java.lang:open
  *          java.management
  *
  * @run main/othervm -Xmx256m -Xlog:gc+stats -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+UseStringDeduplication
- *      -XX:+UseShenandoahGC -XX:ShenandoahGCMode=iu -XX:StringDeduplicationAgeThreshold=3
- *      TestStringDedup
- *
- * @run main/othervm -Xmx256m -Xlog:gc+stats -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+UseStringDeduplication
- *      -XX:+UseShenandoahGC -XX:ShenandoahGCMode=iu -XX:ShenandoahGCHeuristics=aggressive -XX:StringDeduplicationAgeThreshold=3
+ *      -XX:+UseShenandoahGC -XX:ShenandoahGCMode=generational -XX:StringDeduplicationAgeThreshold=3
  *      TestStringDedup
  */
 
@@ -89,11 +84,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import jdk.test.lib.Utils;
 
-import sun.misc.*;
-
 public class TestStringDedup {
     private static Field valueField;
-    private static Unsafe unsafe;
 
     private static final int UniqueStrings = 20;
     // How many GC cycles are needed to complete deduplication.
@@ -101,10 +93,6 @@ public class TestStringDedup {
 
     static {
         try {
-            Field field = Unsafe.class.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
-            unsafe = (Unsafe) field.get(null);
-
             valueField = String.class.getDeclaredField("value");
             valueField.setAccessible(true);
         } catch (Exception e) {

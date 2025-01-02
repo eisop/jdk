@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,8 +33,6 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
 
-// java import
-//
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -50,9 +48,7 @@ import javax.management.Descriptor;
 import javax.management.DescriptorRead;
 import javax.management.ImmutableDescriptor;
 import javax.management.MBeanAttributeInfo;
-import com.sun.jmx.remote.util.EnvHelp;
 import sun.reflect.misc.MethodUtil;
-import sun.reflect.misc.ReflectUtil;
 
 /**
  * Describes an attribute of an open MBean.
@@ -70,7 +66,6 @@ public class OpenMBeanAttributeInfoSupport
     /**
      * @serial The open mbean attribute's <i>open type</i>
      */
-    @SuppressWarnings("serial") // Not statically typed as Serializable
     private OpenType<?> openType;
 
     /**
@@ -574,7 +569,7 @@ public class OpenMBeanAttributeInfoSupport
 
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     static int compare(Object x, Object y) {
         return ((Comparable) x).compareTo(y);
     }
@@ -584,11 +579,11 @@ public class OpenMBeanAttributeInfoSupport
                                          T[] legalValues,
                                          Comparable<T> minValue,
                                          Comparable<T> maxValue) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         if (defaultValue != null)
             map.put("defaultValue", defaultValue);
         if (legalValues != null) {
-            Set<T> set = new HashSet<T>();
+            Set<T> set = new HashSet<>();
             for (T v : legalValues)
                 set.add(v);
             set = Collections.unmodifiableSet(set);
@@ -632,7 +627,7 @@ public class OpenMBeanAttributeInfoSupport
             final String msg =
                 "Cannot convert descriptor field " + name + "  to " +
                 openType.getTypeName();
-            throw EnvHelp.initCause(new IllegalArgumentException(msg), e);
+            throw new IllegalArgumentException(msg, e);
         }
     }
 
@@ -663,7 +658,7 @@ public class OpenMBeanAttributeInfoSupport
             throw new IllegalArgumentException(msg);
         }
 
-        Set<T> result = new HashSet<T>();
+        Set<T> result = new HashSet<>();
         for (Object element : coll)
             result.add(convertFrom(element, openType));
         return result;
@@ -703,7 +698,6 @@ public class OpenMBeanAttributeInfoSupport
         Class<T> c;
         try {
             String className = openType.safeGetClassName();
-            ReflectUtil.checkPackageAccess(className);
             c = cast(Class.forName(className));
         } catch (ClassNotFoundException e) {
             throw new NoClassDefFoundError(e.toString());  // can't happen
@@ -712,8 +706,6 @@ public class OpenMBeanAttributeInfoSupport
         // Look for: public static T valueOf(String)
         Method valueOf;
         try {
-            // It is safe to call this plain Class.getMethod because the class "c"
-            // was checked before by ReflectUtil.checkPackageAccess(openType.safeGetClassName());
             valueOf = c.getMethod("valueOf", String.class);
             if (!Modifier.isStatic(valueOf.getModifiers()) ||
                     valueOf.getReturnType() != c)
@@ -734,8 +726,6 @@ public class OpenMBeanAttributeInfoSupport
         // Look for: public T(String)
         Constructor<T> con;
         try {
-            // It is safe to call this plain Class.getConstructor because the class "c"
-            // was checked before by ReflectUtil.checkPackageAccess(openType.safeGetClassName());
             con = c.getConstructor(String.class);
         } catch (NoSuchMethodException e) {
             con = null;
@@ -773,9 +763,6 @@ public class OpenMBeanAttributeInfoSupport
         Class<?> targetArrayClass;
         try {
             String baseClassName = baseType.safeGetClassName();
-
-            // check access to the provided base type class name and bail out early
-            ReflectUtil.checkPackageAccess(baseClassName);
 
             stringArrayClass =
                 Class.forName(squareBrackets + "Ljava.lang.String;");
@@ -947,7 +934,7 @@ public class OpenMBeanAttributeInfoSupport
         return isValue(this, obj);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})  // cast to Comparable
+    @SuppressWarnings("unchecked")  // cast to Comparable
     static boolean isValue(OpenMBeanParameterInfo info, Object obj) {
         if (info.hasDefaultValue() && obj == null)
             return true;

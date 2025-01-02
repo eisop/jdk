@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020, Red Hat, Inc. All rights reserved.
+ * Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,7 +24,7 @@
  */
 
 /*
- * @test TestDynamicSoftMaxHeapSize
+ * @test id=passive
  * @requires vm.gc.Shenandoah
  * @library /test/lib
  *
@@ -41,7 +42,7 @@
  */
 
 /*
- * @test TestDynamicSoftMaxHeapSize
+ * @test id=aggressive
  * @requires vm.gc.Shenandoah
  * @library /test/lib
  *
@@ -52,7 +53,7 @@
  */
 
 /*
- * @test TestDynamicSoftMaxHeapSize
+ * @test id=adaptive
  * @requires vm.gc.Shenandoah
  * @library /test/lib
  *
@@ -63,7 +64,18 @@
  */
 
 /*
- * @test TestDynamicSoftMaxHeapSize
+ * @test id=generational
+ * @requires vm.gc.Shenandoah
+ * @library /test/lib
+ *
+ * @run main/othervm -Xms16m -Xmx512m -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions
+ *      -XX:+UseShenandoahGC -XX:ShenandoahGCHeuristics=adaptive -XX:ShenandoahGCMode=generational
+ *      -Dtarget=10000
+ *      TestDynamicSoftMaxHeapSize
+ */
+
+/*
+ * @test id=static
  * @requires vm.gc.Shenandoah
  * @library /test/lib
  *
@@ -74,7 +86,7 @@
  */
 
 /*
- * @test TestDynamicSoftMaxHeapSize
+ * @test id=compact
  * @requires vm.gc.Shenandoah
  * @library /test/lib
  *
@@ -82,28 +94,6 @@
  *      -XX:+UseShenandoahGC -XX:ShenandoahGCHeuristics=compact
  *      -Dtarget=1000
  *     TestDynamicSoftMaxHeapSize
- */
-
-/*
- * @test TestDynamicSoftMaxHeapSize
- * @requires vm.gc.Shenandoah
- * @library /test/lib
- *
- * @run main/othervm -Xms16m -Xmx512m -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions
- *      -XX:+UseShenandoahGC -XX:ShenandoahGCMode=iu -XX:ShenandoahGCHeuristics=aggressive
- *      -Dtarget=1000
- *      TestDynamicSoftMaxHeapSize
- */
-
-/*
- * @test TestDynamicSoftMaxHeapSize
- * @requires vm.gc.Shenandoah
- * @library /test/lib
- *
- * @run main/othervm -Xms16m -Xmx512m -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions
- *      -XX:+UseShenandoahGC -XX:ShenandoahGCMode=iu
- *      -Dtarget=10000
- *      TestDynamicSoftMaxHeapSize
  */
 
 import java.util.Random;
