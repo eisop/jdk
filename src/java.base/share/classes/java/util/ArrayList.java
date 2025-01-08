@@ -203,7 +203,7 @@ public @ReceiverDependentMutable class ArrayList<E> extends AbstractList<E>
      * @throws NullPointerException if the specified collection is null
      */
     @SideEffectFree
-    public @PolyNonEmpty ArrayList(@PolyNonEmpty Collection<? extends E> c) {
+    public @PolyNonEmpty ArrayList(@Readonly @PolyNonEmpty Collection<? extends E> c) {
         Object[] a = c.toArray();
         if ((size = a.length) != 0) {
             if (c.getClass() == ArrayList.class) {
