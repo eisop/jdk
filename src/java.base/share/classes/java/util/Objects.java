@@ -78,7 +78,7 @@ public final @UsesObjectEquals class Objects {
      */
     @Pure
     @EqualsMethod
-    public static boolean equals(@Readonly @@GuardSatisfied @Nullable @UnknownSignedness Object a, @Readonly @GuardSatisfied @Nullable @UnknownSignedness Object b) {
+    public static boolean equals(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object a, @Readonly @GuardSatisfied @Nullable @UnknownSignedness Object b) {
         return (a == b) || (a != null && a.equals(b));
     }
 
