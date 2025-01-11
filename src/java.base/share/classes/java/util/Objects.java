@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -77,7 +78,7 @@ public final @UsesObjectEquals class Objects {
      */
     @Pure
     @EqualsMethod
-    public static boolean equals(@GuardSatisfied @Nullable @UnknownSignedness Object a, @GuardSatisfied @Nullable @UnknownSignedness Object b) {
+    public static boolean equals(@Readonly @@GuardSatisfied @Nullable @UnknownSignedness Object a, @Readonly @GuardSatisfied @Nullable @UnknownSignedness Object b) {
         return (a == b) || (a != null && a.equals(b));
     }
 
@@ -99,7 +100,7 @@ public final @UsesObjectEquals class Objects {
     * @see Objects#equals(Object, Object)
     */
     @Pure
-    public static boolean deepEquals(@GuardSatisfied @Nullable @UnknownSignedness Object a, @GuardSatisfied @Nullable @UnknownSignedness Object b) {
+    public static boolean deepEquals(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object a, @Readonly @GuardSatisfied @Nullable @UnknownSignedness Object b) {
         if (a == b)
             return true;
         else if (a == null || b == null)
@@ -118,7 +119,7 @@ public final @UsesObjectEquals class Objects {
      * @see Object#hashCode
      */
     @Pure
-    public static int hashCode(@GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public static int hashCode(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return o != null ? o.hashCode() : 0;
     }
 
@@ -149,7 +150,7 @@ public final @UsesObjectEquals class Objects {
     * @see List#hashCode
     */
     @Pure
-    public static int hash(@GuardSatisfied @Nullable @UnknownSignedness Object... values) {
+    public static int hash(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object... values) {
         return Arrays.hashCode(values);
     }
 
@@ -164,7 +165,7 @@ public final @UsesObjectEquals class Objects {
      * @see String#valueOf(Object)
      */
     @SideEffectFree
-    public static String toString(@GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public static String toString(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return String.valueOf(o);
     }
 
@@ -182,7 +183,7 @@ public final @UsesObjectEquals class Objects {
      * @see Objects#toString(Object)
      */
     @SideEffectFree
-    public static @PolyNull String toString(@GuardSatisfied @Nullable @UnknownSignedness Object o, @PolyNull String nullDefault) {
+    public static @PolyNull String toString(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object o, @PolyNull String nullDefault) {
         return (o != null) ? o.toString() : nullDefault;
     }
 
@@ -207,7 +208,7 @@ public final @UsesObjectEquals class Objects {
      * @see Comparator
      */
     @Pure
-    public static <T> int compare(@GuardSatisfied @Nullable @UnknownSignedness T a, @GuardSatisfied @Nullable @UnknownSignedness T b, @GuardSatisfied Comparator<? super T> c) {
+    public static <T> int compare(@Readonly @GuardSatisfied @Nullable @UnknownSignedness T a, @Readonly @GuardSatisfied @Nullable @UnknownSignedness T b, @GuardSatisfied Comparator<? super T> c) {
         return (a == b) ? 0 :  c.compare(a, b);
     }
 
@@ -277,7 +278,7 @@ public final @UsesObjectEquals class Objects {
      */
     @EnsuresNonNullIf(expression={"#1"}, result=false)
     @Pure
-    public static boolean isNull(@GuardSatisfied @Nullable @UnknownSignedness Object obj) {
+    public static boolean isNull(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object obj) {
         return obj == null;
     }
 
@@ -297,7 +298,7 @@ public final @UsesObjectEquals class Objects {
      */
     @EnsuresNonNullIf(expression={"#1"}, result=true)
     @Pure
-    public static boolean nonNull(@GuardSatisfied @Nullable @UnknownSignedness Object obj) {
+    public static boolean nonNull(@Readonly @GuardSatisfied @Nullable @UnknownSignedness Object obj) {
         return obj != null;
     }
 
