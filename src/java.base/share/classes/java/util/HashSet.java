@@ -227,7 +227,7 @@ public @ReceiverDependentMutable class HashSet<E>
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(@GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean contains(@Readonly @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return map.containsKey(o);
     }
 
