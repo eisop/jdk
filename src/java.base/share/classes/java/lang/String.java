@@ -2995,7 +2995,7 @@ public final class String
     @Pure
     @StaticallyExecutable
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(CharSequence s) {
+    public boolean contains(@Readonly CharSequence s) {
         return indexOf(s.toString()) >= 0;
     }
 
@@ -4329,7 +4329,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     @FormatMethod
-    public static String format(String format, @Readonly @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
+    public static String format(String format, @Readonly @GuardSatisfied @Nullable Object @GuardSatisfied @Readonly ... args) {
         return new Formatter().format(format, args).toString();
     }
 

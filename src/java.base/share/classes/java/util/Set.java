@@ -145,7 +145,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @return the number of elements in this set (its cardinality)
      */
     @Pure
-    @NonNegative int size(@GuardSatisfied Set<E> this);
+    @NonNegative int size(@Readonly @GuardSatisfied Set<E> this);
 
     /**
      * Returns {@code true} if this set contains no elements.
@@ -154,7 +154,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    boolean isEmpty(@GuardSatisfied Set<E> this);
+    boolean isEmpty(@Readonly @GuardSatisfied Set<E> this);
 
     /**
      * Returns {@code true} if this set contains the specified element.
@@ -173,7 +173,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean contains(@GuardSatisfied Set<E> this, @GuardSatisfied @UnknownSignedness Object o);
+    boolean contains(@Readonly @GuardSatisfied Set<E> this, @GuardSatisfied @UnknownSignedness Object o);
 
     /**
      * Returns an iterator over the elements in this set.  The elements are

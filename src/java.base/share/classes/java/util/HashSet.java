@@ -105,8 +105,8 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.2
  */
 
-@AnnotatedFor({"lock", "nullness", "index"})
-@DefaultQualifierForUse(Readonly.class)
+ @AnnotatedFor({"index", "initialization", "lock", "nullness"})
+ @DefaultQualifierForUse(Readonly.class)
 public @ReceiverDependentMutable class HashSet<E>
     extends AbstractSet<E>
     implements Set<E>, Cloneable, java.io.Serializable
@@ -123,7 +123,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * Constructs a new, empty set; the backing {@code HashMap} instance has
      * default initial capacity (16) and load factor (0.75).
      */
-    public HashSet() {
+    public @ReceiverDependentMutable HashSet() {
         map = new HashMap<>();
     }
 
@@ -136,7 +136,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * @param c the collection whose elements are to be placed into this set
      * @throws NullPointerException if the specified collection is null
      */
-    public @PolyNonEmpty HashSet(@PolyNonEmpty Collection<? extends E> c) {
+    public @PolyNonEmpty @ReceiverDependentMutable HashSet(@PolyNonEmpty @Readonly Collection<? extends E> c) {
         map = new HashMap<>(Math.max((int) (c.size()/.75f) + 1, 16));
         addAll(c);
     }
@@ -150,7 +150,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    public HashSet(@NonNegative int initialCapacity, float loadFactor) {
+    public @ReceiverDependentMutable HashSet(@NonNegative int initialCapacity, float loadFactor) {
         map = new HashMap<>(initialCapacity, loadFactor);
     }
 
@@ -162,7 +162,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero
      */
-    public HashSet(@NonNegative int initialCapacity) {
+    public @ReceiverDependentMutable HashSet(@NonNegative int initialCapacity) {
         map = new HashMap<>(initialCapacity);
     }
 
@@ -179,7 +179,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    HashSet(int initialCapacity, float loadFactor, boolean dummy) {
+    @ReceiverDependentMutable HashSet(int initialCapacity, float loadFactor, boolean dummy) {
         map = new LinkedHashMap<>(initialCapacity, loadFactor);
     }
 
@@ -212,7 +212,7 @@ public @ReceiverDependentMutable class HashSet<E>
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean isEmpty(@GuardSatisfied HashSet<E> this) {
+    public boolean isEmpty(@Readonly @GuardSatisfied HashSet<E> this) {
         return map.isEmpty();
     }
 

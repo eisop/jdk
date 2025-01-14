@@ -163,7 +163,7 @@ import java.util.function.UnaryOperator;
  */
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness", "index"})
+@AnnotatedFor({"index", "initialization", "lock", "nullness"})
 public @ReceiverDependentMutable interface List<E> extends Collection<E> {
     // Query Operations
 
