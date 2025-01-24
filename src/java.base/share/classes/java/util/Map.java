@@ -230,7 +230,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
     @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
     @EnsuresNonEmptyIf(result=true, expression={"this"})
     @Pure
-    boolean containsKey(@GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
+    boolean containsKey(@GuardSatisfied @Readonly Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
 
     /**
      * Returns {@code true} if this map maps one or more keys to the

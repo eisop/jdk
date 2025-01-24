@@ -3522,7 +3522,7 @@ public class Arrays {
      */
     @SideEffectFree
     @SuppressWarnings("unchecked")
-    public static <T> @Nullable T @PolyMutable [] copyOf(T @PolyMutable [] original, @NonNegative int newLength) {
+    public static <T> @Nullable T @Mutable [] copyOf(T @Readonly [] original, @NonNegative int newLength) {
         return (T[]) copyOf(original, newLength, original.getClass());
     }
 
@@ -3552,7 +3552,7 @@ public class Arrays {
      */
     @SideEffectFree
     @IntrinsicCandidate
-    public static <T,U> @Nullable T @PolyMutable [] copyOf(U @PolyMutable [] original, @NonNegative int newLength, Class<? extends T[]> newType) {
+    public static <T,U> @Nullable T @Mutable [] copyOf(U @Readonly [] original, @NonNegative int newLength, Class<? extends T[]> newType) {
         @SuppressWarnings("unchecked")
         T[] copy = ((Object)newType == (Object)Object[].class)
             ? (T[]) new Object[newLength]
@@ -3580,7 +3580,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned byte @PolyMutable [] copyOf(@PolySigned byte @PolyMutable [] original, @NonNegative int newLength) {
+    public static @PolySigned byte @Mutable [] copyOf(@PolySigned byte @Readonly [] original, @NonNegative int newLength) {
         byte[] copy = new byte[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3605,7 +3605,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned short @PolyMutable [] copyOf(@PolySigned short @PolyMutable [] original, @NonNegative int newLength) {
+    public static @PolySigned short @Mutable [] copyOf(@PolySigned short @Readonly [] original, @NonNegative int newLength) {
         short[] copy = new short[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3630,7 +3630,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned int @PolyMutable [] copyOf(@PolySigned int @PolyMutable [] original, @NonNegative int newLength) {
+    public static @PolySigned int @Mutable [] copyOf(@PolySigned int @Readonly [] original, @NonNegative int newLength) {
         int[] copy = new int[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3655,7 +3655,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned long @PolyMutable [] copyOf(@PolySigned long @PolyMutable [] original, @NonNegative int newLength) {
+    public static @PolySigned long @Mutable [] copyOf(@PolySigned long @Readonly [] original, @NonNegative int newLength) {
         long[] copy = new long[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3680,7 +3680,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned char @PolyMutable [] copyOf(@PolySigned char @PolyMutable [] original, @NonNegative int newLength) {
+    public static @PolySigned char @Mutable [] copyOf(@PolySigned char @Readonly [] original, @NonNegative int newLength) {
         char[] copy = new char[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3705,7 +3705,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static float @PolyMutable [] copyOf(float @PolyMutable [] original, @NonNegative int newLength) {
+    public static float @Mutable [] copyOf(float @Readonly [] original, @NonNegative int newLength) {
         float[] copy = new float[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3730,7 +3730,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static double @PolyMutable [] copyOf(double @PolyMutable [] original, @NonNegative int newLength) {
+    public static double @Mutable [] copyOf(double @Readonly [] original, @NonNegative int newLength) {
         double[] copy = new double[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3755,7 +3755,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static boolean @PolyMutable [] copyOf(boolean @PolyMutable [] original, @NonNegative int newLength) {
+    public static boolean @Mutable [] copyOf(boolean @Readonly [] original, @NonNegative int newLength) {
         boolean[] copy = new boolean[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3793,7 +3793,7 @@ public class Arrays {
      */
     @SuppressWarnings("unchecked")
     @SideEffectFree
-    public static <T> @Nullable T @PolyMutable [] copyOfRange(T @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static <T> @Nullable T @Mutable [] copyOfRange(T @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         return copyOfRange(original, from, to, (Class<? extends T[]>) original.getClass());
     }
 
@@ -3832,7 +3832,7 @@ public class Arrays {
      */
     @IntrinsicCandidate
     @SideEffectFree
-    public static <T,U> @Nullable T @PolyMutable [] copyOfRange(U @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to, Class<? extends T[]> newType) {
+    public static <T,U> @Nullable T @Mutable [] copyOfRange(U @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to, Class<? extends T[]> newType) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -3872,7 +3872,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned byte @PolyMutable [] copyOfRange(@PolySigned byte @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static @PolySigned byte @Mutable [] copyOfRange(@PolySigned byte @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -3909,7 +3909,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned short @PolyMutable [] copyOfRange(@PolySigned short @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static @PolySigned short @Mutable [] copyOfRange(@PolySigned short @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -3946,7 +3946,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned int @PolyMutable [] copyOfRange(@PolySigned int @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static @PolySigned int @Mutable [] copyOfRange(@PolySigned int @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -3983,7 +3983,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned long @PolyMutable [] copyOfRange(@PolySigned long @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static @PolySigned long @Mutable [] copyOfRange(@PolySigned long @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -4020,7 +4020,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static @PolySigned char @PolyMutable [] copyOfRange(@PolySigned char @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static @PolySigned char @Mutable [] copyOfRange(@PolySigned char @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -4057,7 +4057,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static float @PolyMutable [] copyOfRange(float @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static float @Mutable [] copyOfRange(float @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -4094,7 +4094,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static double @PolyMutable [] copyOfRange(double @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static double @Mutable [] copyOfRange(double @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -4131,7 +4131,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    public static boolean @PolyMutable [] copyOfRange(boolean @PolyMutable [] original, @IndexOrHigh({"#1"}) int from, int to) {
+    public static boolean @Mutable [] copyOfRange(boolean @Readonly [] original, @IndexOrHigh({"#1"}) int from, int to) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
