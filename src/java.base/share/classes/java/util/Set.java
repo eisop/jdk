@@ -183,7 +183,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @return an iterator over the elements in this set
      */
     @SideEffectFree
-    @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty Set<E> this);
+    @PolyNonEmpty @ReceiverDependentMutable Iterator<E> iterator(@PolyNonEmpty @ReceiverDependentMutable Set<E> this);
 
     /**
      * Returns an array containing all of the elements in this set.
@@ -202,7 +202,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @return an array containing all the elements in this set
      */
     @SideEffectFree
-    @PolyNull @PolySigned Object[] toArray(Set<@PolyNull @PolySigned E> this);
+    @PolyNull @PolySigned Object @Mutable [] toArray(@Readonly Set<@PolyNull @PolySigned E> this);
 
     /**
      * Returns an array containing all of the elements in this set; the
@@ -247,7 +247,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @throws NullPointerException if the specified array is null
      */
     @SideEffectFree
-    <T> @Nullable T [] toArray(@PolyNull T[] a);
+    <T> @Nullable T @Mutable [] toArray(@PolyNull T @Readonly [] a);
 
 
     // Modification Operations
@@ -307,7 +307,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @throws UnsupportedOperationException if the {@code remove} operation
      *         is not supported by this set
      */
-    boolean remove(@Mutable @GuardSatisfied Set<E> this, @UnknownSignedness Object o);
+    boolean remove(@Mutable @GuardSatisfied Set<E> this, @UnknownSignedness @Readonly Object o);
 
 
     // Bulk Operations
@@ -332,7 +332,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @see    #contains(Object)
      */
     @Pure
-    boolean containsAll(@Readonly @GuardSatisfied Set<E> this, @GuardSatisfied Collection<? extends @UnknownSignedness Object> c);
+    boolean containsAll(@Readonly @GuardSatisfied Set<E> this, @GuardSatisfied @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Adds all of the elements in the specified collection to this set if
@@ -357,7 +357,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @see #add(Object)
      */
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean addAll(@Mutable @GuardSatisfied Set<E> this, Collection<? extends E> c);
+    boolean addAll(@Mutable @GuardSatisfied Set<E> this, @Readonly Collection<? extends E> c);
 
     /**
      * Retains only the elements in this set that are contained in the
@@ -380,7 +380,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      *         or if the specified collection is null
      * @see #remove(Object)
      */
-    boolean retainAll(@Mutable @GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean retainAll(@Mutable @GuardSatisfied Set<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Removes from this set all of its elements that are contained in the
@@ -403,7 +403,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    boolean removeAll(@Mutable @GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean removeAll(@Mutable @GuardSatisfied Set<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Removes all of the elements from this set (optional operation).
@@ -430,7 +430,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @return {@code true} if the specified object is equal to this set
      */
     @Pure
-    boolean equals(@GuardSatisfied Set<E> this, @GuardSatisfied @Nullable Object o);
+    boolean equals(@GuardSatisfied @Readonly Set<E> this, @GuardSatisfied @Nullable @Readonly Object o);
 
     /**
      * Returns the hash code value for this set.  The hash code of a set is
@@ -446,7 +446,7 @@ public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
      * @see Set#equals(Object)
      */
     @Pure
-    int hashCode(@GuardSatisfied Set<E> this);
+    int hashCode(@GuardSatisfied @Readonly Set<E> this);
 
     /**
      * Creates a {@code Spliterator} over the elements in this set.

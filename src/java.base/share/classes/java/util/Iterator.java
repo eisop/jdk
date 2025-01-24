@@ -82,7 +82,7 @@ public @ReceiverDependentMutable interface Iterator<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean hasNext(@Readonly @GuardSatisfied Iterator<E> this);
+    boolean hasNext(@GuardSatisfied Iterator<E> this);
 
     /**
      * Returns the next element in the iteration.
@@ -91,7 +91,7 @@ public @ReceiverDependentMutable interface Iterator<E> {
      * @throws NoSuchElementException if the iteration has no more elements
      */
     @SideEffectsOnly("this")
-    E next(@Readonly @GuardSatisfied @NonEmpty Iterator<E> this);
+    E next(@GuardSatisfied @NonEmpty Iterator<E> this);
 
     /**
      * Removes from the underlying collection the last element returned
@@ -147,7 +147,7 @@ public @ReceiverDependentMutable interface Iterator<E> {
      * @throws NullPointerException if the specified action is null
      * @since 1.8
      */
-    default void forEachRemaining(Consumer<? super E> action) {
+     default void forEachRemaining(Consumer<? super E> action) {
         Objects.requireNonNull(action);
         while (hasNext())
             action.accept(next());

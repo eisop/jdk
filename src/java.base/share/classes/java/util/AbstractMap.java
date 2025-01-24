@@ -107,7 +107,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * This implementation returns {@code entrySet().size()}.
      */
     @Pure
-    public @NonNegative int size(@GuardSatisfied AbstractMap<K, V> this) {
+    public @NonNegative int size(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         return entrySet().size();
     }
 
@@ -119,7 +119,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean isEmpty(@GuardSatisfied AbstractMap<K, V> this) {
+    public boolean isEmpty(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         return size() == 0;
     }
 
@@ -137,7 +137,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * @throws NullPointerException {@inheritDoc}
      */
     @Pure
-    public boolean containsValue(@GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
+    public boolean containsValue(@GuardSatisfied @Readonly AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object value) {
         Iterator<Entry<K,V>> i = entrySet().iterator();
         if (value==null) {
             while (i.hasNext()) {
@@ -171,7 +171,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      */
     @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
     @Pure
-    public boolean containsKey(@GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
+    public boolean containsKey(@GuardSatisfied @Readonly AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key) {
         Iterator<Map.Entry<K,V>> i = entrySet().iterator();
         if (key==null) {
             while (i.hasNext()) {
@@ -204,7 +204,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * @throws NullPointerException          {@inheritDoc}
      */
     @Pure
-    public @Nullable V get(@GuardSatisfied AbstractMap<K, V> this, @UnknownSignedness @GuardSatisfied Object key) {
+    public @Nullable V get(@GuardSatisfied @Readonly AbstractMap<K, V> this, @UnknownSignedness @GuardSatisfied @Readonly Object key) {
         Iterator<Entry<K,V>> i = entrySet().iterator();
         if (key==null) {
             while (i.hasNext()) {
@@ -378,7 +378,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * method will not all return the same set.
      */
     @SideEffectFree
-    public Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied AbstractMap<K, V> this) {
+    public Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         Set<K> ks = keySet;
         if (ks == null) {
             ks = new AbstractSet<K>() {
@@ -445,7 +445,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * method will not all return the same collection.
      */
     @SideEffectFree
-    public Collection<V> values(@GuardSatisfied AbstractMap<K, V> this) {
+    public Collection<V> values(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         Collection<V> vals = values;
         if (vals == null) {
             vals = new AbstractCollection<V>() {
@@ -496,7 +496,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
     }
 
     @SideEffectFree
-    public abstract Set<Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied AbstractMap<K, V> this);
+    public abstract Set<Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @Readonly AbstractMap<K, V> this);
 
 
     // Comparison and hashing
@@ -524,7 +524,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * @return {@code true} if the specified object is equal to this map
      */
     @Pure
-    public boolean equals(@GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @Nullable Object o) {
+    public boolean equals(@GuardSatisfied @Readonly AbstractMap<K, V> this, @GuardSatisfied @Nullable @Readonly Object o) {
         if (o == this)
             return true;
 
@@ -573,7 +573,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * @see Set#equals(Object)
      */
     @Pure
-    public int hashCode(@GuardSatisfied AbstractMap<K, V> this) {
+    public int hashCode(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         int h = 0;
         for (Entry<K, V> entry : entrySet())
             h += entry.hashCode();
@@ -593,7 +593,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      * @return a string representation of this map
      */
     @SideEffectFree
-    public String toString(@GuardSatisfied AbstractMap<K, V> this) {
+    public String toString(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         Iterator<Entry<K,V>> i = entrySet().iterator();
         if (! i.hasNext())
             return "{}";
@@ -657,7 +657,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      *
      * @since 1.6
      */
-    public static class SimpleEntry<K,V>
+    public static @Mutable class SimpleEntry<K extends @Immutable Object,V>
         implements Entry<K,V>, java.io.Serializable
     {
         @java.io.Serial
@@ -805,7 +805,7 @@ public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<
      *
      * @since 1.6
      */
-    public static class SimpleImmutableEntry<K,V>
+    public static class SimpleImmutableEntry<K extends @Immutable Object,V>
         implements Entry<K,V>, java.io.Serializable
     {
         @java.io.Serial
