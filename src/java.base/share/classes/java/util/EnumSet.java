@@ -26,6 +26,8 @@
 package java.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import jdk.internal.access.SharedSecrets;
@@ -80,7 +82,7 @@ import jdk.internal.access.SharedSecrets;
  * @see EnumMap
  */
 @AnnotatedFor({"index", "initialization", "nullness"})
-public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
+public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     implements Cloneable, java.io.Serializable
 {
     // declare EnumSet.class serialization compatibility with JDK 8
@@ -142,7 +144,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * Adds all of the elements from the appropriate enum type to this enum
      * set, which is empty prior to the call.
      */
-    abstract void addAll();
+    abstract void addAll(@Mutable EnumSet<E> this);
 
     /**
      * Creates an enum set with the same element type as the specified enum
@@ -216,7 +218,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @throws NullPointerException if {@code e} is null
      * @return an enum set initially containing the specified element
      */
-    public static <E extends Enum<E>> EnumSet<E> of(E e) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e) {
         EnumSet<E> result = noneOf(e.getDeclaringClass());
         result.add(e);
         return result;
@@ -237,7 +239,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2) {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
         result.add(e1);
         result.add(e2);
@@ -260,7 +262,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2, E e3) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2, E e3) {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
         result.add(e1);
         result.add(e2);
@@ -285,7 +287,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2, E e3, E e4) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2, E e3, E e4) {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
         result.add(e1);
         result.add(e2);
@@ -312,7 +314,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2, E e3, E e4,
+    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2, E e3, E e4,
                                                     E e5)
     {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
@@ -339,7 +341,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @return an enum set initially containing the specified elements
      */
     @SafeVarargs
-    public static <E extends Enum<E>> EnumSet<E> of(E first, E... rest) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E first, E... rest) {
         EnumSet<E> result = noneOf(first.getDeclaringClass());
         result.add(first);
         for (E e : rest)

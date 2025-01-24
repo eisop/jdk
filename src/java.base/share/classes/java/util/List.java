@@ -38,6 +38,7 @@ import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.PolySigned;
@@ -175,7 +176,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      * @return the number of elements in this list
      */
     @Pure
-    @NonNegative int size(@Readonly @GuardSatisfied List<E> this);
+    @NonNegative int size(@GuardSatisfied List<E> this);
 
     /**
      * Returns {@code true} if this list contains no elements.
@@ -184,7 +185,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    boolean isEmpty(@Readonly @GuardSatisfied List<E> this);
+    boolean isEmpty(@GuardSatisfied List<E> this);
 
     /**
      * Returns {@code true} if this list contains the specified element.
@@ -203,7 +204,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean contains(@Readonly @GuardSatisfied List<E> this, @UnknownSignedness Object o);
+    boolean contains(@GuardSatisfied List<E> this, @UnknownSignedness @Readonly Object o);
 
     /**
      * Returns an iterator over the elements in this list in proper sequence.
@@ -230,7 +231,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      * @see Arrays#asList(Object[])
      */
     @SideEffectFree
-    @PolyNull @PolySigned Object[] toArray(@Readonly List<@PolyNull @PolySigned E> this);
+    @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly List<@PolyNull @PolySigned @PolyMutable E> this);
 
     /**
      * Returns an array containing all of the elements in this list in
@@ -272,7 +273,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      * @throws NullPointerException if the specified array is null
      */
     @SideEffectFree
-    <T extends @UnknownSignedness Object> @Nullable T[] toArray(@Readonly List<E> this, @PolyNull T[] a);
+    <T extends @UnknownSignedness @Readonly Object> @Nullable T[] toArray(List<E> this, @PolyNull T[] a);
 
 
     // Modification Operations
@@ -350,7 +351,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      * @see #contains(Object)
      */
     @Pure
-    boolean containsAll(@Readonly @GuardSatisfied List<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean containsAll(@GuardSatisfied List<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Appends all of the elements in the specified collection to the end of
@@ -375,7 +376,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      */
     @SideEffectsOnly("this")
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean addAll(@Mutable @GuardSatisfied List<E> this, Collection<? extends E> c);
+    boolean addAll(@Mutable @GuardSatisfied List<E> this, @Readonly Collection<? extends E> c);
 
     /**
      * Inserts all of the elements in the specified collection into this
@@ -406,7 +407,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      */
     @SideEffectsOnly("this")
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean addAll(@Mutable @GuardSatisfied List<E> this, @IndexOrHigh({"this"}) int index, Collection<? extends E> c);
+    boolean addAll(@Mutable @GuardSatisfied List<E> this, @IndexOrHigh({"this"}) int index, @Readonly Collection<? extends E> c);
 
     /**
      * Removes from this list all of its elements that are contained in the
@@ -426,7 +427,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    boolean removeAll(@Mutable @GuardSatisfied List<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean removeAll(@Mutable @GuardSatisfied List<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Retains only the elements in this list that are contained in the
@@ -448,7 +449,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    boolean retainAll(@Mutable @GuardSatisfied List<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean retainAll(@Mutable @GuardSatisfied List<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Replaces each element of this list with the result of applying the
@@ -479,7 +480,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    default void replaceAll(UnaryOperator<E> operator) {
+    default void replaceAll(@Mutable List<E> this, UnaryOperator<E> operator) {
         Objects.requireNonNull(operator);
         final ListIterator<E> li = this.listIterator();
         while (li.hasNext()) {
@@ -618,7 +619,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      *         ({@code index < 0 || index >= size()})
      */
     @Pure
-    E get(@Readonly @GuardSatisfied List<E> this, @IndexFor({"this"}) int index);
+    E get(@GuardSatisfied List<E> this, @IndexFor({"this"}) int index);
 
     /**
      * Replaces the element at the specified position in this list with the
@@ -638,7 +639,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index >= size()})
      */
-    E set(@GuardSatisfied List<E> this, @IndexFor({"this"}) int index, E element);
+    E set(@Mutable @GuardSatisfied List<E> this, @IndexFor({"this"}) int index, E element);
 
     /**
      * Inserts the specified element at the specified position in this list
@@ -700,7 +701,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      */
     @Pure
-    @GTENegativeOne int indexOf(@Readonly @GuardSatisfied List<E> this, @GuardSatisfied @UnknownSignedness Object o);
+    @GTENegativeOne int indexOf(@Readonly @GuardSatisfied List<E> this, @GuardSatisfied @UnknownSignedness @Readonly Object o);
 
     /**
      * Returns the index of the last occurrence of the specified element
@@ -720,7 +721,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      */
     @Pure
-    @GTENegativeOne int lastIndexOf(@Readonly @GuardSatisfied List<E> this, @GuardSatisfied @UnknownSignedness Object o);
+    @GTENegativeOne int lastIndexOf(@Readonly @GuardSatisfied List<E> this, @GuardSatisfied @UnknownSignedness @Readonly Object o);
 
 
     // List Iterators
@@ -788,7 +789,7 @@ public @ReceiverDependentMutable interface List<E> extends Collection<E> {
      *         fromIndex > toIndex})
      */
     @SideEffectFree
-    List<E> subList(@GuardSatisfied List<E> this, @IndexOrHigh({"this"}) int fromIndex, @IndexOrHigh({"this"}) int toIndex);
+    @ReceiverDependentMutable List<E> subList(@GuardSatisfied List<E> this, @IndexOrHigh({"this"}) int fromIndex, @IndexOrHigh({"this"}) int toIndex);
 
     /**
      * Creates a {@link Spliterator} over the elements in this list.
