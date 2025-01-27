@@ -3521,6 +3521,8 @@ public class Arrays {
      */
     @SideEffectFree
     @SuppressWarnings("unchecked")
+    @CFComment("The return type is refined when safe see" +
+            "https://github.com/eisop/checker-framework/blob/17991582bc3a35509f15065b051d8e4c45c3e9ae/checker/src/main/java/org/checkerframework/checker/nullness/NullnessNoInitAnnotatedTypeFactory.java#L759")
     public static <T> @Nullable T[] copyOf(T[] original, @NonNegative int newLength) {
         return (T[]) copyOf(original, newLength, original.getClass());
     }
@@ -3551,6 +3553,8 @@ public class Arrays {
      */
     @SideEffectFree
     @IntrinsicCandidate
+    @CFComment("The return type is refined when safe see" +
+            "https://github.com/eisop/checker-framework/blob/17991582bc3a35509f15065b051d8e4c45c3e9ae/checker/src/main/java/org/checkerframework/checker/nullness/NullnessNoInitAnnotatedTypeFactory.java#L759")
     public static <T,U> @Nullable T[] copyOf(U[] original, @NonNegative int newLength, Class<? extends T[]> newType) {
         @SuppressWarnings("unchecked")
         T[] copy = ((Object)newType == (Object)Object[].class)
