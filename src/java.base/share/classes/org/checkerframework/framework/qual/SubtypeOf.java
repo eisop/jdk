@@ -38,8 +38,8 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
-@AnnotatedFor({"initialization", "nullness"})
+@AnnotatedFor("nullness")
 public @interface SubtypeOf {
-  /** An array of the supertype qualifiers of the annotated qualifier. */
-  Class<? extends Annotation>[] value();
+    /** An array of the supertype qualifiers of the annotated qualifier. */
+    Class<? extends Annotation>[] value();
 }

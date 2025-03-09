@@ -35,7 +35,7 @@ import java.util.StringJoiner;
  * @checker_framework.manual #formatter-checker Format String Checker
  */
 @SuppressWarnings("unchecked") // ".class" expressions in varargs position
-@AnnotatedFor({"initialization", "nullness"})
+@AnnotatedFor("nullness")
 public enum ConversionCategory {
     /** Use if the parameter can be of any type. Applicable for conversions b, B, h, H, s, S. */
     GENERAL("bBhHsS", (Class<?>[]) null /* everything */),
@@ -146,7 +146,7 @@ public enum ConversionCategory {
                     typesWithPrimitives.add(unwrapped);
                 }
             }
-            this.types = typesWithPrimitives.toArray(new Class<?>[typesWithPrimitives.size()]);
+            this.types = typesWithPrimitives.toArray(new Class<?>[0]);
         }
     }
 
