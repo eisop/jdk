@@ -69,7 +69,16 @@ jobs:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
           repository-cache: true
-    
+
+      - name: Clone plume-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
+
+      - name: Clone git-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
+
+      - name: Clone checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
 
@@ -93,6 +102,15 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.1.0
+
+      - name: Clone plume-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
+
+      - name: Clone git-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
+
+      - name: Clone checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
     
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
@@ -131,6 +149,14 @@ jobs:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
           repository-cache: true
-    
+      - name: Clone plume-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
+
+      - name: Clone git-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
+
+      - name: Clone checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
