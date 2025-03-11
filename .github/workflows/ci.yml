@@ -77,10 +77,10 @@ jobs:
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
 
       - name: Clone checker-framework
-        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop ../checker-framework
 
       - name: Go into the checker-framework directory
-        run: cd ../checker-framework && pwd
+        run: cd ../checker-framework && pwd && ls
 
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
@@ -113,10 +113,10 @@ jobs:
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
 
       - name: Clone checker-framework
-        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop ../checker-framework
 
       - name: Go into the checker-framework directory
-        run: cd ../checker-framework && pwd
+        run: cd ../checker-framework && pwd && ls
     
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
@@ -162,10 +162,10 @@ jobs:
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
 
       - name: Clone checker-framework
-        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop ../checker-framework
 
       - name: Go into the checker-framework directory
-        run: cd ../checker-framework && pwd
+        run: cd ../checker-framework && pwd && ls
 
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
