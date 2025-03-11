@@ -78,7 +78,7 @@ jobs:
       - name: Clone checker-framework
         run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
 
-      - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
+      - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh on JDK ${{ matrix.java_version }}
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
         working-directory: ../checker-framework
 
