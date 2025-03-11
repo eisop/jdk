@@ -40,8 +40,8 @@ jobs:
       - name: Build the JDK
         run: make jdk
 
-  sanity:
-    name: ${{ matrix.script }} on JDK ${{ matrix.java_version }}
+  CF:
+    name: ${{ matrix.script }} on JDK ${{ matrix.java.version }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,10 +53,10 @@ jobs:
       JAVA_VERSION: ${{ matrix.java.version }}
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK ${{ matrix.java_version }}
+      - name: Set up JDK ${{ matrix.java.version }}
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java_version }}
+          java-version: ${{ matrix.java.version }}
           distribution: 'temurin'
     
       - name: Setup Gradle
@@ -78,11 +78,11 @@ jobs:
       - name: Clone checker-framework
         run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
 
-      - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh on JDK ${{ matrix.java_version }}
+      - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
         working-directory: ../checker-framework
 
-  remainder:
+  extra:
     name: ${{ matrix.script }} on JDK ${{ matrix.java_version }}
     runs-on: ubuntu-latest
     strategy:
