@@ -77,13 +77,11 @@ jobs:
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
 
       - name: Clone checker-framework
-        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework ../checker-framework
-
-      - name: Go into the checker-framework directory
-        run: cd ../checker-framework && pwd && ls
+        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
 
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
+        working-directory: ../checker-framework
 
   remainder:
     name: ${{ matrix.script }} on JDK ${{ matrix.java_version }}
@@ -113,15 +111,13 @@ jobs:
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
 
       - name: Clone checker-framework
-        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework ../checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
 
-      - name: Go into the checker-framework directory
-        run: cd ../checker-framework && pwd && ls
-    
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
         if: (matrix.java_version != 8 || (matrix.script != 'plume-lib')) && 
             (matrix.java_version <= 21 || (matrix.script != 'daikon-part1' && matrix.script != 'daikon-part2'))
+        working-directory: ../checker-framework
 
   otherjdks:
     name: ${{ matrix.script }} on JDK ${{ matrix.java.version }}
@@ -162,10 +158,8 @@ jobs:
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
 
       - name: Clone checker-framework
-        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework ../checker-framework
-
-      - name: Go into the checker-framework directory
-        run: cd ../checker-framework && pwd && ls
+        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
 
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
+        working-directory: ../checker-framework
