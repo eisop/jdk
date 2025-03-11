@@ -79,6 +79,9 @@ jobs:
       - name: Clone checker-framework
         run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
 
+      - name: Go into the checker-framework directory
+        run: cd checker-framework
+
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
 
@@ -111,6 +114,9 @@ jobs:
 
       - name: Clone checker-framework
         run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+
+      - name: Go into the checker-framework directory
+        run: cd checker-framework
     
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
@@ -157,6 +163,9 @@ jobs:
 
       - name: Clone checker-framework
         run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+
+      - name: Go into the checker-framework directory
+        run: cd checker-framework
 
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
