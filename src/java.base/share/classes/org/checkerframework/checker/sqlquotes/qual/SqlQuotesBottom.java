@@ -1,5 +1,6 @@
-package org.checkerframework.common.reflection.qual;
+package org.checkerframework.checker.sqlquotes.qual;
 
+import org.checkerframework.framework.qual.DefaultFor;
 import org.checkerframework.framework.qual.InvisibleQualifier;
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TargetLocations;
@@ -12,15 +13,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The bottom type in the MethodVal type system. Programmers should rarely write this type.
+ * Represents the bottom of the SQL Quotes qualifier hierarchy.
  *
- * @checker_framework.manual #methodval-and-classval-checkers MethodVal Checker
+ * @checker_framework.manual #sql-quotes-checker SQL Quotes Checker
  * @checker_framework.manual #bottom-type the bottom type
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@TargetLocations({TypeUseLocation.LOWER_BOUND, TypeUseLocation.UPPER_BOUND})
+@TargetLocations({TypeUseLocation.LOWER_BOUND, TypeUseLocation.EXPLICIT_UPPER_BOUND})
 @InvisibleQualifier
-@SubtypeOf({MethodVal.class})
-public @interface MethodValBottom {}
+@SubtypeOf({SqlEvenQuotes.class, SqlOddQuotes.class})
+@DefaultFor(value = {TypeUseLocation.LOWER_BOUND})
+public @interface SqlQuotesBottom {}
