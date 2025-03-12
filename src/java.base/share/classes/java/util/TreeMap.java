@@ -39,7 +39,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -1533,7 +1532,6 @@ public class TreeMap<K,V>
             return next != null;
         }
 
-        @SideEffectsOnly("this")
         final Entry<K,V> nextEntry() {
             Entry<K,V> e = next;
             if (e == null)
@@ -1545,7 +1543,6 @@ public class TreeMap<K,V>
             return e;
         }
 
-        @SideEffectsOnly("this")
         final Entry<K,V> prevEntry() {
             Entry<K,V> e = next;
             if (e == null)
@@ -2083,7 +2080,6 @@ public class TreeMap<K,V>
                 return next != null && next.key != fenceKey;
             }
 
-            @SideEffectsOnly("this")
             final TreeMap.Entry<K,V> nextEntry() {
                 TreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)
@@ -2095,7 +2091,6 @@ public class TreeMap<K,V>
                 return e;
             }
 
-            @SideEffectsOnly("this")
             final TreeMap.Entry<K,V> prevEntry() {
                 TreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)

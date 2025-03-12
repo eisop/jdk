@@ -26,7 +26,6 @@
 package sun.security.jca;
 
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.util.*;
 
@@ -571,7 +570,6 @@ public final class ProviderList {
                     return tryGet(index) != null;
                 }
 
-                @SideEffectsOnly("this")
                 public Service next() {
                     Service s = tryGet(index);
                     if (s == null) {
