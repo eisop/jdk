@@ -34,6 +34,8 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -108,7 +110,7 @@ import jdk.internal.util.ArraysSupport;
  */
 @CFComment({"lock/nullness: permits nullable object"})
 @AnnotatedFor({"lock", "nullness", "index"})
-public class Vector<E>
+public @ReceiverDependentMutable class Vector<E>
     extends AbstractList<E>
     implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 {
@@ -546,7 +548,7 @@ public class Vector<E>
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index >= size()})
      */
-    public synchronized void setElementAt(@GuardSatisfied Vector<E> this, E obj, @NonNegative int index) {
+    public synchronized void setElementAt(@Mutable @GuardSatisfied Vector<E> this, E obj, @NonNegative int index) {
         if (index >= elementCount) {
             throw new ArrayIndexOutOfBoundsException(index + " >= " +
                                                      elementCount);
@@ -573,7 +575,7 @@ public class Vector<E>
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index >= size()})
      */
-    public synchronized void removeElementAt(@GuardSatisfied Vector<E> this, @NonNegative int index) {
+    public synchronized void removeElementAt(@Mutable @GuardSatisfied Vector<E> this, @NonNegative int index) {
         if (index >= elementCount) {
             throw new ArrayIndexOutOfBoundsException(index + " >= " +
                                                      elementCount);
@@ -613,7 +615,7 @@ public class Vector<E>
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
-    public synchronized void insertElementAt(@GuardSatisfied Vector<E> this, E obj, @NonNegative int index) {
+    public synchronized void insertElementAt(@Mutable @GuardSatisfied Vector<E> this, E obj, @NonNegative int index) {
         if (index > elementCount) {
             throw new ArrayIndexOutOfBoundsException(index
                                                      + " > " + elementCount);
@@ -641,7 +643,7 @@ public class Vector<E>
      *
      * @param   obj   the component to be added
      */
-    public synchronized void addElement(@GuardSatisfied Vector<E> this, E obj) {
+    public synchronized void addElement(@Mutable @GuardSatisfied Vector<E> this, E obj) {
         modCount++;
         add(obj, elementData, elementCount);
     }
@@ -661,7 +663,7 @@ public class Vector<E>
      * @return  {@code true} if the argument was a component of this
      *          vector; {@code false} otherwise.
      */
-    public synchronized boolean removeElement(@GuardSatisfied Vector<E> this, Object obj) {
+    public synchronized boolean removeElement(@Mutable @GuardSatisfied Vector<E> this, Object obj) {
         modCount++;
         int i = indexOf(obj);
         if (i >= 0) {
@@ -677,7 +679,7 @@ public class Vector<E>
      * <p>This method is identical in functionality to the {@link #clear}
      * method (which is part of the {@link List} interface).
      */
-    public synchronized void removeAllElements(@GuardSatisfied Vector<E> this) {
+    public synchronized void removeAllElements(@Mutable @GuardSatisfied Vector<E> this) {
         final Object[] es = elementData;
         for (int to = elementCount, i = elementCount = 0; i < to; i++)
             es[i] = null;
@@ -826,7 +828,7 @@ public class Vector<E>
      */
     @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
-    public synchronized boolean add(@GuardSatisfied Vector<E> this, E e) {
+    public synchronized boolean add(@Mutable @GuardSatisfied Vector<E> this, E e) {
         modCount++;
         add(e, elementData, elementCount);
         return true;
@@ -843,7 +845,7 @@ public class Vector<E>
      * @return true if the Vector contained the specified element
      * @since 1.2
      */
-    public boolean remove(@GuardSatisfied Vector<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean remove(@Mutable @GuardSatisfied Vector<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return removeElement(o);
     }
 
@@ -858,7 +860,7 @@ public class Vector<E>
      *         ({@code index < 0 || index > size()})
      * @since 1.2
      */
-    public void add(@GuardSatisfied Vector<E> this, @NonNegative int index, E element) {
+    public void add(@Mutable @GuardSatisfied Vector<E> this, @NonNegative int index, E element) {
         insertElementAt(element, index);
     }
 
@@ -873,7 +875,7 @@ public class Vector<E>
      *         ({@code index < 0 || index >= size()})
      * @since 1.2
      */
-    public synchronized E remove(@GuardSatisfied Vector<E> this, @NonNegative int index) {
+    public synchronized E remove(@Mutable @GuardSatisfied Vector<E> this, @NonNegative int index) {
         modCount++;
         if (index >= elementCount)
             throw new ArrayIndexOutOfBoundsException(index);
@@ -894,7 +896,7 @@ public class Vector<E>
      *
      * @since 1.2
      */
-    public void clear(@GuardSatisfied Vector<E> this) {
+    public void clear(@Mutable @GuardSatisfied Vector<E> this) {
         removeAllElements();
     }
 
@@ -928,7 +930,7 @@ public class Vector<E>
      * @throws NullPointerException if the specified collection is null
      * @since 1.2
      */
-    public boolean addAll(@GuardSatisfied Vector<E> this, Collection<? extends E> c) {
+    public boolean addAll(@Mutable @GuardSatisfied Vector<E> this, Collection<? extends E> c) {
         Object[] a = c.toArray();
         modCount++;
         int numNew = a.length;
@@ -962,7 +964,7 @@ public class Vector<E>
      *         or if the specified collection is null
      * @since 1.2
      */
-    public boolean removeAll(@GuardSatisfied Vector<E> this, Collection<? extends @UnknownSignedness Object> c) {
+    public boolean removeAll(@Mutable @GuardSatisfied Vector<E> this, Collection<? extends @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> c.contains(e));
     }
@@ -986,7 +988,7 @@ public class Vector<E>
      *         or if the specified collection is null
      * @since 1.2
      */
-    public boolean retainAll(@GuardSatisfied Vector<E> this, Collection<? extends @UnknownSignedness Object> c) {
+    public boolean retainAll(@Mutable @GuardSatisfied Vector<E> this, Collection<? extends @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> !c.contains(e));
     }

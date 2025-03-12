@@ -34,12 +34,16 @@ import org.checkerframework.checker.nullness.qual.EnsuresKeyFor;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyForIf;
 import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.util.Map.Entry;
 
@@ -84,7 +88,8 @@ import java.util.Map.Entry;
 
 @CFComment("lock: Subclasses of this interface/class may opt to prohibit null elements")
 @AnnotatedFor({"lock", "nullness", "index"})
-public abstract class AbstractMap<K,V> implements Map<K,V> {
+@DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable abstract class AbstractMap<K,V> implements Map<K,V> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
@@ -102,7 +107,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * This implementation returns {@code entrySet().size()}.
      */
     @Pure
-    public @NonNegative int size(@GuardSatisfied AbstractMap<K, V> this) {
+    public @NonNegative int size(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         return entrySet().size();
     }
 
@@ -114,7 +119,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean isEmpty(@GuardSatisfied AbstractMap<K, V> this) {
+    public boolean isEmpty(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         return size() == 0;
     }
 
@@ -132,7 +137,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * @throws NullPointerException {@inheritDoc}
      */
     @Pure
-    public boolean containsValue(@GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
+    public boolean containsValue(@GuardSatisfied @Readonly AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object value) {
         Iterator<Entry<K,V>> i = entrySet().iterator();
         if (value==null) {
             while (i.hasNext()) {
@@ -166,7 +171,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      */
     @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
     @Pure
-    public boolean containsKey(@GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
+    public boolean containsKey(@GuardSatisfied @Readonly AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key) {
         Iterator<Map.Entry<K,V>> i = entrySet().iterator();
         if (key==null) {
             while (i.hasNext()) {
@@ -199,7 +204,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * @throws NullPointerException          {@inheritDoc}
      */
     @Pure
-    public @Nullable V get(@GuardSatisfied AbstractMap<K, V> this, @UnknownSignedness @GuardSatisfied Object key) {
+    public @Nullable V get(@GuardSatisfied @Readonly AbstractMap<K, V> this, @UnknownSignedness @GuardSatisfied @Readonly Object key) {
         Iterator<Entry<K,V>> i = entrySet().iterator();
         if (key==null) {
             while (i.hasNext()) {
@@ -234,7 +239,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      */
     @ReleasesNoLocks
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@GuardSatisfied AbstractMap<K, V> this, K key, V value) {
+    public @Nullable V put(@Mutable @GuardSatisfied AbstractMap<K, V> this, K key, V value) {
         throw new UnsupportedOperationException();
     }
 
@@ -260,7 +265,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * @throws ClassCastException            {@inheritDoc}
      * @throws NullPointerException          {@inheritDoc}
      */
-    public @Nullable V remove(@GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
+    public @Nullable V remove(@Mutable @GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
         Iterator<Entry<K,V>> i = entrySet().iterator();
         Entry<K,V> correctEntry = null;
         if (key==null) {
@@ -305,7 +310,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
-    public void putAll(@GuardSatisfied AbstractMap<K, V> this, Map<? extends K, ? extends V> m) {
+    public void putAll(@Mutable @GuardSatisfied AbstractMap<K, V> this, Map<? extends K, ? extends V> m) {
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
             put(e.getKey(), e.getValue());
     }
@@ -322,7 +327,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      *
      * @throws UnsupportedOperationException {@inheritDoc}
      */
-    public void clear(@GuardSatisfied AbstractMap<K, V> this) {
+    public void clear(@Mutable @GuardSatisfied AbstractMap<K, V> this) {
         entrySet().clear();
     }
 
@@ -373,7 +378,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * method will not all return the same set.
      */
     @SideEffectFree
-    public Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied AbstractMap<K, V> this) {
+    public Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         Set<K> ks = keySet;
         if (ks == null) {
             ks = new AbstractSet<K>() {
@@ -440,7 +445,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * method will not all return the same collection.
      */
     @SideEffectFree
-    public Collection<V> values(@GuardSatisfied AbstractMap<K, V> this) {
+    public Collection<V> values(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         Collection<V> vals = values;
         if (vals == null) {
             vals = new AbstractCollection<V>() {
@@ -491,7 +496,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
     }
 
     @SideEffectFree
-    public abstract Set<Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied AbstractMap<K, V> this);
+    public abstract Set<Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @Readonly AbstractMap<K, V> this);
 
 
     // Comparison and hashing
@@ -519,7 +524,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * @return {@code true} if the specified object is equal to this map
      */
     @Pure
-    public boolean equals(@GuardSatisfied AbstractMap<K, V> this, @GuardSatisfied @Nullable Object o) {
+    public boolean equals(@GuardSatisfied @Readonly AbstractMap<K, V> this, @GuardSatisfied @Nullable @Readonly Object o) {
         if (o == this)
             return true;
 
@@ -568,7 +573,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * @see Set#equals(Object)
      */
     @Pure
-    public int hashCode(@GuardSatisfied AbstractMap<K, V> this) {
+    public int hashCode(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         int h = 0;
         for (Entry<K, V> entry : entrySet())
             h += entry.hashCode();
@@ -588,7 +593,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      * @return a string representation of this map
      */
     @SideEffectFree
-    public String toString(@GuardSatisfied AbstractMap<K, V> this) {
+    public String toString(@GuardSatisfied @Readonly AbstractMap<K, V> this) {
         Iterator<Entry<K,V>> i = entrySet().iterator();
         if (! i.hasNext())
             return "{}";
@@ -652,7 +657,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      *
      * @since 1.6
      */
-    public static class SimpleEntry<K,V>
+    public static @Mutable class SimpleEntry<K extends @Immutable Object,V>
         implements Entry<K,V>, java.io.Serializable
     {
         @java.io.Serial
@@ -800,7 +805,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
      *
      * @since 1.6
      */
-    public static class SimpleImmutableEntry<K,V>
+    public static class SimpleImmutableEntry<K extends @Immutable Object,V>
         implements Entry<K,V>, java.io.Serializable
     {
         @java.io.Serial

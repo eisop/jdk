@@ -33,11 +33,15 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.io.InvalidObjectException;
 import jdk.internal.access.SharedSecrets;
@@ -101,8 +105,9 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.2
  */
 
-@AnnotatedFor({"lock", "nullness", "index"})
-public class HashSet<E>
+ @AnnotatedFor({"index", "initialization", "lock", "nullness"})
+ @DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable class HashSet<E>
     extends AbstractSet<E>
     implements Set<E>, Cloneable, java.io.Serializable
 {
@@ -118,7 +123,7 @@ public class HashSet<E>
      * Constructs a new, empty set; the backing {@code HashMap} instance has
      * default initial capacity (16) and load factor (0.75).
      */
-    public HashSet() {
+    public @ReceiverDependentMutable HashSet() {
         map = new HashMap<>();
     }
 
@@ -131,7 +136,7 @@ public class HashSet<E>
      * @param c the collection whose elements are to be placed into this set
      * @throws NullPointerException if the specified collection is null
      */
-    public @PolyNonEmpty HashSet(@PolyNonEmpty Collection<? extends E> c) {
+    public @PolyNonEmpty @ReceiverDependentMutable HashSet(@PolyNonEmpty @Readonly Collection<? extends E> c) {
         map = new HashMap<>(Math.max((int) (c.size()/.75f) + 1, 16));
         addAll(c);
     }
@@ -145,7 +150,7 @@ public class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    public HashSet(@NonNegative int initialCapacity, float loadFactor) {
+    public @ReceiverDependentMutable HashSet(@NonNegative int initialCapacity, float loadFactor) {
         map = new HashMap<>(initialCapacity, loadFactor);
     }
 
@@ -157,7 +162,7 @@ public class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero
      */
-    public HashSet(@NonNegative int initialCapacity) {
+    public @ReceiverDependentMutable HashSet(@NonNegative int initialCapacity) {
         map = new HashMap<>(initialCapacity);
     }
 
@@ -174,7 +179,7 @@ public class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    HashSet(int initialCapacity, float loadFactor, boolean dummy) {
+    @ReceiverDependentMutable HashSet(int initialCapacity, float loadFactor, boolean dummy) {
         map = new LinkedHashMap<>(initialCapacity, loadFactor);
     }
 
@@ -207,7 +212,7 @@ public class HashSet<E>
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean isEmpty(@GuardSatisfied HashSet<E> this) {
+    public boolean isEmpty(@Readonly @GuardSatisfied HashSet<E> this) {
         return map.isEmpty();
     }
 
@@ -222,7 +227,7 @@ public class HashSet<E>
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(@GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean contains(@Readonly @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return map.containsKey(o);
     }
 
@@ -240,7 +245,7 @@ public class HashSet<E>
      */
     @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
-    public boolean add(@GuardSatisfied HashSet<E> this, E e) {
+    public boolean add(@Mutable @GuardSatisfied HashSet<E> this, E e) {
         return map.put(e, PRESENT)==null;
     }
 
@@ -257,7 +262,7 @@ public class HashSet<E>
      * @return {@code true} if the set contained the specified element
      */
     @SideEffectsOnly("this")
-    public boolean remove(@GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean remove(@Mutable @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return map.remove(o)==PRESENT;
     }
 
@@ -266,7 +271,7 @@ public class HashSet<E>
      * The set will be empty after this call returns.
      */
     @SideEffectsOnly("this")
-    public void clear(@GuardSatisfied HashSet<E> this) {
+    public void clear(@Mutable @GuardSatisfied HashSet<E> this) {
         map.clear();
     }
 

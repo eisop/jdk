@@ -33,12 +33,16 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 /**
  * A collection that contains no duplicate elements.  More formally, sets
@@ -129,7 +133,8 @@ import org.checkerframework.framework.qual.CFComment;
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness", "index"})
-public interface Set<E> extends Collection<E> {
+@DefaultQualifierForUse(Readonly.class)
+public @ReceiverDependentMutable interface Set<E> extends Collection<E> {
     // Query Operations
 
     /**
@@ -140,7 +145,7 @@ public interface Set<E> extends Collection<E> {
      * @return the number of elements in this set (its cardinality)
      */
     @Pure
-    @NonNegative int size(@GuardSatisfied Set<E> this);
+    @NonNegative int size(@Readonly @GuardSatisfied Set<E> this);
 
     /**
      * Returns {@code true} if this set contains no elements.
@@ -149,7 +154,7 @@ public interface Set<E> extends Collection<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    boolean isEmpty(@GuardSatisfied Set<E> this);
+    boolean isEmpty(@Readonly @GuardSatisfied Set<E> this);
 
     /**
      * Returns {@code true} if this set contains the specified element.
@@ -168,7 +173,7 @@ public interface Set<E> extends Collection<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean contains(@GuardSatisfied Set<E> this, @GuardSatisfied @UnknownSignedness Object o);
+    boolean contains(@Readonly @GuardSatisfied Set<E> this, @GuardSatisfied @UnknownSignedness Object o);
 
     /**
      * Returns an iterator over the elements in this set.  The elements are
@@ -178,7 +183,7 @@ public interface Set<E> extends Collection<E> {
      * @return an iterator over the elements in this set
      */
     @SideEffectFree
-    @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty Set<E> this);
+    @PolyNonEmpty @ReceiverDependentMutable Iterator<E> iterator(@PolyNonEmpty @ReceiverDependentMutable Set<E> this);
 
     /**
      * Returns an array containing all of the elements in this set.
@@ -197,7 +202,7 @@ public interface Set<E> extends Collection<E> {
      * @return an array containing all the elements in this set
      */
     @SideEffectFree
-    @PolyNull @PolySigned Object[] toArray(Set<@PolyNull @PolySigned E> this);
+    @PolyNull @PolySigned Object @Mutable [] toArray(@Readonly Set<@PolyNull @PolySigned E> this);
 
     /**
      * Returns an array containing all of the elements in this set; the
@@ -242,7 +247,7 @@ public interface Set<E> extends Collection<E> {
      * @throws NullPointerException if the specified array is null
      */
     @SideEffectFree
-    <T> @Nullable T [] toArray(@PolyNull T[] a);
+    <T> @Nullable T @Mutable [] toArray(@PolyNull T @Readonly [] a);
 
 
     // Modification Operations
@@ -278,7 +283,7 @@ public interface Set<E> extends Collection<E> {
      *         prevents it from being added to this set
      */
     @EnsuresNonEmpty("this")
-    boolean add(@GuardSatisfied Set<E> this, E e);
+    boolean add(@Mutable @GuardSatisfied Set<E> this, E e);
 
 
     /**
@@ -302,7 +307,7 @@ public interface Set<E> extends Collection<E> {
      * @throws UnsupportedOperationException if the {@code remove} operation
      *         is not supported by this set
      */
-    boolean remove(@GuardSatisfied Set<E> this, @UnknownSignedness Object o);
+    boolean remove(@Mutable @GuardSatisfied Set<E> this, @UnknownSignedness @Readonly Object o);
 
 
     // Bulk Operations
@@ -327,7 +332,7 @@ public interface Set<E> extends Collection<E> {
      * @see    #contains(Object)
      */
     @Pure
-    boolean containsAll(@GuardSatisfied Set<E> this, @GuardSatisfied Collection<? extends @UnknownSignedness Object> c);
+    boolean containsAll(@Readonly @GuardSatisfied Set<E> this, @GuardSatisfied @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Adds all of the elements in the specified collection to this set if
@@ -352,7 +357,7 @@ public interface Set<E> extends Collection<E> {
      * @see #add(Object)
      */
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean addAll(@GuardSatisfied Set<E> this, Collection<? extends E> c);
+    boolean addAll(@Mutable @GuardSatisfied Set<E> this, @Readonly Collection<? extends E> c);
 
     /**
      * Retains only the elements in this set that are contained in the
@@ -375,7 +380,7 @@ public interface Set<E> extends Collection<E> {
      *         or if the specified collection is null
      * @see #remove(Object)
      */
-    boolean retainAll(@GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean retainAll(@Mutable @GuardSatisfied Set<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Removes from this set all of its elements that are contained in the
@@ -398,7 +403,7 @@ public interface Set<E> extends Collection<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    boolean removeAll(@GuardSatisfied Set<E> this, Collection<? extends @UnknownSignedness Object> c);
+    boolean removeAll(@Mutable @GuardSatisfied Set<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c);
 
     /**
      * Removes all of the elements from this set (optional operation).
@@ -407,7 +412,7 @@ public interface Set<E> extends Collection<E> {
      * @throws UnsupportedOperationException if the {@code clear} method
      *         is not supported by this set
      */
-    void clear(@GuardSatisfied Set<E> this);
+    void clear(@Mutable @GuardSatisfied Set<E> this);
 
 
     // Comparison and hashing
@@ -425,7 +430,7 @@ public interface Set<E> extends Collection<E> {
      * @return {@code true} if the specified object is equal to this set
      */
     @Pure
-    boolean equals(@GuardSatisfied Set<E> this, @GuardSatisfied @Nullable Object o);
+    boolean equals(@GuardSatisfied @Readonly Set<E> this, @GuardSatisfied @Nullable @Readonly Object o);
 
     /**
      * Returns the hash code value for this set.  The hash code of a set is
@@ -441,7 +446,7 @@ public interface Set<E> extends Collection<E> {
      * @see Set#equals(Object)
      */
     @Pure
-    int hashCode(@GuardSatisfied Set<E> this);
+    int hashCode(@GuardSatisfied @Readonly Set<E> this);
 
     /**
      * Creates a {@code Spliterator} over the elements in this set.
