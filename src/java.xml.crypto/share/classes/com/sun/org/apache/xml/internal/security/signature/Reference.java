@@ -53,7 +53,6 @@ import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolver;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverContext;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException;
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -626,7 +625,6 @@ public class Reference extends SignatureElementProxy {
                             }
 
                             @Override
-                            @SideEffectsOnly("this")
                             public Node next() {
                                 return sIterator.next();
                             }

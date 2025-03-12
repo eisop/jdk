@@ -44,7 +44,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.AbstractQueue;
@@ -805,7 +804,6 @@ public class LinkedBlockingQueue<E extends Object> extends AbstractQueue<E>
             return next != null;
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty Itr this) {
             Node<E> p;
             if ((p = next) == null)
