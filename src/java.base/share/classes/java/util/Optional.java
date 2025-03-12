@@ -216,7 +216,7 @@ public final @NonNull class Optional<T> {
      *         {@code null}
      */
     @OptionalEliminator
-    public void ifPresent(Consumer<? super T> action) {
+    public void ifPresent(Consumer<? super @NonNull T> action) {
         if (value != null) {
             action.accept(value);
         }
@@ -235,7 +235,7 @@ public final @NonNull class Optional<T> {
      * @since 9
      */
     @OptionalEliminator
-    public void ifPresentOrElse(Consumer<? super T> action, Runnable emptyAction) {
+    public void ifPresentOrElse(Consumer<? super @NonNull T> action, Runnable emptyAction) {
         if (value != null) {
             action.accept(value);
         } else {
@@ -255,7 +255,7 @@ public final @NonNull class Optional<T> {
      * @throws NullPointerException if the predicate is {@code null}
      */
     @OptionalPropagator
-    public Optional<T> filter(Predicate<? super T> predicate) {
+    public Optional<T> filter(Predicate<? super @NonNull T> predicate) {
         Objects.requireNonNull(predicate);
         if (!isPresent()) {
             return this;
@@ -300,7 +300,7 @@ public final @NonNull class Optional<T> {
     @CFComment({"@SideEffectFree: the mapper must not have side effects."})
     @OptionalPropagator
     @SideEffectFree
-    public <U> Optional<U> map(Function<? super T, ? extends @Nullable U> mapper) {
+    public <U> Optional<U> map(Function<? super @NonNull T, ? extends @Nullable U> mapper) {
         Objects.requireNonNull(mapper);
         if (!isPresent()) {
             return empty();
@@ -329,7 +329,7 @@ public final @NonNull class Optional<T> {
      *         returns a {@code null} result
      */
     @OptionalPropagator
-    public <U> Optional<U> flatMap(Function<? super T, ? extends Optional<? extends U>> mapper) {
+    public <U> Optional<U> flatMap(Function<? super @NonNull T, ? extends Optional<? extends U>> mapper) {
         Objects.requireNonNull(mapper);
         if (!isPresent()) {
             return empty();
@@ -381,7 +381,7 @@ public final @NonNull class Optional<T> {
      * @since 9
      */
     @SideEffectFree
-    public Stream<T> stream() {
+    public Stream<@NonNull T> stream() {
         if (!isPresent()) {
             return Stream.empty();
         } else {
