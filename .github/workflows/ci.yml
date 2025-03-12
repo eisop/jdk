@@ -48,7 +48,7 @@ jobs:
     strategy:
       matrix:
         script: ['cftests-junit', 'cftests-nonjunit']
-        java: [{version: '8', experimental: false}, {version: '11', experimental: false}, {version: '21', experimental: false}, {version: '22', experimental: true}, {version: '23', experimental: false}, {version: '24-ea', experimental: true}]
+        java: [{version: '8', experimental: false}, {version: '11', experimental: false}, {version: '21', experimental: false}, {version: '22', experimental: true}, {version: '23', experimental: false}]
     continue-on-error: true
     env:
       JAVA_VERSION: ${{ matrix.java.version }}
