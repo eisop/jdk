@@ -90,7 +90,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        script: ['plume-lib', 'daikon']
+        script: ['plume-lib', 'daikon', 'misc']
         java_version: [17]
     env:
       JAVA_VERSION: ${{ matrix.java_version }}
