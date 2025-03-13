@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -90,7 +89,6 @@ public class DOMSubTreeData implements NodeSetData<Node> {
             return li.hasNext();
         }
 
-        @SideEffectsOnly("this")
         public Node next() {
             if (nodeSet == null) {
                 nodeSet = dereferenceSameDocumentURI(root);

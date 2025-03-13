@@ -36,7 +36,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.function.Consumer;
@@ -787,7 +786,6 @@ public class LinkedHashMap<K,V>
             return next != null;
         }
 
-        @SideEffectsOnly("this")
         final LinkedHashMap.Entry<K,V> nextNode(@NonEmpty LinkedHashIterator this) {
             LinkedHashMap.Entry<K,V> e = next;
             if (modCount != expectedModCount)
