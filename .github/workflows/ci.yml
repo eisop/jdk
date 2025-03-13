@@ -105,6 +105,17 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.1.0
 
+      - name: Install misc dependencies
+        if: ${{ matrix.script == 'misc' }}
+        run: |
+          sudo apt install -y shellcheck devscripts python3-pip \
+            texlive-latex-base texlive-latex-extra latexmk librsvg2-bin \
+            autoconf dia hevea latexmk libasound2-dev rsync pdf2svg \
+            libcups2-dev libfontconfig1-dev libx11-dev libxext-dev \
+            libxrender-dev libxrandr-dev libxtst-dev libxt-dev \
+            texlive-font-utils texlive-fonts-recommended texlive-latex-recommended
+          pip install black flake8 html5validator  
+
       - name: Clone plume-scripts
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
 
