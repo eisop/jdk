@@ -90,7 +90,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        script: ['plume-lib', 'daikon', 'misc']
+        script: ['plume-lib', 'daikon']
         java_version: [17]
     env:
       JAVA_VERSION: ${{ matrix.java_version }}
@@ -105,17 +105,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.1.0
 
-      - name: Install misc dependencies
-        if: ${{ matrix.script == 'misc' }}
-        run: |
-          sudo apt install -y shellcheck devscripts python3-pip \
-            texlive-latex-base texlive-latex-extra latexmk librsvg2-bin \
-            autoconf dia hevea latexmk libasound2-dev rsync pdf2svg \
-            libcups2-dev libfontconfig1-dev libx11-dev libxext-dev \
-            libxrender-dev libxrandr-dev libxtst-dev libxt-dev \
-            texlive-font-utils texlive-fonts-recommended texlive-latex-recommended
-          pip install black flake8 html5validator  
-
       - name: Clone plume-scripts
         run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
 
@@ -127,4 +116,37 @@ jobs:
 
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
+        working-directory: ../checker-framework
+
+  Consistency:
+    name: JDK consistency on JDK ${{ matrix.java_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        java_version: [ 17 ]
+    env:
+      JAVA_VERSION: ${{ matrix.java_version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{ matrix.java_version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java_version }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4.1.0
+
+      - name: Clone plume-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/plume-scripts.git
+
+      - name: Clone git-scripts
+        run: mkdir -p /tmp/$USER && git -C /tmp/$USER clone --depth 1 -q https://github.com/eisop-plume-lib/git-scripts.git
+
+      - name: Clone checker-framework
+        run: /tmp/$USER/git-scripts/git-clone-related eisop checker-framework
+
+      - name: Run test script checker/bin-devel/check-jdk-consistency.sh
+        run: ./checker/bin-devel/check-jdk-consistency.sh
         working-directory: ../checker-framework
