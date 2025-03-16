@@ -34,7 +34,6 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.NoSuchElementException;
@@ -174,7 +173,6 @@ public interface CharSequence {
                 return cur < length();
             }
 
-            @SideEffectsOnly("this")
             public int nextInt(@NonEmpty CharIterator this) {
                 if (hasNext()) {
                     return charAt(cur++);
@@ -251,7 +249,6 @@ public interface CharSequence {
                 return cur < length();
             }
 
-            @SideEffectsOnly("this")
             public int nextInt(@NonEmpty CodePointIterator this) {
                 final int length = length();
 

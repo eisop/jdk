@@ -88,7 +88,7 @@ import jdk.internal.reflect.Reflection;
  * @see Connection
  * @since 1.1
  */
-@AnnotatedFor({"interning"})
+@AnnotatedFor({"initialization", "nullness", "interning"})
 public @UsesObjectEquals class DriverManager {
 
 
@@ -226,7 +226,7 @@ public @UsesObjectEquals class DriverManager {
      */
     @CallerSensitive
     public static Connection getConnection(String url,
-        String user, String password) throws SQLException {
+        @Nullable String user, @Nullable String password) throws SQLException {
         java.util.Properties info = new java.util.Properties();
 
         if (user != null) {
@@ -386,7 +386,7 @@ public @UsesObjectEquals class DriverManager {
      * @see SecurityManager#checkPermission
      */
     @CallerSensitive
-    public static void deregisterDriver(Driver driver) throws SQLException {
+    public static void deregisterDriver(@Nullable Driver driver) throws SQLException {
         if (driver == null) {
             return;
         }
@@ -507,7 +507,7 @@ public @UsesObjectEquals class DriverManager {
      * @see #getLogStream
      */
     @Deprecated(since="1.2")
-    public static void setLogStream(java.io.PrintStream out) {
+    public static void setLogStream(java.io.@Nullable PrintStream out) {
 
         @SuppressWarnings("removal")
         SecurityManager sec = System.getSecurityManager();
@@ -555,12 +555,13 @@ public @UsesObjectEquals class DriverManager {
 
     // Indicates whether the class object that would be created if the code calling
     // DriverManager is accessible.
-    private static boolean isDriverAllowed(Driver driver, Class<?> caller) {
+    private static boolean isDriverAllowed(Driver driver, @Nullable Class<?> caller) {
         ClassLoader callerCL = caller != null ? caller.getClassLoader() : null;
         return isDriverAllowed(driver, callerCL);
     }
 
-    private static boolean isDriverAllowed(Driver driver, ClassLoader classLoader) {
+    private static boolean isDriverAllowed(@Nullable Driver driver,
+        @Nullable ClassLoader classLoader) {
         boolean result = false;
         if (driver != null) {
             Class<?> aClass = null;
@@ -658,7 +659,7 @@ public @UsesObjectEquals class DriverManager {
 
     //  Worker method called by the public getConnection() methods.
     private static Connection getConnection(
-        String url, java.util.Properties info, Class<?> caller) throws SQLException {
+        String url, java.util.Properties info, @Nullable Class<?> caller) throws SQLException {
         /*
          * When callerCl is null, we should check the application's
          * (which is invoking this class indirectly)
@@ -724,6 +725,7 @@ public @UsesObjectEquals class DriverManager {
  * to avoid the capture of the Driver it being compared to as it might not
  * normally have access.
  */
+@AnnotatedFor({"initialization", "nullness"})
 class DriverInfo {
 
     final Driver driver;
