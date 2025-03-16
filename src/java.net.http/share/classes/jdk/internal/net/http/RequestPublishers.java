@@ -26,7 +26,6 @@
 package jdk.internal.net.http;
 
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -139,7 +138,6 @@ public final class RequestPublishers {
             }
 
             @Override
-            @SideEffectsOnly("this")
             public ByteBuffer next() {
                 ByteBuffer buffer = buffers.poll();
                 while (buffer == null) {
@@ -460,7 +458,6 @@ public final class RequestPublishers {
         }
 
         @Override
-        @SideEffectsOnly("this")
         public synchronized ByteBuffer next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();

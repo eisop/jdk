@@ -28,7 +28,6 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -699,7 +698,6 @@ public final class Spliterators {
             }
 
             @Override
-            @SideEffectsOnly("this")
             public T next(@NonEmpty Adapter this) {
                 if (!valueReady && !hasNext())
                     throw new NoSuchElementException();
@@ -761,7 +759,6 @@ public final class Spliterators {
             }
 
             @Override
-            @SideEffectsOnly("this")
             public int nextInt(@NonEmpty Adapter this) {
                 if (!valueReady && !hasNext())
                     throw new NoSuchElementException();
@@ -819,7 +816,6 @@ public final class Spliterators {
             }
 
             @Override
-            @SideEffectsOnly("this")
             public long nextLong(@NonEmpty Adapter this) {
                 if (!valueReady && !hasNext())
                     throw new NoSuchElementException();
@@ -877,7 +873,6 @@ public final class Spliterators {
             }
 
             @Override
-            @SideEffectsOnly("this")
             public double nextDouble(@NonEmpty Adapter this) {
                 if (!valueReady && !hasNext())
                     throw new NoSuchElementException();

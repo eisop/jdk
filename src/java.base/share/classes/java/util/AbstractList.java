@@ -36,7 +36,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -389,7 +388,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
             return cursor != size();
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty Itr this) {
             checkForComodification();
             try {
@@ -875,7 +873,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
                     return nextIndex() < size;
                 }
 
-                @SideEffectsOnly("this")
                 public E next(/*@NonEmpty ListIterator<E> this*/) {
                     if (hasNext())
                         return i.next();
@@ -888,7 +885,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
                     return previousIndex() >= 0;
                 }
 
-                @SideEffectsOnly("this")
                 public E previous() {
                     if (hasPrevious())
                         return i.previous();

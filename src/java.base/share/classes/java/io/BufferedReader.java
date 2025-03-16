@@ -38,7 +38,6 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.Iterator;
@@ -597,7 +596,6 @@ public class BufferedReader extends Reader {
             }
 
             @Override
-            @SideEffectsOnly("this")
             public String next(/*@NonEmpty Iterator<String> this*/) {
                 if (nextLine != null || hasNext()) {
                     String line = nextLine;
