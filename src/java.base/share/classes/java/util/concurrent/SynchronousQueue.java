@@ -498,8 +498,7 @@ public class SynchronousQueue<E extends @NonNull Object> extends AbstractQueue<E
     }
 
     /**
-     * Returns a zero-length array.
-     * @return a zero-length array
+     * {@return a zero-length array}
      */
     @SideEffectFree
     public @PolyNull @PolySigned Object[] toArray(SynchronousQueue<@PolyNull @PolySigned E> this) {

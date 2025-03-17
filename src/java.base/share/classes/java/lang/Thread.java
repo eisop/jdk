@@ -38,11 +38,6 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Field;
-import java.security.AccessController;
-import java.security.AccessControlContext;
-import java.security.Permission;
-import java.security.PrivilegedAction;
-import java.security.ProtectionDomain;
 import java.time.Duration;
 import java.util.Map;
 import java.util.HashMap;
@@ -54,8 +49,6 @@ import jdk.internal.event.ThreadSleepEvent;
 import jdk.internal.misc.TerminatingThreadLocal;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.misc.VM;
-import jdk.internal.reflect.CallerSensitive;
-import jdk.internal.reflect.Reflection;
 import jdk.internal.vm.Continuation;
 import jdk.internal.vm.ScopedValueContainer;
 import jdk.internal.vm.StackableScope;
@@ -65,7 +58,6 @@ import jdk.internal.vm.annotation.Hidden;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 import jdk.internal.vm.annotation.Stable;
 import sun.nio.ch.Interruptible;
-import sun.security.util.SecurityConstants;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -173,7 +165,15 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
  * }
  *
  * <h2><a id="inheritance">Inheritance when creating threads</a></h2>
- * A {@code Thread} inherits its initial values of {@linkplain InheritableThreadLocal
+ * A {@code Thread} created with one of the public constructors inherits the daemon
+ * status and thread priority from the parent thread at the time that the child {@code
+ * Thread} is created. The {@linkplain ThreadGroup thread group} is also inherited when
+ * not provided to the constructor. When using a {@code Thread.Builder} to create a
+ * platform thread, the daemon status, thread priority, and thread group are inherited
+ * when not set on the builder. As with the constructors, inheriting from the parent
+ * thread is done when the child {@code Thread} is created.
+ *
+ * <p> A {@code Thread} inherits its initial values of {@linkplain InheritableThreadLocal
  * inheritable-thread-local} variables (including the context class loader) from
  * the parent thread values at the time that the child {@code Thread} is created.
  * The 5-param {@linkplain Thread#Thread(ThreadGroup, Runnable, String, long, boolean)
@@ -181,17 +181,6 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
  * values from the constructing thread. When using a {@code Thread.Builder}, the
  * {@link Builder#inheritInheritableThreadLocals(boolean) inheritInheritableThreadLocals}
  * method can be used to select if the initial values are inherited.
- *
- * <p> Platform threads inherit the daemon status, thread priority, and when not
- * provided (or not selected by a security manager), the thread group.
- *
- * <p> Creating a platform thread {@linkplain AccessController#getContext() captures} the
- * {@linkplain AccessControlContext caller context} to limit the {@linkplain Permission
- * permissions} of the new thread when it executes code that performs a {@linkplain
- * AccessController#doPrivileged(PrivilegedAction) privileged action}. The captured
- * caller context is the new thread's "Inherited {@link AccessControlContext}". Creating
- * a virtual thread does not capture the caller context; virtual threads have no
- * permissions when executing code that performs a privileged action.
  *
  * <p> Unless otherwise specified, passing a {@code null} argument to a constructor
  * or method in this class will cause a {@link NullPointerException} to be thrown.
@@ -256,10 +245,6 @@ public @UsesObjectEquals class Thread implements Runnable {
 
     // context ClassLoader
     private volatile ClassLoader contextClassLoader;
-
-    // inherited AccessControlContext, this could be moved to FieldHolder
-    @SuppressWarnings("removal")
-    private AccessControlContext inheritedAccessControlContext;
 
     // Additional fields for platform threads.
     // All fields, except task, are accessed directly by the VM.
@@ -469,18 +454,19 @@ public @UsesObjectEquals class Thread implements Runnable {
      * Called before sleeping to create a jdk.ThreadSleep event.
      */
     private static ThreadSleepEvent beforeSleep(long nanos) {
-        ThreadSleepEvent event = null;
-        if (ThreadSleepEvent.isTurnedOn()) {
-            try {
-                event = new ThreadSleepEvent();
+        try {
+            ThreadSleepEvent event = new ThreadSleepEvent();
+            if (event.isEnabled()) {
                 event.time = nanos;
                 event.begin();
-            } catch (OutOfMemoryError e) {
-                event = null;
+                return event;
             }
+        } catch (OutOfMemoryError e) {
+            // ignore
         }
-        return event;
+        return null;
     }
+
 
     /**
      * Called after sleeping to commit the jdk.ThreadSleep event.
@@ -648,11 +634,16 @@ public @UsesObjectEquals class Thread implements Runnable {
     static final int NO_INHERIT_THREAD_LOCALS = 1 << 2;
 
     /**
+     * Thread identifier assigned to the primordial thread.
+     */
+    static final long PRIMORDIAL_TID = 3;
+
+    /**
      * Helper class to generate thread identifiers. The identifiers start at
-     * 2 as this class cannot be used during early startup to generate the
-     * identifier for the primordial thread. The counter is off-heap and
-     * shared with the VM to allow it assign thread identifiers to non-Java
-     * threads.
+     * {@link Thread#PRIMORDIAL_TID}&nbsp;+1 as this class cannot be used during
+     * early startup to generate the identifier for the primordial thread. The
+     * counter is off-heap and shared with the VM to allow it to assign thread
+     * identifiers to non-Java threads.
      * See Thread initialization.
      */
     private static class ThreadIdentifiers {
@@ -668,21 +659,6 @@ public @UsesObjectEquals class Thread implements Runnable {
     }
 
     /**
-     * Returns the context class loader to inherit from the parent thread.
-     * See Thread initialization.
-     */
-    private static ClassLoader contextClassLoader(Thread parent) {
-        @SuppressWarnings("removal")
-        SecurityManager sm = System.getSecurityManager();
-        if (sm == null || isCCLOverridden(parent.getClass())) {
-            return parent.getContextClassLoader();
-        } else {
-            // skip call to getContextClassLoader
-            return parent.contextClassLoader;
-        }
-    }
-
-    /**
      * Initializes a platform Thread.
      *
      * @param g the Thread group, can be null
@@ -691,12 +667,8 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @param task the object whose run() method gets called
      * @param stackSize the desired stack size for the new thread, or
      *        zero to indicate that this parameter is to be ignored.
-     * @param acc the AccessControlContext to inherit, or
-     *        AccessController.getContext() if null
      */
-    @SuppressWarnings("removal")
-    Thread(ThreadGroup g, String name, int characteristics, Runnable task,
-           long stackSize, AccessControlContext acc) {
+    Thread(ThreadGroup g, String name, int characteristics, Runnable task, long stackSize) {
 
         Thread parent = currentThread();
         boolean attached = (parent == this);   // primordial or JNI attached
@@ -707,43 +679,21 @@ public @UsesObjectEquals class Thread implements Runnable {
             }
             this.holder = new FieldHolder(g, task, stackSize, NORM_PRIORITY, false);
         } else {
-            SecurityManager sm = System.getSecurityManager();
             if (g == null) {
-                // the security manager can choose the thread group
-                if (sm != null) {
-                    g = sm.getThreadGroup();
-                }
-
                 // default to current thread's group
-                if (g == null) {
-                    g = parent.getThreadGroup();
-                }
+                g = parent.getThreadGroup();
             }
-
-            // permission checks when creating a child Thread
-            if (sm != null) {
-                sm.checkAccess(g);
-                if (isCCLOverridden(getClass())) {
-                    sm.checkPermission(SecurityConstants.SUBCLASS_IMPLEMENTATION_PERMISSION);
-                }
-            }
-
             int priority = Math.min(parent.getPriority(), g.getMaxPriority());
             this.holder = new FieldHolder(g, task, stackSize, priority, parent.isDaemon());
         }
 
         if (attached && VM.initLevel() < 1) {
-            this.tid = 1;  // primordial thread
+            this.tid = PRIMORDIAL_TID;  // primordial thread
         } else {
             this.tid = ThreadIdentifiers.next();
         }
-        this.name = (name != null) ? name : genThreadName();
 
-        if (acc != null) {
-            this.inheritedAccessControlContext = acc;
-        } else {
-            this.inheritedAccessControlContext = AccessController.getContext();
-        }
+        this.name = (name != null) ? name : genThreadName();
 
         // thread locals
         if (!attached) {
@@ -753,7 +703,7 @@ public @UsesObjectEquals class Thread implements Runnable {
                     this.inheritableThreadLocals = ThreadLocal.createInheritedMap(parentMap);
                 }
                 if (VM.isBooted()) {
-                    this.contextClassLoader = contextClassLoader(parent);
+                    this.contextClassLoader = parent.getContextClassLoader();
                 }
             } else if (VM.isBooted()) {
                 // default CCL to the system class loader when not inheriting
@@ -776,7 +726,6 @@ public @UsesObjectEquals class Thread implements Runnable {
     Thread(String name, int characteristics, boolean bound) {
         this.tid = ThreadIdentifiers.next();
         this.name = (name != null) ? name : "";
-        this.inheritedAccessControlContext = Constants.NO_PERMISSIONS_ACC;
 
         // thread locals
         if ((characteristics & NO_INHERIT_THREAD_LOCALS) == 0) {
@@ -785,7 +734,7 @@ public @UsesObjectEquals class Thread implements Runnable {
             if (parentMap != null && parentMap.size() > 0) {
                 this.inheritableThreadLocals = ThreadLocal.createInheritedMap(parentMap);
             }
-            this.contextClassLoader = contextClassLoader(parent);
+            this.contextClassLoader = parent.getContextClassLoader();
         } else {
             // default CCL to the system class loader when not inheriting
             this.contextClassLoader = ClassLoader.getSystemClassLoader();
@@ -807,18 +756,6 @@ public @UsesObjectEquals class Thread implements Runnable {
     /**
      * Returns a builder for creating a platform {@code Thread} or {@code ThreadFactory}
      * that creates platform threads.
-     *
-     * <p> <a id="ofplatform-security"><b>Interaction with security manager when
-     * creating platform threads</b></a>
-     * <p> Creating a platform thread when there is a security manager set will
-     * invoke the security manager's {@link SecurityManager#checkAccess(ThreadGroup)
-     * checkAccess(ThreadGroup)} method with the thread's thread group.
-     * If the thread group has not been set with the {@link
-     * Builder.OfPlatform#group(ThreadGroup) OfPlatform.group} method then the
-     * security manager's {@link SecurityManager#getThreadGroup() getThreadGroup}
-     * method will be invoked first to select the thread group. If the security
-     * manager {@code getThreadGroup} method returns {@code null} then the thread
-     * group of the constructing thread is used.
      *
      * @apiNote The following are examples using the builder:
      * {@snippet :
@@ -949,9 +886,6 @@ public @UsesObjectEquals class Thread implements Runnable {
          *
          * @param task the object to run when the thread executes
          * @return a new unstarted Thread
-         * @throws SecurityException if denied by the security manager
-         *         (See <a href="Thread.html#ofplatform-security">Interaction with
-         *         security manager when creating platform threads</a>)
          *
          * @see <a href="Thread.html#inheritance">Inheritance when creating threads</a>
          */
@@ -963,9 +897,6 @@ public @UsesObjectEquals class Thread implements Runnable {
          *
          * @param task the object to run when the thread executes
          * @return a new started Thread
-         * @throws SecurityException if denied by the security manager
-         *         (See <a href="Thread.html#ofplatform-security">Interaction with
-         *         security manager when creating platform threads</a>)
          *
          * @see <a href="Thread.html#inheritance">Inheritance when creating threads</a>
          */
@@ -1145,7 +1076,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread() {
-        this(null, null, 0, null, 0, null);
+        this(null, null, 0, null, 0);
     }
 
     /**
@@ -1166,16 +1097,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread(@Nullable Runnable task) {
-        this(null, null, 0, task, 0, null);
-    }
-
-    /**
-     * Creates a new Thread that inherits the given AccessControlContext
-     * but thread-local variables are not inherited.
-     * This is not a public constructor.
-     */
-    Thread(Runnable task, @SuppressWarnings("removal") AccessControlContext acc) {
-        this(null, null, 0, task, 0, acc);
+        this(null, null, 0, task, 0);
     }
 
     /**
@@ -1190,25 +1112,17 @@ public @UsesObjectEquals class Thread implements Runnable {
      * <pre>{@code Thread.ofPlatform().group(group).unstarted(task); }</pre>
      *
      * @param  group
-     *         the thread group. If {@code null} and there is a security
-     *         manager, the group is determined by {@linkplain
-     *         SecurityManager#getThreadGroup SecurityManager.getThreadGroup()}.
-     *         If there is not a security manager or {@code
-     *         SecurityManager.getThreadGroup()} returns {@code null}, the group
+     *         the thread group. If {@code null} the group
      *         is set to the current thread's thread group.
      *
      * @param  task
      *         the object whose {@code run} method is invoked when this thread
      *         is started. If {@code null}, this thread's run method is invoked.
      *
-     * @throws  SecurityException
-     *          if the current thread cannot create a thread in the specified
-     *          thread group
-     *
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread(@Nullable ThreadGroup group, @Nullable Runnable task) {
-        this(group, null, 0, task, 0, null);
+        this(group, null, 0, task, 0);
     }
 
     /**
@@ -1225,7 +1139,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread(String name) {
-        this(null, checkName(name), 0, null, 0, null);
+        this(null, checkName(name), 0, null, 0);
     }
 
     /**
@@ -1237,24 +1151,16 @@ public @UsesObjectEquals class Thread implements Runnable {
      * override the {@link #run()} method.
      *
      * @param  group
-     *         the thread group. If {@code null} and there is a security
-     *         manager, the group is determined by {@linkplain
-     *         SecurityManager#getThreadGroup SecurityManager.getThreadGroup()}.
-     *         If there is not a security manager or {@code
-     *         SecurityManager.getThreadGroup()} returns {@code null}, the group
+     *         the thread group. If {@code null}, the group
      *         is set to the current thread's thread group.
      *
      * @param  name
      *         the name of the new thread
      *
-     * @throws  SecurityException
-     *          if the current thread cannot create a thread in the specified
-     *          thread group
-     *
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread(@Nullable ThreadGroup group, String name) {
-        this(group, checkName(name), 0, null, 0, null);
+        this(group, checkName(name), 0, null, 0);
     }
 
     /**
@@ -1276,23 +1182,13 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread(@Nullable Runnable task, String name) {
-        this(null, checkName(name), 0, task, 0, null);
+        this(null, checkName(name), 0, task, 0);
     }
 
     /**
      * Initializes a new platform {@code Thread} so that it has {@code task}
      * as its run object, has the specified {@code name} as its name,
      * and belongs to the thread group referred to by {@code group}.
-     *
-     * <p>If there is a security manager, its
-     * {@link SecurityManager#checkAccess(ThreadGroup) checkAccess}
-     * method is invoked with the ThreadGroup as its argument.
-     *
-     * <p>In addition, its {@code checkPermission} method is invoked with
-     * the {@code RuntimePermission("enableContextClassLoaderOverride")}
-     * permission when invoked directly or indirectly by the constructor
-     * of a subclass which overrides the {@code getContextClassLoader}
-     * or {@code setContextClassLoader} methods.
      *
      * <p>The priority of the newly created thread is the smaller of
      * priority of the thread creating it and the maximum permitted
@@ -1309,11 +1205,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      * <pre>{@code Thread.ofPlatform().group(group).name(name).unstarted(task); }</pre>
      *
      * @param  group
-     *         the thread group. If {@code null} and there is a security
-     *         manager, the group is determined by {@linkplain
-     *         SecurityManager#getThreadGroup SecurityManager.getThreadGroup()}.
-     *         If there is not a security manager or {@code
-     *         SecurityManager.getThreadGroup()} returns {@code null}, the group
+     *         the thread group. If {@code null}, the group
      *         is set to the current thread's thread group.
      *
      * @param  task
@@ -1323,14 +1215,10 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @param  name
      *         the name of the new thread
      *
-     * @throws  SecurityException
-     *          if the current thread cannot create a thread in the specified
-     *          thread group or cannot override the context class loader methods.
-     *
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread(@Nullable ThreadGroup group, @Nullable Runnable task, String name) {
-        this(group, checkName(name), 0, task, 0, null);
+        this(group, checkName(name), 0, task, 0);
     }
 
     /**
@@ -1386,11 +1274,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      * <pre>{@code Thread.ofPlatform().group(group).name(name).stackSize(stackSize).unstarted(task); }</pre>
      *
      * @param  group
-     *         the thread group. If {@code null} and there is a security
-     *         manager, the group is determined by {@linkplain
-     *         SecurityManager#getThreadGroup SecurityManager.getThreadGroup()}.
-     *         If there is not a security manager or {@code
-     *         SecurityManager.getThreadGroup()} returns {@code null}, the group
+     *         the thread group. If {@code null}, the group
      *         is set to the current thread's thread group.
      *
      * @param  task
@@ -1404,16 +1288,12 @@ public @UsesObjectEquals class Thread implements Runnable {
      *         the desired stack size for the new thread, or zero to indicate
      *         that this parameter is to be ignored.
      *
-     * @throws  SecurityException
-     *          if the current thread cannot create a thread in the specified
-     *          thread group
-     *
      * @since 1.4
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
     public Thread(@Nullable ThreadGroup group, @Nullable Runnable task, String name,
                   long stackSize) {
-        this(group, checkName(name), 0, task, stackSize, null);
+        this(group, checkName(name), 0, task, stackSize);
     }
 
     /**
@@ -1447,11 +1327,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      *      .unstarted(task); }</pre>
      *
      * @param  group
-     *         the thread group. If {@code null} and there is a security
-     *         manager, the group is determined by {@linkplain
-     *         SecurityManager#getThreadGroup SecurityManager.getThreadGroup()}.
-     *         If there is not a security manager or {@code
-     *         SecurityManager.getThreadGroup()} returns {@code null}, the group
+     *         the thread group. If {@code null}, the group
      *         is set to the current thread's thread group.
      *
      * @param  task
@@ -1470,10 +1346,6 @@ public @UsesObjectEquals class Thread implements Runnable {
      *         thread-locals from the constructing thread, otherwise no initial
      *         values are inherited
      *
-     * @throws  SecurityException
-     *          if the current thread cannot create a thread in the specified
-     *          thread group
-     *
      * @since 9
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
@@ -1481,7 +1353,7 @@ public @UsesObjectEquals class Thread implements Runnable {
                   long stackSize, boolean inheritInheritableThreadLocals) {
         this(group, checkName(name),
                 (inheritInheritableThreadLocals ? 0 : NO_INHERIT_THREAD_LOCALS),
-                task, stackSize, null);
+                task, stackSize);
     }
 
     /**
@@ -1608,7 +1480,6 @@ public @UsesObjectEquals class Thread implements Runnable {
     void clearReferences() {
         threadLocals = null;
         inheritableThreadLocals = null;
-        inheritedAccessControlContext = null;
         if (uncaughtExceptionHandler != null)
             uncaughtExceptionHandler = null;
         if (nioBlocker != null)
@@ -1675,11 +1546,6 @@ public @UsesObjectEquals class Thread implements Runnable {
     /**
      * Interrupts this thread.
      *
-     * <p> Unless the current thread is interrupting itself, which is
-     * always permitted, the {@link #checkAccess() checkAccess} method
-     * of this thread is invoked, which may cause a {@link
-     * SecurityException} to be thrown.
-     *
      * <p> If this thread is blocked in an invocation of the {@link
      * Object#wait() wait()}, {@link Object#wait(long) wait(long)}, or {@link
      * Object#wait(long, int) wait(long, int)} methods of the {@link Object}
@@ -1708,15 +1574,8 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @implNote In the JDK Reference Implementation, interruption of a thread
      * that is not alive still records that the interrupt request was made and
      * will report it via {@link #interrupted()} and {@link #isInterrupted()}.
-     *
-     * @throws  SecurityException
-     *          if the current thread cannot modify this thread
      */
     public void interrupt() {
-        if (this != Thread.currentThread()) {
-            checkAccess();
-        }
-
         // Setting the interrupt status must be done before reading nioBlocker.
         interrupted = true;
         interrupt0();  // inform VM of interrupt
@@ -1827,14 +1686,10 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @param newPriority the new thread priority
      * @throws  IllegalArgumentException if the priority is not in the
      *          range {@code MIN_PRIORITY} to {@code MAX_PRIORITY}.
-     * @throws  SecurityException
-     *          if {@link #checkAccess} determines that the current
-     *          thread cannot modify this thread
      * @see #setPriority(int)
      * @see ThreadGroup#getMaxPriority()
      */
     public final void setPriority(@UnknownInitialization(java.lang.Thread.class) Thread this, int newPriority) {
-        checkAccess();
         if (newPriority > MAX_PRIORITY || newPriority < MIN_PRIORITY) {
             throw new IllegalArgumentException();
         }
@@ -1872,10 +1727,6 @@ public @UsesObjectEquals class Thread implements Runnable {
 
     /**
      * Changes the name of this thread to be equal to the argument {@code name}.
-     * <p>
-     * First the {@code checkAccess} method of this thread is called
-     * with no arguments. This may result in throwing a
-     * {@code SecurityException}.
      *
      * @implNote In the JDK Reference Implementation, if this thread is the
      * current thread, and it's a platform thread that was not attached to the
@@ -1886,15 +1737,11 @@ public @UsesObjectEquals class Thread implements Runnable {
      * purposes.
      *
      * @param      name   the new name for this thread.
-     * @throws     SecurityException  if the current thread cannot modify this
-     *             thread.
      *
      * @spec jni/index.html Java Native Interface Specification
      * @see        #getName
-     * @see        #checkAccess()
      */
     public final synchronized void setName(String name) {
-        checkAccess();
         if (name == null) {
             throw new NullPointerException("name cannot be null");
         }
@@ -1973,10 +1820,6 @@ public @UsesObjectEquals class Thread implements Runnable {
      *         an array into which to put the list of threads
      *
      * @return  the number of threads put into the array
-     *
-     * @throws  SecurityException
-     *          if {@link java.lang.ThreadGroup#checkAccess} determines that
-     *          the current thread cannot access its thread group
      */
     public static int enumerate(@PolyNull Thread[] tarray) {
         return currentThread().getThreadGroup().enumerate(tarray);
@@ -2182,12 +2025,8 @@ public @UsesObjectEquals class Thread implements Runnable {
      *          if this is a virtual thread and {@code on} is false
      * @throws  IllegalThreadStateException
      *          if this thread is {@linkplain #isAlive alive}
-     * @throws  SecurityException
-     *          if {@link #checkAccess} determines that the current
-     *          thread cannot modify this thread
      */
     public final void setDaemon(@UnknownInitialization Thread this, boolean on) {
-        checkAccess();
         if (isVirtual() && !on)
             throw new IllegalArgumentException("'false' not legal for virtual threads");
         if (isAlive())
@@ -2218,31 +2057,16 @@ public @UsesObjectEquals class Thread implements Runnable {
     }
 
     /**
-     * Determines if the currently running thread has permission to
-     * modify this thread.
-     * <p>
-     * If there is a security manager, its {@code checkAccess} method
-     * is called with this thread as its argument. This may result in
-     * throwing a {@code SecurityException}.
+     * Does nothing.
      *
-     * @throws  SecurityException  if the current thread is not allowed to
-     *          access this thread.
-     * @see        SecurityManager#checkAccess(Thread)
-     * @deprecated This method is only useful in conjunction with
-     *       {@linkplain SecurityManager the Security Manager}, which is
-     *       deprecated and subject to removal in a future release.
-     *       Consequently, this method is also deprecated and subject to
-     *       removal. There is no replacement for the Security Manager or this
-     *       method.
+     * @deprecated This method originally determined if the currently running
+     * thread had permission to modify this thread. This method was only useful
+     * in conjunction with {@linkplain SecurityManager the Security Manager},
+     * which is no longer supported. There is no replacement for the Security
+     * Manager or this method.
      */
     @Deprecated(since="17", forRemoval=true)
-    public final void checkAccess() {
-        @SuppressWarnings("removal")
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkAccess(this);
-        }
-    }
+    public final void checkAccess() { }
 
     /**
      * Returns a string representation of this thread. The string representation
@@ -2282,26 +2106,10 @@ public @UsesObjectEquals class Thread implements Runnable {
      *          indicating the system class loader (or, failing that, the
      *          bootstrap class loader)
      *
-     * @throws  SecurityException
-     *          if a security manager is present, and the caller's class loader
-     *          is not {@code null} and is not the same as or an ancestor of the
-     *          context class loader, and the caller does not have the
-     *          {@link RuntimePermission}{@code ("getClassLoader")}
-     *
      * @since 1.2
      */
-    @CallerSensitive
     public @Nullable ClassLoader getContextClassLoader() {
-        ClassLoader cl = this.contextClassLoader;
-        if (cl == null)
-            return null;
-        @SuppressWarnings("removal")
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            Class<?> caller = Reflection.getCallerClass();
-            ClassLoader.checkClassLoaderPermission(cl, caller);
-        }
-        return cl;
+        return contextClassLoader;
     }
 
     /**
@@ -2310,27 +2118,13 @@ public @UsesObjectEquals class Thread implements Runnable {
      * <p> The context {@code ClassLoader} may be set by the creator of the thread
      * for use by code running in this thread when loading classes and resources.
      *
-     * <p> If a security manager is present, its {@link
-     * SecurityManager#checkPermission(java.security.Permission) checkPermission}
-     * method is invoked with a {@link RuntimePermission RuntimePermission}{@code
-     * ("setContextClassLoader")} permission to see if setting the context
-     * ClassLoader is permitted.
-     *
      * @param  cl
      *         the context ClassLoader for this Thread, or null  indicating the
      *         system class loader (or, failing that, the bootstrap class loader)
      *
-     * @throws  SecurityException
-     *          if the current thread cannot set the context ClassLoader
-     *
      * @since 1.2
      */
     public void setContextClassLoader(@Nullable ClassLoader cl) {
-        @SuppressWarnings("removal")
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new RuntimePermission("setContextClassLoader"));
-        }
         contextClassLoader = cl;
     }
 
@@ -2367,12 +2161,6 @@ public @UsesObjectEquals class Thread implements Runnable {
      * represents the bottom of the stack, which is the least recent method
      * invocation in the sequence.
      *
-     * <p>If there is a security manager, and this thread is not
-     * the current thread, then the security manager's
-     * {@code checkPermission} method is called with a
-     * {@code RuntimePermission("getStackTrace")} permission
-     * to see if it's ok to get the stack trace.
-     *
      * <p>Some virtual machines may, under some circumstances, omit one
      * or more stack frames from the stack trace.  In the extreme case,
      * a virtual machine that has no stack trace information concerning
@@ -2382,22 +2170,11 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @return an array of {@code StackTraceElement},
      * each represents one stack frame.
      *
-     * @throws SecurityException
-     *        if a security manager exists and its
-     *        {@code checkPermission} method doesn't allow
-     *        getting the stack trace of thread.
      * @see Throwable#getStackTrace
-     *
      * @since 1.5
      */
     public StackTraceElement[] getStackTrace() {
         if (this != Thread.currentThread()) {
-            // check for getStackTrace permission
-            @SuppressWarnings("removal")
-            SecurityManager security = System.getSecurityManager();
-            if (security != null) {
-                security.checkPermission(SecurityConstants.GET_STACK_TRACE_PERMISSION);
-            }
             // optimization so we do not call into the vm for threads that
             // have not yet started or have terminated
             if (!isAlive()) {
@@ -2447,34 +2224,16 @@ public @UsesObjectEquals class Thread implements Runnable {
      * array will be returned in the map value if the virtual machine has
      * no stack trace information about a thread.
      *
-     * <p>If there is a security manager, then the security manager's
-     * {@code checkPermission} method is called with a
-     * {@code RuntimePermission("getStackTrace")} permission as well as
-     * {@code RuntimePermission("modifyThreadGroup")} permission
-     * to see if it is ok to get the stack trace of all threads.
-     *
      * @return a {@code Map} from {@code Thread} to an array of
      * {@code StackTraceElement} that represents the stack trace of
      * the corresponding thread.
      *
-     * @throws SecurityException
-     *        if a security manager exists and its
-     *        {@code checkPermission} method doesn't allow
-     *        getting the stack trace of thread.
      * @see #getStackTrace
      * @see Throwable#getStackTrace
      *
      * @since 1.5
      */
     public static Map<Thread, StackTraceElement[]> getAllStackTraces() {
-        // check for getStackTrace permission
-        @SuppressWarnings("removal")
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkPermission(SecurityConstants.GET_STACK_TRACE_PERMISSION);
-            security.checkPermission(SecurityConstants.MODIFY_THREADGROUP_PERMISSION);
-        }
-
         // Get a snapshot of the list of all threads
         Thread[] threads = getThreads();
         StackTraceElement[][] traces = dumpThreads(threads);
@@ -2487,64 +2246,6 @@ public @UsesObjectEquals class Thread implements Runnable {
             // else terminated so we don't put it in the map
         }
         return m;
-    }
-
-    /** cache of subclass security audit results */
-    private static class Caches {
-        /** cache of subclass security audit results */
-        static final ClassValue<Boolean> subclassAudits =
-            new ClassValue<>() {
-                @Override
-                protected Boolean computeValue(Class<?> type) {
-                    return auditSubclass(type);
-                }
-            };
-    }
-
-    /**
-     * Verifies that this (possibly subclass) instance can be constructed
-     * without violating security constraints: the subclass must not override
-     * security-sensitive non-final methods, or else the
-     * "enableContextClassLoaderOverride" RuntimePermission is checked.
-     */
-    private static boolean isCCLOverridden(Class<?> cl) {
-        if (cl == Thread.class)
-            return false;
-
-        return Caches.subclassAudits.get(cl);
-    }
-
-    /**
-     * Performs reflective checks on given subclass to verify that it doesn't
-     * override security-sensitive non-final methods.  Returns true if the
-     * subclass overrides any of the methods, false otherwise.
-     */
-    private static boolean auditSubclass(final Class<?> subcl) {
-        @SuppressWarnings("removal")
-        Boolean result = AccessController.doPrivileged(
-            new PrivilegedAction<>() {
-                public Boolean run() {
-                    for (Class<?> cl = subcl;
-                         cl != Thread.class;
-                         cl = cl.getSuperclass())
-                    {
-                        try {
-                            cl.getDeclaredMethod("getContextClassLoader", new Class<?>[0]);
-                            return Boolean.TRUE;
-                        } catch (NoSuchMethodException ex) {
-                        }
-                        try {
-                            Class<?>[] params = {ClassLoader.class};
-                            cl.getDeclaredMethod("setContextClassLoader", params);
-                            return Boolean.TRUE;
-                        } catch (NoSuchMethodException ex) {
-                        }
-                    }
-                    return Boolean.FALSE;
-                }
-            }
-        );
-        return result.booleanValue();
     }
 
     /**
@@ -2779,21 +2480,12 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @param ueh the object to use as the default uncaught exception handler.
      * If {@code null} then there is no default handler.
      *
-     * @throws SecurityException if a security manager is present and it denies
-     *         {@link RuntimePermission}{@code ("setDefaultUncaughtExceptionHandler")}
-     *
      * @see #setUncaughtExceptionHandler
      * @see #getUncaughtExceptionHandler
      * @see ThreadGroup#uncaughtException
      * @since 1.5
      */
     public static void setDefaultUncaughtExceptionHandler(@Nullable UncaughtExceptionHandler ueh) {
-        @SuppressWarnings("removal")
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(
-                new RuntimePermission("setDefaultUncaughtExceptionHandler"));
-        }
         defaultUncaughtExceptionHandler = ueh;
     }
 
@@ -2837,14 +2529,11 @@ public @UsesObjectEquals class Thread implements Runnable {
      * object acts as its handler.
      * @param ueh the object to use as this thread's uncaught exception
      * handler. If {@code null} then this thread has no explicit handler.
-     * @throws  SecurityException  if the current thread is not allowed to
-     *          modify this thread.
      * @see #setDefaultUncaughtExceptionHandler
      * @see ThreadGroup#uncaughtException
      * @since 1.5
      */
     public void setUncaughtExceptionHandler(@Nullable UncaughtExceptionHandler ueh) {
-        checkAccess();
         uncaughtExceptionHandler(ueh);
     }
 
@@ -2863,32 +2552,16 @@ public @UsesObjectEquals class Thread implements Runnable {
     /**
      * Holder class for constants.
      */
-    @SuppressWarnings("removal")
     private static class Constants {
         // Thread group for virtual threads.
         static final ThreadGroup VTHREAD_GROUP;
 
-        // AccessControlContext that doesn't support any permissions.
-        @SuppressWarnings("removal")
-        static final AccessControlContext NO_PERMISSIONS_ACC;
-
         static {
-            var getThreadGroup  = new PrivilegedAction<ThreadGroup>() {
-                @Override
-                public ThreadGroup run() {
-                    ThreadGroup parent = Thread.currentCarrierThread().getThreadGroup();
-                    for (ThreadGroup p; (p = parent.getParent()) != null; )
-                        parent = p;
-                    return parent;
-                }
-            };
-            @SuppressWarnings("removal")
-            ThreadGroup root = AccessController.doPrivileged(getThreadGroup);
+            ThreadGroup root = Thread.currentCarrierThread().getThreadGroup();
+            for (ThreadGroup p; (p = root.getParent()) != null; ) {
+                root = p;
+            }
             VTHREAD_GROUP = new ThreadGroup(root, "VirtualThreads", MAX_PRIORITY, false);
-
-            NO_PERMISSIONS_ACC = new AccessControlContext(new ProtectionDomain[] {
-                new ProtectionDomain(null, null)
-            });
         }
     }
 

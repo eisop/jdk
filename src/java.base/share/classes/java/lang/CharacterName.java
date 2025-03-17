@@ -31,12 +31,9 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import jdk.internal.util.ArraysSupport;
 
 import java.io.DataInputStream;
-import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 import java.util.zip.InflaterInputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 @AnnotatedFor({"index", "interning"})
 @UsesObjectEquals class CharacterName {
@@ -53,12 +50,9 @@ import java.security.PrivilegedAction;
     private final int[] hsIndices;   // chain heads, hash indices into "cps"
 
     private CharacterName()  {
-        try (@SuppressWarnings("removal") DataInputStream dis = new DataInputStream(new InflaterInputStream(
-            AccessController.doPrivileged(new PrivilegedAction<>() {
-                public InputStream run() {
-                    return getClass().getResourceAsStream("uniName.dat");
-                }
-            })))) {
+        try (DataInputStream dis = new DataInputStream(
+                new InflaterInputStream(CharacterName.class
+                        .getResourceAsStream("uniName.dat")))) {
 
             int total = dis.readInt();
             int bkNum = dis.readInt();

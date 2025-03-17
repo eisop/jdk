@@ -891,6 +891,9 @@ public abstract @UsesObjectEquals class ForkJoinTask<V> implements Future<V>, Se
         return (status & (DONE | ABNORMAL)) == DONE;
     }
 
+    /**
+     * @since 19
+     */
     @Override
     public State state() {
         int s = status;
@@ -900,6 +903,9 @@ public abstract @UsesObjectEquals class ForkJoinTask<V> implements Future<V>, Se
             State.CANCELLED;
     }
 
+    /**
+     * @since 19
+     */
     @Override
     public V resultNow() {
         int s = status;
@@ -914,6 +920,9 @@ public abstract @UsesObjectEquals class ForkJoinTask<V> implements Future<V>, Se
         return getRawResult();
     }
 
+    /**
+     * @since 19
+     */
     @Override
     public Throwable exceptionNow() {
         Throwable ex;
@@ -1067,7 +1076,7 @@ public abstract @UsesObjectEquals class ForkJoinTask<V> implements Future<V>, Se
 
     /**
      * Tries to join this task, returning true if it completed
-     * (possibly exceptionally) before the given timeout and
+     * (possibly exceptionally) before the given timeout elapsed and
      * the current thread has not been interrupted.
      *
      * @param timeout the maximum time to wait
@@ -1092,7 +1101,7 @@ public abstract @UsesObjectEquals class ForkJoinTask<V> implements Future<V>, Se
 
     /**
      * Tries to join this task, returning true if it completed
-     * (possibly exceptionally) before the given timeout.
+     * (possibly exceptionally) before the given timeout elapsed.
      *
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument

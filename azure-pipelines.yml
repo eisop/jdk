@@ -6,7 +6,7 @@ jobs:
 - job: build_jdk
   pool:
     vmImage: 'ubuntu-latest'
-  container: wmdietl/cf-ubuntu-jdk-next-plus:latest
+  container: mdernst/cf-ubuntu-jdk23-plus:latest
   steps:
   - bash: |
       whoami

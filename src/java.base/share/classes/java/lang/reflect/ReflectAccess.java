@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,66 +28,16 @@ package java.lang.reflect;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-import jdk.internal.reflect.MethodAccessor;
+import jdk.internal.access.JavaLangReflectAccess;
 import jdk.internal.reflect.ConstructorAccessor;
 
 /** Package-private class implementing the
     jdk.internal.access.JavaLangReflectAccess interface, allowing the java.lang
     package to instantiate objects in this package. */
-
 @AnnotatedFor({"interning"})
-@UsesObjectEquals class ReflectAccess implements jdk.internal.access.JavaLangReflectAccess {
-    public <T> Constructor<T> newConstructor(Class<T> declaringClass,
-                                             Class<?>[] parameterTypes,
-                                             Class<?>[] checkedExceptions,
-                                             int modifiers,
-                                             int slot,
-                                             String signature,
-                                             byte[] annotations,
-                                             byte[] parameterAnnotations)
-    {
-        return new Constructor<>(declaringClass,
-                                  parameterTypes,
-                                  checkedExceptions,
-                                  modifiers,
-                                  slot,
-                                  signature,
-                                  annotations,
-                                  parameterAnnotations);
-    }
-
-    public MethodAccessor getMethodAccessor(Method m) {
-        return m.getMethodAccessor();
-    }
-
-    public void setMethodAccessor(Method m, MethodAccessor accessor) {
-        m.setMethodAccessor(accessor);
-    }
-
-    public ConstructorAccessor getConstructorAccessor(Constructor<?> c) {
-        return c.getConstructorAccessor();
-    }
-
-    public void setConstructorAccessor(Constructor<?> c,
-                                       ConstructorAccessor accessor)
-    {
-        c.setConstructorAccessor(accessor);
-    }
-
-    public int getConstructorSlot(Constructor<?> c) {
-        return c.getSlot();
-    }
-
-    public String getConstructorSignature(Constructor<?> c) {
-        return c.getSignature();
-    }
-
-    public byte[] getConstructorAnnotations(Constructor<?> c) {
-        return c.getRawAnnotations();
-    }
-
-    public byte[] getConstructorParameterAnnotations(Constructor<?> c) {
-        return c.getRawParameterAnnotations();
+final @UsesObjectEquals class ReflectAccess implements JavaLangReflectAccess {
+    public <T> Constructor<T> newConstructorWithAccessor(Constructor<T> original, ConstructorAccessor accessor) {
+        return original.newWithAccessor(accessor);
     }
 
     public byte[] getExecutableTypeAnnotationBytes(Executable ex) {
@@ -108,9 +58,6 @@ import jdk.internal.reflect.ConstructorAccessor;
     //
     public Method      copyMethod(Method arg) {
         return arg.copy();
-    }
-    public Method      leafCopyMethod(Method arg) {
-        return arg.leafCopy();
     }
 
     public Field       copyField(Field arg) {

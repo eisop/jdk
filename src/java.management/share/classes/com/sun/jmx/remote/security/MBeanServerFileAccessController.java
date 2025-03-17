@@ -27,10 +27,7 @@ package com.sun.jmx.remote.security;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.Principal;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -303,17 +300,7 @@ public class MBeanServerFileAccessController
 
     @SuppressWarnings("removal")
     private synchronized void checkAccess(AccessType requiredAccess, String arg) {
-        Subject s = null;
-        if (!SharedSecrets.getJavaLangAccess().allowSecurityManager()) {
-            s = Subject.current();
-        } else {
-            final AccessControlContext acc = AccessController.getContext();
-            s = AccessController.doPrivileged(new PrivilegedAction<>() {
-                        public Subject run() {
-                            return Subject.getSubject(acc);
-                        }
-                });
-        }
+        final Subject s = Subject.current();
         if (s == null) return; /* security has not been enabled */
         final Set<Principal> principals = s.getPrincipals();
         String newPropertyValue = null;

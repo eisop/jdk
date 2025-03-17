@@ -26,7 +26,6 @@
  * @summary javap should not fail if reserved access flag bits are set to 1
  * @library /tools/lib
  * @modules jdk.jdeps/com.sun.tools.javap
- * @enablePreview
  * @run junit UndefinedAccessFlagTest
  */
 
@@ -70,7 +69,7 @@ public class UndefinedAccessFlagTest {
         )) {
             cm = cf.parse(is.readAllBytes());
         }
-        var bytes = cf.transform(cm, (cb, ce) -> {
+        var bytes = cf.transformClass(cm, (cb, ce) -> {
             switch (ce) {
                 case AccessFlags flags when location == TestLocation.CLASS -> cb
                     .withFlags(flags.flagsMask() | ACC_PRIVATE);

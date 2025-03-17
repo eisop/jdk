@@ -473,12 +473,10 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
                 // mouse 1 behavior
                 if(nclicks == 1) {
                     selectedWordEvent = null;
-                } else if(nclicks == 2
-                          && SwingUtilities2.canEventAccessSystemClipboard(e)) {
+                } else if (nclicks == 2) {
                     selectWord(e);
                     selectedWordEvent = null;
-                } else if(nclicks == 3
-                          && SwingUtilities2.canEventAccessSystemClipboard(e)) {
+                } else if (nclicks == 3) {
                     Action a = null;
                     ActionMap map = getComponent().getActionMap();
                     if (map != null) {
@@ -495,8 +493,7 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
                 }
             } else if (SwingUtilities.isMiddleMouseButton(e)) {
                 // mouse 2 behavior
-                if (nclicks == 1 && component.isEditable() && component.isEnabled()
-                    && SwingUtilities2.canEventAccessSystemClipboard(e)) {
+                if (nclicks == 1 && component.isEditable() && component.isEnabled()) {
                     // paste system selection, if it exists
                     JTextComponent c = (JTextComponent) e.getSource();
                     if (c != null) {
@@ -553,8 +550,7 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
             } else {
                 shouldHandleRelease = false;
                 adjustCaretAndFocus(e);
-                if (nclicks == 2
-                    && SwingUtilities2.canEventAccessSystemClipboard(e)) {
+                if (nclicks == 2) {
                     selectWord(e);
                 }
             }
@@ -1400,9 +1396,6 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     }
 
     private void updateSystemSelection() {
-        if ( ! SwingUtilities2.canCurrentEventAccessSystemClipboard() ) {
-            return;
-        }
         if (this.dot != this.mark && component != null && component.hasFocus()) {
             Clipboard clip = getSystemSelection();
             if (clip != null) {
@@ -1444,8 +1437,6 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
             return component.getToolkit().getSystemSelection();
         } catch (HeadlessException he) {
             // do nothing... there is no system clipboard
-        } catch (SecurityException se) {
-            // do nothing... there is no allowed system clipboard
         }
         return null;
     }

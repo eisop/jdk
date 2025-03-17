@@ -38,6 +38,7 @@ import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
@@ -70,7 +71,7 @@ import java.util.stream.Stream;
  * {@link #getInputStream()}, and
  * {@link #getErrorStream()}.
  * The I/O streams of characters and lines can be written and read using the methods
- * {@link #outputWriter()}, {@link #outputWriter(Charset)}},
+ * {@link #outputWriter()}, {@link #outputWriter(Charset)},
  * {@link #inputReader()}, {@link #inputReader(Charset)},
  * {@link #errorReader()}, and {@link #errorReader(Charset)}.
  * The parent process uses these streams to feed input to and get output
@@ -457,10 +458,13 @@ public abstract @UsesObjectEquals class Process {
      * terminated and the timeout value is less than, or equal to, zero, then
      * this method returns immediately with the value {@code false}.
      *
-     * <p>The default implementation of this method polls the {@code exitValue}
-     * to check if the process has terminated. Concrete implementations of this
-     * class are strongly encouraged to override this method with a more
-     * efficient implementation.
+     * @implSpec
+     * The default implementation of this method polls the {@code exitValue}
+     * to check if the process has terminated.
+     *
+     * @implNote
+     * Concrete implementations of this class are strongly encouraged to
+     * override this method with a more efficient implementation.
      *
      * @param timeout the maximum time to wait
      * @param unit the time unit of the {@code timeout} argument
@@ -489,6 +493,38 @@ public abstract @UsesObjectEquals class Process {
         } while (remainingNanos > 0);
 
         return false;
+    }
+
+    /**
+     * Causes the current thread to wait, if necessary, until the
+     * process represented by this {@code Process} object has
+     * terminated, or the specified waiting duration elapses.
+     *
+     * <p>If the process has already terminated then this method returns
+     * immediately with the value {@code true}.  If the process has not
+     * terminated and the duration is not positive, then
+     * this method returns immediately with the value {@code false}.
+     *
+     * @implSpec
+     * The default implementation of this method polls the {@code exitValue}
+     * to check if the process has terminated.
+     *
+     * @implNote
+     * Concrete implementations of this class are strongly encouraged to
+     * override this method with a more efficient implementation.
+     *
+     * @param duration the maximum duration to wait; if not positive,
+     *                this method returns immediately.
+     * @return {@code true} if the process has exited and {@code false} if
+     *         the waiting duration elapsed before the process has exited.
+     * @throws InterruptedException if the current thread is interrupted
+     *         while waiting.
+     * @throws NullPointerException if duration is null
+     * @since 24
+     */
+    public boolean waitFor(Duration duration) throws InterruptedException {
+        Objects.requireNonNull(duration, "duration");
+        return waitFor(TimeUnit.NANOSECONDS.convert(duration), TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -593,8 +629,8 @@ public abstract @UsesObjectEquals class Process {
 
     /**
      * This is called from the default implementation of
-     * {@code waitFor(long, TimeUnit)}, which is specified to poll
-     * {@code exitValue()}.
+     * {@code waitFor(long, TimeUnit)} and {@code waitFor(Duration)},
+     * which are specified to poll {@code exitValue()}.
      */
     private boolean hasExited() {
         try {
@@ -733,8 +769,7 @@ public abstract @UsesObjectEquals class Process {
      *
      * {@code Process} objects returned by {@link ProcessBuilder#start()} and
      * {@link Runtime#exec} implement {@code toHandle} as the equivalent of
-     * {@link ProcessHandle#of(long) ProcessHandle.of(pid)} including the
-     * check for a SecurityManager and {@code RuntimePermission("manageProcess")}.
+     * {@link ProcessHandle#of(long) ProcessHandle.of(pid)}.
      *
      * @implSpec
      * This implementation throws an instance of
@@ -746,8 +781,6 @@ public abstract @UsesObjectEquals class Process {
      * @return Returns a ProcessHandle for the Process
      * @throws UnsupportedOperationException if the Process implementation
      *         does not support this operation
-     * @throws SecurityException if a security manager has been installed and
-     *         it denies RuntimePermission("manageProcess")
      * @since 9
      */
     public ProcessHandle toHandle() {
@@ -791,8 +824,6 @@ public abstract @UsesObjectEquals class Process {
      *         direct children of the process
      * @throws UnsupportedOperationException if the Process implementation
      *         does not support this operation
-     * @throws SecurityException if a security manager has been installed and
-     *         it denies RuntimePermission("manageProcess")
      * @since 9
      */
     public Stream<ProcessHandle> children() {
@@ -817,8 +848,6 @@ public abstract @UsesObjectEquals class Process {
      *         are descendants of the process
      * @throws UnsupportedOperationException if the Process implementation
      *         does not support this operation
-     * @throws SecurityException if a security manager has been installed and
-     *         it denies RuntimePermission("manageProcess")
      * @since 9
      */
     public Stream<ProcessHandle> descendants() {
