@@ -167,8 +167,6 @@ public class InputStreamReader extends Reader {
      *         {@code null} if the stream has been closed
      *
      * @see Charset
-     *
-     * @revised 1.4
      */
     public @Nullable String getEncoding() {
         return sd.getEncoding();

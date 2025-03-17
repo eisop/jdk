@@ -65,10 +65,16 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * <h2><a id=equivalenceRelation>Floating-point Equality, Equivalence,
  * and Comparison</a></h2>
  *
- * The class {@code java.lang.Double} has a <a
- * href="Double.html#equivalenceRelation">discussion of equality,
- * equivalence, and comparison of floating-point values</a> that is
+ * The class {@code java.lang.Double} has a {@linkplain
+ * Double##equivalenceRelation discussion of equality,
+ * equivalence, and comparison of floating-point values} that is
  * equally applicable to {@code float} values.
+ *
+ * <h2><a id=decimalToBinaryConversion>Decimal &harr; Binary Conversion Issues</a></h2>
+ *
+ * The {@linkplain Double##decimalToBinaryConversion discussion of binary to
+ * decimal conversion issues} in {@code java.lang.Double} is also
+ * applicable to {@code float} values.
  *
  * @see <a href="https://standards.ieee.org/ieee/754/6210/">
  *      <cite>IEEE Standard for Floating-Point Arithmetic</cite></a>
@@ -529,6 +535,7 @@ public final class Float extends Number
      *          represented by the {@code String} argument.
      * @throws  NumberFormatException  if the string does not contain a
      *          parsable number.
+     * @see Double##decimalToBinaryConversion Decimal &harr; Binary Conversion Issues
      */
     @SideEffectFree
     @StaticallyExecutable
@@ -568,6 +575,7 @@ public final class Float extends Number
      * @throws NumberFormatException if the string does not contain a
      *               parsable {@code float}.
      * @see    java.lang.Float#valueOf(String)
+     * @see    Double##decimalToBinaryConversion Decimal &harr; Binary Conversion Issues
      * @since 1.2
      */
     @Pure

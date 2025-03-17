@@ -125,7 +125,7 @@ public @UsesObjectEquals class StreamTokenizer {
      *     has been reached.
      * </ul>
      * <p>
-     * The initial value of this field is -4.
+     * The initial value of this field is {@value TT_NOTHING}.
      *
      * @see     java.io.StreamTokenizer#eolIsSignificant(boolean)
      * @see     java.io.StreamTokenizer#nextToken()
@@ -354,7 +354,7 @@ public @UsesObjectEquals class StreamTokenizer {
     }
 
     /**
-     * Specified that the character argument starts a single-line
+     * Specifies that the character argument starts a single-line
      * comment. All characters from the comment character to the end of
      * the line are ignored by this stream tokenizer.
      *
@@ -488,7 +488,7 @@ public @UsesObjectEquals class StreamTokenizer {
      * If the flag argument is {@code true}, then the value in the
      * {@code sval} field is lowercased whenever a word token is
      * returned (the {@code ttype} field has the
-     * value {@code TT_WORD} by the {@code nextToken} method
+     * value {@code TT_WORD}) by the {@code nextToken} method
      * of this tokenizer.
      * <p>
      * If the flag argument is {@code false}, then the
@@ -765,7 +765,7 @@ public @UsesObjectEquals class StreamTokenizer {
     }
 
     /**
-     * Return the current line number.
+     * Returns the current line number.
      *
      * @return  the current line number of this stream tokenizer.
      */

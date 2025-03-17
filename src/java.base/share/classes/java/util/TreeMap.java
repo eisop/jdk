@@ -1223,6 +1223,8 @@ public class TreeMap<K,V>
      * {@code Set.remove}, {@code removeAll}, {@code retainAll} and
      * {@code clear} operations.  It does not support the
      * {@code add} or {@code addAll} operations.
+     *
+     * @return {@inheritDoc SortedMap}
      */
     @SideEffectFree
     public Set<Map.Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied TreeMap<K, V> this) {

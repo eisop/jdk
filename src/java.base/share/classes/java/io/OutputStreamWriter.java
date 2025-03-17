@@ -184,8 +184,6 @@ public class OutputStreamWriter extends Writer {
      *         {@code null} if the stream has been closed
      *
      * @see Charset
-     *
-     * @revised 1.4
      */
     public @Nullable String getEncoding() {
         return se.getEncoding();

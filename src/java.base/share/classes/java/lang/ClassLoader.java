@@ -239,7 +239,6 @@ import sun.security.util.SecurityConstants;
  * @jls 13.1 The Form of a Binary
  * @see      #resolveClass(Class)
  * @since 1.0
- * @revised 9
  */
 @AnnotatedFor({"interning", "lock", "nullness", "signature"})
 public abstract @UsesObjectEquals class ClassLoader {
@@ -898,7 +897,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see  java.security.SecureClassLoader
      *
      * @since  1.1
-     * @revised 9
      */
     protected final Class<?> defineClass(@Nullable @BinaryName String name, byte[] b, int off, int len)
         throws ClassFormatError
@@ -1032,8 +1030,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          certificates than this class, or if {@code name} begins with
      *          "{@code java.}" and this class loader is not the platform
      *          class loader or its ancestor.
-     *
-     * @revised 9
      */
     protected final Class<?> defineClass(@Nullable @BinaryName String name, byte[] b, int off, int len,
                                          @Nullable ProtectionDomain protectionDomain)
@@ -1108,7 +1104,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see      #defineClass(String, byte[], int, int, ProtectionDomain)
      *
      * @since  1.5
-     * @revised 9
      */
     protected final Class<?> defineClass(@Nullable @BinaryName String name, java.nio.ByteBuffer b,
                                          @Nullable ProtectionDomain protectionDomain)
@@ -1421,7 +1416,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @throws  NullPointerException If {@code name} is {@code null}
      *
      * @since  1.1
-     * @revised 9
      */
     public @Nullable URL getResource(String name) {
         Objects.requireNonNull(name);
@@ -1486,7 +1480,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @throws  NullPointerException If {@code name} is {@code null}
      *
      * @since  1.2
-     * @revised 9
      */
     public Enumeration<URL> getResources(String name) throws IOException {
         Objects.requireNonNull(name);
@@ -1584,7 +1577,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          denied by the security manager.
      *
      * @since  1.2
-     * @revised 9
      */
     protected @Nullable URL findResource(String name) {
         return null;
@@ -1619,7 +1611,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          If I/O errors occur
      *
      * @since  1.2
-     * @revised 9
      */
     protected Enumeration<URL> findResources(String name) throws IOException {
         return Collections.emptyEnumeration();
@@ -1704,7 +1695,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          denied by the security manager.
      *
      * @since  1.1
-     * @revised 9
      */
     public static @Nullable URL getSystemResource(String name) {
         return getSystemClassLoader().getResource(name);
@@ -1740,7 +1730,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          If I/O errors occur
      *
      * @since  1.2
-     * @revised 9
      */
     public static Enumeration<URL> getSystemResources(String name)
         throws IOException
@@ -1772,7 +1761,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @throws  NullPointerException If {@code name} is {@code null}
      *
      * @since  1.1
-     * @revised 9
      */
     public @Nullable InputStream getResourceAsStream(String name) {
         Objects.requireNonNull(name);
@@ -1805,7 +1793,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          denied by the security manager.
      *
      * @since  1.1
-     * @revised 9
      */
     public static @Nullable InputStream getSystemResourceAsStream(String name) {
         URL url = getSystemResource(name);
@@ -1965,9 +1952,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          exception is thrown by that constructor when it is invoked. The
      *          underlying cause of the error can be retrieved via the
      *          {@link Throwable#getCause()} method.
-     *
-     * @revised  1.4
-     * @revised 9
      */
     @CallerSensitive
     public static ClassLoader getSystemClassLoader() {
@@ -2234,7 +2218,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      *
      * @since  1.2
-     * @revised 9
      *
      * @jvms 5.3 Creation and Loading
      * @see <a href="{@docRoot}/../specs/jar/jar.html#package-sealing">
@@ -2343,7 +2326,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see ClassLoader#getDefinedPackage(String)
      *
      * @since  1.2
-     * @revised 9
      */
     @Deprecated(since="9")
     protected @Nullable Package getPackage(String name) {
@@ -2378,7 +2360,6 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see ClassLoader#getDefinedPackages()
      *
      * @since  1.2
-     * @revised 9
      */
     @CFComment({"nullness: The size of array passed to toArray",
      "method is of exact same size as of the map for which toArray method is invoked"})

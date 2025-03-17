@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,10 +31,14 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 
 import jdk.internal.access.JavaLangAccess;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.util.ByteArrayLittleEndian;
+import jdk.internal.util.HexDigits;
 
 /**
  * A class that represents an immutable universally unique identifier (UUID).
@@ -471,7 +475,43 @@ public final class UUID implements java.io.Serializable, Comparable<UUID> {
     @SideEffectFree
     @Override
     public String toString(@GuardSatisfied UUID this) {
-        return jla.fastUUID(leastSigBits, mostSigBits);
+        long lsb = leastSigBits;
+        long msb = mostSigBits;
+        byte[] buf = new byte[36];
+        ByteArrayLittleEndian.setLong(
+                buf,
+                0,
+                HexDigits.packDigits((int) (msb >> 56), (int) (msb >> 48), (int) (msb >> 40), (int) (msb >> 32)));
+        buf[8] = '-';
+        ByteArrayLittleEndian.setInt(
+                buf,
+                9,
+                HexDigits.packDigits(((int) msb) >> 24, ((int) msb) >> 16));
+        buf[13] = '-';
+        ByteArrayLittleEndian.setInt(
+                buf,
+                14,
+                HexDigits.packDigits(((int) msb) >> 8, (int) msb));
+        buf[18] = '-';
+        ByteArrayLittleEndian.setInt(
+                buf,
+                19,
+                HexDigits.packDigits((int) (lsb >> 56), (int) (lsb >> 48)));
+        buf[23] = '-';
+        ByteArrayLittleEndian.setLong(
+                buf,
+                24,
+                HexDigits.packDigits((int) (lsb >> 40), (int) (lsb >> 32), ((int) lsb) >> 24, ((int) lsb) >> 16));
+        ByteArrayLittleEndian.setInt(
+                buf,
+                32,
+                HexDigits.packDigits(((int) lsb) >> 8, (int) lsb));
+
+        try {
+            return jla.newStringNoRepl(buf, StandardCharsets.ISO_8859_1);
+        } catch (CharacterCodingException cce) {
+            throw new AssertionError(cce);
+        }
     }
 
     /**

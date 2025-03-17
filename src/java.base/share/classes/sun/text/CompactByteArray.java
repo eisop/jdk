@@ -44,6 +44,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
+import java.util.Arrays;
+
 /**
  * class CompactATypeArray : use only on primitive data types
  * Provides a compact way to store information that is indexed by Unicode
@@ -82,12 +84,11 @@ public final class CompactByteArray implements Cloneable {
         values = new byte[UNICODECOUNT];
         indices = new short[INDEXCOUNT];
         hashes = new int[INDEXCOUNT];
-        for (i = 0; i < UNICODECOUNT; ++i) {
-            values[i] = defaultValue;
+        if (defaultValue != (byte)0) {
+            Arrays.fill(values, defaultValue);
         }
         for (i = 0; i < INDEXCOUNT; ++i) {
             indices[i] = (short)(i<<BLOCKSHIFT);
-            hashes[i] = 0;
         }
         isCompact = false;
     }

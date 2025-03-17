@@ -188,6 +188,7 @@ abstract class P11Key implements Key, Length {
 
     abstract byte[] getEncodedInternal();
 
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
@@ -220,20 +221,13 @@ abstract class P11Key implements Key, Length {
         return MessageDigest.isEqual(thisEnc, otherEnc);
     }
 
+    @Override
     public int hashCode() {
         // hashCode() should never throw exceptions
         if (!token.isValid()) {
             return 0;
         }
-        byte[] b1 = getEncodedInternal();
-        if (b1 == null) {
-            return 0;
-        }
-        int r = b1.length;
-        for (int i = 0; i < b1.length; i++) {
-            r += (b1[i] & 0xff) * 37;
-        }
-        return r;
+        return Arrays.hashCode(getEncodedInternal());
     }
 
     protected Object writeReplace() throws ObjectStreamException {
@@ -913,7 +907,8 @@ abstract class P11Key implements Key, Length {
             params = new DSAParameterSpec(res[0], res[1], res[2]);
         }
 
-        protected DSAParams getParams() {
+        @Override
+        public DSAParams getParams() {
             fetchValues();
             return params;
         }
@@ -1216,7 +1211,8 @@ abstract class P11Key implements Key, Length {
             }
         }
 
-        protected ECParameterSpec getParams() {
+        @Override
+        public ECParameterSpec getParams() {
             fetchValues();
             return params;
         }

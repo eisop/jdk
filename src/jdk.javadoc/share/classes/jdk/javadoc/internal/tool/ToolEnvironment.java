@@ -176,10 +176,6 @@ public class ToolEnvironment {
         return (sym.flags() & Flags.SYNTHETIC) != 0;
     }
 
-    boolean isUnnamed(Symbol sym) {
-        return (sym.flags() & Flags.UNNAMED_CLASS) != 0;
-    }
-
     void setElementToTreePath(Element e, TreePath tree) {
         if (e == null || tree == null)
             return;

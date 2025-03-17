@@ -49,6 +49,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
+import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.StringConcatFactory;
@@ -70,6 +71,7 @@ import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -82,6 +84,7 @@ import java.util.function.Supplier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import jdk.internal.logger.LoggerFinderLoader.TemporaryLoggerFinder;
 import jdk.internal.misc.CarrierThreadLocal;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.util.StaticProperty;
@@ -101,7 +104,6 @@ import jdk.internal.vm.Continuation;
 import jdk.internal.vm.ContinuationScope;
 import jdk.internal.vm.StackableScope;
 import jdk.internal.vm.ThreadContainer;
-import jdk.internal.vm.annotation.ForceInline;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 import jdk.internal.vm.annotation.Stable;
 import sun.nio.fs.DefaultFileSystemProvider;
@@ -835,6 +837,10 @@ public final @UsesObjectEquals class System {
      * Note that even if the security manager does not permit the
      * {@code getProperties} operation, it may choose to permit the
      * {@link #getProperty(String)} operation.
+     * <p>
+     * Additional locale-related system properties defined by the
+     * {@link Locale##default_locale Default Locale} section in the {@code Locale}
+     * class description may also be obtained with this method.
      *
      * @apiNote
      * <strong>Changing a standard system property may have unpredictable results
@@ -1792,13 +1798,16 @@ public final @UsesObjectEquals class System {
             // We do not need to synchronize: LoggerFinderLoader will
             // always return the same instance, so if we don't have it,
             // just fetch it again.
-            if (service == null) {
+            LoggerFinder finder = service;
+            if (finder == null) {
                 PrivilegedAction<LoggerFinder> pa =
                         () -> LoggerFinderLoader.getLoggerFinder();
-                service = AccessController.doPrivileged(pa, null,
+                finder = AccessController.doPrivileged(pa, null,
                         LOGGERFINDER_PERMISSION);
+                if (finder instanceof TemporaryLoggerFinder) return finder;
+                service = finder;
             }
-            return service;
+            return finder;
         }
 
     }
@@ -2368,6 +2377,9 @@ public final @UsesObjectEquals class System {
             public List<Method> getDeclaredPublicMethods(Class<?> klass, String name, Class<?>... parameterTypes) {
                 return klass.getDeclaredPublicMethods(name, parameterTypes);
             }
+            public Method findMethod(Class<?> klass, boolean publicOnly, String name, Class<?>... parameterTypes) {
+                return klass.findMethod(publicOnly, name, parameterTypes);
+            }
             public jdk.internal.reflect.ConstantPool getConstantPool(Class<?> klass) {
                 return klass.getConstantPool();
             }
@@ -2421,9 +2433,6 @@ public final @UsesObjectEquals class System {
             }
             public Package definePackage(ClassLoader cl, String name, Module module) {
                 return cl.definePackage(name, module);
-            }
-            public String fastUUID(long lsb, long msb) {
-                return Long.fastUUID(lsb, msb);
             }
             @SuppressWarnings("removal")
             public void addNonExportedPackages(ModuleLayer layer) {
@@ -2480,8 +2489,8 @@ public final @UsesObjectEquals class System {
             public void addEnableNativeAccessToAllUnnamed() {
                 Module.implAddEnableNativeAccessToAllUnnamed();
             }
-            public void ensureNativeAccess(Module m, Class<?> owner, String methodName) {
-                m.ensureNativeAccess(owner, methodName);
+            public void ensureNativeAccess(Module m, Class<?> owner, String methodName, Class<?> currentClass) {
+                m.ensureNativeAccess(owner, methodName, currentClass);
             }
             public ServicesCatalog getServicesCatalog(ModuleLayer layer) {
                 return layer.getServicesCatalog();
@@ -2693,7 +2702,17 @@ public final @UsesObjectEquals class System {
             }
 
             public String getLoaderNameID(ClassLoader loader) {
-                return loader.nameAndId();
+                return loader != null ? loader.nameAndId() : "null";
+            }
+
+            @Override
+            public void copyToSegmentRaw(String string, MemorySegment segment, long offset) {
+                string.copyToSegmentRaw(segment, offset);
+            }
+
+            @Override
+            public boolean bytesCompatible(String string, Charset charset) {
+                return string.bytesCompatible(charset);
             }
         });
     }

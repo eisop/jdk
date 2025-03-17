@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,6 +33,7 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 
 import java.io.Serial;
 import java.util.Arrays;
+import java.util.Objects;
 import javax.crypto.SecretKey;
 import javax.security.auth.DestroyFailedException;
 
@@ -284,11 +285,10 @@ public class KerberosKey implements SecretKey {
     }
 
     /**
-     * Returns a hash code for this {@code KerberosKey}.
-     *
-     * @return a hash code for this {@code KerberosKey}.
+     * {@return a hash code for this {@code KerberosKey}}
      * @since 1.6
      */
+    @Override
     public int hashCode() {
         int result = 17;
         if (isDestroyed()) {
@@ -314,6 +314,7 @@ public class KerberosKey implements SecretKey {
      * false otherwise.
      * @since 1.6
      */
+    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object other) {
@@ -336,10 +337,6 @@ public class KerberosKey implements SecretKey {
             return false;
         }
 
-        if (principal == null) {
-            return otherKey.getPrincipal() == null;
-        } else {
-            return principal.equals(otherKey.getPrincipal());
-        }
+        return Objects.equals(principal, otherKey.getPrincipal());
     }
 }

@@ -582,7 +582,7 @@ public @UsesObjectEquals class Desktop {
      * <p> A {@code mailto:} URI can specify message fields
      * including <i>"to"</i>, <i>"cc"</i>, <i>"subject"</i>,
      * <i>"body"</i>, etc.  See <a
-     * href="http://www.ietf.org/rfc/rfc2368.txt">The mailto URL
+     * href="https://www.rfc-editor.org/info/rfc2368">The mailto URL
      * scheme (RFC 2368)</a> for the {@code mailto:} URI specification
      * details.
      *
@@ -600,6 +600,8 @@ public @UsesObjectEquals class Desktop {
      * {@code AWTPermission("showWindowWithoutWarningBanner")}
      * permission, or the calling thread is not allowed to create a
      * subprocess
+     * @spec https://www.rfc-editor.org/info/rfc2368
+     *      RFC 2368: The mailto URL scheme
      * @see java.net.URI
      * @see java.awt.AWTPermission
      */

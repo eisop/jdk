@@ -200,7 +200,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
  * In the JDK Reference Implementation, the virtual thread scheduler may be configured
  * with the following system properties:
  * <table class="striped">
- * <caption style="display:none:">System properties</caption>
+ * <caption style="display:none">System properties</caption>
  *   <thead>
  *   <tr>
  *     <th scope="col">System property</th>
@@ -491,6 +491,25 @@ public @UsesObjectEquals class Thread implements Runnable {
     }
 
     /**
+     * Sleep for the specified number of nanoseconds, subject to the precision
+     * and accuracy of system timers and schedulers.
+     */
+    private static void sleepNanos(long nanos) throws InterruptedException {
+        ThreadSleepEvent event = beforeSleep(nanos);
+        try {
+            if (currentThread() instanceof VirtualThread vthread) {
+                vthread.sleepNanos(nanos);
+            } else {
+                sleepNanos0(nanos);
+            }
+        } finally {
+            afterSleep(event);
+        }
+    }
+
+    private static native void sleepNanos0(long nanos) throws InterruptedException;
+
+    /**
      * Causes the currently executing thread to sleep (temporarily cease
      * execution) for the specified number of milliseconds, subject to
      * the precision and accuracy of system timers and schedulers. The thread
@@ -511,21 +530,9 @@ public @UsesObjectEquals class Thread implements Runnable {
         if (millis < 0) {
             throw new IllegalArgumentException("timeout value is negative");
         }
-
         long nanos = MILLISECONDS.toNanos(millis);
-        ThreadSleepEvent event = beforeSleep(nanos);
-        try {
-            if (currentThread() instanceof VirtualThread vthread) {
-                vthread.sleepNanos(nanos);
-            } else {
-                sleep0(nanos);
-            }
-        } finally {
-            afterSleep(event);
-        }
+        sleepNanos(nanos);
     }
-
-    private static native void sleep0(long nanos) throws InterruptedException;
 
     /**
      * Causes the currently executing thread to sleep (temporarily cease
@@ -561,17 +568,7 @@ public @UsesObjectEquals class Thread implements Runnable {
         // total sleep time, in nanoseconds
         long totalNanos = MILLISECONDS.toNanos(millis);
         totalNanos += Math.min(Long.MAX_VALUE - totalNanos, nanos);
-
-        ThreadSleepEvent event = beforeSleep(totalNanos);
-        try {
-            if (currentThread() instanceof VirtualThread vthread) {
-                vthread.sleepNanos(totalNanos);
-            } else {
-                sleep0(totalNanos);
-            }
-        } finally {
-            afterSleep(event);
-        }
+        sleepNanos(totalNanos);
     }
 
     /**
@@ -595,17 +592,7 @@ public @UsesObjectEquals class Thread implements Runnable {
         if (nanos < 0) {
             return;
         }
-
-        ThreadSleepEvent event = beforeSleep(nanos);
-        try {
-            if (currentThread() instanceof VirtualThread vthread) {
-                vthread.sleepNanos(nanos);
-            } else {
-                sleep0(nanos);
-            }
-        } finally {
-            afterSleep(event);
-        }
+        sleepNanos(nanos);
     }
 
     /**
@@ -1604,7 +1591,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      */
     @Hidden
     @ForceInline
-    private void runWith(Object bindings, Runnable op) {
+    final void runWith(Object bindings, Runnable op) {
         ensureMaterializedForStackWalk(bindings);
         op.run();
         Reference.reachabilityFence(bindings);
@@ -1719,8 +1706,6 @@ public @UsesObjectEquals class Thread implements Runnable {
      *
      * @throws  SecurityException
      *          if the current thread cannot modify this thread
-     *
-     * @revised 6.0, 14
      */
     public void interrupt() {
         if (this != Thread.currentThread()) {
@@ -1752,7 +1737,6 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @return  {@code true} if the current thread has been interrupted;
      *          {@code false} otherwise.
      * @see #isInterrupted()
-     * @revised 6.0, 14
      */
     public static boolean interrupted() {
         return currentThread().getAndClearInterrupt();
@@ -1765,7 +1749,6 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @return  {@code true} if this thread has been interrupted;
      *          {@code false} otherwise.
      * @see     #interrupted()
-     * @revised 6.0, 14
      */
     @Pure
     public boolean isInterrupted(@GuardSatisfied Thread this) {
@@ -2025,22 +2008,6 @@ public @UsesObjectEquals class Thread implements Runnable {
      */
     public static int enumerate(@PolyNull Thread[] tarray) {
         return currentThread().getThreadGroup().enumerate(tarray);
-    }
-
-    /**
-     * Throws {@code UnsupportedOperationException}.
-     *
-     * @return     nothing
-     *
-     * @deprecated This method was originally designed to count the number of
-     *             stack frames but the results were never well-defined and it
-     *             depended on thread-suspension.
-     *             This method is subject to removal in a future version of Java SE.
-     * @see        StackWalker
-     */
-    @Deprecated(since="1.2", forRemoval=true)
-    public int countStackFrames() {
-        throw new UnsupportedOperationException();
     }
 
     /**

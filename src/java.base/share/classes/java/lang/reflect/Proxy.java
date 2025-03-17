@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -295,7 +295,6 @@ import static java.lang.module.ModuleDescriptor.Modifier.SYNTHETIC;
  * @author      Peter Jones
  * @see         InvocationHandler
  * @since       1.3
- * @revised 9
  */
 @AnnotatedFor({"nullness"})
 public class Proxy implements java.io.Serializable {
@@ -386,7 +385,6 @@ public class Proxy implements java.io.Serializable {
      *      to create a proxy instance instead.
      *
      * @see <a href="#membership">Package and Module Membership of Proxy Class</a>
-     * @revised 9
      */
     @Deprecated
     @CallerSensitive
@@ -1019,7 +1017,6 @@ public class Proxy implements java.io.Serializable {
      *          {@code null}
      *
      * @see <a href="#membership">Package and Module Membership of Proxy Class</a>
-     * @revised 9
      */
     @CallerSensitive
     public static Object newProxyInstance(@Nullable ClassLoader loader,
@@ -1056,8 +1053,8 @@ public class Proxy implements java.io.Serializable {
             throw new InternalError(e.toString(), e);
         } catch (InvocationTargetException e) {
             Throwable t = e.getCause();
-            if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
+            if (t instanceof RuntimeException re) {
+                throw re;
             } else {
                 throw new InternalError(t.toString(), t);
             }
@@ -1104,8 +1101,6 @@ public class Proxy implements java.io.Serializable {
      * @return  {@code true} if the class is a proxy class and
      *          {@code false} otherwise
      * @throws  NullPointerException if {@code cl} is {@code null}
-     *
-     * @revised 9
      */
     public static boolean isProxyClass(Class<?> cl) {
         return Proxy.class.isAssignableFrom(cl) && ProxyBuilder.isProxyClass(cl);

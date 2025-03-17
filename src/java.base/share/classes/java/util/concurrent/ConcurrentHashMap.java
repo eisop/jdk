@@ -1563,7 +1563,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     // ConcurrentMap methods
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @return the previous value associated with the specified key,
      *         or {@code null} if there was no mapping for the key
@@ -1575,9 +1575,10 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @throws NullPointerException if the specified key is null
+     * @return {@inheritDoc ConcurrentMap}
      */
     public boolean remove(@GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
         if (key == null)
@@ -1586,9 +1587,10 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @throws NullPointerException if any of the arguments are null
+     * @return {@inheritDoc ConcurrentMap}
      */
     public boolean replace(K key, V oldValue, V newValue) {
         if (key == null || oldValue == null || newValue == null)
@@ -1597,7 +1599,7 @@ public class ConcurrentHashMap<K extends @NonNull Object,V extends @NonNull Obje
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc ConcurrentMap}
      *
      * @return the previous value associated with the specified key,
      *         or {@code null} if there was no mapping for the key
