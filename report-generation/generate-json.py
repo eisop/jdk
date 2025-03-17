@@ -60,7 +60,7 @@ def extract_new_changes(old_lines, new_lines):
     }
 
 #https://stackoverflow.com/questions/8625991/use-python-os-walk-to-identify-a-list-of-files
-#uses os.walk to get all java files in every subdirectory of results (after minimization is performed)
+#get all java files in every subdirectory of results (after minimization is performed)
 def list_java_files(directory):
     java_files = []
     for root, _, files in os.walk(directory):

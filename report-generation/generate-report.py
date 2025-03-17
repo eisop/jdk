@@ -17,8 +17,6 @@ for filename in os.listdir(json_folder):
             data[version] = file_data[version]
 
 checked_methods = {}
-# If your CSV files are now directly in the report-files directory,
-# update the csv_folder accordingly (remove the subfolder name).
 csv_folder = "../report-files/csv_reports"
 
 #loads the review status from the csv files
@@ -31,7 +29,6 @@ for version in data:
                 key = (row["version"], row["file_url"], row["method"])
                 checked_methods[key] = (row["checked"].strip().lower() == "true")
 
-# Set the output directory to be a subfolder inside report-files
 output_dir = os.path.join("..", "report-files", "reports")
 os.makedirs(output_dir, exist_ok=True)
 

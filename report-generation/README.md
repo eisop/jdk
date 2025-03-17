@@ -36,7 +36,6 @@ GENERATE CSVs
 
 GENERATE HTML Report
 6. run HTML report generation script: 
-Finally, run the HTML report generator to create a browsable report using Bootstrap styling. This report generates an index and a seperate html page for each jdk version, and opens the report in your browser.
 
 - python3 generate-report.py
 - this creates and opens a report in your browser, loading in information from the CSVs and JSONs generated in the previous step 
