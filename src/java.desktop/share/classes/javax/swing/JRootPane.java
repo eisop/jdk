@@ -583,7 +583,7 @@ public class JRootPane extends JComponent implements Accessible {
      * replace it with an opaque <code>JComponent</code>.
      *
      * @param content the <code>Container</code> to use for component-contents
-     * @exception java.awt.IllegalComponentStateException (a runtime
+     * @throws java.awt.IllegalComponentStateException (a runtime
      *            exception) if the content pane parameter is <code>null</code>
      */
     public void setContentPane(Container content) {
@@ -610,7 +610,7 @@ public class JRootPane extends JComponent implements Accessible {
      * typically holds a content pane and an optional <code>JMenuBar</code>.
      *
      * @param layered  the <code>JLayeredPane</code> to use
-     * @exception java.awt.IllegalComponentStateException (a runtime
+     * @throws java.awt.IllegalComponentStateException (a runtime
      *            exception) if the layered pane parameter is <code>null</code>
      */
     public void setLayeredPane(JLayeredPane layered) {
@@ -652,7 +652,7 @@ public class JRootPane extends JComponent implements Accessible {
      *
      * @param glass the <code>Component</code> to use as the glass pane
      *              for this <code>JRootPane</code>
-     * @exception NullPointerException if the <code>glass</code> parameter is
+     * @throws NullPointerException if the <code>glass</code> parameter is
      *          <code>null</code>
      */
     public void setGlassPane(Component glass) {

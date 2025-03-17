@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,19 +25,16 @@
 
 package java.lang;
 
+import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
-
-import jdk.internal.misc.TerminatingThreadLocal;
-
-import org.checkerframework.checker.interning.qual.UsesObjectEquals;
-import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import jdk.internal.misc.TerminatingThreadLocal;
 
 /**
  * This class provides thread-local variables.  These variables differ from
@@ -77,6 +74,7 @@ import java.util.function.Supplier;
  * instance is accessible; after a thread goes away, all of its copies of
  * thread-local instances are subject to garbage collection (unless other
  * references to these copies exist).
+ * @param <T> the type of the thread local's value
  *
  * @author  Josh Bloch and Doug Lea
  * @since   1.2
@@ -170,21 +168,40 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
      * thread-local variable.  If the variable has no value for the
      * current thread, it is first initialized to the value returned
      * by an invocation of the {@link #initialValue} method.
+     * If the current thread does not support thread locals then
+     * this method returns its {@link #initialValue} (or {@code null}
+     * if the {@code initialValue} method is not overridden).
      *
      * @return the current thread's value of this thread-local
+     * @see Thread.Builder#allowSetThreadLocals(boolean)
      */
     public T get() {
-        Thread t = Thread.currentThread();
+        return get(Thread.currentThread());
+    }
+
+    /**
+     * Returns the value in the current carrier thread's copy of this
+     * thread-local variable.
+     */
+    T getCarrierThreadLocal() {
+        return get(Thread.currentCarrierThread());
+    }
+
+    private T get(Thread t) {
         ThreadLocalMap map = getMap(t);
         if (map != null) {
-            ThreadLocalMap.Entry e = map.getEntry(this);
-            if (e != null) {
-                @SuppressWarnings("unchecked")
-                T result = (T)e.value;
-                return result;
+            if (map == ThreadLocalMap.NOT_SUPPORTED) {
+                return initialValue();
+            } else {
+                ThreadLocalMap.Entry e = map.getEntry(this);
+                if (e != null) {
+                    @SuppressWarnings("unchecked")
+                    T result = (T) e.value;
+                    return result;
+                }
             }
         }
-        return setInitialValue();
+        return setInitialValue(t);
     }
 
     /**
@@ -197,7 +214,11 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
     boolean isPresent() {
         Thread t = Thread.currentThread();
         ThreadLocalMap map = getMap(t);
-        return map != null && map.getEntry(this) != null;
+        if (map != null && map != ThreadLocalMap.NOT_SUPPORTED) {
+            return map.getEntry(this) != null;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -206,10 +227,10 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
      *
      * @return the initial value
      */
-    private T setInitialValue() {
+    private T setInitialValue(Thread t) {
         T value = initialValue();
-        Thread t = Thread.currentThread();
         ThreadLocalMap map = getMap(t);
+        assert map != ThreadLocalMap.NOT_SUPPORTED;
         if (map != null) {
             map.set(this, value);
         } else {
@@ -229,10 +250,25 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
      *
      * @param value the value to be stored in the current thread's copy of
      *        this thread-local.
+     *
+     * @throws UnsupportedOperationException if the current thread is not
+     *         allowed to set its copy of thread-local variables
+     *
+     * @see Thread.Builder#allowSetThreadLocals(boolean)
      */
     public void set(T value) {
-        Thread t = Thread.currentThread();
+        set(Thread.currentThread(), value);
+    }
+
+    void setCarrierThreadLocal(T value) {
+        set(Thread.currentCarrierThread(), value);
+    }
+
+    private void set(Thread t, T value) {
         ThreadLocalMap map = getMap(t);
+        if (map == ThreadLocalMap.NOT_SUPPORTED) {
+            throw new UnsupportedOperationException();
+        }
         if (map != null) {
             map.set(this, value);
         } else {
@@ -253,7 +289,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
      */
      public void remove() {
          ThreadLocalMap m = getMap(Thread.currentThread());
-         if (m != null) {
+         if (m != null && m != ThreadLocalMap.NOT_SUPPORTED) {
              m.remove(this);
          }
      }
@@ -351,6 +387,9 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
             }
         }
 
+        // Placeholder when thread locals not supported
+        static final ThreadLocalMap NOT_SUPPORTED = new ThreadLocalMap();
+
         /**
          * The initial capacity -- MUST be a power of two.
          */
@@ -394,6 +433,12 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
         }
 
         /**
+         * Construct a new map without a table.
+         */
+        private ThreadLocalMap() {
+        }
+
+        /**
          * Construct a new map initially containing (firstKey, firstValue).
          * ThreadLocalMaps are constructed lazily, so we only create
          * one when we have at least one entry to put in it.
@@ -433,6 +478,13 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
                     }
                 }
             }
+        }
+
+        /**
+         * Returns the number of elements in the map.
+         */
+        int size() {
+            return size;
         }
 
         /**

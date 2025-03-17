@@ -137,7 +137,7 @@ public @UsesObjectEquals class InputContext extends java.awt.im.InputContext
 
     /**
      * @see java.awt.im.InputContext#selectInputMethod
-     * @exception NullPointerException when the locale is null.
+     * @throws NullPointerException when the locale is null.
      */
     public synchronized boolean selectInputMethod(Locale locale) {
         if (locale == null) {
@@ -210,7 +210,7 @@ public @UsesObjectEquals class InputContext extends java.awt.im.InputContext
     /**
      * @see java.awt.im.InputContext#reconvert
      * @since 1.3
-     * @exception UnsupportedOperationException when input method is null
+     * @throws UnsupportedOperationException when input method is null
      */
     public synchronized void reconvert() {
         InputMethod inputMethod = getInputMethod();
@@ -614,7 +614,7 @@ public @UsesObjectEquals class InputContext extends java.awt.im.InputContext
 
     /**
      * @see java.awt.im.InputContext#removeNotify
-     * @exception NullPointerException when the component is null.
+     * @throws NullPointerException when the component is null.
      */
     public synchronized void removeNotify(Component component) {
         if (component == null) {
@@ -666,7 +666,7 @@ public @UsesObjectEquals class InputContext extends java.awt.im.InputContext
 
     /**
      * @see java.awt.im.InputContext#dispose
-     * @exception IllegalStateException when the currentClientComponent is not null
+     * @throws IllegalStateException when the currentClientComponent is not null
      */
     public synchronized void dispose() {
         if (currentClientComponent != null) {
@@ -727,7 +727,7 @@ public @UsesObjectEquals class InputContext extends java.awt.im.InputContext
 
     /**
      * @see java.awt.im.InputContext#setCompositionEnabled(boolean)
-     * @exception UnsupportedOperationException when input method is null
+     * @throws UnsupportedOperationException when input method is null
      */
     public void setCompositionEnabled(boolean enable) {
         InputMethod inputMethod = getInputMethod();
@@ -740,7 +740,7 @@ public @UsesObjectEquals class InputContext extends java.awt.im.InputContext
 
     /**
      * @see java.awt.im.InputContext#isCompositionEnabled
-     * @exception UnsupportedOperationException when input method is null
+     * @throws UnsupportedOperationException when input method is null
      */
     public boolean isCompositionEnabled() {
         InputMethod inputMethod = getInputMethod();
@@ -753,7 +753,7 @@ public @UsesObjectEquals class InputContext extends java.awt.im.InputContext
 
     /**
      * @return a string with information about the current input method.
-     * @exception UnsupportedOperationException when input method is null
+     * @throws UnsupportedOperationException when input method is null
      */
     public String getInputMethodInfo() {
         InputMethod inputMethod = getInputMethod();

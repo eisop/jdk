@@ -43,7 +43,9 @@ import java.util.Arrays;
  * @since 1.6
  */
 @AnnotatedFor({"interning"})
-public abstract @UsesObjectEquals class MultipleGradientPaint implements Paint {
+public abstract sealed @UsesObjectEquals class MultipleGradientPaint implements Paint
+    permits LinearGradientPaint,
+            RadialGradientPaint {
 
     /** The method to use when painting outside the gradient bounds.
      * @since 1.6

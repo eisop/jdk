@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
+import java.io.Serial;
 import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
 import java.io.Serializable;
@@ -58,7 +59,7 @@ class CryptoPermission extends java.security.Permission {
     @java.io.Serial
     private static final long serialVersionUID = 8987399626114087514L;
 
-    private String alg;
+    private final String alg;
     private int maxKeySize = Integer.MAX_VALUE; // no restriction on maxKeySize
     private String exemptionMechanism = null;
     @SuppressWarnings("serial") // Not statically typed as Serializable
@@ -225,10 +226,8 @@ class CryptoPermission extends java.security.Permission {
      * implied by this permission, false otherwise.
      */
     public boolean implies(Permission p) {
-        if (!(p instanceof CryptoPermission))
+        if (!(p instanceof CryptoPermission cp))
             return false;
-
-        CryptoPermission cp = (CryptoPermission)p;
 
         if ((!alg.equalsIgnoreCase(cp.alg)) &&
             (!alg.equalsIgnoreCase(ALG_NAME_WILDCARD))) {
@@ -244,9 +243,7 @@ class CryptoPermission extends java.security.Permission {
             }
 
             // check exemptionMechanism.
-            if (impliesExemptionMechanism(cp.exemptionMechanism)) {
-                return true;
-            }
+            return impliesExemptionMechanism(cp.exemptionMechanism);
         }
 
         return false;
@@ -269,10 +266,8 @@ class CryptoPermission extends java.security.Permission {
         if (obj == this)
             return true;
 
-        if (!(obj instanceof CryptoPermission))
+        if (!(obj instanceof CryptoPermission that))
             return false;
-
-        CryptoPermission that = (CryptoPermission) obj;
 
         if (!(alg.equalsIgnoreCase(that.alg)) ||
             (maxKeySize != that.maxKeySize)) {
@@ -308,7 +303,7 @@ class CryptoPermission extends java.security.Permission {
 
     /**
      * There is no action defined for a CryptoPermission
-     * onject.
+     * object.
      */
     public String getActions()
     {
@@ -406,11 +401,7 @@ class CryptoPermission extends java.security.Permission {
             return false;
         }
 
-        if (this.exemptionMechanism.equals(exemptionMechanism)) {
-            return true;
-        }
-
-        return false;
+        return this.exemptionMechanism.equals(exemptionMechanism);
     }
 
     private boolean impliesParameterSpec(boolean checkParam,
@@ -450,20 +441,15 @@ class CryptoPermission extends java.security.Permission {
 
             // For classes we don't know, the following
             // may be the best try.
-            if (this.algParamSpec.equals(algParamSpec)) {
-                return true;
-            }
-            return false;
-        } else if (this.checkParam) {
-            return false;
+            return this.algParamSpec.equals(algParamSpec);
         } else {
-            return true;
+            return !this.checkParam;
         }
     }
 
     private boolean equalObjects(Object obj1, Object obj2) {
         if (obj1 == null) {
-            return (obj2 == null ? true : false);
+            return (obj2 == null);
         }
 
         return obj1.equals(obj2);
@@ -483,16 +469,17 @@ class CryptoPermission extends java.security.Permission {
 final class CryptoPermissionCollection extends PermissionCollection
     implements Serializable
 {
+    @Serial
     private static final long serialVersionUID = -511215555898802763L;
 
-    private Vector<Permission> permissions;
+    private final Vector<Permission> permissions;
 
     /**
      * Creates an empty CryptoPermissionCollection
      * object.
      */
     CryptoPermissionCollection() {
-        permissions = new Vector<Permission>(3);
+        permissions = new Vector<>(3);
     }
 
     /**
@@ -524,10 +511,8 @@ final class CryptoPermissionCollection extends PermissionCollection
      * CryptoPermissionCollection, false if not.
      */
     public boolean implies(Permission permission) {
-        if (!(permission instanceof CryptoPermission))
+        if (!(permission instanceof CryptoPermission cp))
             return false;
-
-        CryptoPermission cp = (CryptoPermission)permission;
 
         Enumeration<Permission> e = permissions.elements();
 

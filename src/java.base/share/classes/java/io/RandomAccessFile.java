@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -42,6 +42,7 @@ import java.nio.channels.FileChannel;
 
 import jdk.internal.access.JavaIORandomAccessFileAccess;
 import jdk.internal.access.SharedSecrets;
+import jdk.internal.misc.Blocker;
 import sun.nio.ch.FileChannelImpl;
 
 
@@ -353,9 +354,13 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @param mode the mode flags, a combination of the O_ constants
      *             defined above
      */
-    private void open(String name, int mode)
-        throws FileNotFoundException {
-        open0(name, mode);
+    private void open(String name, int mode) throws FileNotFoundException {
+        long comp = Blocker.begin();
+        try {
+            open0(name, mode);
+        } finally {
+            Blocker.end(comp);
+        }
     }
 
     // 'Read' primitives
@@ -376,7 +381,12 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      *                          end-of-file has been reached.
      */
     public @GTENegativeOne int read() throws IOException {
-        return read0();
+        long comp = Blocker.begin();
+        try {
+            return read0();
+        } finally {
+            Blocker.end(comp);
+        }
     }
 
     private native int read0() throws IOException;
@@ -388,7 +398,16 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @param     len the number of bytes to read.
      * @throws    IOException If an I/O error has occurred.
      */
-    private native int readBytes(@PolySigned byte[] b, int off, int len) throws IOException;
+    private int readBytes(@PolySigned byte[] b, int off, int len) throws IOException {
+        long comp = Blocker.begin();
+        try {
+            return readBytes0(b, off, len);
+        } finally {
+            Blocker.end(comp);
+        }
+    }
+
+    private native int readBytes0(byte[] b, int off, int len) throws IOException;
 
     /**
      * Reads up to {@code len} bytes of data from this file into an
@@ -533,7 +552,12 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @throws     IOException  if an I/O error occurs.
      */
     public void write(@PolySigned int b) throws IOException {
-        write0(b);
+        long comp = Blocker.begin();
+        try {
+            write0(b);
+        } finally {
+            Blocker.end(comp);
+        }
     }
 
     private native void write0(@PolySigned int b) throws IOException;
@@ -546,7 +570,16 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @param     len the number of bytes that are written
      * @throws    IOException If an I/O error has occurred.
      */
-    private native void writeBytes(@PolySigned byte[] b, int off, int len) throws IOException;
+    private void writeBytes(@PolySigned byte[] b, int off, int len) throws IOException {
+        long comp = Blocker.begin();
+        try {
+            writeBytes0(b, off, len);
+        } finally {
+            Blocker.end(comp);
+        }
+    }
+
+    private native void writeBytes0(byte[] b, int off, int len) throws IOException;
 
     /**
      * Writes {@code b.length} bytes from the specified byte array
@@ -601,8 +634,12 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
     public void seek(@NonNegative long pos) throws IOException {
         if (pos < 0) {
             throw new IOException("Negative seek offset");
-        } else {
+        }
+        long comp = Blocker.begin();
+        try {
             seek0(pos);
+        } finally {
+            Blocker.end(comp);
         }
     }
 
@@ -614,7 +651,16 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @return     the length of this file, measured in bytes.
      * @throws     IOException  if an I/O error occurs.
      */
-    public native @NonNegative long length() throws IOException;
+    public @NonNegative long length() throws IOException {
+        long comp = Blocker.begin();
+        try {
+            return length0();
+        } finally {
+            Blocker.end(comp);
+        }
+    }
+
+    private native long length0() throws IOException;
 
     /**
      * Sets the length of this file.
@@ -635,7 +681,16 @@ public @UsesObjectEquals class RandomAccessFile implements DataOutput, DataInput
      * @throws     IOException  If an I/O error occurs
      * @since      1.2
      */
-    public native void setLength(@NonNegative long newLength) throws IOException;
+    public void setLength(@NonNegative long newLength) throws IOException {
+        long comp = Blocker.begin();
+        try {
+            setLength0(newLength);
+        } finally {
+            Blocker.end(comp);
+        }
+    }
+
+    private native void setLength0(long newLength) throws IOException;
 
     /**
      * Closes this random access file stream and releases any system

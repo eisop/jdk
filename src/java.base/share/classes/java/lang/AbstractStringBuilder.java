@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,8 +37,10 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-import jdk.internal.math.FloatingDecimal;
+import jdk.internal.math.DoubleToDecimal;
+import jdk.internal.math.FloatToDecimal;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Spliterator;
 import java.util.stream.IntStream;
@@ -69,7 +71,8 @@ import static java.lang.String.checkOffset;
  * @since       1.5
  */
 @AnnotatedFor({"index", "initialization", "interning", "lock", "nullness"})
-abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, CharSequence {
+abstract sealed @UsesObjectEquals class AbstractStringBuilder implements Appendable, CharSequence
+    permits StringBuilder, StringBuffer {
     /**
      * The value is used for character storage.
      */
@@ -79,6 +82,14 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
      * The id of the encoding used to encode the bytes in {@code value}.
      */
     byte coder;
+
+    /**
+     *  The attribute indicates {@code value} might be compressible to LATIN1 if it is UTF16-encoded.
+     *  An inflated byte array becomes compressible only when those non-latin1 chars are deleted.
+     *  We simply set this attribute in all methods which may delete chars. Therefore, there are
+     *  false positives. Subclasses and String need to handle it properly.
+     */
+    boolean maybeLatin1;
 
     /**
      * The count is the number of characters used.
@@ -144,10 +155,11 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
 
         final byte initCoder;
         if (COMPACT_STRINGS) {
-            if (seq instanceof AbstractStringBuilder) {
-                initCoder = ((AbstractStringBuilder)seq).getCoder();
-            } else if (seq instanceof String) {
-                initCoder = ((String)seq).coder();
+            if (seq instanceof AbstractStringBuilder asb) {
+                initCoder = asb.getCoder();
+                maybeLatin1 |= asb.maybeLatin1;
+            } else if (seq instanceof String s) {
+                initCoder = s.coder();
             } else {
                 initCoder = LATIN1;
             }
@@ -332,6 +344,8 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
             } else {
                 StringUTF16.fillNull(value, count, newLength);
             }
+        } else if (count > newLength) {
+            maybeLatin1 = true;
         }
         count = newLength;
     }
@@ -541,6 +555,7 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
                 inflate();
             }
             StringUTF16.putCharSB(value, index, ch);
+            maybeLatin1 = true;
         }
     }
 
@@ -610,6 +625,7 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
         inflateIfNeededFor(asb);
         asb.getBytes(value, count, coder);
         count += len;
+        maybeLatin1 |= asb.maybeLatin1;
         return this;
     }
 
@@ -875,8 +891,13 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(float f) {
-        FloatingDecimal.appendTo(f,this);
+        try {
+            FloatToDecimal.appendTo(f, this);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         return this;
+
     }
 
     /**
@@ -892,7 +913,11 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(double d) {
-        FloatingDecimal.appendTo(d,this);
+        try {
+            DoubleToDecimal.appendTo(d, this);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         return this;
     }
 
@@ -920,6 +945,7 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
         if (len > 0) {
             shift(end, -len);
             this.count = count - len;
+            maybeLatin1 = true;
         }
         return this;
     }
@@ -971,6 +997,7 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
         checkIndex(index, count);
         shift(index + 1, -1);
         count--;
+        maybeLatin1 = true;
         return this;
     }
 
@@ -1005,6 +1032,7 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
         shift(end, newCount - count);
         this.count = newCount;
         putStringAt(start, str);
+        maybeLatin1 = true;
         return this;
     }
 

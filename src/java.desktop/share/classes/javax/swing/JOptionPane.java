@@ -440,7 +440,7 @@ public class JOptionPane extends JComponent implements Accessible
      * the screen.
      *
      * @param message the <code>Object</code> to display
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @return user's input
@@ -476,7 +476,7 @@ public class JOptionPane extends JComponent implements Accessible
      * @param parentComponent  the parent <code>Component</code> for the
      *          dialog
      * @param message  the <code>Object</code> to display
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *    <code>GraphicsEnvironment.isHeadless</code> returns
      *    <code>true</code>
      * @return user's input
@@ -528,7 +528,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  <code>QUESTION_MESSAGE</code>,
      *                  or <code>PLAIN_MESSAGE</code>
      * @return user's input
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -571,7 +571,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                 field
      * @return user's input, or <code>null</code> meaning the user
      *                  canceled the input
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -614,7 +614,7 @@ public class JOptionPane extends JComponent implements Accessible
      *          or if the <code>parentComponent</code> has no
      *          <code>Frame</code>, a default <code>Frame</code> is used
      * @param message   the <code>Object</code> to display
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -642,7 +642,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  <code>WARNING_MESSAGE</code>,
      *                  <code>QUESTION_MESSAGE</code>,
      *                  or <code>PLAIN_MESSAGE</code>
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -671,7 +671,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  or <code>PLAIN_MESSAGE</code>
      * @param icon      an icon to display in the dialog that helps the user
      *                  identify the kind of message that is being displayed
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -695,7 +695,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  default <code>Frame</code> is used
      * @param message   the <code>Object</code> to display
      * @return an integer indicating the option selected by the user
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -723,7 +723,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  <code>YES_NO_CANCEL_OPTION</code>,
      *                  or <code>OK_CANCEL_OPTION</code>
      * @return an int indicating the option selected by the user
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -762,7 +762,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  <code>QUESTION_MESSAGE</code>,
      *                  or <code>PLAIN_MESSAGE</code>
      * @return an integer indicating the option selected by the user
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -800,7 +800,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  or <code>PLAIN_MESSAGE</code>
      * @param icon      the icon to display in the dialog
      * @return an int indicating the option selected by the user
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -861,7 +861,7 @@ public class JOptionPane extends JComponent implements Accessible
      * @return an integer indicating the option chosen by the user,
      *                  or <code>CLOSED_OPTION</code> if the user closed
      *                  the dialog
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -924,7 +924,7 @@ public class JOptionPane extends JComponent implements Accessible
      *          no <code>Frame</code>, a default <code>Frame</code> is used
      * @param title     the title string for the dialog
      * @return a new <code>JDialog</code> containing this instance
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -951,7 +951,7 @@ public class JOptionPane extends JComponent implements Accessible
      *
      * @param title     the title string for the dialog
      * @return a new <code>JDialog</code> containing this instance
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -1513,7 +1513,7 @@ public class JOptionPane extends JComponent implements Accessible
      *          frame's title bar
      * @return a <code>JInternalFrame</code> containing a
      *          <code>JOptionPane</code>
-     * @exception RuntimeException if <code>parentComponent</code> does
+     * @throws RuntimeException if <code>parentComponent</code> does
      *          not have a valid parent
      */
     public JInternalFrame createInternalFrame(@Nullable Component parentComponent,
@@ -1605,7 +1605,7 @@ public class JOptionPane extends JComponent implements Accessible
      *          or <code>getRootFrame</code>
      *          if the component is <code>null</code>,
      *          or does not have a valid <code>Frame</code> parent
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see #getRootFrame
@@ -1631,7 +1631,7 @@ public class JOptionPane extends JComponent implements Accessible
      *          frame if the component is <code>null</code>,
      *          or does not have a valid
      *          <code>Frame</code> or <code>Dialog</code> parent
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see java.awt.GraphicsEnvironment#isHeadless
@@ -1688,7 +1688,7 @@ public class JOptionPane extends JComponent implements Accessible
      * which a frame is not provided.
      *
      * @return the default <code>Frame</code> to use
-     * @exception HeadlessException if
+     * @throws HeadlessException if
      *   <code>GraphicsEnvironment.isHeadless</code> returns
      *   <code>true</code>
      * @see #setRootFrame
@@ -2055,7 +2055,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
      *                <code>WARNING_MESSAGE</code>,
      *                <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
-     * @exception RuntimeException if <code>newType</code> is not one of the
+     * @throws RuntimeException if <code>newType</code> is not one of the
      *          legal values listed above
 
      * @see #getMessageType
@@ -2101,7 +2101,7 @@ public class JOptionPane extends JComponent implements Accessible
      *                  <code>YES_NO_OPTION</code>,
      *                  <code>YES_NO_CANCEL_OPTION</code>,
      *                  or <code>OK_CANCEL_OPTION</code>
-     * @exception RuntimeException if <code>newType</code> is not one of
+     * @throws RuntimeException if <code>newType</code> is not one of
      *          the legal values listed above
      *
      * @see #getOptionType

@@ -47,7 +47,6 @@ import javax.swing.text.StyleContext;
  *
  */
 @AnnotatedFor({"interning"})
-@SuppressWarnings("doclint:missing")
 public class HTML {
 
     /**
@@ -64,7 +63,11 @@ public class HTML {
      */
     public static class Tag {
 
-        /** @since 1.3 */
+        /**
+         * Constructs a {@code Tag}.
+         *
+         * @since 1.3
+         */
         public Tag() {}
 
         /**
