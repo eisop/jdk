@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,6 +31,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 import org.checkerframework.checker.mustcall.qual.NotOwning;
 
+import jdk.internal.misc.Blocker;
 import jdk.internal.util.StaticProperty;
 
 import java.io.*;
@@ -854,6 +855,75 @@ public abstract @UsesObjectEquals class Process {
             }
 
             return n - remaining;
+        }
+
+        @Override
+        public int read() throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read();
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                return super.read(b, off, len);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+    }
+
+    /**
+     * An output stream for a subprocess pipe.
+     */
+    static class PipeOutputStream extends FileOutputStream {
+        PipeOutputStream(FileDescriptor fd) {
+            super(fd);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b);
+            } finally {
+                Blocker.end(attempted);
+            }
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            boolean attempted = Blocker.begin();
+            try {
+                super.write(b, off, len);
+            } finally {
+                Blocker.end(attempted);
+            }
         }
     }
 

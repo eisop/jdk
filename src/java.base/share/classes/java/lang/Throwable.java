@@ -129,7 +129,8 @@ public @UsesObjectEquals class Throwable implements Serializable {
     private static final long serialVersionUID = -3042686055658047285L;
 
     /**
-     * Flag that determines if exceptions should be traced by JFR
+     * Flag set by jdk.internal.event.JFRTracing to indicate if
+     * exceptions should be traced by JFR.
      */
     static volatile boolean jfrTracing;
 
@@ -270,6 +271,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * the stack trace data in the newly created throwable.
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable() {
         fillInStackTrace();
         if (jfrTracing) {
@@ -289,6 +291,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *          later retrieval by the {@link #getMessage()} method.
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable(@Nullable String message) {
         fillInStackTrace();
         detailMessage = message;
@@ -315,6 +318,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since  1.4
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable(@Nullable String message, @Nullable Throwable cause) {
         fillInStackTrace();
         detailMessage = message;
@@ -342,6 +346,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since  1.4
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     public Throwable(@Nullable Throwable cause) {
         fillInStackTrace();
         detailMessage = (cause==null ? null : cause.toString());
@@ -392,6 +397,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since 1.7
      */
     @SideEffectFree
+    @SuppressWarnings("this-escape")
     protected Throwable(@Nullable String message, @Nullable Throwable cause,
                         boolean enableSuppression,
                         boolean writableStackTrace) {

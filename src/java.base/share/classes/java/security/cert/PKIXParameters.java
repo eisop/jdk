@@ -118,6 +118,7 @@ public @UsesObjectEquals class PKIXParameters implements CertPathParameters {
      * @throws ClassCastException if any of the elements in the {@code Set}
      * are not of type {@code java.security.cert.TrustAnchor}
      */
+    @SuppressWarnings("this-escape")
     public PKIXParameters(Set<TrustAnchor> trustAnchors)
         throws InvalidAlgorithmParameterException
     {
@@ -142,6 +143,7 @@ public @UsesObjectEquals class PKIXParameters implements CertPathParameters {
      * not contain at least one trusted certificate entry
      * @throws NullPointerException if the keystore is {@code null}
      */
+    @SuppressWarnings("this-escape")
     public PKIXParameters(KeyStore keystore)
         throws KeyStoreException, InvalidAlgorithmParameterException
     {

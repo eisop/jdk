@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -186,6 +186,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *               thread in the specified thread group.
      * @see     java.lang.ThreadGroup#checkAccess()
      */
+    @SuppressWarnings("this-escape")
     public ThreadGroup(ThreadGroup parent, @Nullable String name) {
         this(checkParentAccess(parent), parent, name);
     }
@@ -593,17 +594,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
     }
 
     /**
-     * Throws {@code UnsupportedOperationException}.
-     *
-     * @deprecated This method was originally specified to stop all threads in
-     *             the thread group. It was inherently unsafe.
-     */
-    @Deprecated(since="1.2", forRemoval=true)
-    public final void stop() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Interrupts all {@linkplain Thread#isAlive() live} platform threads in
      * this thread group and its subgroups.
      *
@@ -626,30 +616,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
                 thread.interrupt();
             }
         }
-    }
-
-    /**
-     * Throws {@code UnsupportedOperationException}.
-     *
-     * @deprecated This method was originally specified to suspend all threads
-     *             in the thread group.
-     */
-    @Deprecated(since="1.2", forRemoval=true)
-    public final void suspend() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Throws {@code UnsupportedOperationException}.
-     *
-     * @deprecated This method was originally specified to resume all threads
-     *             in the thread group.
-     */
-    @CFComment({"index:  // groupSnapshot.length = ngroupsSnapshot by #0.1",
-                "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @Deprecated(since="1.2", forRemoval=true)
-    public final void resume() {
-        throw new UnsupportedOperationException();
     }
 
     /**

@@ -186,6 +186,7 @@ public @UsesObjectEquals class Timer {
      * @throws NullPointerException if {@code name} is null
      * @since 1.5
      */
+    @SuppressWarnings("this-escape")
     public Timer(String name, boolean isDaemon) {
         var threadReaper = new ThreadReaper(queue, thread);
         this.cleanup = CleanerFactory.cleaner().register(this, threadReaper);

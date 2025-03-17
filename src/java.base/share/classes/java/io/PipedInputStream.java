@@ -132,6 +132,7 @@ public class PipedInputStream extends InputStream {
      * @throws     IllegalArgumentException if {@code pipeSize <= 0}.
      * @since      1.6
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias PipedInputStream(@MustCallAlias PipedOutputStream src, @Positive int pipeSize)
             throws IOException {
          initPipe(pipeSize);

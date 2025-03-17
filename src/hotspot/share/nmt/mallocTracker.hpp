@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2024, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2021, 2023 SAP SE. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -26,8 +26,8 @@
 #ifndef SHARE_NMT_MALLOCTRACKER_HPP
 #define SHARE_NMT_MALLOCTRACKER_HPP
 
-#include "memory/allocation.hpp"
 #include "nmt/mallocHeader.hpp"
+#include "nmt/memflags.hpp"
 #include "nmt/nmtCommon.hpp"
 #include "runtime/atomic.hpp"
 #include "runtime/threadCritical.hpp"
@@ -54,6 +54,12 @@ class MemoryCounter {
 
  public:
   MemoryCounter() : _count(0), _size(0), _peak_count(0), _peak_size(0) {}
+
+  inline void set_size_and_count(size_t size, size_t count) {
+    _size = size;
+    _count = count;
+    update_peak(size, count);
+  }
 
   inline void allocate(size_t sz) {
     size_t cnt = Atomic::add(&_count, size_t(1), memory_order_relaxed);
@@ -173,19 +179,20 @@ class MallocMemorySnapshot {
     return _all_mallocs.size() + malloc_overhead() + total_arena();
   }
 
+  // Total peak malloc
+  size_t total_peak() const {
+    return _all_mallocs.peak_size();
+  }
+
+  // Total peak count
+  size_t total_peak_count() const {
+    return _all_mallocs.peak_count();
+  }
+
   // Total malloc'd memory used by arenas
   size_t total_arena() const;
 
-  void copy_to(MallocMemorySnapshot* s) {
-     // Need to make sure that mtChunks don't get deallocated while the
-     // copy is going on, because their size is adjusted using this
-     // buffer in make_adjustment().
-     ThreadCritical tc;
-     s->_all_mallocs = _all_mallocs;
-     for (int index = 0; index < mt_number_of_types; index ++) {
-       s->_malloc[index] = _malloc[index];
-     }
-   }
+  void copy_to(MallocMemorySnapshot* s);
 
   // Make adjustment by subtracting chunks used by arenas
   // from total chunks to get total free chunk size

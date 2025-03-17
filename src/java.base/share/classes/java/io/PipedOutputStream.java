@@ -67,6 +67,7 @@ public class PipedOutputStream extends OutputStream {
      * @param      snk   The piped input stream to connect to.
      * @throws     IOException  if an I/O error occurs.
      */
+    @SuppressWarnings("this-escape")
     public @MustCallAlias PipedOutputStream(@MustCallAlias PipedInputStream snk)  throws IOException {
         connect(snk);
     }

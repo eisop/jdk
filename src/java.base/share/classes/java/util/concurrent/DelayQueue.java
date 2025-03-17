@@ -154,6 +154,7 @@ public class DelayQueue<E extends @NonNull Delayed> extends AbstractQueue<E>
      * @throws NullPointerException if the specified collection or any
      *         of its elements are null
      */
+    @SuppressWarnings("this-escape")
     public DelayQueue(Collection<? extends E> c) {
         this.addAll(c);
     }

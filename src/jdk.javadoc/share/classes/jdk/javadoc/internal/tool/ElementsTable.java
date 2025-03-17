@@ -72,7 +72,6 @@ import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Names;
-import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.DocletEnvironment.ModuleMode;
 import jdk.javadoc.internal.doclets.toolkit.WorkArounds;
 
@@ -188,7 +187,7 @@ public class ElementsTable {
 
     private List<JCClassDecl> classDecList = List.of();
     private List<String> classArgList = List.of();
-    private com.sun.tools.javac.util.List<JCCompilationUnit> classTreeList = null;
+    private com.sun.tools.javac.util.List<JCCompilationUnit> compilationUnitList = null;
 
     private final Set<JavaFileObject.Kind> sourceKinds = EnumSet.of(JavaFileObject.Kind.SOURCE);
 
@@ -354,8 +353,8 @@ public class ElementsTable {
         initializeIncludedSets(expandedModulePackages);
     }
 
-    ElementsTable classTrees(com.sun.tools.javac.util.List<JCCompilationUnit> classTrees) {
-        this.classTreeList = classTrees;
+    ElementsTable compilationUnits(com.sun.tools.javac.util.List<JCCompilationUnit> compilationUnits) {
+        this.compilationUnitList = compilationUnits;
         return this;
     }
 
@@ -439,10 +438,29 @@ public class ElementsTable {
                 }
             });
 
+        // scan any module-info.java files specified on the command line
+        for (var cu : compilationUnitList) {
+            loop:
+            for (var d : cu.defs) {
+                switch (d.getTag()) {
+                    case IMPORT -> { }
+                    case MODULEDEF -> {
+                        var md = (JCModuleDecl) d;
+                        var mn = md.qualId.toString();
+                        ModuleSymbol msym = syms.enterModule(names.fromString(mn));
+                        specifiedModuleElements.add(msym);
+                    }
+                    default -> {
+                        break loop;
+                    }
+                }
+            }
+        }
+
         // all the modules specified on the command line have been scraped
         // init the module systems
         this.modules.addExtraAddModules(mlist.toArray(new String[mlist.size()]));
-        this.modules.initModules(this.classTreeList);
+        this.modules.initModules(this.compilationUnitList);
 
         return this;
     }

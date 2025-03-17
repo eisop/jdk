@@ -444,6 +444,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since  9
      */
+    @SuppressWarnings("this-escape")
     protected ClassLoader(@Nullable String name, @Nullable ClassLoader parent) {
         this(checkCreateClassLoader(name), name, parent);
     }
@@ -470,6 +471,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since  1.2
      */
+    @SuppressWarnings("this-escape")
     protected ClassLoader(@Nullable ClassLoader parent) {
         this(checkCreateClassLoader(), null, parent);
     }
@@ -489,6 +491,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *          {@code checkCreateClassLoader} method doesn't allow creation
      *          of a new class loader.
      */
+    @SuppressWarnings("this-escape")
     protected ClassLoader() {
         this(checkCreateClassLoader(), null, getSystemClassLoader());
     }
