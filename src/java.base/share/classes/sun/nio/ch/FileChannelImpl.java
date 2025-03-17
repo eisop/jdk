@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,11 +27,12 @@ package sun.nio.ch;
 
 import org.checkerframework.framework.qual.AnnotatedFor;
 
+import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.SegmentScope;
+import java.lang.foreign.Arena;
 import java.lang.ref.Cleaner.Cleanable;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -82,7 +83,7 @@ public class FileChannelImpl
     private final boolean readable;
 
     // Required to prevent finalization of creating stream (immutable)
-    private final Object parent;
+    private final Closeable parent;
 
     // The path of the referenced file
     // (null if the parent stream is created with a file descriptor)
@@ -124,7 +125,7 @@ public class FileChannelImpl
     }
 
     private FileChannelImpl(FileDescriptor fd, String path, boolean readable,
-                            boolean writable, boolean direct, Object parent)
+                            boolean writable, boolean direct, Closeable parent)
     {
         this.fd = fd;
         this.path = path;
@@ -152,7 +153,7 @@ public class FileChannelImpl
     // and RandomAccessFile::getChannel
     public static FileChannel open(FileDescriptor fd, String path,
                                    boolean readable, boolean writable,
-                                   boolean direct, Object parent)
+                                   boolean direct, Closeable parent)
     {
         return new FileChannelImpl(fd, path, readable, writable, direct, parent);
     }
@@ -196,25 +197,24 @@ public class FileChannelImpl
         threads.signalAndWait();
 
         if (parent != null) {
-
+            //
             // Close the fd via the parent stream's close method.  The parent
             // will reinvoke our close method, which is defined in the
             // superclass AbstractInterruptibleChannel, but the isOpen logic in
             // that method will prevent this method from being reinvoked.
             //
-            ((java.io.Closeable)parent).close();
-        } else if (closer != null) {
+            parent.close();
+        } else { // parent == null hence closer != null
+            //
             // Perform the cleaning action so it is not redone when
             // this channel becomes phantom reachable.
+            //
             try {
                 closer.clean();
             } catch (UncheckedIOException uioe) {
                 throw uioe.getCause();
             }
-        } else {
-            fdAccess.close(fd);
         }
-
     }
 
     public int read(ByteBuffer dst) throws IOException {
@@ -938,8 +938,6 @@ public class FileChannelImpl
             throw new NonWritableChannelException();
         if ((position < 0) || (count < 0))
             throw new IllegalArgumentException();
-        if (position > size())
-            return 0;
 
         // System calls supporting fast transfers might not work on files
         // which advertise zero size such as those in Linux /proc
@@ -1211,12 +1209,12 @@ public class FileChannelImpl
 
     @Override
     public MemorySegment map(MapMode mode, long offset, long size,
-                             SegmentScope session)
+                             Arena arena)
             throws IOException
     {
         Objects.requireNonNull(mode,"Mode is null");
-        Objects.requireNonNull(session, "Session is null");
-        MemorySessionImpl sessionImpl = (MemorySessionImpl) session;
+        Objects.requireNonNull(arena, "Arena is null");
+        MemorySessionImpl sessionImpl = MemorySessionImpl.toMemorySession(arena);
         sessionImpl.checkValidState();
         if (offset < 0)
             throw new IllegalArgumentException("Requested bytes offset must be >= 0.");
@@ -1233,7 +1231,7 @@ public class FileChannelImpl
         if (unmapper != null) {
             AbstractMemorySegmentImpl segment =
                 new MappedMemorySegmentImpl(unmapper.address(), unmapper, size,
-                                            readOnly, session);
+                                            readOnly, sessionImpl);
             MemorySessionImpl.ResourceList.ResourceCleanup resource =
                 new MemorySessionImpl.ResourceList.ResourceCleanup() {
                     @Override
@@ -1244,7 +1242,7 @@ public class FileChannelImpl
             sessionImpl.addOrCleanupIfFail(resource);
             return segment;
         } else {
-            return new MappedMemorySegmentImpl.EmptyMappedMemorySegmentImpl(readOnly, sessionImpl);
+            return new MappedMemorySegmentImpl(0, null, 0, readOnly, sessionImpl);
         }
     }
 

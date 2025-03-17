@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1995, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -74,6 +74,7 @@ import jdk.internal.util.StaticProperty;
  * &#252; is encoded as two bytes C3 (hex) and BC (hex), and the
  * character @ is encoded as one byte 40 (hex).
  *
+ * @spec https://www.w3.org/TR/html4 HTML 4.01 Specification
  * @see Charset#defaultCharset()
  *
  * @author  Herb Jellinek
@@ -81,9 +82,9 @@ import jdk.internal.util.StaticProperty;
  */
 @AnnotatedFor({"interning"})
 public @UsesObjectEquals class URLEncoder {
-    static BitSet dontNeedEncoding;
-    static final int caseDiff = ('a' - 'A');
-    static String dfltEncName;
+    private static final BitSet DONT_NEED_ENCODING;
+    private static final int CASE_DIFF = ('a' - 'A');
+    private static final String DEFAULT_ENCODING_NAME;
 
     static {
 
@@ -123,25 +124,19 @@ public @UsesObjectEquals class URLEncoder {
          *
          */
 
-        dontNeedEncoding = new BitSet(256);
-        int i;
-        for (i = 'a'; i <= 'z'; i++) {
-            dontNeedEncoding.set(i);
-        }
-        for (i = 'A'; i <= 'Z'; i++) {
-            dontNeedEncoding.set(i);
-        }
-        for (i = '0'; i <= '9'; i++) {
-            dontNeedEncoding.set(i);
-        }
-        dontNeedEncoding.set(' '); /* encoding a space to a + is done
-                                    * in the encode() method */
-        dontNeedEncoding.set('-');
-        dontNeedEncoding.set('_');
-        dontNeedEncoding.set('.');
-        dontNeedEncoding.set('*');
+        DONT_NEED_ENCODING = new BitSet(128);
 
-        dfltEncName = StaticProperty.fileEncoding();
+        DONT_NEED_ENCODING.set('a', 'z' + 1);
+        DONT_NEED_ENCODING.set('A', 'Z' + 1);
+        DONT_NEED_ENCODING.set('0', '9' + 1);
+        DONT_NEED_ENCODING.set(' '); /* encoding a space to a + is done
+                                    * in the encode() method */
+        DONT_NEED_ENCODING.set('-');
+        DONT_NEED_ENCODING.set('_');
+        DONT_NEED_ENCODING.set('.');
+        DONT_NEED_ENCODING.set('*');
+
+        DEFAULT_ENCODING_NAME = StaticProperty.fileEncoding();
     }
 
     /**
@@ -166,7 +161,7 @@ public @UsesObjectEquals class URLEncoder {
         String str = null;
 
         try {
-            str = encode(s, dfltEncName);
+            str = encode(s, DEFAULT_ENCODING_NAME);
         } catch (UnsupportedEncodingException e) {
             // The system should always have the default charset
         }
@@ -221,6 +216,7 @@ public @UsesObjectEquals class URLEncoder {
      * @param charset the given charset
      * @return  the translated {@code String}.
      * @throws NullPointerException if {@code s} or {@code charset} is {@code null}.
+     * @spec https://www.w3.org/TR/html4 HTML 4.01 Specification
      * @see URLDecoder#decode(java.lang.String, Charset)
      * @since 10
      */
@@ -234,7 +230,7 @@ public @UsesObjectEquals class URLEncoder {
         for (int i = 0; i < s.length();) {
             int c = s.charAt(i);
             //System.out.println("Examining character: " + c);
-            if (dontNeedEncoding.get(c)) {
+            if (DONT_NEED_ENCODING.get(c)) {
                 if (c == ' ') {
                     c = '+';
                     needToChange = true;
@@ -277,7 +273,7 @@ public @UsesObjectEquals class URLEncoder {
                         }
                     }
                     i++;
-                } while (i < s.length() && !dontNeedEncoding.get((c = s.charAt(i))));
+                } while (i < s.length() && !DONT_NEED_ENCODING.get((c = s.charAt(i))));
 
                 charArrayWriter.flush();
                 String str = charArrayWriter.toString();
@@ -288,12 +284,12 @@ public @UsesObjectEquals class URLEncoder {
                     // converting to use uppercase letter as part of
                     // the hex value if ch is a letter.
                     if (Character.isLetter(ch)) {
-                        ch -= caseDiff;
+                        ch -= CASE_DIFF;
                     }
                     out.append(ch);
                     ch = Character.forDigit(b & 0xF, 16);
                     if (Character.isLetter(ch)) {
-                        ch -= caseDiff;
+                        ch -= CASE_DIFF;
                     }
                     out.append(ch);
                 }

@@ -992,7 +992,7 @@ public class ElementsTable {
      */
     @Pure
     public boolean isSelected(Element e) {
-        if (toolEnv.isSynthetic((Symbol) e)) {
+        if (toolEnv.isSynthetic((Symbol) e) && !toolEnv.isUnnamed((Symbol) e)) {
             return false;
         }
         if (visibleElementVisitor == null) {

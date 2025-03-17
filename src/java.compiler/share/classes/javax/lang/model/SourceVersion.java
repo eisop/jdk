@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -71,6 +71,9 @@ public enum SourceVersion {
      *      record patterns in preview)
      *  20: no changes (pattern matching for switch in fourth preview,
      *      record patterns in second preview)
+     *  21: pattern matching for switch and record patterns (string
+     *      templates in preview, unnamed patterns and variables in
+     *      preview, unnamed classes and instance main methods in preview)
      */
 
     /**
@@ -82,15 +85,16 @@ public enum SourceVersion {
     RELEASE_0,
 
     /**
-     * The version recognized by the Java Platform 1.1.
+     * The version introduced by the Java Platform 1.1.
      *
-     * The language is {@code RELEASE_0} augmented with nested classes as described in the 1.1 update to
-     * <cite>The Java Language Specification, First Edition</cite>.
+     * The language is {@code RELEASE_0} augmented with nested classes
+     * as described in the 1.1 update to <cite>The Java Language
+     * Specification, First Edition</cite>.
      */
     RELEASE_1,
 
     /**
-     * The version recognized by the Java 2 Platform, Standard Edition,
+     * The version introduced by the Java 2 Platform, Standard Edition,
      * v 1.2.
      *
      * The language described in
@@ -101,7 +105,7 @@ public enum SourceVersion {
     RELEASE_2,
 
     /**
-     * The version recognized by the Java 2 Platform, Standard Edition,
+     * The version introduced by the Java 2 Platform, Standard Edition,
      * v 1.3.
      *
      * No major changes from {@code RELEASE_2}.
@@ -109,7 +113,7 @@ public enum SourceVersion {
     RELEASE_3,
 
     /**
-     * The version recognized by the Java 2 Platform, Standard Edition,
+     * The version introduced by the Java 2 Platform, Standard Edition,
      * v 1.4.
      *
      * Added a simple assertion facility.
@@ -120,7 +124,7 @@ public enum SourceVersion {
     RELEASE_4,
 
     /**
-     * The version recognized by the Java 2 Platform, Standard
+     * The version introduced by the Java 2 Platform, Standard
      * Edition 5.0.
      *
      * The language described in
@@ -140,7 +144,7 @@ public enum SourceVersion {
     RELEASE_5,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 6.
      *
      * No major changes from {@code RELEASE_5}.
@@ -152,10 +156,10 @@ public enum SourceVersion {
     RELEASE_6,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 7.
      *
-     * Additions in this release include, diamond syntax for
+     * Additions in this release include diamond syntax for
      * constructors, {@code try}-with-resources, strings in switch,
      * binary literals, and multi-catch.
      * @since 1.7
@@ -169,7 +173,7 @@ public enum SourceVersion {
     RELEASE_7,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 8.
      *
      * Additions in this release include lambda expressions and default methods.
@@ -184,7 +188,7 @@ public enum SourceVersion {
     RELEASE_8,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 9.
      *
      * Additions in this release include modules and removal of a
@@ -203,7 +207,7 @@ public enum SourceVersion {
      RELEASE_9,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 10.
      *
      * Additions in this release include local-variable type inference
@@ -220,7 +224,7 @@ public enum SourceVersion {
     RELEASE_10,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 11.
      *
      * Additions in this release include local-variable syntax for
@@ -237,7 +241,7 @@ public enum SourceVersion {
     RELEASE_11,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 12.
      * No major changes from the prior release.
      *
@@ -250,7 +254,7 @@ public enum SourceVersion {
     RELEASE_12,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 13.
      * No major changes from the prior release.
      *
@@ -263,7 +267,7 @@ public enum SourceVersion {
     RELEASE_13,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 14.
      *
      * Additions in this release include switch expressions.
@@ -279,7 +283,7 @@ public enum SourceVersion {
     RELEASE_14,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 15.
      *
      * Additions in this release include text blocks.
@@ -295,7 +299,7 @@ public enum SourceVersion {
     RELEASE_15,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 16.
      *
      * Additions in this release include records and pattern matching
@@ -314,7 +318,7 @@ public enum SourceVersion {
     RELEASE_16,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 17.
      *
      * Additions in this release include sealed classes and
@@ -333,7 +337,7 @@ public enum SourceVersion {
     RELEASE_17,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 18.
      *
      * No major changes from the prior release.
@@ -347,7 +351,7 @@ public enum SourceVersion {
     RELEASE_18,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 19.
      *
      * No major changes from the prior release.
@@ -361,7 +365,7 @@ public enum SourceVersion {
     RELEASE_19,
 
     /**
-     * The version recognized by the Java Platform, Standard Edition
+     * The version introduced by the Java Platform, Standard Edition
      * 20.
      *
      * No major changes from the prior release.
@@ -372,7 +376,26 @@ public enum SourceVersion {
      * href="https://docs.oracle.com/javase/specs/jls/se20/html/index.html">
      * <cite>The Java Language Specification, Java SE 20 Edition</cite></a>
      */
-    RELEASE_20;
+    RELEASE_20,
+
+    /**
+     * The version introduced by the Java Platform, Standard Edition
+     * 21.
+     *
+     * Additions in this release include record patterns and pattern
+     * matching for {@code switch}.
+     *
+     * @since 21
+     *
+     * @see <a
+     * href="https://docs.oracle.com/javase/specs/jls/se21/html/index.html">
+     * <cite>The Java Language Specification, Java SE 21 Edition</cite></a>
+     * @see <a href="https://openjdk.org/jeps/440">
+     * Record Patterns</a>
+     * @see <a href="https://openjdk.org/jeps/441">
+     * Pattern Matching for switch</a>
+     */
+    RELEASE_21;
 
     // Note that when adding constants for newer releases, the
     // behavior of latest() and latestSupported() must be updated too.
@@ -381,7 +404,7 @@ public enum SourceVersion {
      * {@return the latest source version that can be modeled}
      */
     public static SourceVersion latest() {
-        return RELEASE_20;
+        return RELEASE_21;
     }
 
     private static final SourceVersion latestSupported = getLatestSupported();
@@ -396,7 +419,7 @@ public enum SourceVersion {
     private static SourceVersion getLatestSupported() {
         int intVersion = Runtime.version().feature();
         return (intVersion >= 11) ?
-            valueOf("RELEASE_" + Math.min(20, intVersion)):
+            valueOf("RELEASE_" + Math.min(21, intVersion)):
             RELEASE_10;
     }
 

@@ -268,7 +268,7 @@ public abstract class BasicPermission extends Permission
 
     /**
      * {@code readObject} is called to restore the state of the
-     * (@code BasicPermission} from a stream.
+     * {@code BasicPermission} from a stream.
      *
      * @param  s the {@code ObjectInputStream} from which data is read
      * @throws IOException if an I/O error occurs
@@ -331,8 +331,8 @@ final class BasicPermissionCollection
     private transient ConcurrentHashMap<String, Permission> perms;
 
     /**
-     * This is set to {@code true} if this (@code BasicPermissionCollection}
-     * contains a {code BasicPermission} with '*' as its permission name.
+     * This is set to {@code true} if this {@code BasicPermissionCollection}
+     * contains a {@code BasicPermission} with '*' as its permission name.
      *
      * @see #serialPersistentFields
      */

@@ -554,7 +554,7 @@ public @UsesObjectEquals class ColorConvertOp implements BufferedImageOp, Raster
      */
     public BufferedImage createCompatibleDestImage (BufferedImage src,
                                                     ColorModel destCM) {
-        ColorSpace cs = null;;
+        ColorSpace cs = null;
         if (destCM == null) {
             if (CSList == null) {
                 /* ICC case */

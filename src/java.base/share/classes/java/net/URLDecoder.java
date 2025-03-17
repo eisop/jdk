@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,6 +27,8 @@ package java.net;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.framework.qual.AnnotatedFor;
+
+import jdk.internal.util.StaticProperty;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -93,7 +95,7 @@ public @UsesObjectEquals class URLDecoder {
     private URLDecoder() {}
 
     // The default charset
-    static String dfltEncName = URLEncoder.dfltEncName;
+    private static final String DEFAULT_ENCODING_NAME = StaticProperty.fileEncoding();
 
     /**
      * Decodes a {@code x-www-form-urlencoded} string.
@@ -112,7 +114,7 @@ public @UsesObjectEquals class URLDecoder {
         String str = null;
 
         try {
-            str = decode(s, dfltEncName);
+            str = decode(s, DEFAULT_ENCODING_NAME);
         } catch (UnsupportedEncodingException e) {
             // The system should always have the default charset
         }
@@ -178,6 +180,8 @@ public @UsesObjectEquals class URLDecoder {
      * @throws NullPointerException if {@code s} or {@code charset} is {@code null}
      * @throws IllegalArgumentException if the implementation encounters illegal
      * characters
+     *
+     * @spec https://www.w3.org/TR/html4 HTML 4.01 Specification
      * @see URLEncoder#encode(java.lang.String, Charset)
      * @since 10
      */

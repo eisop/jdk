@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,7 +32,6 @@
  ******************************************************************
  ******************************************************************
  ******************************************************************/
-
 
 package java.awt.image;
 
@@ -371,11 +370,10 @@ public @UsesObjectEquals class Raster {
                                                      " be greater than 0");
         }
         int[] bankIndices = new int[bands];
-        int[] bandOffsets = new int[bands];
         for (int i = 0; i < bands; i++) {
             bankIndices[i] = i;
-            bandOffsets[i] = 0;
         }
+        int[] bandOffsets = new int[bands]; // leave default 0 values
 
         return createBandedRaster(dataType, w, h, w,
                                   bankIndices, bandOffsets,

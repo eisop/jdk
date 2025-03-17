@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,6 +37,7 @@ import jdk.internal.access.JavaUtilZipFileAccess;
 import jdk.internal.misc.ThreadTracker;
 import sun.security.action.GetPropertyAction;
 import sun.security.util.ManifestEntryVerifier;
+import sun.security.util.SignatureFileVerifier;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
@@ -152,8 +153,6 @@ public class JarFile extends ZipFile {
     private static final Runtime.Version RUNTIME_VERSION;
     private static final boolean MULTI_RELEASE_ENABLED;
     private static final boolean MULTI_RELEASE_FORCED;
-    // The maximum size of array to allocate. Some VMs reserve some header words in an array.
-    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     private SoftReference<Manifest> manRef;
     private JarEntry manEntry;
@@ -216,11 +215,17 @@ public class JarFile extends ZipFile {
     public static final @Interned @StringVal("META-INF/MANIFEST.MF") String MANIFEST_NAME = META_INF + "MANIFEST.MF";
 
     /**
+     * The 'JAR index' feature has been removed, but JarInputStream and
+     * JarVerifier's verification of signed jars still need to be
+     * able to skip this entry.
+     */
+    static final String INDEX_NAME = "META-INF/INDEX.LIST";
+
+    /**
      * Returns the version that represents the unversioned configuration of a
      * multi-release jar file.
      *
      * @return the version that represents the unversioned configuration
-     *
      * @since 9
      */
     public static Runtime.Version baseVersion() {
@@ -801,8 +806,11 @@ public class JarFile extends ZipFile {
     private byte[] getBytes(ZipEntry ze) throws IOException {
         try (InputStream is = super.getInputStream(ze)) {
             long uncompressedSize = ze.getSize();
-            if (uncompressedSize > MAX_ARRAY_SIZE) {
-                throw new IOException("Unsupported size: " + uncompressedSize);
+            if (uncompressedSize > SignatureFileVerifier.MAX_SIG_FILE_SIZE) {
+                throw new IOException("Unsupported size: " + uncompressedSize +
+                        " for JarEntry " + ze.getName() +
+                        ". Allowed max size: " +
+                        SignatureFileVerifier.MAX_SIG_FILE_SIZE + " bytes");
             }
             int len = (int)uncompressedSize;
             int bytesRead;

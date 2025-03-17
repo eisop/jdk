@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -124,7 +124,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
 @AnnotatedFor({"aliasing", "lock", "nullness", "index"})
  public final class StringBuffer
     extends AbstractStringBuilder
-    implements Serializable, Comparable<StringBuffer>, CharSequence
+    implements Appendable, Serializable, Comparable<StringBuffer>, CharSequence
 {
 
     /**
@@ -726,9 +726,31 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
         return this;
     }
 
-    @SideEffectFree
+    /**
+     * @throws IllegalArgumentException {@inheritDoc}
+     *
+     * @since 21
+     */
     @Override
+    public synchronized StringBuffer repeat(int codePoint, int count) {
+        super.repeat(codePoint, count);
+        return this;
+    }
+
+    /**
+     * @throws IllegalArgumentException {@inheritDoc}
+     *
+     * @since 21
+     */
+    @Override
+    public synchronized StringBuffer repeat(CharSequence cs, int count) {
+        super.repeat(cs, count);
+        return this;
+    }
+
     @IntrinsicCandidate
+    @Override
+    @SideEffectFree
     public synchronized String toString(@GuardSatisfied StringBuffer this) {
         if (toStringCache == null) {
             return toStringCache = new String(this, null);

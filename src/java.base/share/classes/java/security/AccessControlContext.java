@@ -192,7 +192,7 @@ public final class AccessControlContext {
     }
 
     /**
-     * package private to allow calls from (@code ProtectionDomain} without
+     * package private to allow calls from {@code ProtectionDomain} without
      * performing the security check for
      * {@linkplain SecurityConstants#CREATE_ACC_PERMISSION} permission
      */
