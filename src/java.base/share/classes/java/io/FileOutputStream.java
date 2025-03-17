@@ -371,6 +371,7 @@ public class FileOutputStream extends OutputStream
      * @param      off   {@inheritDoc}
      * @param      len   {@inheritDoc}
      * @throws     IOException  if an I/O error occurs.
+     * @throws     IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
     public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {

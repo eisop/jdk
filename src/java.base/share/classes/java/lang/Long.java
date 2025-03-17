@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -1163,7 +1163,7 @@ public final class Long extends Number
      * to the value of:
      *
      * <blockquote>
-     *  {@code new Long(Long.parseLong(s, radix))}
+     *  {@code Long.valueOf(Long.parseLong(s, radix))}
      * </blockquote>
      *
      * @param      s       the string to be parsed
@@ -1193,7 +1193,7 @@ public final class Long extends Number
      * equal to the value of:
      *
      * <blockquote>
-     *  {@code new Long(Long.parseLong(s))}
+     *  {@code Long.valueOf(Long.parseLong(s))}
      * </blockquote>
      *
      * @param      s   the string to be parsed.
@@ -1592,14 +1592,14 @@ public final class Long extends Number
      * to the value of:
      *
      * <blockquote>
-     *  {@code getLong(nm, new Long(val))}
+     *  {@code getLong(nm, Long.valueOf(val))}
      * </blockquote>
      *
      * but in practice it may be implemented in a manner such as:
      *
      * <blockquote><pre>
      * Long result = getLong(nm, null);
-     * return (result == null) ? new Long(val) : result;
+     * return (result == null) ? Long.valueOf(val) : result;
      * </pre></blockquote>
      *
      * to avoid the unnecessary allocation of a {@code Long} object when
@@ -1732,6 +1732,7 @@ public final class Long extends Number
      *         unsigned values
      * @since 1.8
      */
+    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
     public static int compareUnsigned(@Unsigned long x, @Unsigned long y) {
@@ -2011,6 +2012,7 @@ public final class Long extends Number
      *     specified {@code long} value.
      * @since 1.5
      */
+    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
     public static @SignednessGlb long reverse(@PolySigned long i) {

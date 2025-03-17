@@ -27,10 +27,12 @@
 #include "logging/logStream.hpp"
 #include "memory/allocation.inline.hpp"
 #include "runtime/atomic.hpp"
+#include "runtime/javaThread.inline.hpp"
 #include "runtime/jniHandles.inline.hpp"
 #include "runtime/orderAccess.hpp"
 #include "runtime/sharedRuntime.hpp"
 #include "runtime/thread.inline.hpp"
+#include "runtime/threads.hpp"
 #include "runtime/threadSMR.inline.hpp"
 #include "runtime/vmOperations.hpp"
 #include "services/threadIdTable.hpp"
@@ -193,7 +195,7 @@ class ThreadScanHashtable : public CHeapObj<mtThread> {
   // ResourceHashtable SIZE is specified at compile time so we
   // use 1031 which is the first prime after 1024.
   typedef ResourceHashtable<void *, int, 1031,
-                            ResourceObj::C_HEAP, mtThread,
+                            AnyObj::C_HEAP, mtThread,
                             &ThreadScanHashtable::ptr_hash> PtrTable;
   PtrTable * _ptrs;
 
@@ -201,7 +203,7 @@ class ThreadScanHashtable : public CHeapObj<mtThread> {
   // ResourceHashtable is passed to various functions and populated in
   // different places so we allocate it using C_HEAP to make it immune
   // from any ResourceMarks that happen to be in the code paths.
-  ThreadScanHashtable() : _ptrs(new (ResourceObj::C_HEAP, mtThread) PtrTable()) {}
+  ThreadScanHashtable() : _ptrs(new (mtThread) PtrTable()) {}
 
   ~ThreadScanHashtable() { delete _ptrs; }
 

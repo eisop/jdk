@@ -609,7 +609,7 @@ public class StyleContext implements Serializable, AbstractDocument.AttributeCon
      * Writes a set of attributes to the given object stream
      * for the purpose of serialization.  This will take
      * special care to deal with static attribute keys that
-     * have been registered wit the
+     * have been registered with the
      * <code>registerStaticAttributeKey</code> method.
      * Any attribute key not registered as a static key
      * will be serialized directly.  All values are expected
@@ -808,7 +808,7 @@ public class StyleContext implements Serializable, AbstractDocument.AttributeCon
      * The storage format is key, value, key, value, etc.  The size
      * of the set is the length of the array divided by two.  By
      * default, this is the class that will be used to store attributes
-     * when held in the compact sharable form.
+     * when held in the compact shareable form.
      */
     public class SmallAttributeSet implements AttributeSet {
 
@@ -1039,7 +1039,7 @@ public class StyleContext implements Serializable, AbstractDocument.AttributeCon
         }
 
         /**
-         * If not overriden, the resolving parent defaults to
+         * If not overridden, the resolving parent defaults to
          * the parent element.
          *
          * @return the attributes from the parent
@@ -1536,7 +1536,7 @@ public class StyleContext implements Serializable, AbstractDocument.AttributeCon
 
         /**
          * Gets attributes from the parent.
-         * If not overriden, the resolving parent defaults to
+         * If not overridden, the resolving parent defaults to
          * the parent element.
          *
          * @return the attributes from the parent

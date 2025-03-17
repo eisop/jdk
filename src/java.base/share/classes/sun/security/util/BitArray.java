@@ -32,7 +32,6 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 
 import jdk.internal.util.Preconditions;
 
@@ -45,8 +44,8 @@ import jdk.internal.util.Preconditions;
 
 public class BitArray {
 
-    private byte[] repn;
-    private int length;
+    private final byte[] repn;
+    private final int length;
 
     private static final int BITS_PER_UNIT = 8;
 
@@ -176,7 +175,7 @@ public class BitArray {
      * The bit stored at index zero in this BitArray will be copied
      * into the most significant bit of the zeroth element of the
      * returned byte array.  The last byte of the returned byte array
-     * will be contain zeros in any bits that do not have corresponding
+     * will contain zeros in any bits that do not have corresponding
      * bits in the BitArray.  (This matters only if the BitArray's size
      * is not a multiple of 8.)
      */
@@ -188,9 +187,7 @@ public class BitArray {
     @EnsuresNonNullIf(expression="#1", result=true)
     public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
-        if (obj == null || !(obj instanceof BitArray)) return false;
-
-        BitArray ba = (BitArray) obj;
+        if (!(obj instanceof BitArray ba)) return false;
 
         if (ba.length != length) return false;
 
@@ -201,7 +198,7 @@ public class BitArray {
     }
 
     /**
-     * Return a boolean array with the same bit values a this BitArray.
+     * Return a boolean array with the same bit values in this BitArray.
      */
     public boolean[] toBooleanArray() {
         boolean[] bits = new boolean[length];

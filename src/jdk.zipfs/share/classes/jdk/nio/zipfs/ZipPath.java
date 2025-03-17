@@ -335,9 +335,8 @@ final class ZipPath implements Path {
     @Override
     public boolean startsWith(Path other) {
         Objects.requireNonNull(other, "other");
-        if (!(other instanceof ZipPath))
+        if (!(other instanceof final ZipPath o))
             return false;
-        final ZipPath o = (ZipPath)other;
         if (o.isAbsolute() != this.isAbsolute() ||
             o.path.length > this.path.length)
             return false;
@@ -355,9 +354,8 @@ final class ZipPath implements Path {
     @Override
     public boolean endsWith(Path other) {
         Objects.requireNonNull(other, "other");
-        if (!(other instanceof ZipPath))
+        if (!(other instanceof final ZipPath o))
             return false;
-        final ZipPath o = (ZipPath)other;
         int olast = o.path.length - 1;
         if (olast > 0 && o.path[olast] == '/')
             olast--;
@@ -388,17 +386,17 @@ final class ZipPath implements Path {
     }
 
     @Override
-    public final Path resolveSibling(String other) {
+    public Path resolveSibling(String other) {
         return resolveSibling(zfs.getPath(other));
     }
 
     @Override
-    public final boolean startsWith(String other) {
+    public boolean startsWith(String other) {
         return startsWith(zfs.getPath(other));
     }
 
     @Override
-    public final boolean endsWith(String other) {
+    public boolean endsWith(String other) {
         return endsWith(zfs.getPath(other));
     }
 
@@ -679,7 +677,7 @@ final class ZipPath implements Path {
     }
 
     @Override
-    public final File toFile() {
+    public File toFile() {
         throw new UnsupportedOperationException();
     }
 
@@ -852,6 +850,10 @@ final class ZipPath implements Path {
         return getFileAttributeView(view).readAttributes(attrs);
     }
 
+    ZipFileAttributes readAttributesIfExists() throws IOException {
+        return zfs.getFileAttributes(getResolvedPath());
+    }
+
     FileStore getFileStore() throws IOException {
         // each ZipFileSystem only has one root (as requested for now)
         if (exists())
@@ -909,7 +911,7 @@ final class ZipPath implements Path {
         }
     }
 
-    private boolean exists() {
+    boolean exists() {
         return zfs.exists(getResolvedPath());
     }
 

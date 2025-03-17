@@ -2673,8 +2673,6 @@ public @UsesObjectEquals class LogManager {
         for (Runnable c : listeners.values().toArray(new Runnable[0])) {
             try {
                 c.run();
-            } catch (ThreadDeath death) {
-                throw death;
             } catch (Error | RuntimeException x) {
                 if (t == null) t = x;
                 else t.addSuppressed(x);

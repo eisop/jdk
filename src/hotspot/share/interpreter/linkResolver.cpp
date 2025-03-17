@@ -23,12 +23,9 @@
  */
 
 #include "precompiled.hpp"
-#include "jvm.h"
 #include "cds/archiveUtils.hpp"
 #include "classfile/defaultMethods.hpp"
 #include "classfile/javaClasses.hpp"
-#include "classfile/resolutionErrors.hpp"
-#include "classfile/symbolTable.hpp"
 #include "classfile/systemDictionary.hpp"
 #include "classfile/vmClasses.hpp"
 #include "classfile/vmSymbols.hpp"
@@ -39,6 +36,7 @@
 #include "interpreter/bytecode.hpp"
 #include "interpreter/interpreterRuntime.hpp"
 #include "interpreter/linkResolver.hpp"
+#include "jvm.h"
 #include "logging/log.hpp"
 #include "logging/logStream.hpp"
 #include "memory/resourceArea.hpp"
@@ -50,15 +48,16 @@
 #include "oops/objArrayKlass.hpp"
 #include "oops/objArrayOop.hpp"
 #include "oops/oop.inline.hpp"
+#include "oops/symbolHandle.hpp"
 #include "prims/methodHandles.hpp"
 #include "runtime/fieldDescriptor.inline.hpp"
 #include "runtime/frame.inline.hpp"
 #include "runtime/handles.inline.hpp"
+#include "runtime/javaThread.hpp"
 #include "runtime/reflection.hpp"
 #include "runtime/safepointVerifiers.hpp"
 #include "runtime/sharedRuntime.hpp"
 #include "runtime/signature.hpp"
-#include "runtime/thread.inline.hpp"
 #include "runtime/vmThread.hpp"
 #include "utilities/macros.hpp"
 #if INCLUDE_JFR
@@ -1086,7 +1085,7 @@ void LinkResolver::resolve_static_call(CallInfo& result,
     resolved_method = linktime_resolve_static_method(new_info, CHECK);
   }
 
-  if (resolved_method->is_continuation_enter_intrinsic()
+  if (resolved_method->is_continuation_native_intrinsic()
       && resolved_method->from_interpreted_entry() == NULL) { // does a load_acquire
     methodHandle mh(THREAD, resolved_method);
     // Generate a compiled form of the enterSpecial intrinsic.
@@ -1797,7 +1796,7 @@ void LinkResolver::resolve_invokedynamic(CallInfo& result, const constantPoolHan
   // the interpreter or runtime performs a serialized check of
   // the relevant CPCE::f1 field.  This is done by the caller
   // of this method, via CPCE::set_dynamic_call, which uses
-  // an ObjectLocker to do the final serialization of updates
+  // a lock to do the final serialization of updates
   // to CPCE state, including f1.
 
   // Log dynamic info to CDS classlist.

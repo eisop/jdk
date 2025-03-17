@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -520,6 +520,23 @@ public class DocTreeScanner<R,P> implements DocTreeVisitor<R,P> {
      *
      * @implSpec This implementation scans the children in left to right order.
      *
+     * @param node {@inheritDoc}
+     * @param p    {@inheritDoc}
+     * @return the result of scanning
+     * @since 20
+     */
+    @Override
+    public R visitSpec(SpecTree node, P p) {
+        R r = scan(node.getURL(), p);
+        r = scanAndReduce(node.getTitle(), p, r);
+        return r;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @implSpec This implementation scans the children in left to right order.
+     *
      * @param node  {@inheritDoc}
      * @param p  {@inheritDoc}
      * @return the result of scanning
@@ -644,7 +661,9 @@ public class DocTreeScanner<R,P> implements DocTreeVisitor<R,P> {
      */
     @Override
     public R visitValue(ValueTree node, P p) {
-        return scan(node.getReference(), p);
+        R r = scan(node.getFormat(), p);
+        r = scanAndReduce(node.getReference(), p, r);
+        return r;
     }
 
     /**

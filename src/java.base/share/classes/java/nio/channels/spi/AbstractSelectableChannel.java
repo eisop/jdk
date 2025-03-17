@@ -315,6 +315,8 @@ public abstract class AbstractSelectableChannel
      * mode then this method invokes the {@link #implConfigureBlocking
      * implConfigureBlocking} method, while holding the appropriate locks, in
      * order to change the mode.  </p>
+     *
+     * @throws  ClosedChannelException {@inheritDoc}
      */
     public final @MustCallAlias @This SelectableChannel configureBlocking(@MustCallAlias AbstractSelectableChannel this, boolean block)
         throws IOException

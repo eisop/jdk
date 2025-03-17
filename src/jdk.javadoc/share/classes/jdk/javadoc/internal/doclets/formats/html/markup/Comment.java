@@ -31,14 +31,13 @@ import java.io.Writer;
 import java.util.Objects;
 
 import jdk.javadoc.internal.doclets.toolkit.Content;
-import jdk.javadoc.internal.doclets.toolkit.util.DocletConstants;
 
 /**
  * Class for generating a comment for HTML pages of javadoc output.
  */
 public class Comment extends Content {
 
-    private String commentText;
+    private final String commentText;
 
     /**
      * Constructor to construct a Comment object.
@@ -56,12 +55,14 @@ public class Comment extends Content {
     }
 
     @Override
-    public boolean write(Writer out, boolean atNewline) throws IOException {
-        if (!atNewline)
-            out.write(DocletConstants.NL);
+    public boolean write(Writer out, String newline, boolean atNewline) throws IOException {
+        if (!atNewline) {
+            out.write(newline);
+        }
         out.write("<!-- ");
-        out.write(commentText);
-        out.write(" -->" + DocletConstants.NL);
+        out.write(commentText.replace("\n", newline));
+        out.write(" -->");
+        out.write(newline);
         return true;
     }
 }

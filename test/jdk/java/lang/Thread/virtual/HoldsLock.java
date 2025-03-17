@@ -26,9 +26,17 @@
  * @summary Test Thread.holdsLock when lock held by carrier thread
  * @requires vm.continuations
  * @modules java.base/java.lang:+open
- * @compile --enable-preview -source ${jdk.version} HoldsLock.java
- * @run testng/othervm --enable-preview HoldsLock
- * @run testng/othervm --enable-preview -XX:+UseHeavyMonitors HoldsLock
+ * @enablePreview
+ * @run testng HoldsLock
+ */
+
+/**
+ * @test
+ * @summary Test Thread.holdsLock when lock held by carrier thread
+ * @requires vm.continuations & vm.debug
+ * @modules java.base/java.lang:+open
+ * @enablePreview
+ * @run testng/othervm -XX:+UseHeavyMonitors HoldsLock
  */
 
 import java.lang.management.LockInfo;

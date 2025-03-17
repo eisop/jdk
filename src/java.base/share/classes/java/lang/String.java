@@ -535,7 +535,7 @@ public final class String
     @StaticallyExecutable
     public @Unique String(@PolySigned byte @GuardSatisfied [] bytes, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length, String charsetName)
             throws UnsupportedEncodingException {
-        this(bytes, offset, length, lookupCharset(charsetName));
+        this(lookupCharset(charsetName), bytes, checkBoundsOffCount(offset, length, bytes.length), length);
     }
 
     /**
@@ -572,8 +572,17 @@ public final class String
     @StaticallyExecutable
     @SuppressWarnings("removal")
     public @Unique String(@PolySigned byte @GuardSatisfied [] bytes, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length, Charset charset) {
-        Objects.requireNonNull(charset);
-        checkBoundsOffCount(offset, length, bytes.length);
+        this(Objects.requireNonNull(charset), bytes, checkBoundsOffCount(offset, length, bytes.length), length);
+    }
+
+    /**
+     * This method does not do any precondition checks on its arguments.
+     * <p>
+     * Important: parameter order of this method is deliberately changed in order to
+     * disambiguate it against other similar methods of this class.
+     */
+    @SuppressWarnings("removal")
+    private String(Charset charset, byte[] bytes, int offset, int length) {
         if (length == 0) {
             this.value = "".value;
             this.coder = "".coder;
@@ -1425,7 +1434,7 @@ public final class String
     @StaticallyExecutable
     public @Unique String(@PolySigned byte @GuardSatisfied [] bytes, String charsetName)
             throws UnsupportedEncodingException {
-        this(bytes, 0, bytes.length, charsetName);
+        this(lookupCharset(charsetName), bytes, 0, bytes.length);
     }
 
     /**
@@ -1451,7 +1460,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     public @Unique String(@PolySigned byte @GuardSatisfied [] bytes, Charset charset) {
-        this(bytes, 0, bytes.length, charset);
+        this(Objects.requireNonNull(charset), bytes, 0, bytes.length);
     }
 
     /**
@@ -1483,7 +1492,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     public @Unique String(@PolySigned byte @GuardSatisfied [] bytes, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length) {
-        this(bytes, offset, length, Charset.defaultCharset());
+        this(Charset.defaultCharset(), bytes, checkBoundsOffCount(offset, length, bytes.length), length);
     }
 
     /**
@@ -1505,7 +1514,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     public @Unique String(@PolySigned byte @GuardSatisfied [] bytes) {
-        this(bytes, 0, bytes.length);
+        this(Charset.defaultCharset(), bytes, 0, bytes.length);
     }
 
     /**
@@ -1714,7 +1723,7 @@ public final class String
      * @param codePointOffset the offset in code points
      * @return the index within this {@code String}
      * @throws    IndexOutOfBoundsException if {@code index}
-     *   is negative or larger then the length of this
+     *   is negative or larger than the length of this
      *   {@code String}, or if {@code codePointOffset} is positive
      *   and the substring starting with {@code index} has fewer
      *   than {@code codePointOffset} code points,
@@ -1726,9 +1735,6 @@ public final class String
     @Pure
     @StaticallyExecutable
     public @IndexOrHigh({"this"}) int offsetByCodePoints(@IndexOrHigh({"this"}) int index, int codePointOffset) {
-        if (index < 0 || index > length()) {
-            throw new IndexOutOfBoundsException();
-        }
         return Character.offsetByCodePoints(this, index, codePointOffset);
     }
 
@@ -4803,12 +4809,13 @@ public final class String
      * Check {@code offset}, {@code count} against {@code 0} and {@code length}
      * bounds.
      *
+     * @return  {@code offset} if the sub-range within bounds of the range
      * @throws  StringIndexOutOfBoundsException
      *          If {@code offset} is negative, {@code count} is negative,
      *          or {@code offset} is greater than {@code length - count}
      */
-    static void checkBoundsOffCount(int offset, int count, int length) {
-        Preconditions.checkFromIndexSize(offset, count, length, Preconditions.SIOOBE_FORMATTER);
+    static int checkBoundsOffCount(int offset, int count, int length) {
+        return Preconditions.checkFromIndexSize(offset, count, length, Preconditions.SIOOBE_FORMATTER);
     }
 
     /*

@@ -29,11 +29,13 @@ import org.checkerframework.checker.index.qual.IndexOrHigh;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-import java.lang.ref.Reference;
 import java.nio.ByteBuffer;
-import sun.nio.ch.DirectBuffer;
+
 import jdk.internal.util.Preconditions;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
+import sun.nio.ch.DirectBuffer;
+
+import static java.util.zip.ZipUtils.NIO_ACCESS;
 
 /**
  * A class that can be used to compute the Adler-32 checksum of a data
@@ -101,10 +103,11 @@ public @UsesObjectEquals class Adler32 implements Checksum {
         if (rem <= 0)
             return;
         if (buffer.isDirect()) {
+            NIO_ACCESS.acquireSession(buffer);
             try {
                 adler = updateByteBuffer(adler, ((DirectBuffer)buffer).address(), pos, rem);
             } finally {
-                Reference.reachabilityFence(buffer);
+                NIO_ACCESS.releaseSession(buffer);
             }
         } else if (buffer.hasArray()) {
             adler = updateBytes(adler, buffer.array(), pos + buffer.arrayOffset(), rem);

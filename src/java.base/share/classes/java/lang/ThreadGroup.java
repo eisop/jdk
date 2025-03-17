@@ -407,7 +407,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
     public @NonNegative int activeCount() {
         int n = 0;
         for (Thread thread : Thread.getAllThreads()) {
-            @SuppressWarnings("deprecation")
             ThreadGroup g = thread.getThreadGroup();
             if (parentOf(g)) {
                 n++;
@@ -478,7 +477,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
         int n = 0;
         if (list.length > 0) {
             for (Thread thread : Thread.getAllThreads()) {
-                @SuppressWarnings("deprecation")
                 ThreadGroup g = thread.getThreadGroup();
                 if (g == this || (recurse && parentOf(g))) {
                     list[n++] = thread;
@@ -623,7 +621,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
     public final void interrupt() {
         checkAccess();
         for (Thread thread : Thread.getAllThreads()) {
-            @SuppressWarnings("deprecation")
             ThreadGroup g = thread.getThreadGroup();
             if (parentOf(g)) {
                 thread.interrupt();
@@ -720,12 +717,9 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *     uncaught exception handler} installed, and if so, its
      *     {@code uncaughtException} method is called with the same
      *     two arguments.
-     * <li>Otherwise, this method determines if the {@code Throwable}
-     *     argument is an instance of {@link ThreadDeath}. If so, nothing
-     *     special is done. Otherwise, a message containing the
-     *     thread's name, as returned from the thread's {@link
-     *     Thread#getName getName} method, and a stack backtrace,
-     *     using the {@code Throwable}'s {@link
+     * <li>Otherwise, a message containing the thread's name, as returned
+     *     from the thread's {@link Thread#getName getName} method, and a
+     *     stack backtrace, using the {@code Throwable}'s {@link
      *     Throwable#printStackTrace() printStackTrace} method, is
      *     printed to the {@linkplain System#err standard error stream}.
      * </ul>
@@ -745,9 +739,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
                 Thread.getDefaultUncaughtExceptionHandler();
             if (ueh != null) {
                 ueh.uncaughtException(t, e);
-            } else if (!(e instanceof ThreadDeath)) {
-                System.err.print("Exception in thread \""
-                                 + t.getName() + "\" ");
+            } else {
+                System.err.print("Exception in thread \"" + t.getName() + "\" ");
                 e.printStackTrace(System.err);
             }
         }
@@ -844,6 +837,14 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
         synchronized (this) {
             return subgroups();
         }
+    }
+
+    /**
+     * Returns a snapshot of the subgroups as an array, used by JVMTI.
+     */
+    private ThreadGroup[] subgroupsAsArray() {
+        List<ThreadGroup> groups = synchronizedSubgroups();
+        return groups.toArray(new ThreadGroup[0]);
     }
 
     /**
