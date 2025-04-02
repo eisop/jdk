@@ -1,7 +1,7 @@
 JDK API Changes Report Generation
 
 Tina Xia, tzxia@uwaterloo.ca for issues or questions
-Friday, March 14, 2025
+Friday, April 2, 2025
 
 This project automates the review process for newly introduced methods across subsequent JDK versions. 
 
@@ -12,7 +12,7 @@ Configuration
 PERFORMING MINIMIZATION AND STORING RESULTS 
 1. Create a sub-directory called "results" in the "report-generation" directory 
 
-2. Update the absolute paths in perform-minimization.py to match your environment:
+2. Update the absolute paths in config.py to match your environment:
 
 JDK_REPO_PATH: path to your local JDK repository.
 CHECKER_FRAMEWORK_REPO_PATH: path to your local Checker Framework repository.

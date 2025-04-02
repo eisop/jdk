@@ -2,28 +2,30 @@ import os
 import subprocess
 import shutil
 import platform
+import config
 
 #update these absolute paths for your environment
-JDK_REPO_PATH = "/Users/tinaxia/Desktop/eisop/jdk"
-CHECKER_FRAMEWORK_REPO_PATH = "/Users/tinaxia/Desktop/eisop/checker-framework"
-RESULTS_BASE_DIR = "/Users/tinaxia/Desktop/eisop/jdk/report-generation/results"
+JDK_REPO_PATH = config.JDK_REPO_PATH
+CHECKER_FRAMEWORK_REPO_PATH = config.CHECKER_FRAMEWORK_REPO_PATH
+RESULTS_BASE_DIR = config.RESULTS_BASE_DIR
 
 if platform.system() == "Windows":
     gradle_task_cmd  = ["cmd", "/c", "gradlew.bat", "copyAndMinimizeAnnotatedJdkFiles"]
 else:
     gradle_task_cmd  = ["sh", "./gradlew", "copyAndMinimizeAnnotatedJdkFiles"]
 
+#error messages for missing directories
 if not os.path.isdir(JDK_REPO_PATH):
-    print(f"Error: '{JDK_REPO_PATH}' does not exist or is not a directory.")
-    sys.exit(1)
+    print(f"'{JDK_REPO_PATH}' not found. Please ensure you have the JDK repo on your local machine")
+    exit(1)
 
 if not os.path.isdir(CHECKER_FRAMEWORK_REPO_PATH):
-    print(f"Error: '{CHECKER_FRAMEWORK_REPO_PATH}' does not exist or is not a directory.")
-    sys.exit(1)
+    print(f"'{CHECKER_FRAMEWORK_REPO_PATH}' not found. Please ensure you have the Checker Framework repo on your local machine")
+    exit(1)
 
 if not os.path.isdir(RESULTS_BASE_DIR):
-    print(f"Error: '{RESULTS_BASE_DIR}' does not exist or is not a directory.")
-    sys.exit(1)
+    print(f"'{RESULTS_BASE_DIR}' not found. Please create this directory in the report-generation directory.")
+    exit(1)
 
 
 #move into JDK repository
@@ -97,8 +99,11 @@ for jdk_version in branches:
 print("\nAll minimizations completed!")
 
 try:
+    #move into the jdk
     os.chdir(JDK_REPO_PATH)
+    #run git checkout on the initial branch
     subprocess.run(["git", "checkout", initial_branch], check=True)
-    print(f"\nChecked out the original branch: {initial_branch}")
+    print(f"\nMoved back into the initial branch {initial_branch}")
 except Exception as e:
-    print(f"Warning: could not switch back to the initial branch '{initial_branch}'. Error: {e}")
+    #output error in switching back to initial branch
+    print(f"Error switching back to the initial branch '{initial_branch}'. Error: {e}")
