@@ -13,12 +13,27 @@ if platform.system() == "Windows":
 else:
     gradle_task_cmd  = ["sh", "./gradlew", "copyAndMinimizeAnnotatedJdkFiles"]
 
+if not os.path.isdir(JDK_REPO_PATH):
+    print(f"Error: '{JDK_REPO_PATH}' does not exist or is not a directory.")
+    sys.exit(1)
+
+if not os.path.isdir(CHECKER_FRAMEWORK_REPO_PATH):
+    print(f"Error: '{CHECKER_FRAMEWORK_REPO_PATH}' does not exist or is not a directory.")
+    sys.exit(1)
+
+if not os.path.isdir(RESULTS_BASE_DIR):
+    print(f"Error: '{RESULTS_BASE_DIR}' does not exist or is not a directory.")
+    sys.exit(1)
+
+
 #move into JDK repository
-try:
-    os.chdir(JDK_REPO_PATH)
-except FileNotFoundError:
-    print(f"could not find {JDK_REPO_PATH}")
-    exit(1)
+os.chdir(JDK_REPO_PATH)
+
+initial_branch_result = subprocess.run(
+    ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+    capture_output=True, text=True, check=True
+)
+initial_branch = initial_branch_result.stdout.strip()
 
 #fetch remote branches
 subprocess.run(["git", "fetch", "--all", "--prune"], check=True)
@@ -80,3 +95,10 @@ for jdk_version in branches:
     os.chdir(JDK_REPO_PATH)
 
 print("\nAll minimizations completed!")
+
+try:
+    os.chdir(JDK_REPO_PATH)
+    subprocess.run(["git", "checkout", initial_branch], check=True)
+    print(f"\nChecked out the original branch: {initial_branch}")
+except Exception as e:
+    print(f"Warning: could not switch back to the initial branch '{initial_branch}'. Error: {e}")
