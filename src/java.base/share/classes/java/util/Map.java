@@ -40,6 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
@@ -186,8 +187,7 @@ import java.io.Serializable;
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness", "index", "aliasing", "nonempty"})
-@DefaultQualifierForUse(Readonly.class)
-public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
+@ReceiverDependentMutable public interface Map<K extends @Immutable Object, V> {
     // Query Operations
 
     /**
@@ -198,7 +198,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @return the number of key-value mappings in this map
      */
     @Pure
-    @NonNegative int size(@GuardSatisfied Map<K, V> this);
+    @NonNegative int size(@GuardSatisfied @Readonly Map<K, V> this);
 
     /**
      * Returns {@code true} if this map contains no key-value mappings.
@@ -230,7 +230,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
     @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
     @EnsuresNonEmptyIf(result=true, expression={"this"})
     @Pure
-    boolean containsKey(@Readonly @GuardSatisfied @Readonly Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
+    boolean containsKey(@Readonly @GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key);
 
     /**
      * Returns {@code true} if this map maps one or more keys to the
@@ -252,7 +252,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      */
     @EnsuresNonEmptyIf(result=true, expression={"this"})
     @Pure
-    boolean containsValue(@Readonly @GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness Object value);
+    boolean containsValue(@Readonly @GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object value);
 
     /**
      * Returns the value to which the specified key is mapped,
@@ -281,7 +281,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * (<a href="{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     @Pure
-    @Nullable V get(@Readonly @GuardSatisfied Map<K, V> this, @UnknownSignedness @GuardSatisfied Object key);
+    @Nullable V get(@Readonly @GuardSatisfied Map<K, V> this, @UnknownSignedness @GuardSatisfied @Readonly Object key);
 
     // Modification Operations
 
@@ -345,7 +345,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * (<a href="{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     @CFComment("nullness: key is not @Nullable because this map might not permit null values")
-    @Nullable V remove(@Mutable @GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key);
+    @Nullable V remove(@Mutable @GuardSatisfied Map<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key);
 
 
     // Bulk Operations
@@ -369,7 +369,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @throws IllegalArgumentException if some property of a key or value in
      *         the specified map prevents it from being stored in this map
      */
-    void putAll(@Mutable @GuardSatisfied Map<K, V> this, Map<? extends K, ? extends V> m);
+    void putAll(@Mutable @GuardSatisfied Map<K, V> this, @Readonly Map<? extends K, ? extends V> m);
 
     /**
      * Removes all of the mappings from this map (optional operation).
@@ -399,7 +399,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @return a set view of the keys contained in this map
      */
     @SideEffectFree
-    @PolyNonEmpty Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @PolyNonEmpty Map<K, V> this);
+    @PolyNonEmpty @PolyMutable Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @PolyNonEmpty @PolyMutable Map<K, V> this);
 
     /**
      * Returns a {@link Collection} view of the values contained in this map.
@@ -417,7 +417,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @return a collection view of the values contained in this map
      */
     @SideEffectFree
-    @PolyNonEmpty Collection<V> values(@GuardSatisfied @PolyNonEmpty Map<K, V> this);
+    @PolyNonEmpty @PolyMutable Collection<V> values(@GuardSatisfied @PolyNonEmpty @PolyMutable Map<K, V> this);
 
     /**
      * Returns a {@link Set} view of the mappings contained in this map.
@@ -436,7 +436,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
-    @PolyNonEmpty Set<Map.Entry<@KeyFor({"this"}) K, V>> entrySet(@Readonly @GuardSatisfied @PolyNonEmpty Map<K, V> this);
+    @PolyNonEmpty @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K, V>> entrySet(@GuardSatisfied @PolyNonEmpty @PolyMutable Map<K, V> this);
 
     /**
      * A map entry (key-value pair). The Entry may be unmodifiable, or the
@@ -470,7 +470,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @see Map#entrySet()
      * @since 1.2
      */
-    @Covariant({0})
+    @Covariant(0)
     @ReceiverDependentMutable interface Entry<K extends @Immutable Object, V> {
         /**
          * Returns the key corresponding to this entry.
@@ -537,7 +537,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
          *         entry
          */
         @Pure
-        boolean equals(Map.@GuardSatisfied @Readonly Entry<K, V> this, @GuardSatisfied @Nullable Object o);
+        boolean equals(Map.@GuardSatisfied @Readonly Entry<K, V> this, @GuardSatisfied @Nullable @Readonly Object o);
 
         /**
          * Returns the hash code value for this map entry.  The hash code
@@ -571,7 +571,8 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
          * @since 1.8
          */
         @Pure
-        public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K, V>> comparingByKey() {
+        @SuppressWarnings("pico") // covariant
+        public static <K extends @Immutable Comparable<? super K>, V> Comparator<Map.Entry<K, V>> comparingByKey() {
             return (Comparator<Map.Entry<K, V>> & Serializable)
                 (c1, c2) -> c1.getKey().compareTo(c2.getKey());
         }
@@ -589,7 +590,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
          * @since 1.8
          */
         @Pure
-        public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> comparingByValue() {
+        public static <K extends @Immutable Object, V extends Comparable<? super V>> Comparator<Map.Entry<K, V>> comparingByValue() {
             return (Comparator<Map.Entry<K, V>> & Serializable)
                 (c1, c2) -> c1.getValue().compareTo(c2.getValue());
         }
@@ -608,7 +609,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
          * @since 1.8
          */
         @Pure
-        public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(Comparator<? super K> cmp) {
+        public static <K extends @Immutable Object, V> Comparator<Map.Entry<K, V>> comparingByKey(Comparator<? super K> cmp) {
             Objects.requireNonNull(cmp);
             return (Comparator<Map.Entry<K, V>> & Serializable)
                 (c1, c2) -> cmp.compare(c1.getKey(), c2.getKey());
@@ -628,7 +629,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
          * @since 1.8
          */
         @Pure
-        public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(Comparator<? super V> cmp) {
+        public static <K extends @Immutable Object, V> Comparator<Map.Entry<K, V>> comparingByValue(Comparator<? super V> cmp) {
             Objects.requireNonNull(cmp);
             return (Comparator<Map.Entry<K, V>> & Serializable)
                 (c1, c2) -> cmp.compare(c1.getValue(), c2.getValue());
@@ -656,10 +657,10 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
          * @since 17
          */
         @SuppressWarnings("unchecked")
-        public static <K extends Object, V extends @Readonly Object> Map.Entry<K, V> copyOf(Map.Entry<? extends K, ? extends V> e) {
+        public static <K extends @Immutable Object, V extends @Readonly Object> Map.@Readonly Entry<K, V> copyOf(Map.@Readonly Entry<? extends K, ? extends V> e) {
             Objects.requireNonNull(e);
             if (e instanceof KeyValueHolder) {
-                return (Map.Entry<K, V>) e;
+                return (Map.@Readonly Entry<K, V>) e;
             } else {
                 return Map.entry(e.getKey(), e.getValue());
             }
@@ -680,7 +681,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @param o object to be compared for equality with this map
      * @return {@code true} if the specified object is equal to this map
      */
-    boolean equals(@Readonly @GuardSatisfied Map<K, V> this, @GuardSatisfied @Nullable Object o);
+    boolean equals(@Readonly @GuardSatisfied Map<K, V> this, @GuardSatisfied @Nullable @Readonly Object o);
 
     /**
      * Returns the hash code value for this map.  The hash code of a map is
@@ -725,7 +726,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
     @CFComment("nullness: We can't use @PolyNull V because the output can be null even when"
         + " defaultValue is not (namely, when the map contains a null value). "
         + "Map subclasses that forbid null values can use @PolyNull V.")
-    default V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, V defaultValue) {
+    default V getOrDefault(@GuardSatisfied @UnknownSignedness @Readonly Object key, V defaultValue) {
         V v;
         return (((v = get(key)) != null) || containsKey(key))
             ? v
@@ -757,7 +758,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * removed during iteration
      * @since 1.8
      */
-    default void forEach(@NonLeaked BiConsumer<? super K, ? super V> action) {
+    default void forEach(@Readonly Map<K,V> this, @NonLeaked BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);
         for (Map.Entry<K, V> entry : entrySet()) {
             K k;
@@ -814,7 +815,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      */
     default void replaceAll(@Mutable Map<K, V> this, BiFunction<? super K, ? super V, ? extends V> function) {
         Objects.requireNonNull(function);
-        for (Map.Entry<K, V> entry : entrySet()) {
+        for (Map.@Mutable Entry<K, V> entry : entrySet()) {
             K k;
             V v;
             try {
@@ -924,7 +925,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @since 1.8
      */
     @CFComment("nullness: key and value are not @Nullable because this map might not permit null values")
-    default boolean remove(@Mutable Map<K, V> this, @GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
+    default boolean remove(@Mutable Map<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key, @GuardSatisfied @UnknownSignedness @Readonly Object value) {
         Object curValue = (key);
         if (!Objects.equals(curValue, value) ||
             (curValue == null && !containsKey(key))) {
@@ -1269,7 +1270,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *         (<a href="{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    default @PolyNull V compute(K key,
+    default @PolyNull V compute(@Mutable Map<K, V> this, K key,
             BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue = get(key);
@@ -1393,8 +1394,8 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @since 9
      */
     @SuppressWarnings("unchecked")
-    static <K extends @Immutable Object, V> Map<K, V> of() {
-        return (Map<K,V>) ImmutableCollections.EMPTY_MAP;
+    static <K extends @Immutable Object, V> @Immutable Map<K, V> of() {
+        return (@Immutable Map<K,V>) ImmutableCollections.EMPTY_MAP;
     }
 
     /**
@@ -1410,7 +1411,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1) {
         return new ImmutableCollections.Map1<>(k1, v1);
     }
 
@@ -1430,7 +1431,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2);
     }
 
@@ -1452,7 +1453,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3);
     }
 
@@ -1476,7 +1477,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3, k4, v4);
     }
 
@@ -1502,7 +1503,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
     }
 
@@ -1530,7 +1531,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
                                K k6, V v6) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5,
                                                k6, v6);
@@ -1562,7 +1563,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
                                K k6, V v6, K k7, V v7) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5,
                                                k6, v6, k7, v7);
@@ -1596,7 +1597,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
                                K k6, V v6, K k7, V v7, K k8, V v8) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5,
                                                k6, v6, k7, v7, k8, v8);
@@ -1632,7 +1633,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      *
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
                                K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5,
                                                k6, v6, k7, v7, k8, v8, k9, v9);
@@ -1667,10 +1668,10 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @return a {@code Map} containing the specified mappings
      * @throws IllegalArgumentException if there are any duplicate keys
      * @throws NullPointerException if any key or value is {@code null}
-     *
+
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> @NonEmpty Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
+    static <K extends @Immutable Object, V extends @Readonly Object> @NonEmpty @Immutable Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
                                K k6, V v6, K k7, V v7, K k8, V v8, K k9, V v9, K k10, V v10) {
         return new ImmutableCollections.MapN<>(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5,
                                                k6, v6, k7, v7, k8, v8, k9, v9, k10, v10);
@@ -1709,17 +1710,17 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      */
     @SafeVarargs
     @SuppressWarnings("varargs")
-    static <K extends Object, V extends @Readonly Object> @PolyNonEmpty Map<K, V> ofEntries(Entry<? extends K, ? extends V> @PolyNonEmpty... entries) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @PolyNonEmpty @Immutable Map<K, V> ofEntries(Entry<? extends K, ? extends V> @Readonly @PolyNonEmpty... entries) {
         if (entries.length == 0) { // implicit null check of entries array
             @SuppressWarnings("unchecked")
-            var map = (Map<K,V>) ImmutableCollections.EMPTY_MAP;
+            var map = (@Immutable Map<K,V>) ImmutableCollections.EMPTY_MAP;
             return map;
         } else if (entries.length == 1) {
             // implicit null check of the array slot
             return new ImmutableCollections.Map1<>(entries[0].getKey(),
                     entries[0].getValue());
         } else {
-            Object[] kva = new Object[entries.length << 1];
+            @Readonly Object @Mutable [] kva = new Object @Mutable [entries.length << 1];
             int a = 0;
             for (Entry<? extends K, ? extends V> entry : entries) {
                 // implicit null checks of each array slot
@@ -1765,7 +1766,7 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @see Map#ofEntries Map.ofEntries()
      * @since 9
      */
-    static <K extends Object, V extends @Readonly Object> Entry<K, V> entry(K k, V v) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @Readonly Entry<K, V> entry(K k, V v) {
         // KeyValueHolder checks for nulls
         return new KeyValueHolder<>(k, v);
     }
@@ -1788,11 +1789,11 @@ public @ReceiverDependentMutable interface Map<K extends @Immutable Object, V> {
      * @since 10
      */
     @SuppressWarnings({"rawtypes","unchecked"})
-    static <K extends Object, V extends @Readonly Object> @PolyNonEmpty Map<K, V> copyOf(@PolyNonEmpty Map<? extends K, ? extends V> map) {
+    static <K extends @Immutable Object, V extends @Readonly Object> @PolyNonEmpty @Immutable Map<K, V> copyOf(@PolyNonEmpty @Readonly Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableCollections.AbstractImmutableMap) {
-            return (Map<K,V>)map;
+            return (@Immutable Map<K,V>)map;
         } else {
-            return (Map<K,V>)Map.ofEntries(map.entrySet().toArray(new Entry[0]));
+            return (@Immutable Map<K,V>)Map.ofEntries(map.entrySet().toArray(new Entry[0]));
         }
     }
 }

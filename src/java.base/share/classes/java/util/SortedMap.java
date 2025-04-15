@@ -30,6 +30,8 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -134,7 +136,7 @@ import org.checkerframework.framework.qual.CFComment;
      *         of its keys
      */
     @Pure
-    @Nullable Comparator<? super K> comparator(@GuardSatisfied SortedMap<K, V> this);
+    @Nullable Comparator<? super K> comparator(@GuardSatisfied @Readonly SortedMap<K, V> this);
 
     /**
      * Returns a view of the portion of this map whose keys range from
@@ -166,7 +168,7 @@ import org.checkerframework.framework.qual.CFComment;
      *         outside the bounds of the range
      */
     @SideEffectFree
-    @ReceiverDependentMutable SortedMap<K,V> subMap(@GuardSatisfied SortedMap<K, V> this, @GuardSatisfied K fromKey, @GuardSatisfied K toKey);
+    @PolyMutable SortedMap<K,V> subMap(@GuardSatisfied @PolyMutable SortedMap<K, V> this, @GuardSatisfied K fromKey, @GuardSatisfied K toKey);
 
     /**
      * Returns a view of the portion of this map whose keys are
@@ -194,7 +196,7 @@ import org.checkerframework.framework.qual.CFComment;
      *         bounds of the range
      */
     @SideEffectFree
-    @ReceiverDependentMutable SortedMap<K,V> headMap(@GuardSatisfied SortedMap<K, V> this, K toKey);
+    @PolyMutable SortedMap<K,V> headMap(@GuardSatisfied @PolyMutable SortedMap<K, V> this, K toKey);
 
     /**
      * Returns a view of the portion of this map whose keys are
@@ -222,7 +224,7 @@ import org.checkerframework.framework.qual.CFComment;
      *         bounds of the range
      */
     @SideEffectFree
-    @ReceiverDependentMutable SortedMap<K,V> tailMap(@GuardSatisfied SortedMap<K, V> this, K fromKey);
+    @PolyMutable SortedMap<K,V> tailMap(@GuardSatisfied @PolyMutable SortedMap<K, V> this, K fromKey);
 
     /**
      * Returns the first (lowest) key currently in this map.
@@ -231,7 +233,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @throws NoSuchElementException if this map is empty
      */
     @SideEffectFree
-    @KeyFor("this") K firstKey(@GuardSatisfied @NonEmpty SortedMap<K, V> this);
+    @KeyFor("this") K firstKey(@GuardSatisfied @NonEmpty @Readonly SortedMap<K, V> this);
 
     /**
      * Returns the last (highest) key currently in this map.
@@ -240,7 +242,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @throws NoSuchElementException if this map is empty
      */
     @SideEffectFree
-    @KeyFor("this") K lastKey(@GuardSatisfied @NonEmpty SortedMap<K, V> this);
+    @KeyFor("this") K lastKey(@GuardSatisfied @NonEmpty @Readonly SortedMap<K, V> this);
 
     /**
      * Returns a {@link Set} view of the keys contained in this map.
@@ -260,7 +262,7 @@ import org.checkerframework.framework.qual.CFComment;
      *         ascending order
      */
     @SideEffectFree
-    @ReceiverDependentMutable Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied SortedMap<K, V> this);
+    @PolyMutable Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @PolyMutable SortedMap<K, V> this);
 
     /**
      * Returns a {@link Collection} view of the values contained in this map.
@@ -281,7 +283,7 @@ import org.checkerframework.framework.qual.CFComment;
      *         sorted in ascending key order
      */
     @SideEffectFree
-    @ReceiverDependentMutable Collection<V> values(@GuardSatisfied SortedMap<K, V> this);
+    @PolyMutable Collection<V> values(@GuardSatisfied @PolyMutable SortedMap<K, V> this);
 
     /**
      * Returns a {@link Set} view of the mappings contained in this map.
@@ -302,5 +304,5 @@ import org.checkerframework.framework.qual.CFComment;
      *         sorted in ascending key order
      */
     @SideEffectFree
-    @ReceiverDependentMutable Set<Map.Entry<@KeyFor({"this"}) K, V>> entrySet(@GuardSatisfied SortedMap<K, V> this);
+    @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K, V>> entrySet(@PolyMutable SortedMap<K, V> this);
 }

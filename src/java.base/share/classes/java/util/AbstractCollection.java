@@ -32,6 +32,7 @@ import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
@@ -78,7 +79,7 @@ import jdk.internal.util.ArraysSupport;
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
 @AnnotatedFor({"lock", "nullness", "index"})
-public @ReceiverDependentMutable abstract class AbstractCollection<E> implements Collection<E> {
+@ReceiverDependentMutable public abstract class AbstractCollection<E> implements Collection<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
@@ -95,10 +96,10 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      * @return an iterator over the elements contained in this collection
      */
     @SideEffectFree
-    public abstract @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty AbstractCollection<E> this);
+    public abstract @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty @Readonly AbstractCollection<E> this);
 
     @Pure
-    public abstract @NonNegative int size(@GuardSatisfied AbstractCollection<E> this);
+    public abstract @NonNegative int size(@GuardSatisfied @Readonly AbstractCollection<E> this);
 
     /**
      * {@inheritDoc}
@@ -108,7 +109,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean isEmpty(@GuardSatisfied AbstractCollection<E> this) {
+    public boolean isEmpty(@GuardSatisfied @Readonly AbstractCollection<E> this) {
         return size() == 0;
     }
 
@@ -124,7 +125,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(@GuardSatisfied AbstractCollection<E> this, @GuardSatisfied @UnknownSignedness Object o) {
+    public boolean contains(@GuardSatisfied @Readonly AbstractCollection<E> this, @GuardSatisfied @UnknownSignedness @Readonly Object o) {
         Iterator<E> it = iterator();
         if (o==null) {
             while (it.hasNext())
@@ -162,10 +163,11 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      * }</pre>
      */
     @SideEffectFree
-    public @PolyNull @PolySigned Object[] toArray(AbstractCollection<@PolyNull @PolySigned E> this) {
+    @SuppressWarnings("pico") // Conversion
+    public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly AbstractCollection<@PolyNull @PolySigned @PolyMutable E> this) {
         // Estimate size of array; be prepared to see more or fewer elements
-        Object[] r = new Object[size()];
-        Iterator<E> it = iterator();
+        @PolyMutable Object [] r = new @PolyMutable Object @Mutable [size()];
+        Iterator<@PolyMutable E> it = iterator();
         for (int i = 0; i < r.length; i++) {
             if (! it.hasNext()) // fewer elements than expected
                 return Arrays.copyOf(r, i);
@@ -204,7 +206,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      */
     @SideEffectFree
     @SuppressWarnings("unchecked")
-    public <T> @Nullable T [] toArray(@PolyNull T [] a) {
+    public <T> @Nullable T @Mutable [] toArray(@PolyNull T @Mutable [] a) {
         // Estimate size of array; be prepared to see more or fewer elements
         int size = size();
         T[] r = a.length >= size ? a :
@@ -243,7 +245,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      *         further elements returned by the iterator, trimmed to size
      */
     @SuppressWarnings("unchecked")
-    private static <T> T[] finishToArray(T[] r, Iterator<?> it) {
+    private static <T> T @Mutable [] finishToArray(T @Mutable [] r, @Mutable Iterator<?> it) {
         int len = r.length;
         int i = len;
         while (it.hasNext()) {
@@ -295,7 +297,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      * @throws ClassCastException            {@inheritDoc}
      * @throws NullPointerException          {@inheritDoc}
      */
-    public boolean remove(@Mutable @GuardSatisfied AbstractCollection<E> this, @GuardSatisfied @UnknownSignedness Object o) {
+    public boolean remove(@Mutable @GuardSatisfied AbstractCollection<E> this, @GuardSatisfied @UnknownSignedness @Readonly Object o) {
         Iterator<E> it = iterator();
         if (o==null) {
             while (it.hasNext()) {
@@ -332,7 +334,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      * @see #contains(Object)
      */
     @Pure
-    public boolean containsAll(@Readonly @GuardSatisfied AbstractCollection<E> this, @GuardSatisfied Collection<? extends @UnknownSignedness Object> c) {
+    public boolean containsAll(@Readonly @GuardSatisfied AbstractCollection<E> this, @GuardSatisfied @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c) {
         for (Object e : c)
             if (!contains(e))
                 return false;
@@ -358,7 +360,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      *
      * @see #add(Object)
      */
-    public boolean addAll(@Mutable @GuardSatisfied AbstractCollection<E> this, Collection<? extends E> c) {
+    public boolean addAll(@Mutable @GuardSatisfied AbstractCollection<E> this, @Readonly Collection<? extends E> c) {
         boolean modified = false;
         for (E e : c)
             if (add(e))
@@ -388,7 +390,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    public boolean removeAll(@Mutable @GuardSatisfied AbstractCollection<E> this, Collection<? extends @UnknownSignedness Object> c) {
+    public boolean removeAll(@Mutable @GuardSatisfied AbstractCollection<E> this, @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c) {
         Objects.requireNonNull(c);
         boolean modified = false;
         Iterator<?> it = iterator();
@@ -423,7 +425,7 @@ public @ReceiverDependentMutable abstract class AbstractCollection<E> implements
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    public boolean retainAll(@Mutable @GuardSatisfied AbstractCollection<E> this, Collection<? extends @UnknownSignedness Object> c) {
+    public boolean retainAll(@Mutable @GuardSatisfied AbstractCollection<E> this, Collection<? extends @UnknownSignedness @Readonly Object> c) {
         Objects.requireNonNull(c);
         boolean modified = false;
         Iterator<E> it = iterator();

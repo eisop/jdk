@@ -36,7 +36,10 @@ import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Assignable;
+import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
@@ -158,8 +161,7 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.2
  */
 @AnnotatedFor({"lock", "nullness", "index"})
-@DefaultQualifierForUse(Readonly.class)
-public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
+@ReceiverDependentMutable public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
     implements Map<K,V>, Cloneable, Serializable {
 
     @java.io.Serial
@@ -301,38 +303,38 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * Basic hash bin node, used for most entries.  (See below for
      * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
      */
-    static class Node<K,V> implements Map.Entry<K,V> {
+    @ReceiverDependentMutable static class Node<K extends @Immutable Object,V> implements Map.Entry<K,V> {
         final int hash;
         final K key;
         V value;
         Node<K,V> next;
 
-        Node(int hash, K key, V value, Node<K,V> next) {
+        Node(int hash, K key, V value, @ReceiverDependentMutable Node<K,V> next) {
             this.hash = hash;
             this.key = key;
             this.value = value;
             this.next = next;
         }
 
-        public final K getKey()        { return key; }
-        public final V getValue()      { return value; }
-        public final String toString() { return key + "=" + value; }
+        public final K getKey(@Readonly Node<K, V> this)        { return key; }
+        public final V getValue(@Readonly Node<K, V> this)      { return value; }
+        public final String toString(@Readonly Node<K, V> this) { return key + "=" + value; }
 
-        public final int hashCode() {
+        public final int hashCode(@Readonly Node<K, V> this) {
             return Objects.hashCode(key) ^ Objects.hashCode(value);
         }
 
-        public final V setValue(V newValue) {
+        public final V setValue(@Mutable Node<K, V> this, V newValue) {
             V oldValue = value;
             value = newValue;
             return oldValue;
         }
 
-        public final boolean equals(Object o) {
+        public final boolean equals(@Readonly Node<K, V> this, @Readonly Object o) {
             if (o == this)
                 return true;
 
-            return o instanceof Map.Entry<?, ?> e
+            return o instanceof Map.@Readonly Entry<?, ?> e
                     && Objects.equals(key, e.getKey())
                     && Objects.equals(value, e.getValue());
         }
@@ -356,7 +358,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * to incorporate impact of the highest bits that would otherwise
      * never be used in index calculations because of table bounds.
      */
-    static final int hash(@Nullable Object key) {
+    static final int hash(@Nullable @Readonly Object key) {
         int h;
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
     }
@@ -365,7 +367,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * Returns x's Class if it is of the form "class C implements
      * Comparable<C>", else null.
      */
-    static Class<?> comparableClassFor(Object x) {
+    static Class<?> comparableClassFor(@Readonly Object x) {
         if (x instanceof Comparable) {
             Class<?> c; Type[] ts, as; ParameterizedType p;
             if ((c = x.getClass()) == String.class) // bypass checks
@@ -389,7 +391,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * class), else 0.
      */
     @SuppressWarnings({"rawtypes","unchecked"}) // for cast to Comparable
-    static int compareComparables(Class<?> kc, Object k, Object x) {
+    static int compareComparables(Class<?> kc, @Readonly Object k, @Readonly Object x) {
         return (x == null || x.getClass() != kc ? 0 :
                 ((Comparable)k).compareTo(x));
     }
@@ -410,13 +412,13 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * (We also tolerate length zero in some operations to allow
      * bootstrapping mechanics that are currently not needed.)
      */
-    transient Node<K,V>[] table;
+    transient @ReceiverDependentMutable Node<K,V>[] table;
 
     /**
      * Holds cached entrySet(). Note that AbstractMap fields are used
      * for keySet() and values().
      */
-    transient Set<Map.Entry<K,V>> entrySet;
+    transient @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
 
     /**
      * The number of key-value mappings contained in this map.
@@ -502,6 +504,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param   m the map whose mappings are to be placed in this map
      * @throws  NullPointerException if the specified map is null
      */
+    @SuppressWarnings("pico") // PICO constructor fix
     public @PolyNonEmpty HashMap(@PolyNonEmpty Map<? extends K, ? extends V> m) {
         this.loadFactor = DEFAULT_LOAD_FACTOR;
         putMapEntries(m, false);
@@ -514,7 +517,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param evict false when initially constructing this map, else
      * true (relayed to method afterNodeInsertion).
      */
-    final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
+    final void putMapEntries(@Mutable HashMap<K,V> this, @Readonly Map<? extends K, ? extends V> m, boolean evict) {
         int s = m.size();
         if (s > 0) {
             if (table == null) { // pre-size
@@ -545,7 +548,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @return the number of key-value mappings in this map
      */
     @Pure
-    public @NonNegative int size(@GuardSatisfied HashMap<K, V> this) {
+    public @NonNegative int size(@GuardSatisfied @Readonly HashMap<K, V> this) {
         return size;
     }
 
@@ -556,7 +559,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean isEmpty(@GuardSatisfied HashMap<K, V> this) {
+    public boolean isEmpty(@GuardSatisfied @Readonly HashMap<K, V> this) {
         return size == 0;
     }
 
@@ -578,7 +581,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @see #put(Object, Object)
      */
     @Pure
-    public @Nullable V get(@Readonly @GuardSatisfied HashMap<K, V> this, @UnknownSignedness @GuardSatisfied @Nullable Object key) {
+    public @Nullable V get(@Readonly @GuardSatisfied HashMap<K, V> this, @UnknownSignedness @GuardSatisfied @Nullable @Readonly Object key) {
         Node<K,V> e;
         return (e = getNode(key)) == null ? null : e.value;
     }
@@ -589,8 +592,8 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param key the key
      * @return the node, or null if none
      */
-    final Node<K,V> getNode(@Nullable Object key) {
-        Node<K,V>[] tab; Node<K,V> first, e; int n, hash; K k;
+    final @PolyMutable Node<K,V> getNode(@PolyMutable HashMap<K,V> this, @Nullable @Readonly Object key) {
+        @PolyMutable Node<K,V>[] tab; Node<K,V> first, e; int n, hash; K k;
         if ((tab = table) != null && (n = tab.length) > 0 &&
             (first = tab[(n - 1) & (hash = hash(key))]) != null) {
             if (first.hash == hash && // always check first node
@@ -598,7 +601,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
                 return first;
             if ((e = first.next) != null) {
                 if (first instanceof TreeNode)
-                    return ((TreeNode<K,V>)first).getTreeNode(hash, key);
+                    return ((@PolyMutable TreeNode<K,V>)first).getTreeNode(hash, key);
                 do {
                     if (e.hash == hash &&
                         ((k = e.key) == key || (key != null && key.equals(k))))
@@ -619,7 +622,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      */
     @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
     @Pure
-    public boolean containsKey(@GuardSatisfied HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness Object key) {
+    public boolean containsKey(@GuardSatisfied @Readonly HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object key) {
         return getNode(key) != null;
     }
 
@@ -650,7 +653,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param evict if false, the table is in creation mode.
      * @return previous value, or null if none
      */
-    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+    final V putVal(@Mutable HashMap<K, V> this, int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
@@ -703,7 +706,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @return the table
      */
     @SuppressWarnings("cast.unsafe") // https://github.com/typetools/checker-framework/issues/2731
-    final Node<K,V>[] resize() {
+    final Node<K,V>[] resize(@Mutable HashMap<K, V> this) {
         Node<K,V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
         int oldThr = threshold;
@@ -781,7 +784,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * Replaces all linked nodes in bin at index for given hash unless
      * table is too small, in which case resizes instead.
      */
-    final void treeifyBin(Node<K,V>[] tab, int hash) {
+    final void treeifyBin(@Mutable HashMap<K, V> this, Node<K,V>[] tab, int hash) {
         int n, index; Node<K,V> e;
         if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)
             resize();
@@ -810,7 +813,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
      */
-    public void putAll(@Mutable @GuardSatisfied HashMap<K, V> this, Map<? extends K, ? extends V> m) {
+    public void putAll(@Mutable @GuardSatisfied HashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         putMapEntries(m, true);
     }
 
@@ -823,7 +826,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      *         (A {@code null} return can also indicate that the map
      *         previously associated {@code null} with {@code key}.)
      */
-    public @Nullable V remove(@Mutable @GuardSatisfied HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness Object key) {
+    public @Nullable V remove(@Mutable @GuardSatisfied HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object key) {
         Node<K,V> e;
         return (e = removeNode(hash(key), key, null, false, true)) == null ?
             null : e.value;
@@ -839,7 +842,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param movable if false do not move other nodes while removing
      * @return the node, or null if none
      */
-    final Node<K,V> removeNode(int hash, @Nullable Object key, @Nullable Object value,
+    final Node<K,V> removeNode(@Mutable HashMap<K, V> this, int hash, @Nullable @Readonly Object key, @Nullable @Readonly Object value,
                                boolean matchValue, boolean movable) {
         Node<K,V>[] tab; Node<K,V> p; int n, index;
         if ((tab = table) != null && (n = tab.length) > 0 &&
@@ -903,8 +906,8 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      *         specified value
      */
     @Pure
-    public boolean containsValue(@GuardSatisfied HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness Object value) {
-        Node<K,V>[] tab; V v;
+    public boolean containsValue(@GuardSatisfied @Readonly HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object value) {
+        @Readonly Node<K,V>[] tab; V v;
         if ((tab = table) != null && size > 0) {
             for (Node<K,V> e : tab) {
                 for (; e != null; e = e.next) {
@@ -933,10 +936,10 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @return a set view of the keys contained in this map
      */
     @SideEffectFree
-    public Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied HashMap<K, V> this) {
+    public @PolyMutable Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @PolyMutable HashMap<K, V> this) {
         Set<K> ks = keySet;
         if (ks == null) {
-            ks = new KeySet();
+            ks = new @PolyMutable KeySet();
             keySet = ks;
         }
         return ks;
@@ -952,7 +955,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @return an array ready to be filled and returned from {@code toArray()} method.
      */
     @SuppressWarnings("unchecked")
-    final <T> T[] prepareArray(T[] a) {
+    final <T> T[] prepareArray(@Readonly HashMap<K,V> this, T[] a) {
         int size = this.size;
         if (a.length < size) {
             return (T[]) java.lang.reflect.Array
@@ -973,9 +976,9 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param <T> type of array elements
      * @return supplied array
      */
-    <T> T[] keysToArray(T[] a) {
-        Object[] r = a;
-        Node<K,V>[] tab;
+    <T> T[] keysToArray(@Readonly HashMap<K,V> this, T[] a) {
+        @Readonly Object[] r = a;
+        @Readonly Node<K,V>[] tab;
         int idx = 0;
         if (size > 0 && (tab = table) != null) {
             for (Node<K,V> e : tab) {
@@ -996,9 +999,9 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @param <T> type of array elements
      * @return supplied array
      */
-    <T> T[] valuesToArray(T[] a) {
-        Object[] r = a;
-        Node<K,V>[] tab;
+    <T> T[] valuesToArray(@Readonly HashMap<K,V> this, T[] a) {
+        @Readonly Object[] r = a;
+        @Readonly Node<K,V>[] tab;
         int idx = 0;
         if (size > 0 && (tab = table) != null) {
             for (Node<K,V> e : tab) {
@@ -1010,32 +1013,32 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         return a;
     }
 
-    final class KeySet extends AbstractSet<K> {
+    @ReceiverDependentMutable final class KeySet extends AbstractSet<K> {
         @Pure
-        public final @NonNegative int size()                 { return size; }
-        public final void clear()               { HashMap.this.clear(); }
+        public final @NonNegative int size(@Readonly KeySet this)                 { return size; }
+        public final void clear(@Mutable KeySet this)               { HashMap.this.clear(); }
         @SideEffectFree
-        public final Iterator<K> iterator()     { return new KeyIterator(); }
+        public final Iterator<K> iterator(@Readonly KeySet this)     { return new KeyIterator(); }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public final boolean contains(@Nullable @UnknownSignedness Object o) { return containsKey(o); }
-        public final boolean remove(@Nullable @UnknownSignedness Object key) {
+        public final boolean contains(@Readonly KeySet this, @Nullable @UnknownSignedness @Readonly Object o) { return containsKey(o); }
+        public final boolean remove(@Mutable KeySet this, @Nullable @UnknownSignedness @Readonly Object key) {
             return removeNode(hash(key), key, null, false, true) != null;
         }
         @SideEffectFree
-        public final Spliterator<K> spliterator() {
+        public final Spliterator<K> spliterator(@Readonly KeySet this) {
             return new KeySpliterator<>(HashMap.this, 0, -1, 0, 0);
         }
-
-        public Object[] toArray() {
+        // AOSEN: How to specify the polymutable for return array's element type
+        public Object[] toArray(@Readonly KeySet this) {
             return keysToArray(new Object[size]);
         }
 
-        public <T> @Nullable T[] toArray(@PolyNull T[] a) {
+        public <T> @Nullable T[] toArray(@Readonly KeySet this, @PolyNull T[] a) {
             return keysToArray(prepareArray(a));
         }
 
-        public final void forEach(Consumer<? super K> action) {
+        public final void forEach(@Mutable KeySet this, Consumer<? super K> action) {
             Node<K,V>[] tab;
             if (action == null)
                 throw new NullPointerException();
@@ -1067,26 +1070,26 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @return a view of the values contained in this map
      */
     @SideEffectFree
-    public Collection<V> values(@GuardSatisfied HashMap<K, V> this) {
+    public @PolyMutable Collection<V> values(@GuardSatisfied @PolyMutable HashMap<K, V> this) {
         Collection<V> vs = values;
         if (vs == null) {
-            vs = new Values();
+            vs = new @PolyMutable Values();
             values = vs;
         }
         return vs;
     }
 
-    final class Values extends AbstractCollection<V> {
+    @ReceiverDependentMutable final class Values extends AbstractCollection<V> {
         @Pure
-        public final @NonNegative int size()                 { return size; }
-        public final void clear()               { HashMap.this.clear(); }
+        public final @NonNegative int size(@Readonly Values this)                 { return size; }
+        public final void clear(@Mutable HashMap<K, V>. @Mutable Values this)               { HashMap.this.clear(); }
         @SideEffectFree
-        public final Iterator<V> iterator()     { return new ValueIterator(); }
+        public final Iterator<V> iterator(@Readonly Values this)     { return new ValueIterator(); }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public final boolean contains(@Nullable @UnknownSignedness Object o) { return containsValue(o); }
+        public final boolean contains(@Readonly Values this, @Nullable @UnknownSignedness @Readonly Object o) { return containsValue(o); }
         @SideEffectFree
-        public final Spliterator<V> spliterator() {
+        public final Spliterator<V> spliterator(@Readonly Values this) {
             return new ValueSpliterator<>(HashMap.this, 0, -1, 0, 0);
         }
 
@@ -1098,7 +1101,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             return valuesToArray(prepareArray(a));
         }
 
-        public final void forEach(Consumer<? super V> action) {
+        public final void forEach(@Mutable Values this, Consumer<? super V> action) {
             Node<K,V>[] tab;
             if (action == null)
                 throw new NullPointerException();
@@ -1131,30 +1134,31 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
-    public Set<Map.Entry<@KeyFor({"this"}) K,V>> entrySet(@Readonly @GuardSatisfied HashMap<K, V> this) {
-        Set<Map.Entry<K,V>> es;
-        return (es = entrySet) == null ? (entrySet = new EntrySet()) : es;
+    @SuppressWarnings("pico:assignment.type.incompatible") // AOSEN: how to fix this
+    public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@PolyMutable @GuardSatisfied HashMap<K, V> this) {
+        Set<Map.@PolyMutable Entry<K,V>> es;
+        return (es = entrySet) == null ? (entrySet = new @PolyMutable EntrySet()) : es;
     }
 
-    final class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+    @ReceiverDependentMutable final class EntrySet extends AbstractSet<Map.@ReceiverDependentMutable Entry<K,V>> {
         @Pure
-        public final @NonNegative int size()                 { return size; }
-        public final void clear()               { HashMap.this.clear(); }
+        public final @NonNegative int size(@Readonly EntrySet this)                 { return size; }
+        public final void clear(@Mutable HashMap<K,V>.@Mutable EntrySet this)               { HashMap.this.clear(); }
         @SideEffectFree
-        public final Iterator<Map.Entry<K,V>> iterator() {
+        public final Iterator<Map.@Readonly Entry<K,V>> iterator(@Readonly EntrySet this) {
             return new EntryIterator();
         }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public final boolean contains(@Nullable @UnknownSignedness Object o) {
-            if (!(o instanceof Map.Entry<?, ?> e))
+        public final boolean contains(@Readonly EntrySet this, @Nullable @UnknownSignedness @Readonly Object o) {
+            if (!(o instanceof Map.@Readonly Entry<?, ?> e))
                 return false;
             Object key = e.getKey();
             Node<K,V> candidate = getNode(key);
             return candidate != null && candidate.equals(e);
         }
-        public final boolean remove(@Nullable @UnknownSignedness Object o) {
-            if (o instanceof Map.Entry<?, ?> e) {
+        public final boolean remove(@Mutable EntrySet this, @Nullable @UnknownSignedness @Readonly Object o) {
+            if (o instanceof Map.@Readonly Entry<?, ?> e) {
                 Object key = e.getKey();
                 Object value = e.getValue();
                 return removeNode(hash(key), key, value, true, true) != null;
@@ -1162,10 +1166,10 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             return false;
         }
         @SideEffectFree
-        public final Spliterator<Map.Entry<K,V>> spliterator() {
+        public final Spliterator<Map.@Readonly Entry<K,V>> spliterator(@Readonly EntrySet this) {
             return new EntrySpliterator<>(HashMap.this, 0, -1, 0, 0);
         }
-        public final void forEach(Consumer<? super Map.Entry<K,V>> action) {
+        public final void forEach(@Mutable EntrySet this, Consumer<? super Map.Entry<K,V>> action) {
             Node<K,V>[] tab;
             if (action == null)
                 throw new NullPointerException();
@@ -1185,24 +1189,24 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
 
     @Override
     @Pure
-    public V getOrDefault(@GuardSatisfied @Nullable @UnknownSignedness Object key, V defaultValue) {
+    public V getOrDefault(@GuardSatisfied @Nullable @UnknownSignedness @Readonly Object key, V defaultValue) {
         Node<K,V> e;
         return (e = getNode(key)) == null ? defaultValue : e.value;
     }
 
     @EnsuresKeyFor(value={"#1"}, map={"this"})
     @Override
-    public @Nullable V putIfAbsent(K key, V value) {
+    public @Nullable V putIfAbsent(@Mutable HashMap<K, V> this, K key, V value) {
         return putVal(hash(key), key, value, true, true);
     }
 
     @Override
-    public boolean remove(@GuardSatisfied @Nullable @UnknownSignedness Object key, @GuardSatisfied @Nullable @UnknownSignedness Object value) {
+    public boolean remove(@Mutable HashMap<K, V> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object key, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object value) {
         return removeNode(hash(key), key, value, true, true) != null;
     }
 
     @Override
-    public boolean replace(K key, V oldValue, V newValue) {
+    public boolean replace(@Mutable HashMap<K, V> this, K key, V oldValue, V newValue) {
         Node<K,V> e; V v;
         if ((e = getNode(key)) != null &&
             ((v = e.value) == oldValue || (v != null && v.equals(oldValue)))) {
@@ -1214,7 +1218,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     }
 
     @Override
-    public @Nullable V replace(K key, V value) {
+    public @Nullable V replace(@Mutable HashMap<K, V> this, K key, V value) {
         Node<K,V> e;
         if ((e = getNode(key)) != null) {
             V oldValue = e.value;
@@ -1236,7 +1240,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * mapping function modified this map
      */
     @Override
-    public @PolyNull V computeIfAbsent(K key,
+    public @PolyNull V computeIfAbsent(@Mutable HashMap<K, V> this, K key,
                              Function<? super K, ? extends @PolyNull V> mappingFunction) {
         if (mappingFunction == null)
             throw new NullPointerException();
@@ -1302,7 +1306,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * remapping function modified this map
      */
     @Override
-    public @PolyNull V computeIfPresent(K key,
+    public @PolyNull V computeIfPresent(@Mutable HashMap<K, V> this, K key,
                               BiFunction<? super K, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         if (remappingFunction == null)
             throw new NullPointerException();
@@ -1336,7 +1340,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * remapping function modified this map
      */
     @Override
-    public @PolyNull V compute(K key,
+    public @PolyNull V compute(@Mutable HashMap<K,V> this, K key,
                      BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
         if (remappingFunction == null)
             throw new NullPointerException();
@@ -1401,7 +1405,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * remapping function modified this map
      */
     @Override
-    public @PolyNull V merge(K key, @NonNull V value,
+    public @PolyNull V merge(@Mutable HashMap<K,V> this, K key, @NonNull V value,
                    BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
         if (value == null || remappingFunction == null)
             throw new NullPointerException();
@@ -1462,7 +1466,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     }
 
     @Override
-    public void forEach(BiConsumer<? super K, ? super V> action) {
+    public void forEach(@Mutable HashMap<K, V> this, BiConsumer<? super K, ? super V> action) {
         Node<K,V>[] tab;
         if (action == null)
             throw new NullPointerException();
@@ -1478,7 +1482,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     }
 
     @Override
-    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    public void replaceAll(@Mutable HashMap<K, V> this, BiFunction<? super K, ? super V, ? extends V> function) {
         Node<K,V>[] tab;
         if (function == null)
             throw new NullPointerException();
@@ -1506,7 +1510,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     @SideEffectFree
     @SuppressWarnings("unchecked")
     @Override
-    public Object clone(@GuardSatisfied HashMap<K, V> this) {
+    public Object clone(@GuardSatisfied @Mutable HashMap<K, V> this) {
         HashMap<K,V> result;
         try {
             result = (HashMap<K,V>)super.clone();
@@ -1520,8 +1524,8 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     }
 
     // These methods are also used when serializing HashSets
-    final float loadFactor() { return loadFactor; }
-    final int capacity() {
+    final float loadFactor(@Readonly HashMap<K,V> this) { return loadFactor; }
+    final int capacity(@Readonly HashMap<K,V> this) {
         return (table != null) ? table.length :
             (threshold > 0) ? threshold :
             DEFAULT_INITIAL_CAPACITY;
@@ -1540,7 +1544,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      *             emitted in no particular order.
      */
     @java.io.Serial
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject(@Mutable HashMap<K,V> this, java.io.ObjectOutputStream s)
         throws IOException {
         int buckets = capacity();
         // Write out the threshold, loadfactor, and any hidden stuff
@@ -1558,7 +1562,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * @throws IOException if an I/O error occurs
      */
     @java.io.Serial
-    private void readObject(java.io.ObjectInputStream s)
+    private void readObject(@Mutable HashMap<K,V> this, java.io.ObjectInputStream s)
         throws IOException, ClassNotFoundException {
         // Read in the threshold (ignored), loadfactor, and any hidden stuff
         s.defaultReadObject();
@@ -1606,9 +1610,9 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     /* ------------------------------------------------------------ */
     // iterators
 
-    abstract class HashIterator {
-        Node<K,V> next;        // next entry to return
-        Node<K,V> current;     // current entry
+    @ReceiverDependentMutable abstract class HashIterator {
+        @Readonly Node<K,V> next;        // next entry to return
+        @Readonly Node<K,V> current;     // current entry
         int expectedModCount;  // for fast-fail
         int index;             // current slot
 
@@ -1624,13 +1628,14 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
 
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public final boolean hasNext() {
+        public final boolean hasNext(@Readonly HashIterator this) {
             return next != null;
         }
 
         @SideEffectsOnly("this")
-        final Node<K,V> nextNode(@NonEmpty HashIterator this) {
-            Node<K,V>[] t;
+        @SuppressWarnings("pico:return.type.incompatible") //pico not expressive enough
+        final @PolyMutable Node<K,V> nextNode(@PolyMutable HashMap<K,V>.@NonEmpty @Mutable HashIterator this) {
+            @PolyMutable Node<K,V>[] t;
             Node<K,V> e = next;
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
@@ -1642,7 +1647,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             return e;
         }
 
-        public final void remove() {
+        public final void remove(@Mutable HashMap<K,V>.@Mutable HashIterator this) {
             Node<K,V> p = current;
             if (p == null)
                 throw new IllegalStateException();
@@ -1654,33 +1659,33 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         }
     }
 
-    final class KeyIterator extends HashIterator
+    @ReceiverDependentMutable final class KeyIterator extends HashIterator
         implements Iterator<K> {
-        public final K next(@NonEmpty KeyIterator this) { return nextNode().key; }
+        public final K next(@NonEmpty @Mutable KeyIterator this) { return nextNode().key; }
     }
 
-    final class ValueIterator extends HashIterator
+    @ReceiverDependentMutable final class ValueIterator extends HashIterator
         implements Iterator<V> {
-        public final V next(@NonEmpty ValueIterator this) { return nextNode().value; }
+        public final V next(@NonEmpty @Mutable ValueIterator this) { return nextNode().value; }
     }
 
-    final class EntryIterator extends HashIterator
+    @ReceiverDependentMutable final class EntryIterator extends HashIterator
         implements Iterator<Map.Entry<K,V>> {
-        public final Map.Entry<K,V> next(@NonEmpty EntryIterator this) { return nextNode(); }
+        public final Map.Entry<K,V> next(@NonEmpty @Mutable EntryIterator this) { return nextNode(); }
     }
 
     /* ------------------------------------------------------------ */
     // spliterators
 
-    static class HashMapSpliterator<K,V> {
-        final HashMap<K,V> map;
-        Node<K,V> current;          // current node
+    static class HashMapSpliterator<K extends @Immutable Object,V> {
+        final @Readonly HashMap<K,V> map;
+        @Readonly Node<K,V> current;          // current node
         int index;                  // current index, modified on advance/split
         int fence;                  // one past last index
         int est;                    // size estimate
         int expectedModCount;       // for comodification checks
 
-        HashMapSpliterator(HashMap<K,V> m, int origin,
+        HashMapSpliterator(@Readonly HashMap<K,V> m, int origin,
                            int fence, int est,
                            int expectedModCount) {
             this.map = m;
@@ -1696,7 +1701,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
                 HashMap<K,V> m = map;
                 est = m.size;
                 expectedModCount = m.modCount;
-                Node<K,V>[] tab = m.table;
+                @Readonly Node<K,V>[] tab = m.table;
                 hi = fence = (tab == null) ? 0 : tab.length;
             }
             return hi;
@@ -1708,10 +1713,10 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         }
     }
 
-    static final class KeySpliterator<K,V>
+    static final class KeySpliterator<K extends @Immutable Object,V>
         extends HashMapSpliterator<K,V>
         implements Spliterator<K> {
-        KeySpliterator(HashMap<K,V> m, int origin, int fence, int est,
+        KeySpliterator(@Readonly HashMap<K,V> m, int origin, int fence, int est,
                        int expectedModCount) {
             super(m, origin, fence, est, expectedModCount);
         }
@@ -1728,7 +1733,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             if (action == null)
                 throw new NullPointerException();
             HashMap<K,V> m = map;
-            Node<K,V>[] tab = m.table;
+            @Readonly Node<K,V>[] tab = m.table;
             if ((hi = fence) < 0) {
                 mc = expectedModCount = m.modCount;
                 hi = fence = (tab == null) ? 0 : tab.length;
@@ -1756,7 +1761,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             int hi;
             if (action == null)
                 throw new NullPointerException();
-            Node<K,V>[] tab = map.table;
+            @Readonly Node<K,V>[] tab = map.table;
             if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
                 while (current != null || index < hi) {
                     if (current == null)
@@ -1780,10 +1785,10 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         }
     }
 
-    static final class ValueSpliterator<K,V>
+    static final class ValueSpliterator<K extends @Immutable Object,V>
         extends HashMapSpliterator<K,V>
         implements Spliterator<V> {
-        ValueSpliterator(HashMap<K,V> m, int origin, int fence, int est,
+        ValueSpliterator(@Readonly HashMap<K,V> m, int origin, int fence, int est,
                          int expectedModCount) {
             super(m, origin, fence, est, expectedModCount);
         }
@@ -1800,7 +1805,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             if (action == null)
                 throw new NullPointerException();
             HashMap<K,V> m = map;
-            Node<K,V>[] tab = m.table;
+            @Readonly Node<K,V>[] tab = m.table;
             if ((hi = fence) < 0) {
                 mc = expectedModCount = m.modCount;
                 hi = fence = (tab == null) ? 0 : tab.length;
@@ -1828,7 +1833,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             int hi;
             if (action == null)
                 throw new NullPointerException();
-            Node<K,V>[] tab = map.table;
+            @Readonly Node<K,V>[] tab = map.table;
             if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
                 while (current != null || index < hi) {
                     if (current == null)
@@ -1851,10 +1856,10 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         }
     }
 
-    static final class EntrySpliterator<K,V>
+    static final class EntrySpliterator<K extends @Immutable Object,V>
         extends HashMapSpliterator<K,V>
         implements Spliterator<Map.Entry<K,V>> {
-        EntrySpliterator(HashMap<K,V> m, int origin, int fence, int est,
+        EntrySpliterator(@Readonly HashMap<K,V> m, int origin, int fence, int est,
                          int expectedModCount) {
             super(m, origin, fence, est, expectedModCount);
         }
@@ -1866,12 +1871,12 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
                                           expectedModCount);
         }
 
-        public void forEachRemaining(Consumer<? super Map.Entry<K,V>> action) {
+        public void forEachRemaining(Consumer<? super Map.@Readonly Entry<K,V>> action) {
             int i, hi, mc;
             if (action == null)
                 throw new NullPointerException();
             HashMap<K,V> m = map;
-            Node<K,V>[] tab = m.table;
+            @Readonly Node<K,V>[] tab = m.table;
             if ((hi = fence) < 0) {
                 mc = expectedModCount = m.modCount;
                 hi = fence = (tab == null) ? 0 : tab.length;
@@ -1895,11 +1900,11 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             }
         }
 
-        public boolean tryAdvance(Consumer<? super Map.Entry<K,V>> action) {
+        public boolean tryAdvance(Consumer<? super Map.@Readonly Entry<K,V>> action) {
             int hi;
             if (action == null)
                 throw new NullPointerException();
-            Node<K,V>[] tab = map.table;
+            @Readonly Node<K,V>[] tab = map.table;
             if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
                 while (current != null || index < hi) {
                     if (current == null)
@@ -1958,7 +1963,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     /**
      * Reset to initial default state.  Called by clone and readObject.
      */
-    void reinitialize() {
+    void reinitialize(@Mutable HashMap<K,V> this) {
         table = null;
         entrySet = null;
         keySet = null;
@@ -1974,7 +1979,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
     void afterNodeRemoval(Node<K,V> p) { }
 
     // Called only from writeObject, to ensure compatible ordering.
-    void internalWriteEntries(java.io.ObjectOutputStream s) throws IOException {
+    void internalWriteEntries(@Mutable HashMap<K,V> this, java.io.ObjectOutputStream s) throws IOException {
         Node<K,V>[] tab;
         if (size > 0 && (tab = table) != null) {
             for (Node<K,V> e : tab) {
@@ -1994,20 +1999,20 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
      * extends Node) so can be used as extension of either regular or
      * linked node.
      */
-    static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
-        TreeNode<K,V> parent;  // red-black tree links
-        TreeNode<K,V> left;
-        TreeNode<K,V> right;
-        TreeNode<K,V> prev;    // needed to unlink next upon deletion
-        boolean red;
-        TreeNode(int hash, K key, V val, Node<K,V> next) {
+    @ReceiverDependentMutable static final class TreeNode<K extends @Immutable Object,V> extends LinkedHashMap.Entry<K,V> {
+        @Assignable TreeNode<K,V> parent;  // red-black tree links
+        @Assignable TreeNode<K,V> left;
+        @Assignable TreeNode<K,V> right;
+        @Assignable TreeNode<K,V> prev;    // needed to unlink next upon deletion
+        @Assignable boolean red;
+        TreeNode(int hash, K key, V val, @ReceiverDependentMutable Node<K,V> next) {
             super(hash, key, val, next);
         }
 
         /**
          * Returns root of tree containing this node.
          */
-        final TreeNode<K,V> root() {
+        final @PolyMutable TreeNode<K,V> root(@PolyMutable TreeNode<K,V> this) {
             for (TreeNode<K,V> r = this, p;;) {
                 if ((p = r.parent) == null)
                     return r;
@@ -2018,7 +2023,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         /**
          * Ensures that the given root is the first node of its bin.
          */
-        static <K,V> void moveRootToFront(Node<K,V>[] tab, TreeNode<K,V> root) {
+        static <K extends @Immutable Object,V> void moveRootToFront(Node<K,V>[] tab, TreeNode<K,V> root) {
             int n;
             if (root != null && tab != null && (n = tab.length) > 0) {
                 int index = (n - 1) & root.hash;
@@ -2045,7 +2050,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
          * The kc argument caches comparableClassFor(key) upon first use
          * comparing keys.
          */
-        final TreeNode<K,V> find(int h, Object k, Class<?> kc) {
+        final @PolyMutable TreeNode<K,V> find(@PolyMutable TreeNode<K,V> this, int h, @Readonly Object k, Class<?> kc) {
             TreeNode<K,V> p = this;
             do {
                 int ph, dir; K pk;
@@ -2075,7 +2080,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         /**
          * Calls find for root node.
          */
-        final TreeNode<K,V> getTreeNode(int h, Object k) {
+        final @PolyMutable TreeNode<K,V> getTreeNode(@PolyMutable TreeNode<K,V> this, int h, @Readonly Object k) {
             return ((parent != null) ? root() : this).find(h, k, null);
         }
 
@@ -2086,7 +2091,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
          * equivalence across rebalancings. Tie-breaking further than
          * necessary simplifies testing a bit.
          */
-        static int tieBreakOrder(Object a, Object b) {
+        static int tieBreakOrder(@Readonly Object a, @Readonly Object b) {
             int d;
             if (a == null || b == null ||
                 (d = a.getClass().getName().
@@ -2099,7 +2104,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         /**
          * Forms tree of the nodes linked from this node.
          */
-        final void treeify(Node<K,V>[] tab) {
+        final void treeify(@Mutable TreeNode<K,V> this, Node<K,V>[] tab) {
             TreeNode<K,V> root = null;
             for (TreeNode<K,V> x = this, next; x != null; x = next) {
                 next = (TreeNode<K,V>)x.next;
@@ -2145,7 +2150,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
          * Returns a list of non-TreeNodes replacing those linked from
          * this node.
          */
-        final Node<K,V> untreeify(HashMap<K,V> map) {
+        final Node<K,V> untreeify(@Mutable TreeNode<K,V> this, HashMap<K,V> map) {
             Node<K,V> hd = null, tl = null;
             for (Node<K,V> q = this; q != null; q = q.next) {
                 Node<K,V> p = map.replacementNode(q, null);
@@ -2161,7 +2166,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         /**
          * Tree version of putVal.
          */
-        final TreeNode<K,V> putTreeVal(HashMap<K,V> map, Node<K,V>[] tab,
+        final TreeNode<K,V> putTreeVal(@Mutable TreeNode<K,V> this, HashMap<K,V> map, Node<K,V>[] tab,
                                        int h, K k, V v) {
             Class<?> kc = null;
             boolean searched = false;
@@ -2217,7 +2222,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
          * the bin is converted back to a plain bin. (The test triggers
          * somewhere between 2 and 6 nodes, depending on tree structure).
          */
-        final void removeTreeNode(HashMap<K,V> map, Node<K,V>[] tab,
+        final void removeTreeNode(@Mutable TreeNode<K,V> this, HashMap<K,V> map, Node<K,V>[] tab,
                                   boolean movable) {
             int n;
             if (tab == null || (n = tab.length) == 0)
@@ -2325,7 +2330,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
          * @param index the index of the table being split
          * @param bit the bit of hash to split on
          */
-        final void split(HashMap<K,V> map, Node<K,V>[] tab, int index, int bit) {
+        final void split(@Mutable TreeNode<K,V> this, HashMap<K,V> map, Node<K,V>[] tab, int index, int bit) {
             TreeNode<K,V> b = this;
             // Relink into lo and hi lists, preserving order
             TreeNode<K,V> loHead = null, loTail = null;
@@ -2375,8 +2380,8 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         /* ------------------------------------------------------------ */
         // Red-black tree methods, all adapted from CLR
 
-        static <K,V> TreeNode<K,V> rotateLeft(TreeNode<K,V> root,
-                                              TreeNode<K,V> p) {
+        static <K extends @Immutable Object,V> TreeNode<K,V> rotateLeft(@Mutable TreeNode<K,V> root,
+                                                                        @Mutable TreeNode<K,V> p) {
             TreeNode<K,V> r, pp, rl;
             if (p != null && (r = p.right) != null) {
                 if ((rl = p.right = r.left) != null)
@@ -2393,8 +2398,8 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             return root;
         }
 
-        static <K,V> TreeNode<K,V> rotateRight(TreeNode<K,V> root,
-                                               TreeNode<K,V> p) {
+        static <K extends @Immutable Object,V> TreeNode<K,V> rotateRight(TreeNode<K,V> root,
+                                                                         TreeNode<K,V> p) {
             TreeNode<K,V> l, pp, lr;
             if (p != null && (l = p.left) != null) {
                 if ((lr = p.left = l.right) != null)
@@ -2411,8 +2416,8 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             return root;
         }
 
-        static <K,V> TreeNode<K,V> balanceInsertion(TreeNode<K,V> root,
-                                                    TreeNode<K,V> x) {
+        static <K extends @Immutable Object,V> TreeNode<K,V> balanceInsertion(TreeNode<K,V> root,
+                                                                              TreeNode<K,V> x) {
             x.red = true;
             for (TreeNode<K,V> xp, xpp, xppl, xppr;;) {
                 if ((xp = x.parent) == null) {
@@ -2466,8 +2471,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
             }
         }
 
-        static <K,V> TreeNode<K,V> balanceDeletion(TreeNode<K,V> root,
-                                                   TreeNode<K,V> x) {
+        static <K extends @Immutable Object,V> TreeNode<K,V> balanceDeletion(TreeNode<K,V> root, TreeNode<K,V> x) {
             for (TreeNode<K,V> xp, xpl, xpr;;) {
                 if (x == null || x == root)
                     return root;
@@ -2561,7 +2565,7 @@ public @ReceiverDependentMutable class HashMap<K,V> extends AbstractMap<K,V>
         /**
          * Recursive invariant check
          */
-        static <K,V> boolean checkInvariants(TreeNode<K,V> t) {
+        static <K extends @Immutable Object,V> boolean checkInvariants(@Readonly TreeNode<K,V> t) {
             TreeNode<K,V> tp = t.parent, tl = t.left, tr = t.right,
                 tb = t.prev, tn = (TreeNode<K,V>)t.next;
             if (tb != null && tb.next != t)

@@ -271,7 +271,7 @@ import java.util.stream.StreamSupport;
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
 @AnnotatedFor({"lock", "nullness", "index"})
-public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
+@ReceiverDependentMutable public interface Collection<E> extends Iterable<E> {
     // Query Operations
 
     /**
@@ -282,7 +282,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @return the number of elements in this collection
      */
     @Pure
-    @NonNegative int size(@GuardSatisfied Collection<E> this);
+    @NonNegative int size(@GuardSatisfied @Readonly Collection<E> this);
 
     /**
      * Returns {@code true} if this collection contains no elements.
@@ -291,7 +291,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    boolean isEmpty(@GuardSatisfied Collection<E> this);
+    boolean isEmpty(@GuardSatisfied @Readonly Collection<E> this);
 
     /**
      * Returns {@code true} if this collection contains the specified element.
@@ -314,7 +314,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
                 "(though I think a nicer specification would be to return false in that case)"})
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean contains(@GuardSatisfied Collection<E> this, @Readonly @GuardSatisfied @UnknownSignedness Object o);
+    boolean contains(@GuardSatisfied @Readonly Collection<E> this, @Readonly @GuardSatisfied @UnknownSignedness Object o);
 
     /**
      * Returns an iterator over the elements in this collection.  There are no
@@ -325,7 +325,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @return an {@code Iterator} over the elements in this collection
      */
     @SideEffectFree
-    @PolyNonEmpty @ReceiverDependentMutable Iterator<E> iterator(@PolyNonEmpty Collection<E> this);
+    @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty @Readonly Collection<E> this);
 
     /**
      * Returns an array containing all of the elements in this collection.
@@ -354,7 +354,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
     "methods, because the most useful type for toArray is not expressible",
     "in the surface syntax that the nullness annotations support."})
     @SideEffectFree
-    @PolyNull @PolySigned @PolyMutable Object @ReceiverDependentMutable [] toArray(@ReceiverDependentMutable Collection<@PolyNull @PolySigned @PolyMutable E> this);
+    @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly Collection<@PolyNull @PolySigned @PolyMutable E> this);
 
     /**
      * Returns an array containing all of the elements in this collection;
@@ -408,7 +408,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @throws NullPointerException if the specified array is null
      */
     @SideEffectFree
-    <T extends @UnknownSignedness @Readonly Object> @Nullable T @ReceiverDependentMutable [] toArray(@ReceiverDependentMutable Collection<E> this, @PolyNull T @Readonly[] a);
+    <T extends @UnknownSignedness @Readonly Object> @Nullable T[] toArray(@Readonly Collection<E> this, @PolyNull T[] a);
 
     /**
      * Returns an array containing all of the elements in this collection,
@@ -445,7 +445,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @throws NullPointerException if the generator function is null
      * @since 11
      */
-    default <T> T @ReceiverDependentMutable [] toArray(@ReceiverDependentMutable Collection<E> this, IntFunction<T[]> generator) {
+    default <T> T[] toArray(@Readonly Collection<E> this, IntFunction<T[]> generator) {
         return toArray(generator.apply(0));
     }
 
@@ -507,7 +507,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @throws UnsupportedOperationException if the {@code remove} operation
      *         is not supported by this collection
      */
-    boolean remove(@Mutable @GuardSatisfied Collection<E> this, @UnknownSignedness Object o);
+    boolean remove(@Mutable @GuardSatisfied Collection<E> this, @UnknownSignedness @Readonly Object o);
 
 
     // Bulk Operations
@@ -531,7 +531,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @see    #contains(Object)
      */
     @Pure
-    boolean containsAll(@GuardSatisfied Collection<E> this, @GuardSatisfied @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c);
+    boolean containsAll(@GuardSatisfied @Readonly Collection<E> this, @GuardSatisfied @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c);
 
     /**
      * Adds all of the elements in the specified collection to this collection
@@ -689,7 +689,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @see List#equals(Object)
      */
     @Pure
-    boolean equals(@GuardSatisfied Collection<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o);
+    boolean equals(@GuardSatisfied @Readonly Collection<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o);
 
     /**
      * Returns the hash code value for this collection.  While the
@@ -707,7 +707,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @see Object#equals(Object)
      */
     @Pure
-    int hashCode(@GuardSatisfied Collection<E> this);
+    int hashCode(@GuardSatisfied @Readonly Collection<E> this);
 
     /**
      * Creates a {@link Spliterator} over the elements in this collection.
@@ -761,7 +761,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      */
     @SideEffectFree
     @Override
-    default Spliterator<E> spliterator() {
+    default Spliterator<E> spliterator(@Readonly Collection<E> this) {
         return Spliterators.spliterator(this, 0);
     }
 
@@ -780,7 +780,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * @return a sequential {@code Stream} over the elements in this collection
      * @since 1.8
      */
-    default @PolyNonEmpty Stream<E> stream(@PolyNonEmpty Collection<E> this) {
+    default @PolyNonEmpty Stream<E> stream(@PolyNonEmpty @Readonly Collection<E> this) {
         return StreamSupport.stream(spliterator(), false);
     }
 
@@ -801,7 +801,7 @@ public @ReceiverDependentMutable interface Collection<E> extends Iterable<E> {
      * collection
      * @since 1.8
      */
-    default Stream<E> parallelStream(@ReceiverDependentMutable Collection<E> this) {
+    default Stream<E> parallelStream(@Readonly Collection<E> this) {
         return StreamSupport.stream(spliterator(), true);
     }
 }

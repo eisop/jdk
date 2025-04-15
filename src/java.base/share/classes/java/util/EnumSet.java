@@ -82,7 +82,7 @@ import jdk.internal.access.SharedSecrets;
  * @see EnumMap
  */
 @AnnotatedFor({"index", "initialization", "nullness"})
-public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
+@Mutable public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     implements Cloneable, java.io.Serializable
 {
     // declare EnumSet.class serialization compatibility with JDK 8
@@ -99,7 +99,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      */
     final transient Enum<?>[] universe;
 
-    EnumSet(Class<E>elementType, Enum<?>[] universe) {
+    EnumSet(Class<E>elementType, Enum<?> @Mutable [] universe) {
         this.elementType = elementType;
         this.universe    = universe;
     }
@@ -113,15 +113,15 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      * @return An empty enum set of the specified type.
      * @throws NullPointerException if {@code elementType} is null
      */
-    public static <E extends Enum<E>> EnumSet<E> noneOf(Class<E> elementType) {
-        Enum<?>[] universe = getUniverse(elementType);
+    public static <E extends Enum<E>> @Mutable EnumSet<E> noneOf(Class<E> elementType) {
+        Enum<?> @Mutable [] universe = getUniverse(elementType);
         if (universe == null)
             throw new ClassCastException(elementType + " not an enum");
 
         if (universe.length <= 64)
-            return new RegularEnumSet<>(elementType, universe);
+            return new @Mutable RegularEnumSet<>(elementType, universe);
         else
-            return new JumboEnumSet<>(elementType, universe);
+            return new @Mutable JumboEnumSet<>(elementType, universe);
     }
 
     /**
@@ -134,7 +134,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      * @return An enum set containing all the elements in the specified type.
      * @throws NullPointerException if {@code elementType} is null
      */
-    public static <E extends Enum<E>> EnumSet<E> allOf(Class<E> elementType) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> allOf(Class<E> elementType) {
         EnumSet<E> result = noneOf(elementType);
         result.addAll();
         return result;
@@ -173,7 +173,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      *     {@code EnumSet} instance and contains no elements
      * @throws NullPointerException if {@code c} is null
      */
-    public static <E extends Enum<E>> EnumSet<E> copyOf(Collection<E> c) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> copyOf(Collection<E> c) {
         if (c instanceof EnumSet) {
             return ((EnumSet<E>)c).clone();
         } else {
@@ -198,7 +198,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      * @return The complement of the specified set in this set
      * @throws NullPointerException if {@code s} is null
      */
-    public static <E extends Enum<E>> EnumSet<E> complementOf(EnumSet<E> s) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> complementOf(EnumSet<E> s) {
         EnumSet<E> result = copyOf(s);
         result.complement();
         return result;
@@ -363,7 +363,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      * @return an enum set initially containing all of the elements in the
      *         range defined by the two specified endpoints
      */
-    public static <E extends Enum<E>> EnumSet<E> range(E from, E to) {
+    public static <E extends Enum<E>> @Mutable EnumSet<E> range(E from, E to) {
         if (from.compareTo(to) > 0)
             throw new IllegalArgumentException(from + " > " + to);
         EnumSet<E> result = noneOf(from.getDeclaringClass());
@@ -375,7 +375,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      * Adds the specified range to this enum set, which is empty prior
      * to the call.
      */
-    abstract void addRange(E from, E to);
+    abstract void addRange(@Mutable EnumSet<E> this, E from, E to);
 
     /**
      * Returns a copy of this set.
@@ -399,6 +399,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
     /**
      * Throws an exception if e is not of the correct type for this enum set.
      */
+    @SuppressWarnings("pico:type.invalid.annotations.on.use") // Aosen: This is a bug in validator
     final void typeCheck(E e) {
         Class<?> eClass = e.getClass();
         if (eClass != elementType && eClass.getSuperclass() != elementType)
@@ -409,7 +410,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
      * Returns all of the values comprising E.
      * The result is uncloned, cached, and shared by all callers.
      */
-    private static <E extends Enum<E>> E[] getUniverse(Class<E> elementType) {
+    private static <E extends Enum<E>> E @Mutable [] getUniverse(Class<E> elementType) {
         return SharedSecrets.getJavaLangAccess()
                                         .getEnumConstantsShared(elementType);
     }
@@ -457,7 +458,7 @@ public @ReceiverDependentMutable abstract class EnumSet<E extends Enum<E>> exten
          */
         @SuppressWarnings("unchecked")
         @java.io.Serial
-        private Object readResolve() {
+        private @Mutable Object readResolve() {
             // instead of cast to E, we should perhaps use elementType.cast()
             // to avoid injection of forged stream, but it will slow the
             // implementation

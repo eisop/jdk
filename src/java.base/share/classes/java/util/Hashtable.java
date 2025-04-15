@@ -36,8 +36,10 @@ import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Assignable;
 import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
@@ -156,14 +158,14 @@ import jdk.internal.access.SharedSecrets;
  */
 @CFComment({"lock: This collection can only contain nonnull values"})
 @AnnotatedFor({"lock", "nullness", "index"})
-public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull Object>
+@ReceiverDependentMutable  public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull Object>
     extends Dictionary<K,V>
     implements Map<K,V>, Cloneable, java.io.Serializable {
 
     /**
      * The hash table data.
      */
-    private transient Entry<?,?>[] table;
+    private transient @ReceiverDependentMutable Entry<?,?>[] table;
 
     /**
      * The total number of entries in the hash table.
@@ -176,14 +178,14 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      *
      * @serial
      */
-    private int threshold;
+    private @Assignable int threshold;
 
     /**
      * The load factor for the hashtable.
      *
      * @serial
      */
-    private float loadFactor;
+    private @Assignable float loadFactor;
 
     /**
      * The number of times this Hashtable has been structurally modified
@@ -207,6 +209,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @throws     IllegalArgumentException  if the initial capacity is less
      *             than zero, or if the load factor is nonpositive.
      */
+    @SuppressWarnings("pico") // There is a crash...
     public Hashtable(@NonNegative int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal Capacity: "+
@@ -217,7 +220,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         if (initialCapacity==0)
             initialCapacity = 1;
         this.loadFactor = loadFactor;
-        table = new Entry<?,?>[initialCapacity];
+        table = new Entry<?,?> @ReceiverDependentMutable [initialCapacity];
         threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
     }
 
@@ -250,6 +253,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @throws NullPointerException if the specified map is null.
      * @since   1.2
      */
+    @SuppressWarnings("pico") // PICO constructor fix
     public Hashtable(Map<? extends K, ? extends V> t) {
         this(Math.max(2*t.size(), 11), 0.75f);
         putAll(t);
@@ -269,7 +273,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @return  the number of keys in this hashtable.
      */
     @Pure
-    public synchronized @NonNegative int size(@GuardSatisfied Hashtable<K, V> this) {
+    public synchronized @NonNegative int size(@GuardSatisfied @Readonly Hashtable<K, V> this) {
         return count;
     }
 
@@ -281,7 +285,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public synchronized boolean isEmpty(@GuardSatisfied Hashtable<K, V> this) {
+    public synchronized boolean isEmpty(@GuardSatisfied @Readonly Hashtable<K, V> this) {
         return count == 0;
     }
 
@@ -335,14 +339,14 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public synchronized boolean contains(@Readonly  @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
+    public synchronized boolean contains(@Readonly @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object value) {
         if (value == null) {
             throw new NullPointerException();
         }
 
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         for (int i = tab.length ; i-- > 0 ;) {
-            for (Entry<?,?> e = tab[i] ; e != null ; e = e.next) {
+            for (@Readonly Entry<?,?> e = tab[i] ; e != null ; e = e.next) {
                 if (e.value.equals(value)) {
                     return true;
                 }
@@ -364,7 +368,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @since 1.2
      */
     @Pure
-    public boolean containsValue(@Readonly @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object value) {
+    public boolean containsValue(@Readonly @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object value) {
         return contains(value);
     }
 
@@ -380,11 +384,11 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      */
     @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
     @Pure
-    public synchronized boolean containsKey(@Readonly @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
-        Entry<?,?> tab[] = table;
+    public synchronized boolean containsKey(@Readonly @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key) {
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry<?,?> e = tab[index] ; e != null ; e = e.next) {
+        for (@Readonly Entry<?,?> e = tab[index] ; e != null ; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 return true;
             }
@@ -409,11 +413,11 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      */
     @Pure
     @SuppressWarnings("unchecked")
-    public synchronized @Nullable V get(@Readonly @GuardSatisfied Hashtable<K, V> this, @UnknownSignedness @GuardSatisfied Object key) {
-        Entry<?,?> tab[] = table;
+    public synchronized @Nullable V get(@Readonly @GuardSatisfied Hashtable<K, V> this, @UnknownSignedness @GuardSatisfied @Readonly Object key) {
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
-        for (Entry<?,?> e = tab[index] ; e != null ; e = e.next) {
+        for (@Readonly Entry<?,?> e = tab[index] ; e != null ; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 return (V)e.value;
             }
@@ -437,7 +441,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * and load factor.
      */
     @SuppressWarnings("unchecked")
-    protected void rehash() {
+    protected void rehash(@Mutable Hashtable<K, V> this) {
         int oldCapacity = table.length;
         Entry<?,?>[] oldMap = table;
 
@@ -467,8 +471,8 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         }
     }
 
-    private void addEntry(int hash, K key, V value, int index) {
-        Entry<?,?> tab[] = table;
+    private void addEntry(@Mutable Hashtable<K, V> this, int hash, K key, V value, int index) {
+        @Readonly Entry<?,?> tab[] = table;
         if (count >= threshold) {
             // Rehash the table if the threshold is exceeded
             rehash();
@@ -481,7 +485,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         // Creates the new entry.
         @SuppressWarnings("unchecked")
         Entry<K,V> e = (Entry<K,V>) tab[index];
-        tab[index] = new Entry<>(hash, key, value, e);
+        tab[index] = new Entry<K,V>(hash, key, value, e);
         count++;
         modCount++;
     }
@@ -511,7 +515,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         }
 
         // Makes sure the key is not already in the hashtable.
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -537,8 +541,8 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      *          or {@code null} if the key did not have a mapping
      * @throws  NullPointerException  if the key is {@code null}
      */
-    public synchronized @Nullable V remove(@Mutable @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness Object key) {
-        Entry<?,?> tab[] = table;
+    public synchronized @Nullable V remove(@Mutable @GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key) {
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -569,7 +573,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @throws NullPointerException if the specified map is null
      * @since 1.2
      */
-    public synchronized void putAll(@Mutable @GuardSatisfied Hashtable<K, V> this, Map<? extends K, ? extends V> t) {
+    public synchronized void putAll(@Mutable @GuardSatisfied Hashtable<K, V> this, @Readonly Map<? extends K, ? extends V> t) {
         for (Map.Entry<? extends K, ? extends V> e : t.entrySet())
             put(e.getKey(), e.getValue());
     }
@@ -578,7 +582,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * Clears this hashtable so that it contains no keys.
      */
     public synchronized void clear(@Mutable @GuardSatisfied Hashtable<K, V> this) {
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         for (int index = tab.length; --index >= 0; )
             tab[index] = null;
         modCount++;
@@ -593,7 +597,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @return  a clone of the hashtable
      */
     @SideEffectFree
-    public synchronized Object clone(@GuardSatisfied Hashtable<K, V> this) {
+    public synchronized Object clone(@GuardSatisfied @Mutable Hashtable<K, V> this) {
         Hashtable<?,?> t = cloneHashtable();
         t.table = new Entry<?,?>[table.length];
         for (int i = table.length ; i-- > 0 ; ) {
@@ -608,7 +612,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
     }
 
     /** Calls super.clone() */
-    final Hashtable<?,?> cloneHashtable() {
+    final Hashtable<?,?> cloneHashtable(@Mutable Hashtable<K, V> this) {
         try {
             return (Hashtable<?,?>)super.clone();
         } catch (CloneNotSupportedException e) {
@@ -627,13 +631,13 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      *
      * @return  a string representation of this hashtable
      */
-    public synchronized String toString(@GuardSatisfied Hashtable<K, V> this) {
+    public synchronized String toString(@GuardSatisfied @Readonly Hashtable<K, V> this) {
         int max = size() - 1;
         if (max == -1)
             return "{}";
 
         StringBuilder sb = new StringBuilder();
-        Iterator<Map.Entry<K,V>> it = entrySet().iterator();
+        Iterator<Map.@Readonly Entry<K,V>> it = entrySet().iterator();
 
         sb.append('{');
         for (int i = 0; ; i++) {
@@ -651,7 +655,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
     }
 
 
-    private <T> Enumeration<T> getEnumeration(int type) {
+    private <T> Enumeration<T> getEnumeration(@Readonly Hashtable<K, V> this, int type) {
         if (count == 0) {
             return Collections.emptyEnumeration();
         } else {
@@ -659,7 +663,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         }
     }
 
-    private <T> Iterator<T> getIterator(int type) {
+    private <T> Iterator<T> getIterator(@Readonly Hashtable<K, V> this, int type) {
         if (count == 0) {
             return Collections.emptyIterator();
         } else {
@@ -674,9 +678,9 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * appropriate view the first time this view is requested.  The views are
      * stateless, so there's no reason to create more than one of each.
      */
-    private transient volatile Set<K> keySet;
-    private transient volatile Set<Map.Entry<K,V>> entrySet;
-    private transient volatile Collection<V> values;
+    private transient volatile @Assignable Set<K> keySet;
+    private transient volatile @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
+    private transient volatile @Assignable Collection<V> values;
 
     /**
      * Returns a {@link Set} view of the keys contained in this map.
@@ -694,30 +698,30 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @since 1.2
      */
     @SideEffectFree
-    public Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied Hashtable<K, V> this) {
+    public @PolyMutable Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @PolyMutable Hashtable<K, V> this) {
         if (keySet == null)
-            keySet = Collections.synchronizedSet(new KeySet(), this);
+            keySet = Collections.synchronizedSet(new @PolyMutable KeySet(), this);
         return keySet;
     }
 
-    private class KeySet extends AbstractSet<K> {
+    @ReceiverDependentMutable private class KeySet extends AbstractSet<K> {
         @SideEffectFree
-        public Iterator<K> iterator() {
+        public Iterator<K> iterator(@Readonly KeySet this) {
             return getIterator(KEYS);
         }
         @Pure
-        public @NonNegative int size() {
+        public @NonNegative int size(@Readonly KeySet this) {
             return count;
         }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean contains(@UnknownSignedness Object o) {
+        public boolean contains(@Readonly KeySet this, @UnknownSignedness @Readonly Object o) {
             return containsKey(o);
         }
-        public boolean remove(@UnknownSignedness Object o) {
+        public boolean remove(@Mutable Hashtable<K,V>.@Mutable KeySet this, @UnknownSignedness @Readonly Object o) {
             return Hashtable.this.remove(o) != null;
         }
-        public void clear() {
+        public void clear(@Mutable Hashtable<K,V>.@Mutable KeySet this) {
             Hashtable.this.clear();
         }
     }
@@ -739,44 +743,45 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @since 1.2
      */
     @SideEffectFree
-    public Set<Map.Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied Hashtable<K, V> this) {
+    @SuppressWarnings("pico") // Aosen: how to fix this
+    public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable Hashtable<K, V> this) {
         if (entrySet==null)
-            entrySet = Collections.synchronizedSet(new EntrySet(), this);
+            entrySet = Collections.synchronizedSet(new @PolyMutable EntrySet(), this);
         return entrySet;
     }
 
-    private class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
-        public Iterator<Map.Entry<K,V>> iterator() {
+        public Iterator<Map.@Readonly Entry<K,V>> iterator(@Readonly EntrySet this) {
             return getIterator(ENTRIES);
         }
 
         @EnsuresNonEmpty("this")
-        public boolean add(Map.Entry<K,V> o) {
+        public boolean add(@Mutable EntrySet this, Map.@Readonly Entry<K,V> o) {
             return super.add(o);
         }
 
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean contains(@UnknownSignedness Object o) {
-            if (!(o instanceof Map.Entry<?, ?> entry))
+        public boolean contains(@Readonly EntrySet this, @UnknownSignedness @Readonly Object o) {
+            if (!(o instanceof Map.@Readonly Entry<?, ?> entry))
                 return false;
             Object key = entry.getKey();
-            Entry<?,?>[] tab = table;
+            @Readonly Entry<?,?>[] tab = table;
             int hash = key.hashCode();
             int index = (hash & 0x7FFFFFFF) % tab.length;
 
-            for (Entry<?,?> e = tab[index]; e != null; e = e.next)
+            for (@Readonly Entry<?,?> e = tab[index]; e != null; e = e.next)
                 if (e.hash==hash && e.equals(entry))
                     return true;
             return false;
         }
 
-        public boolean remove(@UnknownSignedness Object o) {
-            if (!(o instanceof Map.Entry<?, ?> entry))
+        public boolean remove(@Mutable EntrySet this, @UnknownSignedness @Readonly Object o) {
+            if (!(o instanceof Map. @Readonly Entry<?, ?> entry))
                 return false;
             Object key = entry.getKey();
-            Entry<?,?>[] tab = table;
+            @Readonly Entry<?,?>[] tab = table;
             int hash = key.hashCode();
             int index = (hash & 0x7FFFFFFF) % tab.length;
 
@@ -799,11 +804,11 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         }
 
         @Pure
-        public @NonNegative int size() {
+        public @NonNegative int size(@Readonly EntrySet this) {
             return count;
         }
 
-        public void clear() {
+        public void clear(@Mutable EntrySet this) {
             Hashtable.this.clear();
         }
     }
@@ -824,28 +829,28 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @since 1.2
      */
     @SideEffectFree
-    public Collection<V> values(@GuardSatisfied Hashtable<K, V> this) {
+    public @PolyMutable Collection<V> values(@GuardSatisfied @PolyMutable Hashtable<K, V> this) {
         if (values==null)
-            values = Collections.synchronizedCollection(new ValueCollection(),
+            values = Collections.synchronizedCollection(new @PolyMutable ValueCollection(),
                                                         this);
         return values;
     }
 
-    private class ValueCollection extends AbstractCollection<V> {
+    @ReceiverDependentMutable private class ValueCollection extends AbstractCollection<V> {
         @SideEffectFree
-        public Iterator<V> iterator() {
+        public Iterator<V> iterator(@Readonly ValueCollection this) {
             return getIterator(VALUES);
         }
         @Pure
-        public @NonNegative int size() {
+        public @NonNegative int size(@Readonly ValueCollection this) {
             return count;
         }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean contains(@UnknownSignedness Object o) {
+        public boolean contains(@Readonly ValueCollection this, @UnknownSignedness @Readonly Object o) {
             return containsValue(o);
         }
-        public void clear() {
+        public void clear(@Mutable Hashtable<K,V>.@Mutable ValueCollection this) {
             Hashtable.this.clear();
         }
     }
@@ -862,11 +867,11 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @since 1.2
      */
     @Pure
-    public synchronized boolean equals(@GuardSatisfied Hashtable<K, V> this, @GuardSatisfied @Nullable Object o) {
+    public synchronized boolean equals(@GuardSatisfied @Readonly Hashtable<K, V> this, @GuardSatisfied @Nullable @Readonly Object o) {
         if (o == this)
             return true;
 
-        if (!(o instanceof Map<?, ?> t))
+        if (!(o instanceof @Readonly Map<?, ?> t))
             return false;
         if (t.size() != size())
             return false;
@@ -900,7 +905,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * @since 1.2
      */
     @Pure
-    public synchronized int hashCode(@GuardSatisfied Hashtable<K, V> this) {
+    public synchronized int hashCode(@GuardSatisfied @Readonly Hashtable<K, V> this) {
         /*
          * This code detects the recursion caused by computing the hash code
          * of a self-referential hash table and prevents the stack overflow
@@ -916,7 +921,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
             return h;  // Returns zero
 
         loadFactor = -loadFactor;  // Mark hashCode computation in progress
-        Entry<?,?>[] tab = table;
+        @Readonly Entry<?,?>[] tab = table;
         for (Entry<?,?> entry : tab) {
             while (entry != null) {
                 h += entry.hashCode();
@@ -931,19 +936,19 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
 
     @Override
     @Pure
-    public synchronized @PolyNull V getOrDefault(@GuardSatisfied @UnknownSignedness Object key, @PolyNull V defaultValue) {
+    public synchronized @PolyNull V getOrDefault(@Readonly Hashtable<K,V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key, @PolyNull V defaultValue) {
         V result = get(key);
         return (null == result) ? defaultValue : result;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized void forEach(BiConsumer<? super K, ? super V> action) {
+    public synchronized void forEach(@Mutable Hashtable<K,V> this, BiConsumer<? super K, ? super V> action) {
         Objects.requireNonNull(action);     // explicit check required in case
                                             // table is empty.
         final int expectedModCount = modCount;
 
-        Entry<?, ?>[] tab = table;
+        @Readonly Entry<?, ?>[] tab = table;
         for (Entry<?, ?> entry : tab) {
             while (entry != null) {
                 action.accept((K)entry.key, (V)entry.value);
@@ -958,7 +963,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
 
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    public synchronized void replaceAll(@Mutable Hashtable<K,V> this, BiFunction<? super K, ? super V, ? extends V> function) {
         Objects.requireNonNull(function);     // explicit check required in case
                                               // table is empty.
         final int expectedModCount = modCount;
@@ -979,11 +984,11 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
 
     @EnsuresKeyFor(value={"#1"}, map={"this"})
     @Override
-    public synchronized @Nullable V putIfAbsent(K key, V value) {
+    public synchronized @Nullable V putIfAbsent(@Mutable Hashtable<K,V> this, K key, V value) {
         Objects.requireNonNull(value);
 
         // Makes sure the key is not already in the hashtable.
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -1003,10 +1008,10 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
     }
 
     @Override
-    public synchronized boolean remove(@GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
+    public synchronized boolean remove(@Mutable Hashtable<K,V> this, @GuardSatisfied @UnknownSignedness @Readonly Object key, @GuardSatisfied @UnknownSignedness @Readonly Object value) {
         Objects.requireNonNull(value);
 
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -1028,14 +1033,14 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
     }
 
     @Override
-    public synchronized boolean replace(K key, V oldValue, V newValue) {
+    public synchronized boolean replace(@Mutable Hashtable<K,V> this, K key, V oldValue, V newValue) {
         Objects.requireNonNull(oldValue);
         Objects.requireNonNull(newValue);
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
-        Entry<K,V> e = (Entry<K,V>)tab[index];
+        Entry<K,V> e = (@Mutable Entry<K,V>)tab[index];
         for (; e != null; e = e.next) {
             if ((e.hash == hash) && e.key.equals(key)) {
                 if (e.value.equals(oldValue)) {
@@ -1050,9 +1055,9 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
     }
 
     @Override
-    public synchronized @Nullable V replace(K key, V value) {
+    public synchronized @Nullable V replace(@Mutable Hashtable<K,V> this, K key, V value) {
         Objects.requireNonNull(value);
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -1078,10 +1083,10 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * mapping function modified this map
      */
     @Override
-    public synchronized @PolyNull V computeIfAbsent(K key, Function<? super K, ? extends @PolyNull V> mappingFunction) {
+    public synchronized @PolyNull V computeIfAbsent(@Mutable Hashtable<K,V> this, K key, Function<? super K, ? extends @PolyNull V> mappingFunction) {
         Objects.requireNonNull(mappingFunction);
 
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -1114,10 +1119,10 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * remapping function modified this map
      */
     @Override
-    public synchronized @PolyNull V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+    public synchronized @PolyNull V computeIfPresent(@Mutable Hashtable<K,V> this, K key, BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
 
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -1156,10 +1161,10 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * remapping function modified this map
      */
     @Override
-    public synchronized @PolyNull V compute(K key, BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+    public synchronized @PolyNull V compute(@Mutable Hashtable<K,V> this, K key, BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
 
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -1207,10 +1212,10 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * remapping function modified this map
      */
     @Override
-    public synchronized @PolyNull V merge(K key, V value, BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
+    public synchronized @PolyNull V merge(@Mutable Hashtable<K,V> this, K key, V value, BiFunction<? super V, ? super V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
 
-        Entry<?,?> tab[] = table;
+        @Readonly Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
         @SuppressWarnings("unchecked")
@@ -1255,7 +1260,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      *             The key-value mappings are emitted in no particular order.
      */
     @java.io.Serial
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject(@Mutable Hashtable<K,V> this, java.io.ObjectOutputStream s)
             throws IOException {
         writeHashtable(s);
     }
@@ -1264,9 +1269,9 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * Perform serialization of the Hashtable to an ObjectOutputStream.
      * The Properties class overrides this method.
      */
-    void writeHashtable(java.io.ObjectOutputStream s)
+    void writeHashtable(@Mutable Hashtable<K,V> this, java.io.ObjectOutputStream s)
             throws IOException {
-        Entry<Object, Object> entryStack = null;
+        Entry<@Immutable Object, @Readonly Object> entryStack = null;
 
         synchronized (this) {
             // Write out the threshold and loadFactor
@@ -1281,7 +1286,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
 
                 while (entry != null) {
                     entryStack =
-                        new Entry<>(0, entry.key, entry.value, entryStack);
+                        new Entry<@Immutable Object, @Readonly Object>(0, entry.key, entry.value, entryStack);
                     entry = entry.next;
                 }
             }
@@ -1298,7 +1303,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
     /**
      * Called by Properties to write out a simulated threshold and loadfactor.
      */
-    final void defaultWriteHashtable(java.io.ObjectOutputStream s, int length,
+    final void defaultWriteHashtable(@Mutable Hashtable<K,V> this, java.io.ObjectOutputStream s, int length,
             float loadFactor) throws IOException {
         this.threshold = (int)Math.min(length * loadFactor, MAX_ARRAY_SIZE + 1);
         this.loadFactor = loadFactor;
@@ -1309,7 +1314,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * Reconstitute the Hashtable from a stream (i.e., deserialize it).
      */
     @java.io.Serial
-    private void readObject(java.io.ObjectInputStream s)
+    private void readObject(@Mutable Hashtable<K,V> this, java.io.ObjectInputStream s)
             throws IOException, ClassNotFoundException {
         readHashtable(s);
     }
@@ -1318,7 +1323,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * Perform deserialization of the Hashtable from an ObjectInputStream.
      * The Properties class overrides this method.
      */
-    void readHashtable(java.io.ObjectInputStream s)
+    void readHashtable(@Mutable Hashtable<K,V> this, java.io.ObjectInputStream s)
             throws IOException, ClassNotFoundException {
         // Read in the threshold and loadFactor
         s.defaultReadObject();
@@ -1381,7 +1386,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * there's no synchronization because we are creating a new instance.
      * Also, no return value is needed.
      */
-    private void reconstitutionPut(Entry<?,?>[] tab, K key, V value)
+    private void reconstitutionPut(@Mutable Hashtable<K,V> this, @Readonly Entry<?,?>[] tab, K key, V value)
         throws StreamCorruptedException
     {
         if (value == null) {
@@ -1399,20 +1404,20 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         // Creates the new entry.
         @SuppressWarnings("unchecked")
             Entry<K,V> e = (Entry<K,V>)tab[index];
-        tab[index] = new Entry<>(hash, key, value, e);
+        tab[index] = new Entry<K,V>(hash, key, value, e);
         count++;
     }
 
     /**
      * Hashtable bucket collision list entry
      */
-    private static class Entry<K,V> implements Map.Entry<K,V> {
+    @ReceiverDependentMutable private static class Entry<K extends @Immutable Object,V> implements Map.Entry<K,V> {
         final int hash;
         final K key;
         V value;
-        Entry<K,V> next;
+        @Assignable Entry<K,V> next;
 
-        protected Entry(int hash, K key, V value, Entry<K,V> next) {
+        protected Entry(int hash, K key, V value, @ReceiverDependentMutable Entry<K,V> next) {
             this.hash = hash;
             this.key =  key;
             this.value = value;
@@ -1421,22 +1426,22 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
 
         @SideEffectFree
         @SuppressWarnings("unchecked")
-        protected Object clone() {
-            return new Entry<>(hash, key, value,
+        protected Object clone(@Mutable Entry<K,V> this) {
+            return new Entry<K,V>(hash, key, value,
                                   (next==null ? null : (Entry<K,V>) next.clone()));
         }
 
         // Map.Entry Ops
 
-        public K getKey() {
+        public K getKey(@Readonly Entry<K,V> this) {
             return key;
         }
 
-        public V getValue() {
+        public V getValue(@Readonly Entry<K,V> this) {
             return value;
         }
 
-        public V setValue(V value) {
+        public V setValue(@Mutable Entry<K,V> this, V value) {
             if (value == null)
                 throw new NullPointerException();
 
@@ -1445,19 +1450,19 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
             return oldValue;
         }
 
-        public boolean equals(Object o) {
-            if (!(o instanceof Map.Entry<?, ?> e))
+        public boolean equals(@Readonly Entry<K,V> this, @Readonly Object o) {
+            if (!(o instanceof Map. @Readonly Entry<?, ?> e))
                 return false;
 
             return (key==null ? e.getKey()==null : key.equals(e.getKey())) &&
                (value==null ? e.getValue()==null : value.equals(e.getValue()));
         }
 
-        public int hashCode() {
+        public int hashCode(@Readonly Entry<K,V> this) {
             return hash ^ Objects.hashCode(value);
         }
 
-        public String toString() {
+        public String toString(@Readonly Entry<K,V> this) {
             return key.toString()+"="+value.toString();
         }
     }
@@ -1474,11 +1479,12 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
      * to avoid unintentionally increasing the capabilities granted a user
      * by passing an Enumeration.
      */
-    private class Enumerator<T> implements Enumeration<T>, Iterator<T> {
-        final Entry<?,?>[] table = Hashtable.this.table;
-        int index = table.length;
-        Entry<?,?> entry;
-        Entry<?,?> lastReturned;
+    @ReceiverDependentMutable private class Enumerator<T> implements Enumeration<T>, Iterator<T> {
+        @SuppressWarnings("pico:assignment.type.incompatible") // PICO field use
+        final @Readonly Entry<?,?>[] table = Hashtable.this.table;
+        @Assignable int index = table.length;
+        @Assignable @Readonly Entry<?,?> entry;
+        @Assignable @Readonly Entry<?,?> lastReturned;
         final int type;
 
         /**
@@ -1500,10 +1506,10 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         }
 
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean hasMoreElements() {
+        public boolean hasMoreElements(@Readonly Enumerator<T> this) {
             Entry<?,?> e = entry;
             int i = index;
-            Entry<?,?>[] t = table;
+            @Readonly Entry<?,?>[] t = table;
             /* Use locals for faster loop iteration */
             while (e == null && i > 0) {
                 e = t[--i];
@@ -1514,10 +1520,10 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         }
 
         @SuppressWarnings("unchecked")
-        public T nextElement(@NonEmpty Enumerator<T> this) {
+        public T nextElement(@NonEmpty @Mutable Enumerator<T> this) {
             Entry<?,?> et = entry;
             int i = index;
-            Entry<?,?>[] t = table;
+            @Readonly Entry<?,?>[] t = table;
             /* Use locals for faster loop iteration */
             while (et == null && i > 0) {
                 et = t[--i];
@@ -1535,18 +1541,18 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
         // Iterator methods
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean hasNext() {
+        public boolean hasNext(@Readonly Enumerator<T> this) {
             return hasMoreElements();
         }
 
         @SideEffectsOnly("this")
-        public T next(@NonEmpty Enumerator<T> this) {
+        public T next(@NonEmpty @Mutable Enumerator<T> this) {
             if (Hashtable.this.modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             return nextElement();
         }
 
-        public void remove() {
+        public void remove(@Mutable Hashtable<K,V>.@Mutable Enumerator<T> this) {
             if (!iterator)
                 throw new UnsupportedOperationException();
             if (lastReturned == null)
@@ -1555,7 +1561,7 @@ public @ReceiverDependentMutable class Hashtable<K extends @NonNull @Immutable O
                 throw new ConcurrentModificationException();
 
             synchronized(Hashtable.this) {
-                Entry<?,?>[] tab = Hashtable.this.table;
+                @Readonly Entry<?,?>[] tab = Hashtable.this.table;
                 int index = (lastReturned.hash & 0x7FFFFFFF) % tab.length;
 
                 @SuppressWarnings("unchecked")

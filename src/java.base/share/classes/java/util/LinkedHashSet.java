@@ -25,6 +25,7 @@
 
 package java.util;
 
+import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
@@ -121,7 +122,7 @@ import org.checkerframework.framework.qual.CFComment;
 
 @CFComment({"lock/nullness: This class permits null elements"})
 @AnnotatedFor({"lock", "nullness"})
-@ReceiverDependentMutable public class LinkedHashSet<E>
+@ReceiverDependentMutable public class LinkedHashSet<E extends @Immutable Object>
     extends HashSet<E>
     implements Set<E>, Cloneable, java.io.Serializable {
 
@@ -171,6 +172,7 @@ import org.checkerframework.framework.qual.CFComment;
      *           this set
      * @throws NullPointerException if the specified collection is null
      */
+    @SuppressWarnings("pico") // PICO constructor fix
     public LinkedHashSet(Collection<? extends E> c) {
         super(Math.max(2*c.size(), 11), .75f, true);
         addAll(c);

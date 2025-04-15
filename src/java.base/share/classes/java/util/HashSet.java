@@ -33,7 +33,9 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
@@ -41,6 +43,7 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.CFComment;
 import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.io.InvalidObjectException;
@@ -106,15 +109,15 @@ import jdk.internal.access.SharedSecrets;
  */
 
  @AnnotatedFor({"index", "initialization", "lock", "nullness"})
- @DefaultQualifierForUse(Readonly.class)
-public @ReceiverDependentMutable class HashSet<E>
+// @SuppressWarnings("pico:assignment.type.incompatible") // Revisit this, looks like CF bug
+ @ReceiverDependentMutable public class HashSet<E extends @Immutable Object>
     extends AbstractSet<E>
     implements Set<E>, Cloneable, java.io.Serializable
 {
     @java.io.Serial
     static final long serialVersionUID = -5024744406713321676L;
 
-    private transient HashMap<E,Object> map;
+    private transient HashMap<E, @Readonly Object> map;
 
     // Dummy value to associate with an Object in the backing Map
     private static final Object PRESENT = new Object();
@@ -123,8 +126,8 @@ public @ReceiverDependentMutable class HashSet<E>
      * Constructs a new, empty set; the backing {@code HashMap} instance has
      * default initial capacity (16) and load factor (0.75).
      */
-    public @ReceiverDependentMutable HashSet() {
-        map = new HashMap<>();
+    public HashSet() {
+        map = new @ReceiverDependentMutable HashMap<E, @Readonly Object>();
     }
 
     /**
@@ -136,8 +139,9 @@ public @ReceiverDependentMutable class HashSet<E>
      * @param c the collection whose elements are to be placed into this set
      * @throws NullPointerException if the specified collection is null
      */
-    public @PolyNonEmpty @ReceiverDependentMutable HashSet(@PolyNonEmpty @Readonly Collection<? extends E> c) {
-        map = new HashMap<>(Math.max((int) (c.size()/.75f) + 1, 16));
+    @SuppressWarnings("pico") // PICO constructor fix
+    public @PolyNonEmpty HashSet(@PolyNonEmpty @Readonly Collection<? extends E> c) {
+        map = new @ReceiverDependentMutable HashMap<E, @Readonly Object>(Math.max((int) (c.size()/.75f) + 1, 16));
         addAll(c);
     }
 
@@ -150,8 +154,8 @@ public @ReceiverDependentMutable class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    public @ReceiverDependentMutable HashSet(@NonNegative int initialCapacity, float loadFactor) {
-        map = new HashMap<>(initialCapacity, loadFactor);
+    public HashSet(@NonNegative int initialCapacity, float loadFactor) {
+        map = new @ReceiverDependentMutable HashMap<E, @Readonly Object>(initialCapacity, loadFactor);
     }
 
     /**
@@ -162,8 +166,8 @@ public @ReceiverDependentMutable class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero
      */
-    public @ReceiverDependentMutable HashSet(@NonNegative int initialCapacity) {
-        map = new HashMap<>(initialCapacity);
+    public HashSet(@NonNegative int initialCapacity) {
+        map = new @ReceiverDependentMutable HashMap<E, @Readonly Object>(initialCapacity);
     }
 
     /**
@@ -179,8 +183,8 @@ public @ReceiverDependentMutable class HashSet<E>
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero, or if the load factor is nonpositive
      */
-    @ReceiverDependentMutable HashSet(int initialCapacity, float loadFactor, boolean dummy) {
-        map = new LinkedHashMap<>(initialCapacity, loadFactor);
+    HashSet(int initialCapacity, float loadFactor, boolean dummy) {
+        map = new @ReceiverDependentMutable LinkedHashMap<E, @Readonly Object>(initialCapacity, loadFactor);
     }
 
     /**
@@ -191,7 +195,8 @@ public @ReceiverDependentMutable class HashSet<E>
      * @see ConcurrentModificationException
      */
     @SideEffectFree
-    public @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty HashSet<E> this) {
+    @SuppressWarnings("pico") // lost can not invoke poly method.
+    public @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty @Readonly HashSet<E> this) {
         return map.keySet().iterator();
     }
 
@@ -201,7 +206,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * @return the number of elements in this set (its cardinality)
      */
     @Pure
-    public @NonNegative int size(@GuardSatisfied HashSet<E> this) {
+    public @NonNegative int size(@GuardSatisfied @Readonly HashSet<E> this) {
         return map.size();
     }
 
@@ -227,7 +232,7 @@ public @ReceiverDependentMutable class HashSet<E>
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(@Readonly @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean contains(@Readonly @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         return map.containsKey(o);
     }
 
@@ -262,7 +267,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * @return {@code true} if the set contained the specified element
      */
     @SideEffectsOnly("this")
-    public boolean remove(@Mutable @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean remove(@Mutable @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         return map.remove(o)==PRESENT;
     }
 
@@ -283,10 +288,10 @@ public @ReceiverDependentMutable class HashSet<E>
      */
     @SideEffectFree
     @SuppressWarnings("unchecked")
-    public Object clone(@GuardSatisfied HashSet<E> this) {
+    public Object clone(@GuardSatisfied @Mutable HashSet<E> this) {
         try {
             HashSet<E> newSet = (HashSet<E>) super.clone();
-            newSet.map = (HashMap<E, Object>) map.clone();
+            newSet.map = (HashMap<E, @Readonly Object>) map.clone();
             return newSet;
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e);
@@ -304,7 +309,7 @@ public @ReceiverDependentMutable class HashSet<E>
      *             no particular order.
      */
     @java.io.Serial
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject(@Mutable HashSet<E> this, java.io.ObjectOutputStream s)
         throws java.io.IOException {
         // Write out any hidden serialization magic
         s.defaultWriteObject();
@@ -326,7 +331,7 @@ public @ReceiverDependentMutable class HashSet<E>
      * deserialize it).
      */
     @java.io.Serial
-    private void readObject(java.io.ObjectInputStream s)
+    private void readObject(@Mutable HashSet<E> this, java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException {
         // Read in any hidden serialization magic
         s.defaultReadObject();
@@ -366,8 +371,8 @@ public @ReceiverDependentMutable class HashSet<E>
 
         // Create backing HashMap
         map = (((HashSet<?>)this) instanceof LinkedHashSet ?
-               new LinkedHashMap<>(capacity, loadFactor) :
-               new HashMap<>(capacity, loadFactor));
+               new LinkedHashMap<E, @Readonly Object>(capacity, loadFactor) :
+               new HashMap<E, @Readonly Object>(capacity, loadFactor));
 
         // Read in all elements in the proper order.
         for (int i=0; i<size; i++) {
@@ -389,17 +394,17 @@ public @ReceiverDependentMutable class HashSet<E>
      * @return a {@code Spliterator} over the elements in this set
      * @since 1.8
      */
-    public Spliterator<E> spliterator() {
+    public Spliterator<E> spliterator(@Readonly HashSet<E> this) {
         return new HashMap.KeySpliterator<>(map, 0, -1, 0, 0);
     }
 
     @Override
-    public Object[] toArray() {
-        return map.keysToArray(new Object[map.size()]);
+    public @Immutable Object[] toArray(@Readonly HashSet<E> this) {
+        return map.keysToArray(new @Immutable Object[map.size()]);
     }
 
     @Override
-    public <T> @Nullable T[] toArray(@PolyNull T[] a) {
+    public <T> @Nullable T[] toArray(@Readonly HashSet<E> this, @PolyNull T[] a) {
         return map.keysToArray(map.prepareArray(a));
     }
 }

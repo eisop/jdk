@@ -33,8 +33,11 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Assignable;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -89,13 +92,13 @@ import java.util.function.Consumer;
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
 @AnnotatedFor({"lock", "nullness", "index"})
-public @ReceiverDependentMutable abstract class AbstractList<E> extends AbstractCollection<E> implements List<E> {
+@ReceiverDependentMutable public abstract class AbstractList<E> extends AbstractCollection<E> implements List<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
      */
     @SideEffectFree
-    protected @ReceiverDependentMutable AbstractList() {
+    protected AbstractList() {
     }
 
     /**
@@ -139,7 +142,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Pure
-    public abstract E get(@GuardSatisfied AbstractList<E> this, @IndexFor({"this"}) int index);
+    public abstract E get(@GuardSatisfied @Readonly AbstractList<E> this, @IndexFor({"this"}) int index);
 
     /**
      * {@inheritDoc}
@@ -287,7 +290,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * @throws IllegalArgumentException      {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public boolean addAll(@Mutable @GuardSatisfied AbstractList<E> this, @IndexOrHigh({"this"}) int index, Collection<? extends E> c) {
+    public boolean addAll(@Mutable @GuardSatisfied AbstractList<E> this, @IndexOrHigh({"this"}) int index, @Readonly Collection<? extends E> c) {
         rangeCheckForAdd(index);
         boolean modified = false;
         for (E e : c) {
@@ -320,8 +323,8 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * @return an iterator over the elements in this list in proper sequence
      */
     @SideEffectFree
-    public Iterator<E> iterator() {
-        return new Itr();
+    public @PolyMutable Iterator<E> iterator(@PolyMutable AbstractList<E> this) {
+        return new @PolyMutable Itr();
     }
 
     /**
@@ -332,7 +335,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      *
      * @see #listIterator(int)
      */
-    public ListIterator<E> listIterator() {
+    public @Mutable ListIterator<E> listIterator(@Readonly AbstractList<E> this) {
         return listIterator(0);
     }
 
@@ -359,13 +362,13 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public ListIterator<E> listIterator(final @IndexOrHigh({"this"}) int index) {
+    public @Mutable ListIterator<E> listIterator(@Readonly AbstractList<E> this, final @IndexOrHigh({"this"}) int index) {
         rangeCheckForAdd(index);
 
-        return new ListItr(index);
+        return new @Mutable ListItr(index);
     }
 
-    private class Itr implements Iterator<E> {
+    @ReceiverDependentMutable private class Itr implements Iterator<E> {
         /**
          * Index of element to be returned by subsequent call to next.
          */
@@ -387,12 +390,12 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
 
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean hasNext() {
+        public boolean hasNext(@Readonly Itr this) {
             return cursor != size();
         }
 
         @SideEffectsOnly("this")
-        public E next(@NonEmpty Itr this) {
+        public E next(@NonEmpty @Mutable Itr this) {
             checkForComodification();
             try {
                 int i = cursor;
@@ -406,7 +409,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             }
         }
 
-        public void remove() {
+        public void remove(@Mutable AbstractList<E>. @Mutable Itr this) {
             if (lastRet < 0)
                 throw new IllegalStateException();
             checkForComodification();
@@ -422,22 +425,22 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             }
         }
 
-        final void checkForComodification() {
+        final void checkForComodification(@Readonly Itr this) {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
         }
     }
 
-    private class ListItr extends Itr implements ListIterator<E> {
+    @ReceiverDependentMutable private class ListItr extends Itr implements ListIterator<E> {
         ListItr(int index) {
             cursor = index;
         }
 
-        public boolean hasPrevious() {
+        public boolean hasPrevious(@Readonly ListItr this) {
             return cursor != 0;
         }
 
-        public E previous() {
+        public E previous(@Mutable ListItr this) {
             checkForComodification();
             try {
                 int i = cursor - 1;
@@ -450,15 +453,15 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             }
         }
 
-        public int nextIndex() {
+        public int nextIndex(@Readonly ListItr this) {
             return cursor;
         }
 
-        public int previousIndex() {
+        public int previousIndex(@Readonly ListItr this) {
             return cursor-1;
         }
 
-        public void set(E e) {
+        public void set(@Mutable AbstractList<E>. @Mutable ListItr this, E e) {
             if (lastRet < 0)
                 throw new IllegalStateException();
             checkForComodification();
@@ -471,7 +474,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             }
         }
 
-        public void add(E e) {
+        public void add(@Mutable AbstractList<E>. @Mutable ListItr this, E e) {
             checkForComodification();
 
             try {
@@ -522,11 +525,11 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      *         {@code (fromIndex > toIndex)}
      */
     @SideEffectFree
-    public List<E> subList(@GuardSatisfied AbstractList<E> this, @IndexOrHigh({"this"}) int fromIndex, @IndexOrHigh({"this"}) int toIndex) {
+    public @PolyMutable List<E> subList(@GuardSatisfied @PolyMutable AbstractList<E> this, @IndexOrHigh({"this"}) int fromIndex, @IndexOrHigh({"this"}) int toIndex) {
         subListRangeCheck(fromIndex, toIndex, size());
         return (this instanceof RandomAccess ?
-                new RandomAccessSubList<>(this, fromIndex, toIndex) :
-                new SubList<>(this, fromIndex, toIndex));
+                new @PolyMutable RandomAccessSubList<>(this, fromIndex, toIndex) :
+                new @PolyMutable SubList<>(this, fromIndex, toIndex));
     }
 
     static void subListRangeCheck(int fromIndex, int toIndex, int size) {
@@ -564,7 +567,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * @return {@code true} if the specified object is equal to this list
      */
     @Pure
-    public boolean equals(@GuardSatisfied AbstractList<E> this, @GuardSatisfied @Nullable Object o) {
+    public boolean equals(@GuardSatisfied @Readonly AbstractList<E> this, @GuardSatisfied @Nullable @Readonly Object o) {
         if (o == this)
             return true;
         if (!(o instanceof List))
@@ -592,7 +595,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * @return the hash code value for this list
      */
     @Pure
-    public int hashCode(@GuardSatisfied AbstractList<E> this) {
+    public int hashCode(@GuardSatisfied @Readonly AbstractList<E> this) {
         int hashCode = 1;
         for (E e : this)
             hashCode = 31*hashCode + (e==null ? 0 : e.hashCode());
@@ -622,7 +625,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * @param fromIndex index of first element to be removed
      * @param toIndex index after last element to be removed
      */
-    protected void removeRange(@IndexOrHigh({"this"}) int fromIndex, @IndexOrHigh({"this"}) int toIndex) {
+    protected void removeRange(@Mutable AbstractList<E> this, @IndexOrHigh({"this"}) int fromIndex, @IndexOrHigh({"this"}) int toIndex) {
         ListIterator<E> it = listIterator(fromIndex);
         for (int i=0, n=toIndex-fromIndex; i<n; i++) {
             it.next();
@@ -656,14 +659,14 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * does not wish to provide fail-fast iterators, this field may be
      * ignored.
      */
-    protected transient int modCount = 0;
+    protected transient @Assignable int modCount = 0;
 
-    private void rangeCheckForAdd(int index) {
+    private void rangeCheckForAdd(@Readonly AbstractList<E> this, int index) {
         if (index < 0 || index > size())
             throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
 
-    private String outOfBoundsMsg(int index) {
+    private String outOfBoundsMsg(@Readonly AbstractList<E> this, int index) {
         return "Index: "+index+", Size: "+size();
     }
 
@@ -678,17 +681,17 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
      * If the List is an instance of AbstractList then concurrent modification
      * checking is performed using the AbstractList's modCount field.
      */
-    static final class RandomAccessSpliterator<E> implements Spliterator<E> {
+    @Mutable static final class RandomAccessSpliterator<E> implements Spliterator<E> {
 
-        private final List<E> list;
-        private int index; // current index, modified on advance/split
-        private int fence; // -1 until used; then one past last index
+        private final @Readonly List<E> list;
+        private @Assignable int index; // current index, modified on advance/split
+        private @Assignable int fence; // -1 until used; then one past last index
 
         // The following fields are valid if covering an AbstractList
-        private final AbstractList<E> alist;
-        private int expectedModCount; // initialized when fence set
+        private final @Readonly AbstractList<E> alist;
+        private @Assignable int expectedModCount; // initialized when fence set
 
-        RandomAccessSpliterator(List<E> list) {
+        RandomAccessSpliterator(@Readonly List<E> list) {
             assert list instanceof RandomAccess;
 
             this.list = list;
@@ -753,15 +756,15 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             checkAbstractListModCount(alist, expectedModCount);
         }
 
-        public long estimateSize() {
+        public long estimateSize(RandomAccessSpliterator<E> this) {
             return (long) (getFence() - index);
         }
 
-        public int characteristics() {
+        public int characteristics(RandomAccessSpliterator<E> this) {
             return Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED;
         }
 
-        private static <E> E get(List<E> list, int i) {
+        private static <E> E get(@Readonly List<E> list, int i) {
             try {
                 return list.get(i);
             } catch (IndexOutOfBoundsException ex) {
@@ -769,14 +772,14 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             }
         }
 
-        static void checkAbstractListModCount(AbstractList<?> alist, int expectedModCount) {
+        static void checkAbstractListModCount(@Readonly AbstractList<?> alist, int expectedModCount) {
             if (alist != null && alist.modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
             }
         }
     }
 
-    private static class SubList<E> extends AbstractList<E> {
+    @ReceiverDependentMutable private static class SubList<E> extends AbstractList<E> {
         private final AbstractList<E> root;
         private final SubList<E> parent;
         private final int offset;
@@ -786,7 +789,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
          * Constructs a sublist of an arbitrary AbstractList, which is
          * not a SubList itself.
          */
-        public SubList(AbstractList<E> root, int fromIndex, int toIndex) {
+        public SubList(@ReceiverDependentMutable AbstractList<E> root, int fromIndex, int toIndex) {
             this.root = root;
             this.parent = null;
             this.offset = fromIndex;
@@ -797,7 +800,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
         /**
          * Constructs a sublist of another SubList.
          */
-        protected SubList(SubList<E> parent, int fromIndex, int toIndex) {
+        protected SubList(@ReceiverDependentMutable SubList<E> parent, int fromIndex, int toIndex) {
             this.root = parent.root;
             this.parent = parent;
             this.offset = parent.offset + fromIndex;
@@ -805,7 +808,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             this.modCount = root.modCount;
         }
 
-        public E set(int index, E element) {
+        public E set(@Mutable SubList<E> this, int index, E element) {
             Objects.checkIndex(index, size);
             checkForComodification();
             return root.set(offset + index, element);
@@ -818,19 +821,19 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
         }
 
         @Pure
-        public int size() {
+        public int size(@Readonly SubList<E> this) {
             checkForComodification();
             return size;
         }
 
-        public void add(int index, E element) {
+        public void add(@Mutable SubList<E> this, int index, E element) {
             rangeCheckForAdd(index);
             checkForComodification();
             root.add(offset + index, element);
             updateSizeAndModCount(1);
         }
 
-        public E remove(int index) {
+        public E remove(@Mutable SubList<E> this, int index) {
             Objects.checkIndex(index, size);
             checkForComodification();
             E result = root.remove(offset + index);
@@ -838,17 +841,17 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             return result;
         }
 
-        protected void removeRange(int fromIndex, int toIndex) {
+        protected void removeRange(@Mutable SubList<E> this, int fromIndex, int toIndex) {
             checkForComodification();
             root.removeRange(offset + fromIndex, offset + toIndex);
             updateSizeAndModCount(fromIndex - toIndex);
         }
 
-        public boolean addAll(Collection<? extends E> c) {
+        public boolean addAll(@Mutable SubList<E> this, @Readonly Collection<? extends E> c) {
             return addAll(size, c);
         }
 
-        public boolean addAll(int index, Collection<? extends E> c) {
+        public boolean addAll(@Mutable SubList<E> this, int index, @Readonly Collection<? extends E> c) {
             rangeCheckForAdd(index);
             int cSize = c.size();
             if (cSize==0)
@@ -859,7 +862,7 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             return true;
         }
 
-        public Iterator<E> iterator() {
+        public @Mutable Iterator<E> iterator(@Readonly SubList<E> this) {
             return listIterator();
         }
 
@@ -907,16 +910,16 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
                 public int previousIndex() {
                     return i.previousIndex() - offset;
                 }
-
+                @SuppressWarnings("method.invocation.invalid")
                 public void remove() {
                     i.remove();
                     updateSizeAndModCount(-1);
                 }
-
+                @SuppressWarnings("method.invocation.invalid")
                 public void set(E e) {
                     i.set(e);
                 }
-
+                @SuppressWarnings("method.invocation.invalid")
                 public void add(E e) {
                     i.add(e);
                     updateSizeAndModCount(1);
@@ -924,9 +927,9 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             };
         }
 
-        public List<E> subList(int fromIndex, int toIndex) {
+        public @PolyMutable List<E> subList(@PolyMutable SubList<E> this, int fromIndex, int toIndex) {
             subListRangeCheck(fromIndex, toIndex, size);
-            return new SubList<>(this, fromIndex, toIndex);
+            return new @PolyMutable SubList<>(this, fromIndex, toIndex);
         }
 
         private void rangeCheckForAdd(int index) {
@@ -938,12 +941,12 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
             return "Index: "+index+", Size: "+size;
         }
 
-        private void checkForComodification() {
+        private void checkForComodification(@Readonly SubList<E> this) {
             if (root.modCount != this.modCount)
                 throw new ConcurrentModificationException();
         }
 
-        private void updateSizeAndModCount(int sizeChange) {
+        private void updateSizeAndModCount(@Mutable SubList<E> this, int sizeChange) {
             SubList<E> slist = this;
             do {
                 slist.size += sizeChange;
@@ -953,14 +956,14 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
         }
     }
 
-    private static class RandomAccessSubList<E>
+    @ReceiverDependentMutable private static class RandomAccessSubList<E>
             extends SubList<E> implements RandomAccess {
 
         /**
          * Constructs a sublist of an arbitrary AbstractList, which is
          * not a RandomAccessSubList itself.
          */
-        RandomAccessSubList(AbstractList<E> root,
+        RandomAccessSubList(@ReceiverDependentMutable AbstractList<E> root,
                 int fromIndex, int toIndex) {
             super(root, fromIndex, toIndex);
         }
@@ -968,14 +971,14 @@ public @ReceiverDependentMutable abstract class AbstractList<E> extends Abstract
         /**
          * Constructs a sublist of another RandomAccessSubList.
          */
-        RandomAccessSubList(RandomAccessSubList<E> parent,
+        RandomAccessSubList(@ReceiverDependentMutable RandomAccessSubList<E> parent,
                 int fromIndex, int toIndex) {
             super(parent, fromIndex, toIndex);
         }
 
-        public List<E> subList(int fromIndex, int toIndex) {
+        public @PolyMutable List<E> subList(@PolyMutable RandomAccessSubList<E> this, int fromIndex, int toIndex) {
             subListRangeCheck(fromIndex, toIndex, size);
-            return new RandomAccessSubList<>(this, fromIndex, toIndex);
+            return new @PolyMutable RandomAccessSubList<>(this, fromIndex, toIndex);
         }
     }
 }

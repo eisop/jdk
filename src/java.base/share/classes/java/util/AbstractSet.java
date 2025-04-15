@@ -28,8 +28,8 @@ package java.util;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.pico.qual.Mutable;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -68,8 +68,7 @@ import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
 @AnnotatedFor({"lock", "nullness"})
-@DefaultQualifierForUse(Readonly.class)
-public @ReceiverDependentMutable abstract class AbstractSet<E> extends AbstractCollection<E> implements Set<E> {
+@ReceiverDependentMutable public abstract class AbstractSet<E> extends AbstractCollection<E> implements Set<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
@@ -97,13 +96,13 @@ public @ReceiverDependentMutable abstract class AbstractSet<E> extends AbstractC
      * @return {@code true} if the specified object is equal to this set
      */
     @Pure
-    public boolean equals(@GuardSatisfied AbstractSet<E> this, @GuardSatisfied @Nullable Object o) {
+    public boolean equals(@GuardSatisfied @Readonly AbstractSet<E> this, @GuardSatisfied @Nullable @Readonly Object o) {
         if (o == this)
             return true;
 
         if (!(o instanceof Set))
             return false;
-        Collection<?> c = (Collection<?>) o;
+        Collection<?> c = (@Readonly Collection<?>) o;
         if (c.size() != size())
             return false;
         try {
@@ -131,7 +130,7 @@ public @ReceiverDependentMutable abstract class AbstractSet<E> extends AbstractC
      * @see Set#equals(Object)
      */
     @Pure
-    public int hashCode(@GuardSatisfied AbstractSet<E> this) {
+    public int hashCode(@GuardSatisfied @Readonly AbstractSet<E> this) {
         int h = 0;
         Iterator<E> i = iterator();
         while (i.hasNext()) {
@@ -179,7 +178,7 @@ public @ReceiverDependentMutable abstract class AbstractSet<E> extends AbstractC
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    public boolean removeAll(@Mutable @GuardSatisfied AbstractSet<E> this, Collection<? extends @UnknownSignedness Object> c) {
+    public boolean removeAll(@Mutable @GuardSatisfied AbstractSet<E> this, @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c) {
         Objects.requireNonNull(c);
         boolean modified = false;
 

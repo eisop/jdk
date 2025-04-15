@@ -57,7 +57,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  */
 @AnnotatedFor({"aliasing", "guieffect", "index", "lock", "nullness"})
 @PolyUIType
-public @ReceiverDependentMutable class Object {
+@ReceiverDependentMutable public class Object {
 
     /**
      * Constructs a new object.
