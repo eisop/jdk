@@ -2091,6 +2091,9 @@ import java.util.function.Function;
 
             final TreeMap.@Readonly Entry<K,V> nextEntry(@Readonly NavigableSubMap<K,V>.@Mutable SubMapIterator<T> this) {
                 TreeMap.Entry<K,V> e = next;
+                if (e == null || e.key == fenceKey)
+                    throw new NoSuchElementException();
+                if (m.modCount != expectedModCount)
                     throw new ConcurrentModificationException();
                 next = successor(e);
                 lastReturned = e;
