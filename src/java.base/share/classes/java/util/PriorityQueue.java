@@ -35,6 +35,7 @@ import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -102,7 +103,7 @@ import jdk.internal.util.ArraysSupport;
  */
 @CFComment({"lock/nullness: This class doesn't permits null elements"})
 @AnnotatedFor({"lock", "nullness", "index"})
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "pico"}) // Not interesting class, fix later
 public class PriorityQueue<E extends @NonNull Object> extends AbstractQueue<E>
     implements java.io.Serializable {
 
@@ -849,7 +850,7 @@ public class PriorityQueue<E extends @NonNull Object> extends AbstractQueue<E>
         return new PriorityQueueSpliterator(0, -1, 0);
     }
 
-    final class PriorityQueueSpliterator implements Spliterator<E> {
+    @Mutable final class PriorityQueueSpliterator implements Spliterator<E> {
         private int index;            // current index, modified on advance/split
         private int fence;            // -1 until first use
         private int expectedModCount; // initialized when fence set

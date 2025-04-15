@@ -32,6 +32,7 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -49,7 +50,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @serial exclude
  */
 @AnnotatedFor({"index"})
-class JumboEnumSet<E extends Enum<E>> extends EnumSet<E> {
+@Mutable class JumboEnumSet<E extends Enum<E>> extends EnumSet<E> {
     @java.io.Serial
     private static final long serialVersionUID = 334349849919042784L;
 
@@ -63,9 +64,9 @@ class JumboEnumSet<E extends Enum<E>> extends EnumSet<E> {
     // Redundant - maintained for performance
     private int size = 0;
 
-    JumboEnumSet(Class<E>elementType, Enum<?>[] universe) {
+    JumboEnumSet(Class<E>elementType, Enum<?> @Mutable [] universe) {
         super(elementType, universe);
-        elements = new long[(universe.length + 63) >>> 6];
+        elements = new long @Mutable [(universe.length + 63) >>> 6];
     }
 
     void addRange(E from, E to) {
@@ -107,11 +108,11 @@ class JumboEnumSet<E extends Enum<E>> extends EnumSet<E> {
      *
      * @return an iterator over the elements contained in this set
      */
-    public Iterator<E> iterator() {
+    public @Mutable Iterator<E> iterator() {
         return new EnumSetIterator<>();
     }
 
-    private class EnumSetIterator<E extends Enum<E>> implements Iterator<E> {
+    @Mutable private class EnumSetIterator<E extends Enum<E>> implements Iterator<E> {
         /**
          * A bit vector representing the elements in the current "word"
          * of the set not yet returned by this iterator.

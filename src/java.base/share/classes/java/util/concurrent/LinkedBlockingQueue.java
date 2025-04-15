@@ -41,6 +41,7 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
@@ -886,7 +887,7 @@ public class LinkedBlockingQueue<E extends @Readonly Object> extends AbstractQue
      * A customized variant of Spliterators.IteratorSpliterator.
      * Keep this class in sync with (very similar) LBDSpliterator.
      */
-    private final class LBQSpliterator implements Spliterator<E> {
+    @Mutable private final class LBQSpliterator implements Spliterator<E> {
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         Node<E> current;    // current node; null until initialized
         int batch;          // batch size for splits

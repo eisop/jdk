@@ -28,6 +28,7 @@ package java.util;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
@@ -57,7 +58,7 @@ import jdk.internal.vm.annotation.Stable;
  * @since 9
  */
 @jdk.internal.ValueBased
-final class KeyValueHolder<K,V> implements Map.Entry<K,V> {
+final class KeyValueHolder<K extends @Immutable Object,V> implements Map.Entry<K,V> {
     @Stable
     final K key;
     @Stable

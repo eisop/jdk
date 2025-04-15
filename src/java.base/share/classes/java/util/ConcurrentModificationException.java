@@ -25,6 +25,8 @@
 
 package java.util;
 
+import org.checkerframework.checker.pico.qual.Readonly;
+
 /**
  * This exception may be thrown by methods that have detected concurrent
  * modification of an object when such modification is not permissible.
@@ -67,6 +69,7 @@ package java.util;
  * @see     AbstractList
  * @since   1.2
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 public class ConcurrentModificationException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = -3666751008965953603L;
@@ -99,7 +102,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since  1.7
      */
-    public ConcurrentModificationException(Throwable cause) {
+    public ConcurrentModificationException(@Readonly Throwable cause) {
         super(cause);
     }
 
@@ -119,7 +122,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since 1.7
      */
-    public ConcurrentModificationException(String message, Throwable cause) {
+    public ConcurrentModificationException(String message, @Readonly Throwable cause) {
         super(message, cause);
     }
 }

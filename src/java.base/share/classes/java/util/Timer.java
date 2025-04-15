@@ -96,6 +96,7 @@ import jdk.internal.ref.CleanerFactory;
  */
 
 @AnnotatedFor({"index", "interning", "lock", "nullness"})
+@SuppressWarnings("pico") // Not interesting class, fix later
 public @UsesObjectEquals class Timer {
     /**
      * The timer task queue.  This data structure is shared with the timer
@@ -120,9 +121,9 @@ public @UsesObjectEquals class Timer {
         private final TaskQueue queue;
         private final TimerThread thread;
 
-        ThreadReaper(TaskQueue queue, TimerThread thread) {
-            this.queue = queue;
-            this.thread = thread;
+        ThreadReaper(TaskQueue q, TimerThread t) {
+            this.queue = q;
+            this.thread = t;
         }
 
         public void run() {

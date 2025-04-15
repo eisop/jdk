@@ -33,6 +33,7 @@ package java.util;
  * @see     java.util.Stack
  * @since   1.0
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 public class EmptyStackException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = 5084686378493302095L;

@@ -33,6 +33,7 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -47,7 +48,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @serial exclude
  */
 @AnnotatedFor({"index"})
-class RegularEnumSet<E extends Enum<E>> extends EnumSet<E> {
+@Mutable class RegularEnumSet<E extends Enum<E>> extends EnumSet<E> {
     @java.io.Serial
     private static final long serialVersionUID = 3411599620347842686L;
     /**
@@ -56,7 +57,7 @@ class RegularEnumSet<E extends Enum<E>> extends EnumSet<E> {
      */
     private long elements = 0L;
 
-    RegularEnumSet(Class<E>elementType, Enum<?>[] universe) {
+    RegularEnumSet(Class<E>elementType, Enum<?> @Mutable [] universe) {
         super(elementType, universe);
     }
 
@@ -86,11 +87,11 @@ class RegularEnumSet<E extends Enum<E>> extends EnumSet<E> {
      *
      * @return an iterator over the elements contained in this set
      */
-    public Iterator<E> iterator() {
+    public @Mutable Iterator<E> iterator() {
         return new EnumSetIterator<>();
     }
 
-    private class EnumSetIterator<E extends Enum<E>> implements Iterator<E> {
+    @Mutable private class EnumSetIterator<E extends Enum<E>> implements Iterator<E> {
         /**
          * A bit vector representing the elements in the set not yet
          * returned by this iterator.

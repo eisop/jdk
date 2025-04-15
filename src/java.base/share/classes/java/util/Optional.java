@@ -88,6 +88,7 @@ import java.util.stream.Stream;
 @AnnotatedFor({"lock", "nullness", "optional"})
 @Covariant(0)
 @jdk.internal.ValueBased
+@SuppressWarnings("pico") // Not interesting class, fix later
 public final @NonNull class Optional<T> {
     /**
      * Common instance for {@code empty()}.

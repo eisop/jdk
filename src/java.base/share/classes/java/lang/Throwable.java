@@ -29,6 +29,8 @@ import org.checkerframework.checker.initialization.qual.PolyInitialized;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -121,7 +123,7 @@ import java.util.*;
  * @since 1.0
  */
 @AnnotatedFor({"interning", "lock", "nullness"})
-public @UsesObjectEquals @ReceiverDependentMutable class Throwable implements Serializable {
+@ReceiverDependentMutable public @UsesObjectEquals class Throwable implements Serializable {
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
     @java.io.Serial
     private static final long serialVersionUID = -3042686055658047285L;
@@ -475,7 +477,7 @@ public @UsesObjectEquals @ReceiverDependentMutable class Throwable implements Se
      *         been called on this throwable.
      * @since  1.4
      */
-    public synchronized @PolyInitialized Throwable initCause(@PolyInitialized Throwable this, @Nullable Throwable cause) {
+    public synchronized @PolyInitialized Throwable initCause(@PolyInitialized Throwable this, @Nullable @Readonly Throwable cause) {
         if (this.cause != this)
             throw new IllegalStateException("Can't overwrite cause with " +
                                             Objects.toString(cause, "a null"), this);

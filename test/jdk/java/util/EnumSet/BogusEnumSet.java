@@ -27,10 +27,12 @@
  * @author  Josh Bloch
  */
 
+import org.checkerframework.checker.pico.qual.Mutable;
+
 import java.util.*;
 import java.io.*;
 
-public class BogusEnumSet {
+@Mutable public class BogusEnumSet {
     public static void main(String[] args) throws Throwable {
         // This test tries to deserialize a bogus stream produced with
         // hypothetical EnumSet without a writeReplace() method - i.e.

@@ -47,6 +47,7 @@ package java.util;
  * @author      Mark Davis
  * @since       1.1
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 public class MissingResourceException extends RuntimeException {
 
     /**

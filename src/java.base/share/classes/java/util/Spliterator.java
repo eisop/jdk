@@ -29,6 +29,7 @@ import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.SignedPositive;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.Covariant;
 
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -300,7 +301,8 @@ import java.util.function.LongConsumer;
  * @since 1.8
  */
 @AnnotatedFor({"lock", "nullness"})
-public @ReceiverDependentMutable interface Spliterator<T> {
+@Covariant(0)
+@ReceiverDependentMutable public interface Spliterator<T> {
     /**
      * If a remaining element exists, performs the given action on it,
      * returning {@code true}; else returns {@code false}.  If this

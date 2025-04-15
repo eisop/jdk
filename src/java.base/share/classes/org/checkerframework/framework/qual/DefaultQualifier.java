@@ -39,13 +39,13 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({
-  ElementType.PACKAGE,
-  ElementType.TYPE,
-  ElementType.CONSTRUCTOR,
-  ElementType.METHOD,
-  ElementType.FIELD,
-  ElementType.LOCAL_VARIABLE,
-  ElementType.PARAMETER
+        ElementType.PACKAGE,
+        ElementType.TYPE,
+        ElementType.CONSTRUCTOR,
+        ElementType.METHOD,
+        ElementType.FIELD,
+        ElementType.LOCAL_VARIABLE,
+        ElementType.PARAMETER
 })
 @Repeatable(DefaultQualifier.List.class)
 public @interface DefaultQualifier {

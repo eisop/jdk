@@ -42,6 +42,7 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -952,7 +953,7 @@ public class PriorityBlockingQueue<E extends Object> extends AbstractQueue<E>
     /**
      * Immutable snapshot spliterator that binds to elements "late".
      */
-    final class PBQSpliterator implements Spliterator<E> {
+    @Mutable final class PBQSpliterator implements Spliterator<E> {
         Object[] array;        // null until late-bound-initialized
         int index;
         int fence;

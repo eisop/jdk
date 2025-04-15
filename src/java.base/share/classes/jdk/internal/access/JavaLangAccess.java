@@ -25,6 +25,8 @@
 
 package jdk.internal.access;
 
+import org.checkerframework.checker.pico.qual.Mutable;
+
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -102,7 +104,7 @@ public interface JavaLangAccess {
      * Class object does not represent an enum type;
      * the result is uncloned, cached, and shared by all callers.
      */
-    <E extends Enum<E>> E[] getEnumConstantsShared(Class<E> klass);
+    <E extends Enum<E>> E [] getEnumConstantsShared(Class<E> klass);
 
     /**
      * Set current thread's blocker field.

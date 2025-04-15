@@ -48,6 +48,7 @@ import java.util.function.LongBinaryOperator;
  * @author Doug Lea
  * @since 1.8
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 class ArrayPrefixHelpers {
     private ArrayPrefixHelpers() {} // non-instantiable
 

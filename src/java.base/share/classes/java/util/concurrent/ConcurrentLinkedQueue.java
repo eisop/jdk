@@ -42,6 +42,7 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -882,7 +883,7 @@ public class ConcurrentLinkedQueue<E extends @NonNull Object> extends AbstractQu
     }
 
     /** A customized variant of Spliterators.IteratorSpliterator */
-    final class CLQSpliterator implements Spliterator<E> {
+    @Mutable final class CLQSpliterator implements Spliterator<E> {
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         Node<E> current;    // current node; null until initialized
         int batch;          // batch size for splits

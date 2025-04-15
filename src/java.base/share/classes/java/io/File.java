@@ -165,8 +165,7 @@ import sun.security.action.GetPropertyAction;
 "EnsuresNonNullIf(expression={\"list()\",\"list(FilenameFilter)\",\"listFiles()\",\"listFiles(FilenameFilter)\",\"listFiles(FileFilter)\"}, result=true)\""
 })
 @AnnotatedFor({"index", "initialization", "interning", "lock", "nullness"})
-@DefaultQualifierForUse(Readonly.class)
-public @ReceiverDependentMutable class File
+@ReceiverDependentMutable public class File
     implements Serializable, Comparable<File>
 {
 

@@ -30,6 +30,7 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.propkey.qual.PropertyKey;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -152,6 +153,7 @@ import jdk.internal.util.xml.PropertiesDefaultHandler;
  * @since   1.0
  */
 @AnnotatedFor({"index", "lock", "nullness", "propkey"})
+@SuppressWarnings("pico") // Not interesting class, fix later
 public class Properties extends Hashtable<Object,Object> {
     /**
      * use serialVersionUID from JDK 1.1.X for interoperability

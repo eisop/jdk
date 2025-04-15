@@ -35,6 +35,9 @@ import java.util.function.LongConsumer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -47,6 +50,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.8
  */
 @AnnotatedFor("nullness")
+@SuppressWarnings("pico") // Not interesting class, fix later
 public final class Spliterators {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -150,7 +154,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(Object[])
      */
-    public static <T> Spliterator<@PolyNull T> spliterator(@PolyNull Object[] array,
+    public static <T> Spliterator<@PolyNull @PolyMutable T> spliterator(@PolyNull @PolyMutable Object @Readonly [] array,
                                                  int additionalCharacteristics) {
         return new ArraySpliterator<>(Objects.requireNonNull(array),
                                       additionalCharacteristics);
@@ -185,7 +189,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(Object[], int, int)
      */
-    public static <T> Spliterator<@PolyNull T> spliterator(@PolyNull Object[] array, int fromIndex, int toIndex,
+    public static <T> Spliterator<@PolyNull @PolyMutable T> spliterator(@PolyNull @PolyMutable Object @Readonly [] array, int fromIndex, int toIndex,
                                                  int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new ArraySpliterator<>(array, fromIndex, toIndex, additionalCharacteristics);
@@ -214,7 +218,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(int[])
      */
-    public static Spliterator.OfInt spliterator(int[] array,
+    public static Spliterator.OfInt spliterator(int @Readonly [] array,
                                                 int additionalCharacteristics) {
         return new IntArraySpliterator(Objects.requireNonNull(array), additionalCharacteristics);
     }
@@ -247,7 +251,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(int[], int, int)
      */
-    public static Spliterator.OfInt spliterator(int[] array, int fromIndex, int toIndex,
+    public static Spliterator.OfInt spliterator(int @Readonly [] array, int fromIndex, int toIndex,
                                                 int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new IntArraySpliterator(array, fromIndex, toIndex, additionalCharacteristics);
@@ -276,7 +280,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(long[])
      */
-    public static Spliterator.OfLong spliterator(long[] array,
+    public static Spliterator.OfLong spliterator(long @Readonly [] array,
                                                  int additionalCharacteristics) {
         return new LongArraySpliterator(Objects.requireNonNull(array), additionalCharacteristics);
     }
@@ -313,7 +317,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(long[], int, int)
      */
-    public static Spliterator.OfLong spliterator(long[] array, int fromIndex, int toIndex,
+    public static Spliterator.OfLong spliterator(long @Readonly [] array, int fromIndex, int toIndex,
                                                  int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new LongArraySpliterator(array, fromIndex, toIndex, additionalCharacteristics);
@@ -342,7 +346,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(double[])
      */
-    public static Spliterator.OfDouble spliterator(double[] array,
+    public static Spliterator.OfDouble spliterator(double @Readonly [] array,
                                                    int additionalCharacteristics) {
         return new DoubleArraySpliterator(Objects.requireNonNull(array), additionalCharacteristics);
     }
@@ -379,7 +383,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(double[], int, int)
      */
-    public static Spliterator.OfDouble spliterator(double[] array, int fromIndex, int toIndex,
+    public static Spliterator.OfDouble spliterator(double @Readonly [] array, int fromIndex, int toIndex,
                                                    int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new DoubleArraySpliterator(array, fromIndex, toIndex, additionalCharacteristics);
@@ -428,7 +432,7 @@ public final class Spliterators {
      * @return A spliterator from an iterator
      * @throws NullPointerException if the given collection is {@code null}
      */
-    public static <T> Spliterator<T> spliterator(Collection<? extends T> c,
+    public static <T> Spliterator<T> spliterator(@Readonly Collection<? extends T> c,
                                                  int characteristics) {
         return new IteratorSpliterator<>(Objects.requireNonNull(c),
                                          characteristics);
@@ -954,7 +958,7 @@ public final class Spliterators {
      * A Spliterator designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code Object[]} array.
      */
-    static final class ArraySpliterator<T> implements Spliterator<T> {
+    @Mutable static final class ArraySpliterator<T> implements Spliterator<T> {
         /**
          * The array, explicitly typed as Object[]. Unlike in some other
          * classes (see for example CR 6260652), we do not need to
@@ -1046,7 +1050,7 @@ public final class Spliterators {
      * A Spliterator.OfInt designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code int[]} array.
      */
-    static final class IntArraySpliterator implements Spliterator.OfInt {
+    @Mutable static final class IntArraySpliterator implements Spliterator.OfInt {
         private final int[] array;
         private int index;        // current index, modified on advance/split
         private final int fence;  // one past last index
@@ -1129,7 +1133,7 @@ public final class Spliterators {
      * A Spliterator.OfLong designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code int[]} array.
      */
-    static final class LongArraySpliterator implements Spliterator.OfLong {
+    @Mutable static final class LongArraySpliterator implements Spliterator.OfLong {
         private final long[] array;
         private int index;        // current index, modified on advance/split
         private final int fence;  // one past last index
@@ -1212,7 +1216,7 @@ public final class Spliterators {
      * A Spliterator.OfDouble designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code int[]} array.
      */
-    static final class DoubleArraySpliterator implements Spliterator.OfDouble {
+    @Mutable static final class DoubleArraySpliterator implements Spliterator.OfDouble {
         private final double[] array;
         private int index;        // current index, modified on advance/split
         private final int fence;  // one past last index
@@ -1318,7 +1322,7 @@ public final class Spliterators {
      * @see #spliterator(Iterator, long, int)
      * @since 1.8
      */
-    public abstract static class AbstractSpliterator<T> implements Spliterator<T> {
+    @Mutable public abstract static class AbstractSpliterator<T> implements Spliterator<T> {
         static final int BATCH_UNIT = 1 << 10;  // batch array size increment
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         private final int characteristics;
@@ -1441,7 +1445,7 @@ public final class Spliterators {
      * @see #spliterator(java.util.PrimitiveIterator.OfInt, long, int)
      * @since 1.8
      */
-    public abstract static class AbstractIntSpliterator implements Spliterator.OfInt {
+    @Mutable public abstract static class AbstractIntSpliterator implements Spliterator.OfInt {
         static final int MAX_BATCH = AbstractSpliterator.MAX_BATCH;
         static final int BATCH_UNIT = AbstractSpliterator.BATCH_UNIT;
         private final int characteristics;
@@ -1551,7 +1555,7 @@ public final class Spliterators {
      * @see #spliterator(java.util.PrimitiveIterator.OfLong, long, int)
      * @since 1.8
      */
-    public abstract static class AbstractLongSpliterator implements Spliterator.OfLong {
+    @Mutable public abstract static class AbstractLongSpliterator implements Spliterator.OfLong {
         static final int MAX_BATCH = AbstractSpliterator.MAX_BATCH;
         static final int BATCH_UNIT = AbstractSpliterator.BATCH_UNIT;
         private final int characteristics;
@@ -1661,7 +1665,7 @@ public final class Spliterators {
      * @see #spliterator(java.util.PrimitiveIterator.OfDouble, long, int)
      * @since 1.8
      */
-    public abstract static class AbstractDoubleSpliterator implements Spliterator.OfDouble {
+    @Mutable public abstract static class AbstractDoubleSpliterator implements Spliterator.OfDouble {
         static final int MAX_BATCH = AbstractSpliterator.MAX_BATCH;
         static final int BATCH_UNIT = AbstractSpliterator.BATCH_UNIT;
         private final int characteristics;
@@ -1753,7 +1757,7 @@ public final class Spliterators {
      * operations. The spliterator implements {@code trySplit} to
      * permit limited parallelism.
      */
-    static class IteratorSpliterator<T> implements Spliterator<T> {
+    @Mutable static class IteratorSpliterator<T> implements Spliterator<T> {
         static final int BATCH_UNIT = 1 << 10;  // batch array size increment
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         private final Collection<? extends T> collection; // null OK
@@ -1999,7 +2003,7 @@ public final class Spliterators {
         }
     }
 
-    static final class LongIteratorSpliterator implements Spliterator.OfLong {
+    @Mutable static final class LongIteratorSpliterator implements Spliterator.OfLong {
         static final int BATCH_UNIT = IteratorSpliterator.BATCH_UNIT;
         static final int MAX_BATCH = IteratorSpliterator.MAX_BATCH;
         private final PrimitiveIterator.OfLong it;
@@ -2093,7 +2097,7 @@ public final class Spliterators {
         }
     }
 
-    static final class DoubleIteratorSpliterator implements Spliterator.OfDouble {
+    @Mutable static final class DoubleIteratorSpliterator implements Spliterator.OfDouble {
         static final int BATCH_UNIT = IteratorSpliterator.BATCH_UNIT;
         static final int MAX_BATCH = IteratorSpliterator.MAX_BATCH;
         private final PrimitiveIterator.OfDouble it;

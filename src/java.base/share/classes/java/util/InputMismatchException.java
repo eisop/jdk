@@ -33,6 +33,7 @@ package java.util;
  * @see     java.util.Scanner
  * @since   1.5
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 public class InputMismatchException extends NoSuchElementException {
     @java.io.Serial
     private static final long serialVersionUID = 8811230760997066428L;
