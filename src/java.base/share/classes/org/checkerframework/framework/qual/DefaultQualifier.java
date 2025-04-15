@@ -29,6 +29,9 @@ import java.lang.annotation.Target;
  * <p>Defaults on a package also apply to subpackages, unless the {@code applyToSubpackages} field
  * is set to false.
  *
+ * <p>Defaults on a package also apply to subpackages, unless the {@code applyToSubpackages} field
+ * is set to false.
+ *
  * <p>This annotation currently has no effect in stub files.
  *
  * @see org.checkerframework.framework.qual.TypeUseLocation
