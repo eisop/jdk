@@ -1544,7 +1544,6 @@ import jdk.internal.access.SharedSecrets;
             return hasMoreElements();
         }
 
-        @SideEffectsOnly("this")
         public T next(@NonEmpty @Mutable Enumerator<T> this) {
             if (Hashtable.this.modCount != expectedModCount)
                 throw new ConcurrentModificationException();

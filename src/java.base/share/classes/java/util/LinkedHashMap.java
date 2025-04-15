@@ -794,7 +794,6 @@ import java.io.IOException;
             return next != null;
         }
 
-        @SideEffectsOnly("this")
         final LinkedHashMap.@Readonly Entry<K,V> nextNode(@NonEmpty @Mutable LinkedHashIterator this) {
             LinkedHashMap.Entry<K,V> e = next;
             if (modCount != expectedModCount)

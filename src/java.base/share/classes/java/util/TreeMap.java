@@ -1540,7 +1540,6 @@ import java.util.function.Function;
             return next != null;
         }
 
-        @SideEffectsOnly("this")
         final @Readonly Entry<K,V> nextEntry(@Mutable PrivateEntryIterator<T> this) {
             Entry<K,V> e = next;
             if (e == null)
@@ -1552,7 +1551,6 @@ import java.util.function.Function;
             return e;
         }
 
-        @SideEffectsOnly("this")
         final @Readonly Entry<K,V> prevEntry(@Mutable PrivateEntryIterator<T> this) {
             Entry<K,V> e = next;
             if (e == null)
@@ -2091,7 +2089,6 @@ import java.util.function.Function;
                 return next != null && next.key != fenceKey;
             }
 
-            @SideEffectsOnly("this")
             final TreeMap.@Readonly Entry<K,V> nextEntry(@Readonly NavigableSubMap<K,V>.@Mutable SubMapIterator<T> this) {
                 TreeMap.Entry<K,V> e = next;
                     throw new ConcurrentModificationException();
@@ -2100,7 +2097,6 @@ import java.util.function.Function;
                 return e;
             }
 
-            @SideEffectsOnly("this")
             final TreeMap.@Readonly Entry<K,V> prevEntry(@Readonly NavigableSubMap<K,V>.@Mutable SubMapIterator<T> this) {
                 TreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)

@@ -1631,7 +1631,6 @@ import jdk.internal.access.SharedSecrets;
             return next != null;
         }
 
-        @SideEffectsOnly("this")
         @SuppressWarnings("pico:return.type.incompatible") //pico not expressive enough
         final @PolyMutable Node<K,V> nextNode(@PolyMutable HashMap<K,V>.@NonEmpty @Mutable HashIterator this) {
             @PolyMutable Node<K,V>[] t;

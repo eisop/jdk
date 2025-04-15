@@ -179,7 +179,6 @@ public final class StringBuilder
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(@Readonly @GuardSatisfied @Nullable Object obj) {
         return append(String.valueOf(obj));
     }
@@ -334,7 +333,6 @@ public final class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, @Readonly @GuardSatisfied @Nullable Object obj) {
             super.insert(offset, obj);
             return this;

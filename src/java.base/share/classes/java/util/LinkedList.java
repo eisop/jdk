@@ -927,7 +927,6 @@ import java.util.function.Consumer;
             return nextIndex < size;
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty @Mutable ListItr this) {
             checkForComodification();
             if (!hasNext())
@@ -1043,7 +1042,6 @@ import java.util.function.Consumer;
         public boolean hasNext(@Readonly DescendingIterator this) {
             return itr.hasPrevious();
         }
-        @SideEffectsOnly("this")
         public E next(@NonEmpty @Mutable DescendingIterator this) {
             return itr.previous();
         }

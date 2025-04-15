@@ -95,7 +95,6 @@ import org.checkerframework.framework.qual.AnnotatedFor;
      * @return the next element in the list
      * @throws NoSuchElementException if the iteration has no next element
      */
-    @SideEffectsOnly("this")
     E next(@GuardSatisfied @NonEmpty @Mutable ListIterator<E> this);
 
     /**

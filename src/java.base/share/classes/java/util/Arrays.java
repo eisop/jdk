@@ -4321,7 +4321,6 @@ public class Arrays {
         }
 
         @Override
-        @SideEffectsOnly("this")
         public E next(@NonEmpty @Mutable ArrayItr<E> this) {
             int i = cursor;
             if (i >= a.length) {

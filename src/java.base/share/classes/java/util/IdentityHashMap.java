@@ -770,7 +770,6 @@ import jdk.internal.access.SharedSecrets;
             return false;
         }
 
-        @SideEffectsOnly("this")
         protected int nextIndex(@NonEmpty @Mutable IdentityHashMapIterator<T> this) {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();

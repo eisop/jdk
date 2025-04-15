@@ -89,7 +89,6 @@ import java.util.function.Consumer;
      * @return the next element in the iteration
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    @SideEffectsOnly("this")
     E next(@GuardSatisfied @NonEmpty @Mutable Iterator<E> this);
 
     /**

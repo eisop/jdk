@@ -393,7 +393,6 @@ import java.util.function.Consumer;
             return cursor != size();
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty @Mutable Itr this) {
             checkForComodification();
             try {

@@ -264,7 +264,6 @@ import jdk.internal.access.SharedSecrets;
      * @param o object to be removed from this set, if present
      * @return {@code true} if the set contained the specified element
      */
-    @SideEffectsOnly("this")
     public boolean remove(@Mutable @GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         return map.remove(o)==PRESENT;
     }
@@ -273,7 +272,6 @@ import jdk.internal.access.SharedSecrets;
      * Removes all of the elements from this set.
      * The set will be empty after this call returns.
      */
-    @SideEffectsOnly("this")
     public void clear(@Mutable @GuardSatisfied HashSet<E> this) {
         map.clear();
     }

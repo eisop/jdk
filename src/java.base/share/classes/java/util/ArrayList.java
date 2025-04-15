@@ -479,7 +479,6 @@ import jdk.internal.util.ArraysSupport;
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    @SideEffectsOnly("this")
     public E set(@GuardSatisfied @Mutable ArrayList<E> this, @NonNegative int index, E element) {
         Objects.checkIndex(index, size);
         E oldValue = elementData(index);
@@ -492,7 +491,6 @@ import jdk.internal.util.ArraysSupport;
      * bytecode size under 35 (the -XX:MaxInlineSize default value),
      * which helps when add(E) is called in a C1-compiled loop.
      */
-    @SideEffectsOnly("this")
     private void add(@Mutable ArrayList<E> this, E e, @Readonly Object[] elementData, int s) {
         if (s == elementData.length)
             elementData = grow();
@@ -522,7 +520,6 @@ import jdk.internal.util.ArraysSupport;
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    @SideEffectsOnly("this")
     public void add(@Mutable @GuardSatisfied ArrayList<E> this, @NonNegative int index, E element) {
         rangeCheckForAdd(index);
         modCount++;
@@ -714,7 +711,6 @@ import jdk.internal.util.ArraysSupport;
      * @return {@code true} if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null
      */
-    @SideEffectsOnly("this")
     public boolean addAll(@Mutable @GuardSatisfied ArrayList<E> this, @Readonly Collection<? extends E> c) {
         @Readonly Object[] a = c.toArray();
         modCount++;
@@ -745,7 +741,6 @@ import jdk.internal.util.ArraysSupport;
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @throws NullPointerException if the specified collection is null
      */
-    @SideEffectsOnly("this")
     public boolean addAll(@Mutable @GuardSatisfied ArrayList<E> this, @NonNegative int index, @Readonly Collection<? extends E> c) {
         rangeCheckForAdd(index);
 
@@ -1016,7 +1011,6 @@ import jdk.internal.util.ArraysSupport;
         }
 
         @SuppressWarnings("unchecked")
-        @SideEffectsOnly("this")
         public E next(@NonEmpty @Mutable Itr this) {
             checkForComodification();
             int i = cursor;

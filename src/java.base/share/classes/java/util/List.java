@@ -326,7 +326,6 @@ import java.util.function.UnaryOperator;
      * @throws UnsupportedOperationException if the {@code remove} operation
      *         is not supported by this list
      */
-    @SideEffectsOnly("this")
     boolean remove(@Mutable @GuardSatisfied List<E> this, @UnknownSignedness @Readonly Object o);
 
 
@@ -660,7 +659,6 @@ import java.util.function.UnaryOperator;
      *         ({@code index < 0 || index > size()})
      */
     @ReleasesNoLocks
-    @SideEffectsOnly("this")
     void add(@Mutable @GuardSatisfied List<E> this, @IndexOrHigh({"this"}) int index, E element);
 
     /**

@@ -1782,7 +1782,6 @@ public class Collections {
                     public boolean hasNext() {
                         return i.hasNext();
                     }
-                    @SideEffectsOnly("this")
                     public Map.@Immutable Entry<K,V> next(/*@NonEmpty Iterator<Map.Entry<K,V>> this*/) {
                         return new UnmodifiableEntry<>(i.next());
                     }

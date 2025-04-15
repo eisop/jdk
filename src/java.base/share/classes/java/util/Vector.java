@@ -1289,7 +1289,6 @@ import jdk.internal.util.ArraysSupport;
             return cursor != elementCount;
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty @Mutable Itr this) {
             synchronized (Vector.this) {
                 checkForComodification();
