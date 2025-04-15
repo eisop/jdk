@@ -20,7 +20,6 @@
 package com.sun.org.apache.bcel.internal.generic;
 
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import com.sun.org.apache.bcel.internal.Const;
 import com.sun.org.apache.bcel.internal.classfile.Constant;
 import com.sun.org.apache.bcel.internal.util.ByteSequence;
@@ -1034,7 +1033,6 @@ public class InstructionList implements Iterable<InstructionHandle> {
             private InstructionHandle ih = start;
 
             @Override
-            @SideEffectsOnly("this")
             public InstructionHandle next() throws NoSuchElementException {
                 if (ih == null) {
                     throw new NoSuchElementException();

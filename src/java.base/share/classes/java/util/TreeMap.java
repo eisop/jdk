@@ -45,7 +45,6 @@ import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -2095,9 +2094,6 @@ import java.util.function.Function;
             @SideEffectsOnly("this")
             final TreeMap.@Readonly Entry<K,V> nextEntry(@Readonly NavigableSubMap<K,V>.@Mutable SubMapIterator<T> this) {
                 TreeMap.Entry<K,V> e = next;
-                if (e == null || e.key == fenceKey)
-                    throw new NoSuchElementException();
-                if (m.modCount != expectedModCount)
                     throw new ConcurrentModificationException();
                 next = successor(e);
                 lastReturned = e;

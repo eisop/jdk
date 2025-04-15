@@ -34,7 +34,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.util.*;
 import java.io.*;
@@ -1131,7 +1130,6 @@ public final class Subject implements java.io.Serializable {
                 @EnsuresNonEmptyIf(result = true, expression = "this")
                 public boolean hasNext() {return i.hasNext();}
 
-                @SideEffectsOnly("this")
                 public E next(/*@NonEmpty Iterator<E> this*/) {
                     if (which != Subject.PRIV_CREDENTIAL_SET) {
                         return i.next();

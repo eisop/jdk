@@ -30,7 +30,6 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -132,7 +131,6 @@ import org.checkerframework.framework.qual.AnnotatedFor;
             @Override public boolean hasNext() {
                 return hasMoreElements();
             }
-            @SideEffectsOnly("this")
             @Override public E next(/*@NonEmpty Iterator<E> this*/) {
                 return nextElement();
             }

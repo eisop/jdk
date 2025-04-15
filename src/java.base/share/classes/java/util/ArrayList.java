@@ -44,7 +44,6 @@ import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -507,7 +506,6 @@ import jdk.internal.util.ArraysSupport;
      * @param e element to be appended to this list
      * @return {@code true} (as specified by {@link Collection#add})
      */
-    @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
     public boolean add(@Mutable @GuardSatisfied ArrayList<E> this, E e) {
         modCount++;
@@ -1357,7 +1355,6 @@ import jdk.internal.util.ArraysSupport;
                 }
 
                 @SuppressWarnings("unchecked")
-                @SideEffectsOnly("this")
                 public E next(/*@NonEmpty ListIterator<E> this*/) {
                     checkForComodification();
                     int i = cursor;

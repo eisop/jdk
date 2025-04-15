@@ -36,7 +36,6 @@ import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
@@ -178,7 +177,6 @@ public @ReceiverDependentMutable interface CharSequence {
                 return cur < length();
             }
 
-            @SideEffectsOnly("this")
             public int nextInt(@NonEmpty CharIterator this) {
                 if (hasNext()) {
                     return charAt(cur++);
@@ -255,7 +253,6 @@ public @ReceiverDependentMutable interface CharSequence {
                 return cur < length();
             }
 
-            @SideEffectsOnly("this")
             public int nextInt(@NonEmpty CodePointIterator this) {
                 final int length = length();
 

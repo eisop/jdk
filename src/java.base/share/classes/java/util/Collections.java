@@ -50,7 +50,6 @@ import org.checkerframework.common.value.qual.MinLen;
 import org.checkerframework.common.value.qual.StaticallyExecutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -1104,7 +1103,6 @@ public class Collections {
                 @Pure
                 @EnsuresNonEmptyIf(result = true, expression = "this")
                 public boolean hasNext() {return i.hasNext();}
-                @SideEffectsOnly("this")
                 public E next(/*@NonEmpty Iterator<E> this*/)          {return i.next();}
                 public void remove() {
                     throw new UnsupportedOperationException();
@@ -1441,11 +1439,9 @@ public class Collections {
                 @Pure
                 @EnsuresNonEmptyIf(result = true, expression = "this")
                 public boolean hasNext()     {return i.hasNext();}
-                @SideEffectsOnly("this")
                 public E next(/*@NonEmpty ListIterator<E> this*/)              {return i.next();}
                 @Pure
                 public boolean hasPrevious() {return i.hasPrevious();}
-                @SideEffectsOnly("this")
                 public E previous()          {return i.previous();}
                 public int nextIndex()       {return i.nextIndex();}
                 public int previousIndex()   {return i.previousIndex();}
@@ -3310,7 +3306,6 @@ public class Collections {
                 @Pure
                 @EnsuresNonEmptyIf(result = true, expression = "this")
                 public boolean hasNext() { return it.hasNext(); }
-                @SideEffectsOnly("this")
                 public E next(/*@NonEmpty Iterator<E> this*/)          { return it.next(); }
                 public void remove()     {        it.remove(); }
                 public void forEachRemaining(Consumer<? super E> action) {
@@ -3711,7 +3706,6 @@ public class Collections {
                 @Pure
                 @EnsuresNonEmptyIf(result = true, expression = "this")
                 public boolean hasNext()     { return i.hasNext(); }
-                @SideEffectsOnly("this")
                 public E next(/*@NonEmpty ListIterator<E> this*/)              { return i.next(); }
                 public boolean hasPrevious() { return i.hasPrevious(); }
                 public E previous()          { return i.previous(); }
@@ -4035,7 +4029,6 @@ public class Collections {
                     @Pure
                     @EnsuresNonEmptyIf(result = true, expression = "this")
                     public boolean hasNext() { return i.hasNext(); }
-                    @SideEffectsOnly("this")
                     public void remove()     { i.remove(); }
 
                     public Map.Entry<K,V> next(/*@NonEmpty Iterator<Map.Entry<K,V>> this*/) {
@@ -4490,7 +4483,6 @@ public class Collections {
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean hasNext() { return false; }
-        @SideEffectsOnly("this")
         public E next(@NonEmpty EmptyIterator<E> this) { throw new NoSuchElementException(); }
         public void remove(@NonEmpty EmptyIterator<E> this) { throw new IllegalStateException(); }
         @Override
@@ -5035,7 +5027,6 @@ public class Collections {
             public boolean hasNext() {
                 return hasNext;
             }
-            @SideEffectsOnly("this")
             public E next(/*@NonEmpty Iterator<E> this*/) {
                 if (hasNext) {
                     hasNext = false;

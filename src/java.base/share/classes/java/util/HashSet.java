@@ -41,7 +41,6 @@ import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 import org.checkerframework.framework.qual.DefaultQualifierForUse;
@@ -248,7 +247,6 @@ import jdk.internal.access.SharedSecrets;
      * @return {@code true} if this set did not already contain the specified
      * element
      */
-    @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
     public boolean add(@Mutable @GuardSatisfied HashSet<E> this, E e) {
         return map.put(e, PRESENT)==null;

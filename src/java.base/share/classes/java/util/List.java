@@ -46,7 +46,6 @@ import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -303,7 +302,6 @@ import java.util.function.UnaryOperator;
      *         prevents it from being added to this list
      */
     @ReleasesNoLocks
-    @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
     boolean add(@Mutable @GuardSatisfied List<E> this, E e);
 
@@ -376,7 +374,6 @@ import java.util.function.UnaryOperator;
      *         specified collection prevents it from being added to this list
      * @see #add(Object)
      */
-    @SideEffectsOnly("this")
     @EnsuresNonEmptyIf(result = true, expression = "this")
     boolean addAll(@Mutable @GuardSatisfied List<E> this, @Readonly Collection<? extends E> c);
 
@@ -407,7 +404,6 @@ import java.util.function.UnaryOperator;
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
-    @SideEffectsOnly("this")
     @EnsuresNonEmptyIf(result = true, expression = "this")
     boolean addAll(@Mutable @GuardSatisfied List<E> this, @IndexOrHigh({"this"}) int index, @Readonly Collection<? extends E> c);
 

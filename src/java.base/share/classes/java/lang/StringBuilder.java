@@ -36,7 +36,6 @@ import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.regex.qual.PolyRegex;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import jdk.internal.vm.annotation.IntrinsicCandidate;
@@ -98,8 +97,8 @@ import java.io.IOException;
  * @see         java.lang.String
  * @since       1.5
  */
-@AnnotatedFor({"lock", "nullness", "index", "regex", "sideeffectsonly"})
-public final @Mutable class StringBuilder
+@AnnotatedFor({"lock", "nullness", "index", "regex"})
+public final class StringBuilder
     extends AbstractStringBuilder
     implements java.io.Serializable, Comparable<StringBuilder>, CharSequence
 {
@@ -187,7 +186,6 @@ public final @Mutable class StringBuilder
 
     @Override
     @IntrinsicCandidate
-    @SideEffectsOnly("this")
     public StringBuilder append(@Nullable String str) {
         super.append(str);
         return this;
@@ -212,14 +210,12 @@ public final @Mutable class StringBuilder
      * @param   sb   the {@code StringBuffer} to append.
      * @return  a reference to this object.
      */
-    @SideEffectsOnly("this")
     public StringBuilder append(@Nullable StringBuffer sb) {
         super.append(sb);
         return this;
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(@Nullable CharSequence s) {
         super.append(s);
         return this;
@@ -229,14 +225,12 @@ public final @Mutable class StringBuilder
      * @throws     IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(@Nullable CharSequence s, @IndexOrHigh({"#1"}) int start, @IndexOrHigh({"#1"}) int end) {
         super.append(s, start, end);
         return this;
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(char[] str) {
         super.append(str);
         return this;
@@ -246,14 +240,12 @@ public final @Mutable class StringBuilder
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(char[] str, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) {
         super.append(str, offset, len);
         return this;
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(boolean b) {
         super.append(b);
         return this;
@@ -261,7 +253,6 @@ public final @Mutable class StringBuilder
 
     @Override
     @IntrinsicCandidate
-    @SideEffectsOnly("this")
     public StringBuilder append(char c) {
         super.append(c);
         return this;
@@ -269,28 +260,24 @@ public final @Mutable class StringBuilder
 
     @Override
     @IntrinsicCandidate
-    @SideEffectsOnly("this")
     public StringBuilder append(int i) {
         super.append(i);
         return this;
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(long lng) {
         super.append(lng);
         return this;
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(float f) {
         super.append(f);
         return this;
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder append(double d) {
         super.append(d);
         return this;
@@ -300,7 +287,6 @@ public final @Mutable class StringBuilder
      * @since 1.5
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder appendCodePoint(int codePoint) {
         super.appendCodePoint(codePoint);
         return this;
@@ -310,7 +296,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder delete(@NonNegative int start, @NonNegative int end) {
         super.delete(start, end);
         return this;
@@ -320,7 +305,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder deleteCharAt(@NonNegative int index) {
         super.deleteCharAt(index);
         return this;
@@ -330,7 +314,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder replace(@NonNegative int start, @NonNegative int end, String str) {
         super.replace(start, end, str);
         return this;
@@ -340,7 +323,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int index, char[] str, @IndexOrHigh({"#2"}) int offset,
                                 @IndexOrHigh({"#2"}) int len)
     {
@@ -362,7 +344,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, @Nullable String str) {
         super.insert(offset, str);
         return this;
@@ -372,7 +353,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, char[] str) {
         super.insert(offset, str);
         return this;
@@ -382,7 +362,6 @@ public final @Mutable class StringBuilder
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int dstOffset, @Nullable CharSequence s) {
             super.insert(dstOffset, s);
             return this;
@@ -392,7 +371,6 @@ public final @Mutable class StringBuilder
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int dstOffset, @Nullable CharSequence s,
                                 @NonNegative int start, @NonNegative int end)
     {
@@ -404,7 +382,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, boolean b) {
         super.insert(offset, b);
         return this;
@@ -414,7 +391,6 @@ public final @Mutable class StringBuilder
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, char c) {
         super.insert(offset, c);
         return this;
@@ -424,7 +400,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, int i) {
         super.insert(offset, i);
         return this;
@@ -434,7 +409,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, long l) {
         super.insert(offset, l);
         return this;
@@ -444,7 +418,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, float f) {
         super.insert(offset, f);
         return this;
@@ -454,7 +427,6 @@ public final @Mutable class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder insert(@NonNegative int offset, double d) {
         super.insert(offset, d);
         return this;
@@ -485,7 +457,6 @@ public final @Mutable class StringBuilder
     }
 
     @Override
-    @SideEffectsOnly("this")
     public StringBuilder reverse() {
         super.reverse();
         return this;

@@ -45,7 +45,6 @@ import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.AbstractQueue;
@@ -806,7 +805,6 @@ public class LinkedBlockingQueue<E extends @Readonly Object> extends AbstractQue
             return next != null;
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty Itr this) {
             Node<E> p;
             if ((p = next) == null)
