@@ -67,7 +67,8 @@ import java.util.stream.Collector;
  * @since 1.8
  */
 @AnnotatedFor({"lock", "nullness"})
-@Mutable public class LongSummaryStatistics implements LongConsumer, IntConsumer {
+@SuppressWarnings("pico") // Not interesting class, fix later
+public class LongSummaryStatistics implements LongConsumer, IntConsumer {
     private long count;
     private long sum;
     private long min = Long.MAX_VALUE;
