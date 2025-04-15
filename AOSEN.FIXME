@@ -1,0 +1,64 @@
+Action to take: fix copyof and copyofrange method.
+
+1. PICO Flow
+2. PICO inner class array field initializer
+    class A {
+        Object[] a;
+        class B {
+            Object[] b = a;
+        }
+    }
+3. PICO constructor type
+    question:
+        @RDM class A {
+            @RDM Object obj;
+            A (@RDM Object obj) {
+                // If inside constructor `this` is @Mutable, then obj should @Mutable as well.
+                // This is bad, because new @Immutable A(obj) should not expect a obj to be @Mutable.
+                this.obj = obj;
+            }
+        }
+4. Clone method. How to allow different reciever type
+5. Unique type conversion
+    polymutable(elt) Object polymutable(container) [] copyof(polymutable(container) Collection<polymutable(ele) E> coll){
+
+    	polymutable Object @Mutable [] newArray = new ...;
+
+    	for () {
+    		newArray[i] = coll.get(i);
+    	}
+
+    	return newArray; // polymutable(elt) Object @Mutable @Unique []
+    					// polymutable(elt) Object polymutable(container) []
+    }
+6. Uniqueness typing design. Class bound annotation to identity move or copy semantics. Object creation should always be unique.
+7. Cast is implemented incorrectly
+8. Covariant annotation does not work correctly
+9. Type state system for assignment once. Hashcode() @AssignHash0or1
+10. Allow @PolyMutable as a type argument
+public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable AscendingSubMap<K,V> this) {
+            EntrySetView es = entrySetView;
+            return (es != null) ? es : (entrySetView = new @PolyMutable AscendingEntrySetView());
+        }
+@ReceiverDependentMutable final class AscendingEntrySetView extends EntrySetView {
+            public Iterator<Map.Entry<K,V>> iterator(@Readonly AscendingEntrySetView this) {
+                return new SubMapEntryIterator(absLowest(), absHighFence());
+            }
+        }
+
+        @ReceiverDependentMutable abstract class EntrySetView extends AbstractSet<Map.@Readonly Entry<K,V>>
+
+        ./jdk/src/java.base/share/classes/java/util/TreeMap.java:2325: error: [return.type.incompatible] incompatible types in return.
+                    return (es != null) ? es : (entrySetView = new @PolyMutable AscendingEntrySetView());
+                                        ^
+          type of expression: @PolyMutable Set<@Readonly Entry<K extends @Immutable Object, V extends @Readonly Object>>
+          method return type: @PolyMutable Set<@PolyMutable Entry<K extends @Immutable Object, V extends @Readonly Object>>
+
+11. ReceiverDependentMutable depends on the type of outer class.
+    Iterator {
+        @Readonly Entry<K,V> e;
+
+
+    }
+
+
