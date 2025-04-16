@@ -38,6 +38,7 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
@@ -5070,6 +5071,7 @@ public class Arrays {
      * @since 1.5
      */
     @SideEffectFree
+    @SuppressWarnings("pico:type.argument.type.incompatible") // PICO hashset upperbound not correct
     public static @MinLen(2) String deepToString(@PolyInterned @PolyMustCall @PolyNull @PolySigned @Readonly Object @PolyMustCall @Nullable @Readonly [] a) {
         if (a == null)
             return "null";
@@ -5077,13 +5079,13 @@ public class Arrays {
         int bufLen = 20 * a.length;
         if (a.length != 0 && bufLen <= 0)
             bufLen = Integer.MAX_VALUE;
-        StringBuilder buf = new @Mutable StringBuilder(bufLen);
-        deepToString(a, buf, new HashSet<>());
+        StringBuilder buf = new StringBuilder(bufLen);
+        deepToString(a, buf, new HashSet<@Readonly Object @Readonly []>());
         return buf.toString();
     }
 
-    private static void deepToString(@Readonly Object @Readonly [] a, @Mutable StringBuilder buf,
-                                     @Mutable Set<@Readonly Object @Readonly []> dejaVu) {
+    private static void deepToString(@Readonly Object @Readonly [] a, StringBuilder buf,
+                                     Set<@Readonly Object @Readonly []> dejaVu) {
         if (a == null) {
             buf.append("null");
             return;

@@ -228,7 +228,7 @@ import java.util.Comparators;
      * @throws NullPointerException if the argument is null.
      * @since 1.8
      */
-    default Comparator<T> thenComparing(@Readonly Comparator<T> this, Comparator<? super T> other) {
+    default Comparator<T> thenComparing(@Readonly Comparator<T> this, @Readonly Comparator<? super T> other) {
         Objects.requireNonNull(other);
         return (Comparator<T> & Serializable) (c1, c2) -> {
             int res = compare(c1, c2);

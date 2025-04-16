@@ -706,6 +706,8 @@ import java.io.IOException;
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
+    //AOSEN: I want to use @PolyMutable here, but the type argument on super type does not allow me to do it.
+    @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable LinkedHashMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es;
         return (es = entrySet) == null ? (entrySet = new @PolyMutable LinkedEntrySet()) : es;
@@ -737,7 +739,7 @@ import java.io.IOException;
             return false;
         }
         @SideEffectFree
-        public final Spliterator<Map.Entry<K,V>> spliterator() {
+        public final Spliterator<Map.@Readonly Entry<K,V>> spliterator() {
             return Spliterators.spliterator(this, Spliterator.SIZED |
                                             Spliterator.ORDERED |
                                             Spliterator.DISTINCT);

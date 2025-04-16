@@ -1540,6 +1540,7 @@ final class CollSer implements Serializable {
      * @since 9
      */
     @java.io.Serial
+    @SuppressWarnings("pico:argument.type.incompatible") // covariant
     private @Immutable Object readResolve() throws ObjectStreamException {
         try {
             if (array == null) {
@@ -1560,7 +1561,7 @@ final class CollSer implements Serializable {
                     if (array.length == 0) {
                         return ImmutableCollections.EMPTY_MAP;
                     } else if (array.length == 2) {
-                        return new ImmutableCollections.Map1<>(array[0], array[1]);
+                        return new ImmutableCollections.Map1<@Immutable Object, @Readonly Object>(array[0], array[1]);
                     } else {
                         return new ImmutableCollections.MapN<>(array);
                     }

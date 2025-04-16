@@ -504,6 +504,7 @@ import jdk.internal.access.SharedSecrets;
      * @return a set view of the mappings contained in this enum map
      */
     @SideEffectFree
+    @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
     public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable EnumMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es = entrySet;
         if (es != null)
@@ -512,7 +513,7 @@ import jdk.internal.access.SharedSecrets;
             return entrySet = new @PolyMutable EntrySet();
     }
 
-    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@ReceiverDependentMutable Entry<K,V>> {
+    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
         public Iterator<Map.Entry<K,V>> iterator(@Readonly EntrySet this) {
             return new EntryIterator();

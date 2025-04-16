@@ -1196,6 +1196,7 @@ import java.util.function.Function;
      * {@code add} or {@code addAll} operations.
      */
     @SideEffectFree
+    @SuppressWarnings({"pico:assignment.type.incompatible", "pico:return.type.incompatible"}) // polyq on supertype's type argument
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable TreeMap<K, V> this) {
         EntrySet es = entrySet;
         return (es != null) ? es : (entrySet = new @PolyMutable EntrySet());
@@ -2315,6 +2316,7 @@ import java.util.function.Function;
         }
 
         @SideEffectFree
+        @SuppressWarnings({"pico:assignment.type.incompatible", "pico:return.type.incompatible"}) // polyq on supertype's type argument
         public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable AscendingSubMap<K,V> this) {
             EntrySetView es = entrySetView;
             return (es != null) ? es : (entrySetView = new @PolyMutable AscendingEntrySetView());
@@ -2408,6 +2410,7 @@ import java.util.function.Function;
         }
 
         @SideEffectFree
+        @SuppressWarnings({"pico:assignment.type.incompatible", "pico:return.type.incompatible"}) // polyq on supertype's type argument
         public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable DescendingSubMap<K,V> this) {
             EntrySetView es = entrySetView;
             return (es != null) ? es : (entrySetView = new @PolyMutable DescendingEntrySetView());

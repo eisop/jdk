@@ -1229,6 +1229,7 @@ import jdk.internal.access.SharedSecrets;
      * @return a set view of the identity-mappings contained in this map
      */
     @SideEffectFree
+    @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable IdentityHashMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es = entrySet;
         if (es != null)
@@ -1237,7 +1238,7 @@ import jdk.internal.access.SharedSecrets;
             return entrySet = new @PolyMutable EntrySet();
     }
 
-    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@ReceiverDependentMutable Entry<K,V>> {
+    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
         public @Mutable Iterator<Map.Entry<K,V>> iterator(@Readonly EntrySet this) {
             return new EntryIterator();

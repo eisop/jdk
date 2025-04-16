@@ -1595,6 +1595,7 @@ public class Collections {
         }
 
         @SideEffectFree
+        @SuppressWarnings("pico:assignment.type.incompatible") // covariant
         public @Immutable Set<Map.@Immutable Entry<K,V>> entrySet() {
             if (entrySet==null)
                 entrySet = new UnmodifiableEntrySet<>(m.entrySet());
@@ -1693,39 +1694,39 @@ public class Collections {
                 super((@Readonly Set)s);
             }
 
-            static <K extends @Immutable Object, V> Consumer<Map.@Immutable Entry<? extends K, ? extends V>> entryConsumer(
-                    Consumer<? super @Immutable Entry<K, V>> action) {
+            static <K extends @Immutable Object, V> Consumer<Map.@Readonly Entry<? extends K, ? extends V>> entryConsumer(
+                    Consumer<? super @Readonly Entry<K, V>> action) {
                 return e -> action.accept(new UnmodifiableEntry<>(e));
             }
 
-            public void forEach(Consumer<? super @Immutable Entry<K, V>> action) {
+            public void forEach(Consumer<? super @Readonly Entry<K, V>> action) {
                 Objects.requireNonNull(action);
                 c.forEach(entryConsumer(action));
             }
 
             static final class UnmodifiableEntrySetSpliterator<K extends @Immutable Object, V>
-                    implements Spliterator<Entry<K,V>> {
-                final Spliterator<Map.Entry<K, V>> s;
+                    implements Spliterator<@Readonly Entry<K,V>> {
+                final Spliterator<Map.@Readonly Entry<K, V>> s;
 
-                UnmodifiableEntrySetSpliterator(Spliterator<Entry<K, V>> s) {
+                UnmodifiableEntrySetSpliterator(Spliterator<@Readonly Entry<K, V>> s) {
                     this.s = s;
                 }
 
                 @Override
-                public boolean tryAdvance(Consumer<? super @Immutable Entry<K, V>> action) {
+                public boolean tryAdvance(Consumer<? super @Readonly Entry<K, V>> action) {
                     Objects.requireNonNull(action);
                     return s.tryAdvance(entryConsumer(action));
                 }
 
                 @Override
-                public void forEachRemaining(Consumer<? super @Immutable Entry<K, V>> action) {
+                public void forEachRemaining(Consumer<? super @Readonly Entry<K, V>> action) {
                     Objects.requireNonNull(action);
                     s.forEachRemaining(entryConsumer(action));
                 }
 
                 @Override
-                public Spliterator<Entry<K, V>> trySplit() {
-                    Spliterator<Entry<K, V>> split = s.trySplit();
+                public Spliterator<@Readonly Entry<K, V>> trySplit() {
+                    Spliterator<@Readonly Entry<K, V>> split = s.trySplit();
                     return split == null
                            ? null
                            : new UnmodifiableEntrySetSpliterator<>(split);
@@ -1758,37 +1759,37 @@ public class Collections {
             }
 
             @SuppressWarnings("unchecked")
-            public Spliterator<Entry<K,V>> spliterator() {
+            public Spliterator<@Readonly Entry<K,V>> spliterator() {
                 return new UnmodifiableEntrySetSpliterator<>(
-                        (Spliterator<Map.Entry<K, V>>) c.spliterator());
+                        (Spliterator<Map.@Readonly Entry<K, V>>) c.spliterator());
             }
 
             @Override
-            public Stream<Entry<K,V>> stream() {
+            public Stream<@Readonly Entry<K,V>> stream() {
                 return StreamSupport.stream(spliterator(), false);
             }
 
             @Override
-            public Stream<Entry<K,V>> parallelStream() {
+            public Stream<@Readonly Entry<K,V>> parallelStream() {
                 return StreamSupport.stream(spliterator(), true);
             }
 
             public Iterator<Map.Entry<K,V>> iterator() {
                 return new Iterator<Map.Entry<K,V>>() {
-                    private final Iterator<? extends Map.@Immutable Entry<? extends K, ? extends V>> i = c.iterator();
+                    private final Iterator<? extends Map.@Readonly Entry<? extends K, ? extends V>> i = c.iterator();
 
                     @Pure
                     @EnsuresNonEmptyIf(result = true, expression = "this")
                     public boolean hasNext() {
                         return i.hasNext();
                     }
-                    public Map.@Immutable Entry<K,V> next(/*@NonEmpty Iterator<Map.Entry<K,V>> this*/) {
+                    public Map.@Readonly Entry<K,V> next(/*@NonEmpty Iterator<Map.Entry<K,V>> this*/) {
                         return new UnmodifiableEntry<>(i.next());
                     }
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }
-                    public void forEachRemaining(Consumer<? super Map.@Immutable Entry<K, V>> action) {
+                    public void forEachRemaining(Consumer<? super Map.@Readonly Entry<K, V>> action) {
                         i.forEachRemaining(entryConsumer(action));
                     }
                 };
@@ -3912,6 +3913,7 @@ public class Collections {
         private transient @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
 
         @SideEffectFree
+        @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
         public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable CheckedMap<K,V> this) {
             if (entrySet==null)
                 entrySet = new @PolyMutable CheckedEntrySet<>(m.entrySet(), valueType);
