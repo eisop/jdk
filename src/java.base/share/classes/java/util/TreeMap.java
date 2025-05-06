@@ -1348,8 +1348,8 @@ import java.util.function.Function;
 
     @ReceiverDependentMutable class Values extends AbstractCollection<V> {
         @SideEffectFree
-        public @Mutable Iterator<V> iterator(@Readonly Values this) {
-            return new @Mutable ValueIterator(getFirstEntry());
+        public Iterator<V> iterator(@Readonly Values this) {
+            return new ValueIterator(getFirstEntry());
         }
 
         @Pure
@@ -1523,7 +1523,6 @@ import java.util.function.Function;
     /**
      * Base class for TreeMap Iterators
      */
-    //Aosen: How can we express that the field's type depends on outter class?
     @ReceiverDependentMutable abstract class PrivateEntryIterator<T> implements Iterator<T> {
         @Readonly Entry<K,V> next;
         @Readonly Entry<K,V> lastReturned;
@@ -2090,7 +2089,7 @@ import java.util.function.Function;
                 return next != null && next.key != fenceKey;
             }
 
-            final TreeMap.@Readonly Entry<K,V> nextEntry(@Readonly NavigableSubMap<K,V>.@Mutable SubMapIterator<T> this) {
+            final TreeMap.@PolyMutable Entry<K,V> nextEntry(@PolyMutable NavigableSubMap<K,V>.@Mutable SubMapIterator<T> this) {
                 TreeMap.Entry<K,V> e = next;
                 if (e == null || e.key == fenceKey)
                     throw new NoSuchElementException();
@@ -2439,9 +2438,9 @@ import java.util.function.Function;
         private static final long serialVersionUID = -6520786458950516097L;
         private boolean fromStart = false, toEnd = false;
         @SuppressWarnings("serial") // Conditionally serializable
-        private K fromKey;
+        private @Assignable K fromKey;
         @SuppressWarnings("serial") // Conditionally serializable
-        private K toKey;
+        private @Assignable K toKey;
         @java.io.Serial
         private Object readResolve(@Mutable SubMap this) {
             return new AscendingSubMap<K,V>(TreeMap.this,
@@ -3348,7 +3347,7 @@ import java.util.function.Function;
         }
     }
 
-    @Mutable static final class EntrySpliterator<K extends @Immutable Object,V>
+    static final class EntrySpliterator<K extends @Immutable Object,V>
         extends TreeMapSpliterator<K,V>
         implements Spliterator<Map.Entry<K,V>> {
         EntrySpliterator(@Readonly TreeMap<K,V> tree,

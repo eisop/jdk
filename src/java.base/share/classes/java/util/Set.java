@@ -134,7 +134,7 @@ import org.checkerframework.framework.qual.DefaultQualifierForUse;
  */
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness", "index"})
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
 @ReceiverDependentMutable public interface Set<E> extends Collection<E> {
     // Query Operations
 
@@ -760,12 +760,12 @@ import org.checkerframework.framework.qual.DefaultQualifierForUse;
      * @throws NullPointerException if coll is null, or if it contains any nulls
      * @since 10
      */
-    @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // covariant
-    static <E extends @Readonly Object> @PolyNonEmpty @Immutable Set<E> copyOf(@PolyNonEmpty @Readonly Collection<? extends E> coll) {
+    @SuppressWarnings("unchecked")
+    static <E extends @Immutable Object> @PolyNonEmpty @Immutable Set<E> copyOf(@PolyNonEmpty @Readonly Collection<? extends E> coll) {
         if (coll instanceof ImmutableCollections.AbstractImmutableSet) {
             return (@Immutable Set<E>)coll;
         } else {
-            return (@Immutable Set<E>)Set.of(new HashSet<@Immutable E>(coll).toArray());
+            return (@Immutable Set<E>)Set.of(new HashSet<E>(coll).toArray());
         }
     }
 }

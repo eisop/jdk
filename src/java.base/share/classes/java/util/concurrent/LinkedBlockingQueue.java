@@ -887,7 +887,7 @@ public class LinkedBlockingQueue<E extends @Readonly Object> extends AbstractQue
      * A customized variant of Spliterators.IteratorSpliterator.
      * Keep this class in sync with (very similar) LBDSpliterator.
      */
-    @Mutable private final class LBQSpliterator implements Spliterator<E> {
+    private final class LBQSpliterator implements Spliterator<E> {
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         Node<E> current;    // current node; null until initialized
         int batch;          // batch size for splits

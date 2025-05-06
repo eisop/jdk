@@ -27,6 +27,7 @@ package java.util;
 
 import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -820,7 +821,7 @@ public class Collections {
             rotate2(list, distance);
     }
 
-    private static <T> void rotate1(@Mutable List<T> list, int distance) {
+    private static <T> void rotate1(List<T> list, int distance) {
         int size = list.size();
         if (size == 0)
             return;
@@ -843,7 +844,7 @@ public class Collections {
         }
     }
 
-    private static void rotate2(@Mutable List<?> list, int distance) {
+    private static void rotate2(List<?> list, int distance) {
         int size = list.size();
         if (size == 0)
             return;
@@ -877,7 +878,7 @@ public class Collections {
      *         its list-iterator does not support the {@code set} operation.
      * @since  1.4
      */
-    public static <T> boolean replaceAll(@Mutable List<T> list, @Nullable T oldVal, T newVal) {
+    public static <T> boolean replaceAll(List<T> list, @Nullable T oldVal, T newVal) {
         boolean result = false;
         int size = list.size();
         if (size < REPLACEALL_THRESHOLD || list instanceof RandomAccess) {
@@ -2153,7 +2154,7 @@ public class Collections {
         @SuppressWarnings("serial") // Conditionally serializable
         final Collection<E> c;  // Backing Collection
         @SuppressWarnings("serial") // Conditionally serializable
-        final @Readonly Object mutex;     // Object on which to synchronize
+        final @NotOnlyInitialized @Readonly Object mutex;     // Object on which to synchronize
 
         SynchronizedCollection(@ReceiverDependentMutable Collection<E> c) {
             this.c = Objects.requireNonNull(c);
@@ -2744,7 +2745,7 @@ public class Collections {
         @SuppressWarnings("serial") // Conditionally serializable
         private final Map<K,V> m;     // Backing Map
         @SuppressWarnings("serial") // Conditionally serializable
-        final @Readonly Object      mutex;        // Object on which to synchronize
+        final @NotOnlyInitialized @Readonly Object      mutex;        // Object on which to synchronize
 
         SynchronizedMap(@ReceiverDependentMutable Map<K,V> m) {
             this.m = Objects.requireNonNull(m);
@@ -4023,7 +4024,7 @@ public class Collections {
                 throw new UnsupportedOperationException();
             }
 
-            public @Mutable Iterator<Map.Entry<K,V>> iterator(@Mutable CheckedEntrySet<K,V> this) {
+            public Iterator<Map.Entry<K,V>> iterator(@Mutable CheckedEntrySet<K,V> this) {
                 final Iterator<Map.Entry<K, V>> i = s.iterator();
 
                 return new Iterator<Map.Entry<K,V>>() {
@@ -5437,7 +5438,7 @@ public class Collections {
 
         @SideEffectFree
         @SuppressWarnings("unchecked")
-        public <T> @Nullable T[] toArray(@PolyNull T @Mutable [] a) {
+        public <T> @Nullable T[] toArray(@PolyNull T[] a) {
             final int n = this.n;
             if (a.length < n) {
                 a = (T[])java.lang.reflect.Array

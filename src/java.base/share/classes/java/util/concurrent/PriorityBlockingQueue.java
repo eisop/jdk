@@ -953,7 +953,7 @@ public class PriorityBlockingQueue<E extends Object> extends AbstractQueue<E>
     /**
      * Immutable snapshot spliterator that binds to elements "late".
      */
-    @Mutable final class PBQSpliterator implements Spliterator<E> {
+    final class PBQSpliterator implements Spliterator<E> {
         Object[] array;        // null until late-bound-initialized
         int index;
         int fence;

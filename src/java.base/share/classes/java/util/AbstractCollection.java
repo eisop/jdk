@@ -163,10 +163,9 @@ import jdk.internal.util.ArraysSupport;
      * }</pre>
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // Conversion
     public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly AbstractCollection<@PolyNull @PolySigned @PolyMutable E> this) {
         // Estimate size of array; be prepared to see more or fewer elements
-        @PolyMutable Object [] r = new @PolyMutable Object @Mutable [size()];
+        @PolyMutable Object [] r = new @PolyMutable Object [size()];
         Iterator<@PolyMutable E> it = iterator();
         for (int i = 0; i < r.length; i++) {
             if (! it.hasNext()) // fewer elements than expected
@@ -206,7 +205,7 @@ import jdk.internal.util.ArraysSupport;
      */
     @SideEffectFree
     @SuppressWarnings("unchecked")
-    public <T> @Nullable T @Mutable [] toArray(@PolyNull T @Mutable [] a) {
+    public <T> @Nullable T[] toArray(@PolyNull T[] a) {
         // Estimate size of array; be prepared to see more or fewer elements
         int size = size();
         T[] r = a.length >= size ? a :
@@ -245,7 +244,7 @@ import jdk.internal.util.ArraysSupport;
      *         further elements returned by the iterator, trimmed to size
      */
     @SuppressWarnings("unchecked")
-    private static <T> T @Mutable [] finishToArray(T @Mutable [] r, @Mutable Iterator<?> it) {
+    private static <T> T[] finishToArray(T[] r, Iterator<?> it) {
         int len = r.length;
         int i = len;
         while (it.hasNext()) {

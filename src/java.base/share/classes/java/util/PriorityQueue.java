@@ -850,7 +850,7 @@ public class PriorityQueue<E extends @NonNull Object> extends AbstractQueue<E>
         return new PriorityQueueSpliterator(0, -1, 0);
     }
 
-    @Mutable final class PriorityQueueSpliterator implements Spliterator<E> {
+    final class PriorityQueueSpliterator implements Spliterator<E> {
         private int index;            // current index, modified on advance/split
         private int fence;            // -1 until first use
         private int expectedModCount; // initialized when fence set

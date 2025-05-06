@@ -26,6 +26,7 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
@@ -46,8 +47,6 @@ import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
-import org.checkerframework.framework.qual.CFComment;
-import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -462,6 +461,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws IllegalArgumentException if the initial capacity is negative
      *         or the load factor is nonpositive
      */
+    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public HashMap(@NonNegative int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal initial capacity: " +
@@ -490,6 +490,7 @@ import jdk.internal.access.SharedSecrets;
      * Constructs an empty {@code HashMap} with the default initial capacity
      * (16) and the default load factor (0.75).
      */
+    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public HashMap() {
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
     }
@@ -516,7 +517,7 @@ import jdk.internal.access.SharedSecrets;
      * @param evict false when initially constructing this map, else
      * true (relayed to method afterNodeInsertion).
      */
-    final void putMapEntries(@Mutable HashMap<K,V> this, @Readonly Map<? extends K, ? extends V> m, boolean evict) {
+    final void putMapEntries(@Mutable @UnknownInitialization HashMap<K,V> this, @Readonly Map<? extends K, ? extends V> m, boolean evict) {
         int s = m.size();
         if (s > 0) {
             if (table == null) { // pre-size
@@ -652,7 +653,7 @@ import jdk.internal.access.SharedSecrets;
      * @param evict if false, the table is in creation mode.
      * @return previous value, or null if none
      */
-    final V putVal(@Mutable HashMap<K, V> this, int hash, K key, V value, boolean onlyIfAbsent,
+    final V putVal(@Mutable @UnknownInitialization HashMap<K, V> this, int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
@@ -705,7 +706,7 @@ import jdk.internal.access.SharedSecrets;
      * @return the table
      */
     @SuppressWarnings("cast.unsafe") // https://github.com/typetools/checker-framework/issues/2731
-    final Node<K,V>[] resize(@Mutable HashMap<K, V> this) {
+    final Node<K,V>[] resize(@Mutable @UnknownInitialization HashMap<K, V> this) {
         Node<K,V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
         int oldThr = threshold;
@@ -812,7 +813,7 @@ import jdk.internal.access.SharedSecrets;
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
      */
-    public void putAll(@Mutable @GuardSatisfied HashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
+    public void putAll(@Mutable @UnknownInitialization @GuardSatisfied HashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         putMapEntries(m, true);
     }
 
@@ -1028,7 +1029,7 @@ import jdk.internal.access.SharedSecrets;
         public final Spliterator<K> spliterator(@Readonly KeySet this) {
             return new KeySpliterator<>(HashMap.this, 0, -1, 0, 0);
         }
-        // AOSEN: How to specify the polymutable for return array's element type
+        // AOSEN: class polymorphism qualifier
         public Object[] toArray(@Readonly KeySet this) {
             return keysToArray(new Object[size]);
         }
@@ -1133,7 +1134,7 @@ import jdk.internal.access.SharedSecrets;
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
-    @SuppressWarnings("pico:assignment.type.incompatible") // AOSEN: how to fix this
+    @SuppressWarnings("pico:assignment.type.incompatible") // class polymorphism qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@PolyMutable @GuardSatisfied HashMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es;
         return (es = entrySet) == null ? (entrySet = new @PolyMutable EntrySet()) : es;
@@ -1631,7 +1632,7 @@ import jdk.internal.access.SharedSecrets;
             return next != null;
         }
 
-        @SuppressWarnings("pico:return.type.incompatible") //pico not expressive enough
+        @SuppressWarnings("pico:return.type.incompatible") //field depends on outer class
         final @PolyMutable Node<K,V> nextNode(@PolyMutable HashMap<K,V>.@NonEmpty @Mutable HashIterator this) {
             @PolyMutable Node<K,V>[] t;
             Node<K,V> e = next;
@@ -2378,8 +2379,8 @@ import jdk.internal.access.SharedSecrets;
         /* ------------------------------------------------------------ */
         // Red-black tree methods, all adapted from CLR
 
-        static <K extends @Immutable Object,V> TreeNode<K,V> rotateLeft(@Mutable TreeNode<K,V> root,
-                                                                        @Mutable TreeNode<K,V> p) {
+        static <K extends @Immutable Object,V> TreeNode<K,V> rotateLeft(TreeNode<K,V> root,
+                                                                        TreeNode<K,V> p) {
             TreeNode<K,V> r, pp, rl;
             if (p != null && (r = p.right) != null) {
                 if ((rl = p.right = r.left) != null)

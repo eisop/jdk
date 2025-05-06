@@ -160,7 +160,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(int @Mutable [] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(int[] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         int size = high - low;
 
         if (parallelism > 1 && size > MIN_PARALLEL_SORT_SIZE) {
@@ -183,7 +183,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(Sorter sorter, int @Mutable [] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(Sorter sorter, int[] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         while (true) {
             int end = high - 1, size = high - low;
 
@@ -914,7 +914,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(long @Mutable [] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(long[] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         int size = high - low;
 
         if (parallelism > 1 && size > MIN_PARALLEL_SORT_SIZE) {
@@ -937,7 +937,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(Sorter sorter, long @Mutable [] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(Sorter sorter, long[] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         while (true) {
             int end = high - 1, size = high - low;
 
@@ -1661,7 +1661,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(byte @Mutable [] a, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(byte[] a, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         if (high - low > MIN_BYTE_COUNTING_SORT_SIZE) {
             countingSort(a, low, high);
         } else {
@@ -1749,7 +1749,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(char @Mutable [] a, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(char[] a, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         if (high - low > MIN_SHORT_OR_CHAR_COUNTING_SORT_SIZE) {
             countingSort(a, low, high);
         } else {
@@ -1767,7 +1767,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(char @Mutable [] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(char[] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         while (true) {
             int end = high - 1, size = high - low;
 
@@ -2068,7 +2068,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(short @Mutable [] a, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(short[] a, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         if (high - low > MIN_SHORT_OR_CHAR_COUNTING_SORT_SIZE) {
             countingSort(a, low, high);
         } else {
@@ -2086,7 +2086,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(short @Mutable [] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(short[] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         while (true) {
             int end = high - 1, size = high - low;
 
@@ -2403,7 +2403,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(float @Mutable [] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(float[] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         /*
          * Phase 1. Count the number of negative zero -0.0f,
          * turn them into positive zero, and move all NaNs
@@ -2478,7 +2478,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(Sorter sorter, float @Mutable [] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(Sorter sorter, float[] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         while (true) {
             int end = high - 1, size = high - low;
 
@@ -3209,7 +3209,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(double @Mutable [] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(double[] a, int parallelism, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         /*
          * Phase 1. Count the number of negative zero -0.0d,
          * turn them into positive zero, and move all NaNs
@@ -3284,7 +3284,7 @@ final @UsesObjectEquals class DualPivotQuicksort {
      * @param low the index of the first element, inclusive, to be sorted
      * @param high the index of the last element, exclusive, to be sorted
      */
-    static void sort(Sorter sorter, double @Mutable [] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
+    static void sort(Sorter sorter, double[] a, int bits, @IndexOrHigh({"#1"}) int low, @IndexOrHigh({"#1"}) int high) {
         while (true) {
             int end = high - 1, size = high - low;
 

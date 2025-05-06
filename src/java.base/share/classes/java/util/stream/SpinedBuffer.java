@@ -279,7 +279,7 @@ class SpinedBuffer<E>
      * Return a {@link Spliterator} describing the contents of the buffer.
      */
     public Spliterator<E> spliterator() {
-        @Mutable class Splitr implements Spliterator<E> {
+         class Splitr implements Spliterator<E> {
             // The current spine index
             int splSpineIndex;
 

@@ -26,6 +26,7 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.lock.qual.ReleasesNoLocks;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -45,7 +46,6 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
-import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.util.Map.Entry;
 
@@ -240,7 +240,7 @@ import java.util.Map.Entry;
      */
     @ReleasesNoLocks
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@Mutable @GuardSatisfied AbstractMap<K, V> this, K key, V value) {
+    public @Nullable V put(@Mutable @UnknownInitialization @GuardSatisfied AbstractMap<K, V> this, K key, V value) {
         throw new UnsupportedOperationException();
     }
 
@@ -311,7 +311,7 @@ import java.util.Map.Entry;
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
-    public void putAll(@Mutable @GuardSatisfied AbstractMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
+    public void putAll(@Mutable @UnknownInitialization @GuardSatisfied AbstractMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
             put(e.getKey(), e.getValue());
     }
@@ -620,7 +620,7 @@ import java.util.Map.Entry;
      *
      * @return a shallow copy of this map
      */
-    protected @Mutable Object clone(@Mutable AbstractMap<K,V> this) throws CloneNotSupportedException {
+    protected Object clone(@Mutable AbstractMap<K,V> this) throws CloneNotSupportedException {
         AbstractMap<?,?> result = (AbstractMap<?,?>)super.clone();
         result.keySet = null;
         result.values = null;

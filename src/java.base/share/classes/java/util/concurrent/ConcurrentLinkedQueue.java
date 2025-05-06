@@ -883,7 +883,7 @@ public class ConcurrentLinkedQueue<E extends @NonNull Object> extends AbstractQu
     }
 
     /** A customized variant of Spliterators.IteratorSpliterator */
-    @Mutable final class CLQSpliterator implements Spliterator<E> {
+    final class CLQSpliterator implements Spliterator<E> {
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         Node<E> current;    // current node; null until initialized
         int batch;          // batch size for splits

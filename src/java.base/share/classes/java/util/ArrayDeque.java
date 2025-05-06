@@ -106,7 +106,7 @@ import jdk.internal.access.SharedSecrets;
  * @param <E> the type of elements held in this deque
  * @since   1.6
  */
-@AnnotatedFor({"lock", "nullness", "index"})
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
 @ReceiverDependentMutable public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCollection<E>
                            implements Deque<E>, Cloneable, Serializable
 {
@@ -419,7 +419,6 @@ import jdk.internal.access.SharedSecrets;
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    @SuppressWarnings("pico") // Revisit later
     public E getFirst(@GuardSatisfied @NonEmpty @Readonly ArrayDeque<E> this) {
         E e = elementAt(elements, head);
         if (e == null)
@@ -703,7 +702,7 @@ import jdk.internal.access.SharedSecrets;
         return new DeqIterator();
     }
 
-    public @PolyNonEmpty @Mutable Iterator<E> descendingIterator(@PolyNonEmpty @Readonly ArrayDeque<E> this) {
+    public @PolyNonEmpty Iterator<E> descendingIterator(@PolyNonEmpty @Readonly ArrayDeque<E> this) {
         return new DescendingIterator();
     }
 
@@ -1081,7 +1080,7 @@ import jdk.internal.access.SharedSecrets;
      * Nulls out slots starting at array index i, upto index end.
      * Condition i == end means "empty" - nothing to do.
      */
-    private static void circularClear(@PolyNull @PolySigned @Readonly Object @Mutable [] es, int i, int end) {
+    private static void circularClear(@PolyNull @PolySigned @Readonly Object[] es, int i, int end) {
         // assert 0 <= i && i < es.length;
         // assert 0 <= end && end < es.length;
         for (int to = (i <= end) ? end : es.length;

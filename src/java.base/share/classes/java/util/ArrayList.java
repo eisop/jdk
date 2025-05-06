@@ -1776,7 +1776,7 @@ import jdk.internal.util.ArraysSupport;
     @SuppressWarnings("unchecked")
     public void sort(@Mutable ArrayList<E> this, @Nullable Comparator<? super E> c) {
         final int expectedModCount = modCount;
-        Arrays.sort((E @Mutable []) elementData, 0, size, c);
+        Arrays.sort((E[]) elementData, 0, size, c);
         if (modCount != expectedModCount)
             throw new ConcurrentModificationException();
         modCount++;

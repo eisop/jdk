@@ -156,7 +156,7 @@ import java.util.function.Consumer;
  */
 @CFComment({"lock: permits null keys and values"})
 @AnnotatedFor({"lock", "index", "nullness"})
-@SuppressWarnings("pico") // AOSEN: hard to handle...
+@SuppressWarnings("pico") // AOSEN: Will need more effort
 @ReceiverDependentMutable public class WeakHashMap<K extends @Immutable Object,V>
     extends AbstractMap<K,V>
     implements Map<K,V> {
@@ -181,7 +181,7 @@ import java.util.function.Consumer;
     /**
      * The table, resized as necessary. Length MUST Always be a power of two.
      */
-    Entry<K,V>[] table;
+    @ReceiverDependentMutable Entry<K,V>[] table;
 
     /**
      * The number of key-value mappings contained in this weak hash map.
@@ -275,6 +275,7 @@ import java.util.function.Consumer;
      * @throws  NullPointerException if the specified map is null
      * @since   1.3
      */
+    @SuppressWarnings("pico") // PICO constructor fix
     public @PolyNonEmpty WeakHashMap(@PolyNonEmpty Map<? extends K, ? extends V> m) {
         this(Math.max((int) ((float)m.size() / DEFAULT_LOAD_FACTOR + 1.0F),
                 DEFAULT_INITIAL_CAPACITY),
@@ -292,14 +293,14 @@ import java.util.function.Consumer;
     /**
      * Use NULL_KEY for key if it is null.
      */
-    private static Object maskNull(@Readonly Object key) {
+    private static @PolyMutable Object maskNull(@PolyMutable Object key) {
         return (key == null) ? NULL_KEY : key;
     }
 
     /**
      * Returns internal representation of null key back to caller as null.
      */
-    static Object unmaskNull(@Readonly Object key) {
+    static @PolyMutable Object unmaskNull(@PolyMutable Object key) {
         return (key == NULL_KEY) ? null : key;
     }
 
@@ -546,7 +547,7 @@ import java.util.function.Consumer;
     }
 
     /** Transfers all entries from src to dest tables */
-    private void transfer(Entry<K,V> @Mutable [] src, Entry<K,V> @Mutable [] dest) {
+    private void transfer(Entry<K,V>[] src, Entry<K,V>[] dest) {
         for (int j = 0; j < src.length; ++j) {
             Entry<K,V> e = src[j];
             src[j] = null;
@@ -913,8 +914,8 @@ import java.util.function.Consumer;
 
     @ReceiverDependentMutable private class KeySet extends AbstractSet<K> {
         @SideEffectFree
-        public @Mutable Iterator<K> iterator(@Readonly KeySet this) {
-            return new @Mutable KeyIterator();
+        public Iterator<K> iterator(@Readonly KeySet this) {
+            return new KeyIterator();
         }
 
         @Pure
@@ -972,8 +973,8 @@ import java.util.function.Consumer;
 
     @ReceiverDependentMutable private class Values extends AbstractCollection<V> {
         @SideEffectFree
-        public @Mutable Iterator<V> iterator(@Readonly Values this) {
-            return new @Mutable ValueIterator();
+        public Iterator<V> iterator(@Readonly Values this) {
+            return new ValueIterator();
         }
 
         @Pure
@@ -1017,16 +1018,16 @@ import java.util.function.Consumer;
         return es != null ? es : (entrySet = new EntrySet());
     }
 
-    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@ReceiverDependentMutable Entry<K,V>> {
+    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
-        public @Mutable Iterator<Map.Entry<K,V>> iterator(@Readonly EntrySet this) {
+        public Iterator<Map.@Readonly Entry<K,V>> iterator(@Readonly EntrySet this) {
             return new EntryIterator();
         }
 
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@Readonly EntrySet this, @Nullable @UnknownSignedness @Readonly Object o) {
-            return o instanceof Map.Entry<?, ?> e
+            return o instanceof Map.@Readonly Entry<?, ?> e
                     && getEntry(e.getKey()) != null
                     && getEntry(e.getKey()).equals(e);
         }
@@ -1044,9 +1045,9 @@ import java.util.function.Consumer;
             WeakHashMap.this.clear();
         }
 
-        private List<Map.Entry<K,V>> deepCopy() {
-            List<Map.Entry<K,V>> list = new ArrayList<>(size());
-            for (Map.Entry<K,V> e : this)
+        private List<Map.@Readonly Entry<K,V>> deepCopy() {
+            List<Map.@Readonly Entry<K,V>> list = new ArrayList<>(size());
+            for (Map.@Readonly Entry<K,V> e : this)
                 list.add(new AbstractMap.SimpleEntry<>(e));
             return list;
         }
@@ -1062,7 +1063,7 @@ import java.util.function.Consumer;
         }
 
         @SideEffectFree
-        public Spliterator<Map.Entry<K,V>> spliterator() {
+        public Spliterator<Map.@Readonly Entry<K,V>> spliterator() {
             return new EntrySpliterator<>(WeakHashMap.this, 0, -1, 0, 0);
         }
     }

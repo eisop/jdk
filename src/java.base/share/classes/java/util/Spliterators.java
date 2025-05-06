@@ -958,7 +958,7 @@ public final class Spliterators {
      * A Spliterator designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code Object[]} array.
      */
-    @Mutable static final class ArraySpliterator<T> implements Spliterator<T> {
+    static final class ArraySpliterator<T> implements Spliterator<T> {
         /**
          * The array, explicitly typed as Object[]. Unlike in some other
          * classes (see for example CR 6260652), we do not need to
@@ -1050,7 +1050,7 @@ public final class Spliterators {
      * A Spliterator.OfInt designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code int[]} array.
      */
-    @Mutable static final class IntArraySpliterator implements Spliterator.OfInt {
+    static final class IntArraySpliterator implements Spliterator.OfInt {
         private final int[] array;
         private int index;        // current index, modified on advance/split
         private final int fence;  // one past last index
@@ -1133,7 +1133,7 @@ public final class Spliterators {
      * A Spliterator.OfLong designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code int[]} array.
      */
-    @Mutable static final class LongArraySpliterator implements Spliterator.OfLong {
+    static final class LongArraySpliterator implements Spliterator.OfLong {
         private final long[] array;
         private int index;        // current index, modified on advance/split
         private final int fence;  // one past last index
@@ -1216,7 +1216,7 @@ public final class Spliterators {
      * A Spliterator.OfDouble designed for use by sources that traverse and split
      * elements maintained in an unmodifiable {@code int[]} array.
      */
-    @Mutable static final class DoubleArraySpliterator implements Spliterator.OfDouble {
+    static final class DoubleArraySpliterator implements Spliterator.OfDouble {
         private final double[] array;
         private int index;        // current index, modified on advance/split
         private final int fence;  // one past last index
@@ -1322,7 +1322,7 @@ public final class Spliterators {
      * @see #spliterator(Iterator, long, int)
      * @since 1.8
      */
-    @Mutable public abstract static class AbstractSpliterator<T> implements Spliterator<T> {
+    public abstract static class AbstractSpliterator<T> implements Spliterator<T> {
         static final int BATCH_UNIT = 1 << 10;  // batch array size increment
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         private final int characteristics;
@@ -1445,7 +1445,7 @@ public final class Spliterators {
      * @see #spliterator(java.util.PrimitiveIterator.OfInt, long, int)
      * @since 1.8
      */
-    @Mutable public abstract static class AbstractIntSpliterator implements Spliterator.OfInt {
+    public abstract static class AbstractIntSpliterator implements Spliterator.OfInt {
         static final int MAX_BATCH = AbstractSpliterator.MAX_BATCH;
         static final int BATCH_UNIT = AbstractSpliterator.BATCH_UNIT;
         private final int characteristics;
@@ -1555,7 +1555,7 @@ public final class Spliterators {
      * @see #spliterator(java.util.PrimitiveIterator.OfLong, long, int)
      * @since 1.8
      */
-    @Mutable public abstract static class AbstractLongSpliterator implements Spliterator.OfLong {
+    public abstract static class AbstractLongSpliterator implements Spliterator.OfLong {
         static final int MAX_BATCH = AbstractSpliterator.MAX_BATCH;
         static final int BATCH_UNIT = AbstractSpliterator.BATCH_UNIT;
         private final int characteristics;
@@ -1665,7 +1665,7 @@ public final class Spliterators {
      * @see #spliterator(java.util.PrimitiveIterator.OfDouble, long, int)
      * @since 1.8
      */
-    @Mutable public abstract static class AbstractDoubleSpliterator implements Spliterator.OfDouble {
+    public abstract static class AbstractDoubleSpliterator implements Spliterator.OfDouble {
         static final int MAX_BATCH = AbstractSpliterator.MAX_BATCH;
         static final int BATCH_UNIT = AbstractSpliterator.BATCH_UNIT;
         private final int characteristics;
@@ -1757,7 +1757,7 @@ public final class Spliterators {
      * operations. The spliterator implements {@code trySplit} to
      * permit limited parallelism.
      */
-    @Mutable static class IteratorSpliterator<T> implements Spliterator<T> {
+    static class IteratorSpliterator<T> implements Spliterator<T> {
         static final int BATCH_UNIT = 1 << 10;  // batch array size increment
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         private final Collection<? extends T> collection; // null OK
@@ -2003,7 +2003,7 @@ public final class Spliterators {
         }
     }
 
-    @Mutable static final class LongIteratorSpliterator implements Spliterator.OfLong {
+    static final class LongIteratorSpliterator implements Spliterator.OfLong {
         static final int BATCH_UNIT = IteratorSpliterator.BATCH_UNIT;
         static final int MAX_BATCH = IteratorSpliterator.MAX_BATCH;
         private final PrimitiveIterator.OfLong it;
@@ -2097,7 +2097,7 @@ public final class Spliterators {
         }
     }
 
-    @Mutable static final class DoubleIteratorSpliterator implements Spliterator.OfDouble {
+    static final class DoubleIteratorSpliterator implements Spliterator.OfDouble {
         static final int BATCH_UNIT = IteratorSpliterator.BATCH_UNIT;
         static final int MAX_BATCH = IteratorSpliterator.MAX_BATCH;
         private final PrimitiveIterator.OfDouble it;

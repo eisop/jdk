@@ -121,9 +121,9 @@ public @UsesObjectEquals class Timer {
         private final TaskQueue queue;
         private final TimerThread thread;
 
-        ThreadReaper(TaskQueue q, TimerThread t) {
-            this.queue = q;
-            this.thread = t;
+        ThreadReaper(TaskQueue queue, TimerThread thread) {
+            this.queue = queue;
+            this.thread = thread;
         }
 
         public void run() {

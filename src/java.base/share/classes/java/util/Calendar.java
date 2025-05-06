@@ -328,7 +328,7 @@ import sun.util.spi.CalendarProvider;
  */
 @AnnotatedFor({"lock", "nullness", "index"})
 @SuppressWarnings("pico") // Not interesting class, fix later
-@Mutable public abstract class Calendar implements Serializable, Cloneable, Comparable<Calendar> {
+public abstract class Calendar implements Serializable, Cloneable, Comparable<Calendar> {
 
     // Data flow in Calendar
     // ---------------------

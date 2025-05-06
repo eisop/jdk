@@ -323,6 +323,7 @@ import java.io.IOException;
             removeNode(hash(key), key, null, false, true);
         }
     }
+
     @SuppressWarnings("pico") // Still can not type this as readonly
     void afterNodeAccess(@Readonly LinkedHashMap<K,V> this, @Readonly Node<K,V> e) { // move node to last
         LinkedHashMap.Entry<K,V> last;
@@ -588,8 +589,8 @@ import java.io.IOException;
         public final int size(@Readonly LinkedKeySet this)                 { return size; }
         public final void clear(@Mutable LinkedHashMap<K,V>. @Mutable LinkedKeySet this)               { LinkedHashMap.this.clear(); }
         @SideEffectFree
-        public final @Mutable Iterator<K> iterator(@Readonly LinkedKeySet this) {
-            return new @Mutable LinkedKeyIterator();
+        public final Iterator<K> iterator(@Readonly LinkedKeySet this) {
+            return new LinkedKeyIterator();
         }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
@@ -655,8 +656,8 @@ import java.io.IOException;
         public final int size(@Readonly LinkedValues this)                 { return size; }
         public final void clear(@Mutable LinkedHashMap<K,V>. @Mutable LinkedValues this)               { LinkedHashMap.this.clear(); }
         @SideEffectFree
-        public final @Mutable Iterator<V> iterator(@Readonly LinkedValues this) {
-            return new @Mutable LinkedValueIterator();
+        public final Iterator<V> iterator(@Readonly LinkedValues this) {
+            return new LinkedValueIterator();
         }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
@@ -706,8 +707,7 @@ import java.io.IOException;
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
-    //AOSEN: I want to use @PolyMutable here, but the type argument on super type does not allow me to do it.
-    @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
+    @SuppressWarnings("pico:assignment.type.incompatible") // class polymorphic qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable LinkedHashMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es;
         return (es = entrySet) == null ? (entrySet = new @PolyMutable LinkedEntrySet()) : es;
@@ -718,8 +718,8 @@ import java.io.IOException;
         public final int size(@Readonly LinkedEntrySet this)                 { return size; }
         public final void clear(@Mutable LinkedHashMap<K,V>. @Mutable LinkedEntrySet this)               { LinkedHashMap.this.clear(); }
         @SideEffectFree
-        public final @Mutable Iterator<Map.Entry<K,V>> iterator(@Readonly LinkedEntrySet this) {
-            return new @Mutable LinkedEntryIterator();
+        public final Iterator<Map.Entry<K,V>> iterator(@Readonly LinkedEntrySet this) {
+            return new LinkedEntryIterator();
         }
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")

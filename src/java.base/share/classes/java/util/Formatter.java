@@ -1937,7 +1937,7 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  */
 @AnnotatedFor({"formatter", "index", "lock", "mustcall", "nullness"})
 @SuppressWarnings("pico") // Not interesting class, fix later
-@Mutable public final class Formatter implements Closeable, Flushable {
+public final class Formatter implements Closeable, Flushable {
     private Appendable a;
     private final Locale l;
 

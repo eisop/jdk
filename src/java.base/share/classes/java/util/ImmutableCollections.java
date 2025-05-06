@@ -25,6 +25,7 @@
 
 package java.util;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
@@ -204,7 +205,7 @@ import jdk.internal.vm.annotation.Stable;
     static <E> @Immutable List<E> listFromArray(E @Readonly... input) {
         // copy and check manually to avoid TOCTOU
         @SuppressWarnings("unchecked")
-        E @Mutable [] tmp = (E[])new Object[input.length]; // implicit nullcheck of input
+        E[] tmp = (E[])new Object[input.length]; // implicit nullcheck of input
         for (int i = 0; i < input.length; i++) {
             tmp[i] = Objects.requireNonNull(input[i]);
         }
@@ -905,10 +906,10 @@ import jdk.internal.vm.annotation.Stable;
 
         @Override
         @SuppressWarnings("unchecked")
-        public <T> @Nullable T @Mutable [] toArray(@PolyNull T @Mutable [] a) {
+        public <T> @Nullable T[] toArray(@PolyNull T[] a) {
             int size = size();
-            T @Mutable [] array = a.length >= size ? a :
-                    (T @Mutable [])Array.newInstance(a.getClass().getComponentType(), size);
+            T[] array = a.length >= size ? a :
+                    (T[])Array.newInstance(a.getClass().getComponentType(), size);
             if (size == 1) {
                 array[0] = (T)e0;
             } else if (REVERSE) {
@@ -979,7 +980,7 @@ import jdk.internal.vm.annotation.Stable;
             return size > 0 && probe(o) >= 0;
         }
 
-        @Mutable private final class SetNIterator implements Iterator<E> {
+        private final class SetNIterator implements Iterator<E> {
 
             private int remaining;
 
@@ -1112,8 +1113,8 @@ import jdk.internal.vm.annotation.Stable;
         @Override public @PolyNull V computeIfAbsent(K key, Function<? super K,? extends @PolyNull V> mf) { throw uoe(); }
         @Override public @PolyNull V computeIfPresent(K key, BiFunction<? super K,? super V,? extends @PolyNull V> rf) { throw uoe(); }
         @Override public @PolyNull V merge(K key, @NonNull V value, BiFunction<? super @NonNull V,? super @NonNull V,? extends @PolyNull V> rf) { throw uoe(); }
-        @Override public V put(K key, V value) { throw uoe(); }
-        @Override public void putAll(Map<? extends K,? extends V> m) { throw uoe(); }
+        @Override public V put(@UnknownInitialization AbstractImmutableMap<K,V> this, K key, V value) { throw uoe(); }
+        @Override public void putAll(@UnknownInitialization AbstractImmutableMap<K,V> this, Map<? extends K,? extends V> m) { throw uoe(); }
         @Override public V putIfAbsent(K key, V value) { throw uoe(); }
         @Override public V remove(Object key) { throw uoe(); }
         @Override public boolean remove(@UnknownSignedness Object key, @UnknownSignedness Object value) { throw uoe(); }
@@ -1301,7 +1302,7 @@ import jdk.internal.vm.annotation.Stable;
             return size == 0;
         }
 
-        @Mutable class MapNIterator implements Iterator<Map.Entry<K,V>> {
+        class MapNIterator implements Iterator<Map.Entry<K,V>> {
 
             private int remaining;
 
@@ -1394,7 +1395,7 @@ import jdk.internal.vm.annotation.Stable;
 
         @java.io.Serial
         private Object writeReplace() {
-            @Readonly Object @Mutable [] array = new Object @Mutable [2 * size];
+            @Readonly Object [] array = new Object[2 * size];
             int len = table.length;
             int dest = 0;
             for (int i = 0; i < len; i += 2) {

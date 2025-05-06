@@ -178,7 +178,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @return an iterator over the elements in this set, in ascending order
      */
     @SideEffectFree
-    @Mutable Iterator<E> iterator(@Readonly NavigableSet<E> this);
+    Iterator<E> iterator(@Readonly NavigableSet<E> this);
 
     /**
      * Returns a reverse order view of the elements contained in this set.
@@ -203,7 +203,7 @@ import org.checkerframework.framework.qual.CFComment;
      *
      * @return an iterator over the elements in this set, in descending order
      */
-    @Mutable Iterator<E> descendingIterator(@Readonly NavigableSet<E> this);
+    Iterator<E> descendingIterator(@Readonly NavigableSet<E> this);
 
     /**
      * Returns a view of the portion of this set whose elements range from

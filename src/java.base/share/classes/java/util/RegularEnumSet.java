@@ -48,7 +48,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @serial exclude
  */
 @AnnotatedFor({"index"})
-@Mutable class RegularEnumSet<E extends Enum<E>> extends EnumSet<E> {
+class RegularEnumSet<E extends Enum<E>> extends EnumSet<E> {
     @java.io.Serial
     private static final long serialVersionUID = 3411599620347842686L;
     /**
@@ -57,7 +57,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
      */
     private long elements = 0L;
 
-    RegularEnumSet(Class<E>elementType, Enum<?> @Mutable [] universe) {
+    RegularEnumSet(Class<E>elementType, Enum<?>[] universe) {
         super(elementType, universe);
     }
 
@@ -87,11 +87,11 @@ import org.checkerframework.framework.qual.AnnotatedFor;
      *
      * @return an iterator over the elements contained in this set
      */
-    public @Mutable Iterator<E> iterator() {
+    public Iterator<E> iterator() {
         return new EnumSetIterator<>();
     }
 
-    @Mutable private class EnumSetIterator<E extends Enum<E>> implements Iterator<E> {
+    private class EnumSetIterator<E extends Enum<E>> implements Iterator<E> {
         /**
          * A bit vector representing the elements in the set not yet
          * returned by this iterator.

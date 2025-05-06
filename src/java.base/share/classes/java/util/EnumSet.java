@@ -82,7 +82,7 @@ import jdk.internal.access.SharedSecrets;
  * @see EnumMap
  */
 @AnnotatedFor({"index", "initialization", "nullness"})
-@Mutable public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
+public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     implements Cloneable, java.io.Serializable
 {
     // declare EnumSet.class serialization compatibility with JDK 8
@@ -99,7 +99,7 @@ import jdk.internal.access.SharedSecrets;
      */
     final transient Enum<?>[] universe;
 
-    EnumSet(Class<E>elementType, Enum<?> @Mutable [] universe) {
+    EnumSet(Class<E>elementType, Enum<?>[] universe) {
         this.elementType = elementType;
         this.universe    = universe;
     }
@@ -113,15 +113,15 @@ import jdk.internal.access.SharedSecrets;
      * @return An empty enum set of the specified type.
      * @throws NullPointerException if {@code elementType} is null
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> noneOf(Class<E> elementType) {
-        Enum<?> @Mutable [] universe = getUniverse(elementType);
+    public static <E extends Enum<E>> EnumSet<E> noneOf(Class<E> elementType) {
+        Enum<?>[] universe = getUniverse(elementType);
         if (universe == null)
             throw new ClassCastException(elementType + " not an enum");
 
         if (universe.length <= 64)
-            return new @Mutable RegularEnumSet<>(elementType, universe);
+            return new RegularEnumSet<>(elementType, universe);
         else
-            return new @Mutable JumboEnumSet<>(elementType, universe);
+            return new JumboEnumSet<>(elementType, universe);
     }
 
     /**
@@ -134,7 +134,7 @@ import jdk.internal.access.SharedSecrets;
      * @return An enum set containing all the elements in the specified type.
      * @throws NullPointerException if {@code elementType} is null
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> allOf(Class<E> elementType) {
+    public static <E extends Enum<E>> EnumSet<E> allOf(Class<E> elementType) {
         EnumSet<E> result = noneOf(elementType);
         result.addAll();
         return result;
@@ -173,7 +173,7 @@ import jdk.internal.access.SharedSecrets;
      *     {@code EnumSet} instance and contains no elements
      * @throws NullPointerException if {@code c} is null
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> copyOf(Collection<E> c) {
+    public static <E extends Enum<E>> EnumSet<E> copyOf(Collection<E> c) {
         if (c instanceof EnumSet) {
             return ((EnumSet<E>)c).clone();
         } else {
@@ -198,7 +198,7 @@ import jdk.internal.access.SharedSecrets;
      * @return The complement of the specified set in this set
      * @throws NullPointerException if {@code s} is null
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> complementOf(EnumSet<E> s) {
+    public static <E extends Enum<E>> EnumSet<E> complementOf(EnumSet<E> s) {
         EnumSet<E> result = copyOf(s);
         result.complement();
         return result;
@@ -218,7 +218,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws NullPointerException if {@code e} is null
      * @return an enum set initially containing the specified element
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e) {
+    public static <E extends Enum<E>> EnumSet<E> of(E e) {
         EnumSet<E> result = noneOf(e.getDeclaringClass());
         result.add(e);
         return result;
@@ -239,7 +239,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2) {
+    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2) {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
         result.add(e1);
         result.add(e2);
@@ -262,7 +262,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2, E e3) {
+    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2, E e3) {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
         result.add(e1);
         result.add(e2);
@@ -287,7 +287,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2, E e3, E e4) {
+    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2, E e3, E e4) {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
         result.add(e1);
         result.add(e2);
@@ -314,7 +314,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws NullPointerException if any parameters are null
      * @return an enum set initially containing the specified elements
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E e1, E e2, E e3, E e4,
+    public static <E extends Enum<E>> EnumSet<E> of(E e1, E e2, E e3, E e4,
                                                     E e5)
     {
         EnumSet<E> result = noneOf(e1.getDeclaringClass());
@@ -341,7 +341,7 @@ import jdk.internal.access.SharedSecrets;
      * @return an enum set initially containing the specified elements
      */
     @SafeVarargs
-    public static <E extends Enum<E>> @Mutable EnumSet<E> of(E first, E... rest) {
+    public static <E extends Enum<E>> EnumSet<E> of(E first, E... rest) {
         EnumSet<E> result = noneOf(first.getDeclaringClass());
         result.add(first);
         for (E e : rest)
@@ -363,7 +363,7 @@ import jdk.internal.access.SharedSecrets;
      * @return an enum set initially containing all of the elements in the
      *         range defined by the two specified endpoints
      */
-    public static <E extends Enum<E>> @Mutable EnumSet<E> range(E from, E to) {
+    public static <E extends Enum<E>> EnumSet<E> range(E from, E to) {
         if (from.compareTo(to) > 0)
             throw new IllegalArgumentException(from + " > " + to);
         EnumSet<E> result = noneOf(from.getDeclaringClass());
@@ -410,7 +410,7 @@ import jdk.internal.access.SharedSecrets;
      * Returns all of the values comprising E.
      * The result is uncloned, cached, and shared by all callers.
      */
-    private static <E extends Enum<E>> E @Mutable [] getUniverse(Class<E> elementType) {
+    private static <E extends Enum<E>> E[] getUniverse(Class<E> elementType) {
         return SharedSecrets.getJavaLangAccess()
                                         .getEnumConstantsShared(elementType);
     }
@@ -458,7 +458,7 @@ import jdk.internal.access.SharedSecrets;
          */
         @SuppressWarnings("unchecked")
         @java.io.Serial
-        private @Mutable Object readResolve() {
+        private Object readResolve() {
             // instead of cast to E, we should perhaps use elementType.cast()
             // to avoid injection of forged stream, but it will slow the
             // implementation

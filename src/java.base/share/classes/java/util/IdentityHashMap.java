@@ -26,6 +26,7 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
@@ -453,7 +454,7 @@ import jdk.internal.access.SharedSecrets;
      * @see     #containsKey(Object)
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@GuardSatisfied @Mutable IdentityHashMap<K, V> this, K key, V value) {
+    public @Nullable V put(@GuardSatisfied @Mutable @UnknownInitialization IdentityHashMap<K, V> this, K key, V value) {
         final Object k = maskNull(key);
 
         retryAfterResize: for (;;) {
@@ -491,7 +492,7 @@ import jdk.internal.access.SharedSecrets;
      * @param newCapacity the new capacity, must be a power of two.
      * @return whether a resize did in fact take place
      */
-    private boolean resize(@Mutable IdentityHashMap<K, V> this, int newCapacity) {
+    private boolean resize(@Mutable @UnknownInitialization IdentityHashMap<K, V> this, int newCapacity) {
         // assert (newCapacity & -newCapacity) == newCapacity; // power of 2
         int newLength = newCapacity * 2;
 
@@ -532,7 +533,7 @@ import jdk.internal.access.SharedSecrets;
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
      */
-    public void putAll(@GuardSatisfied @Mutable IdentityHashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
+    public void putAll(@GuardSatisfied @Mutable @UnknownInitialization IdentityHashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         int n = m.size();
         if (n == 0)
             return;
@@ -875,11 +876,12 @@ import jdk.internal.access.SharedSecrets;
     }
 
     @ReceiverDependentMutable private class EntryIterator
-        extends IdentityHashMapIterator<Map.Entry<K,V>>
+        extends IdentityHashMapIterator<Map.@Readonly Entry<K,V>>
     {
-        private Entry lastReturnedEntry;
+        @SuppressWarnings("pico:initialization.field.uninitialized") // lazy
+        private @Readonly Entry lastReturnedEntry;
 
-        public Map.Entry<K,V> next(@NonEmpty @Mutable EntryIterator this) {
+        public Map.@Readonly Entry<K,V> next(@NonEmpty @Mutable EntryIterator this) {
             lastReturnedEntry = new Entry(nextIndex());
             return lastReturnedEntry;
         }
@@ -893,7 +895,7 @@ import jdk.internal.access.SharedSecrets;
         }
 
         @ReceiverDependentMutable private class Entry implements Map.Entry<K,V> {
-            private int index;
+            private @Assignable int index;
 
             private Entry(int index) {
                 this.index = index;
@@ -1240,7 +1242,7 @@ import jdk.internal.access.SharedSecrets;
 
     @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
-        public @Mutable Iterator<Map.Entry<K,V>> iterator(@Readonly EntrySet this) {
+        public Iterator<Map.@Readonly Entry<K,V>> iterator(@Readonly EntrySet this) {
             return new EntryIterator();
         }
         @Pure
@@ -1268,7 +1270,7 @@ import jdk.internal.access.SharedSecrets;
         public boolean removeAll(@Mutable EntrySet this, @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c) {
             Objects.requireNonNull(c);
             boolean modified = false;
-            for (Iterator<Map.Entry<K,V>> i = iterator(); i.hasNext(); ) {
+            for (Iterator<Map.@Readonly Entry<K,V>> i = iterator(); i.hasNext(); ) {
                 if (c.contains(i.next())) {
                     i.remove();
                     modified = true;

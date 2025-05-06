@@ -26,6 +26,7 @@
 package java.util;
 
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
@@ -133,7 +134,7 @@ import java.util.stream.StreamSupport;
     /**
      * Every public method must preserve these invariants.
      */
-    private void checkInvariants(@Readonly BitSet this) {
+    private void checkInvariants(@Readonly @UnknownInitialization BitSet this) {
         assert(wordsInUse == 0 || words[wordsInUse - 1] != 0);
         assert(wordsInUse >= 0 && wordsInUse <= words.length);
         assert(wordsInUse == words.length || words[wordsInUse] == 0);
@@ -157,6 +158,7 @@ import java.util.stream.StreamSupport;
     /**
      * Creates a new bit set. All bits are initially {@code false}.
      */
+    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public BitSet() {
         initWords(BITS_PER_WORD);
         sizeIsSticky = false;
@@ -171,6 +173,7 @@ import java.util.stream.StreamSupport;
      * @throws NegativeArraySizeException if the specified initial size
      *         is negative
      */
+    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public BitSet(@NonNegative int nbits) {
         // nbits can't be negative; size 0 is OK
         if (nbits < 0)

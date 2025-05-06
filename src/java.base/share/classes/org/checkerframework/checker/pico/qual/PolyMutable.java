@@ -27,6 +27,4 @@ import java.lang.annotation.Target;
     TypeUseLocation.RETURN,
     TypeUseLocation.LOCAL_VARIABLE
 })
-public @interface PolyMutable {
-//    String value() default "";
-}
+public @interface PolyMutable {}

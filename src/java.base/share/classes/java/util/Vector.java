@@ -34,8 +34,8 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Assignable;
 import org.checkerframework.checker.pico.qual.Mutable;
-import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
@@ -111,7 +111,7 @@ import jdk.internal.util.ArraysSupport;
  */
 @CFComment({"lock/nullness: permits nullable object"})
 @AnnotatedFor({"lock", "nullness", "index"})
-@Mutable public class Vector<E>
+public class Vector<E>
     extends AbstractList<E>
     implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 {
@@ -1269,15 +1269,15 @@ import jdk.internal.util.ArraysSupport;
      * @return an iterator over the elements in this list in proper sequence
      */
     @SideEffectFree
-    public synchronized @Mutable Iterator<E> iterator(@Readonly Vector<E> this) {
-        return new @Mutable Itr();
+    public synchronized Iterator<E> iterator(@Readonly Vector<E> this) {
+        return new Itr();
     }
 
     /**
      * An optimized version of AbstractList.Itr
      */
     @ReceiverDependentMutable private class Itr implements Iterator<E> {
-        int cursor;       // index of next element to return
+        @Assignable int cursor;       // index of next element to return
         int lastRet = -1; // index of last element returned; -1 if no such
         int expectedModCount = modCount;
 
@@ -1429,7 +1429,7 @@ import jdk.internal.util.ArraysSupport;
     @Override
     public synchronized void sort(@Mutable Vector<E> this, @Nullable Comparator<? super E> c) {
         final int expectedModCount = modCount;
-        Arrays.sort((E @Mutable []) elementData, 0, elementCount, c);
+        Arrays.sort((E[]) elementData, 0, elementCount, c);
         if (modCount != expectedModCount)
             throw new ConcurrentModificationException();
         modCount++;
@@ -1455,7 +1455,7 @@ import jdk.internal.util.ArraysSupport;
     }
 
     /** Similar to ArrayList Spliterator */
-    @Mutable final class VectorSpliterator implements Spliterator<E> {
+    final class VectorSpliterator implements Spliterator<E> {
         private @Readonly Object[] array;
         private int index; // current index, modified on advance/split
         private int fence; // -1 until used; then one past last index

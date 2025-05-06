@@ -39,13 +39,13 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({
-        ElementType.PACKAGE,
-        ElementType.TYPE,
-        ElementType.CONSTRUCTOR,
-        ElementType.METHOD,
-        ElementType.FIELD,
-        ElementType.LOCAL_VARIABLE,
-        ElementType.PARAMETER
+    ElementType.PACKAGE,
+    ElementType.TYPE,
+    ElementType.CONSTRUCTOR,
+    ElementType.METHOD,
+    ElementType.FIELD,
+    ElementType.LOCAL_VARIABLE,
+    ElementType.PARAMETER
 })
 @Repeatable(DefaultQualifier.List.class)
 public @interface DefaultQualifier {
@@ -59,19 +59,19 @@ public @interface DefaultQualifier {
      */
     Class<? extends Annotation> value();
 
-  /**
-   * Returns the locations to which the annotation should be applied.
-   *
-   * @return the locations to which the annotation should be applied
-   */
-  TypeUseLocation[] locations() default {TypeUseLocation.ALL};
+    /**
+    * Returns the locations to which the annotation should be applied.
+    *
+    * @return the locations to which the annotation should be applied
+    */
+    TypeUseLocation[] locations() default {TypeUseLocation.ALL};
 
-  /**
-   * When used on a package, whether the defaults should also apply to subpackages.
-   *
-   * @return whether the default should be inherited by subpackages
-   */
-  boolean applyToSubpackages() default true;
+    /**
+    * When used on a package, whether the defaults should also apply to subpackages.
+    *
+    * @return whether the default should be inherited by subpackages
+    */
+    boolean applyToSubpackages() default true;
 
     /**
      * A wrapper annotation that makes the {@link DefaultQualifier} annotation repeatable.

@@ -322,8 +322,8 @@ import java.util.function.Consumer;
      * @return an iterator over the elements in this list in proper sequence
      */
     @SideEffectFree
-    public @PolyMutable Iterator<E> iterator(@PolyMutable AbstractList<E> this) {
-        return new @PolyMutable Itr();
+    public Iterator<E> iterator(@Readonly AbstractList<E> this) {
+        return new Itr();
     }
 
     /**
@@ -334,7 +334,7 @@ import java.util.function.Consumer;
      *
      * @see #listIterator(int)
      */
-    public @Mutable ListIterator<E> listIterator(@Readonly AbstractList<E> this) {
+    public ListIterator<E> listIterator(@Readonly AbstractList<E> this) {
         return listIterator(0);
     }
 
@@ -361,10 +361,10 @@ import java.util.function.Consumer;
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public @Mutable ListIterator<E> listIterator(@Readonly AbstractList<E> this, final @IndexOrHigh({"this"}) int index) {
+    public ListIterator<E> listIterator(@Readonly AbstractList<E> this, final @IndexOrHigh({"this"}) int index) {
         rangeCheckForAdd(index);
 
-        return new @Mutable ListItr(index);
+        return new ListItr(index);
     }
 
     @ReceiverDependentMutable private class Itr implements Iterator<E> {
@@ -679,7 +679,7 @@ import java.util.function.Consumer;
      * If the List is an instance of AbstractList then concurrent modification
      * checking is performed using the AbstractList's modCount field.
      */
-    @Mutable static final class RandomAccessSpliterator<E> implements Spliterator<E> {
+    static final class RandomAccessSpliterator<E> implements Spliterator<E> {
 
         private final @Readonly List<E> list;
         private @Assignable int index; // current index, modified on advance/split
@@ -860,7 +860,7 @@ import java.util.function.Consumer;
             return true;
         }
 
-        public @Mutable Iterator<E> iterator(@Readonly SubList<E> this) {
+        public Iterator<E> iterator(@Readonly SubList<E> this) {
             return listIterator();
         }
 

@@ -42,7 +42,6 @@ import org.checkerframework.checker.lock.qual.NewObject;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.regex.qual.PolyRegex;
 import org.checkerframework.checker.regex.qual.Regex;
@@ -1912,7 +1911,7 @@ public final class String
     @EnsuresNonNullIf(expression={"#1"}, result=true)
     @Pure
     @StaticallyExecutable
-    public boolean equals(@Immutable @GuardSatisfied @Nullable Object anObject) {
+    public boolean equals(@Readonly @GuardSatisfied @Nullable Object anObject) {
         if (this == anObject) {
             return true;
         }

@@ -264,6 +264,7 @@ import jdk.internal.access.SharedSecrets;
      *
      * @param dummy a dummy parameter
      */
+    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     Hashtable(Void dummy) {}
 
     /**
@@ -742,7 +743,7 @@ import jdk.internal.access.SharedSecrets;
      * @since 1.2
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // Aosen: how to fix this
+    @SuppressWarnings("pico") // Aosen: class polymorphism qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable Hashtable<K, V> this) {
         if (entrySet==null)
             entrySet = Collections.synchronizedSet(new @PolyMutable EntrySet(), this);

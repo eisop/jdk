@@ -131,6 +131,7 @@ import java.util.function.Consumer;
     /**
      * Constructs an empty list.
      */
+    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public LinkedList() {
     }
 
@@ -143,7 +144,7 @@ import java.util.function.Consumer;
      * @throws NullPointerException if the specified collection is null
      */
     @SuppressWarnings("pico") // PICO constructor fix
-    public @PolyNonEmpty LinkedList(@PolyNonEmpty Collection<? extends E> c) {
+    public @PolyNonEmpty LinkedList(@PolyNonEmpty @Readonly Collection<? extends E> c) {
         this();
         addAll(c);
     }
@@ -904,9 +905,9 @@ import java.util.function.Consumer;
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @see List#listIterator(int)
      */
-    public @Mutable ListIterator<E> listIterator(@Readonly LinkedList<E> this, @NonNegative int index) {
+    public ListIterator<E> listIterator(@Readonly LinkedList<E> this, @NonNegative int index) {
         checkPositionIndex(index);
-        return new @Mutable ListItr(index);
+        return new ListItr(index);
     }
 
     @ReceiverDependentMutable private class ListItr implements ListIterator<E> {
@@ -915,6 +916,7 @@ import java.util.function.Consumer;
         private int nextIndex;
         private int expectedModCount = modCount;
 
+        @SuppressWarnings("pico:initialization.fields.uninitialized") // Lazy
         ListItr(int index) {
             // assert isPositionIndex(index);
             next = (index == size) ? null : node(index);

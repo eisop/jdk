@@ -108,7 +108,6 @@ import jdk.internal.access.SharedSecrets;
  */
 
  @AnnotatedFor({"index", "initialization", "lock", "nullness"})
-// @SuppressWarnings("pico:assignment.type.incompatible") // Revisit this, looks like CF bug
  @ReceiverDependentMutable public class HashSet<E extends @Immutable Object>
     extends AbstractSet<E>
     implements Set<E>, Cloneable, java.io.Serializable

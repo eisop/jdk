@@ -1720,7 +1720,7 @@ import java.io.Serializable;
             return new ImmutableCollections.Map1<>(entries[0].getKey(),
                     entries[0].getValue());
         } else {
-            @Readonly Object @Mutable [] kva = new Object @Mutable [entries.length << 1];
+            @Readonly Object [] kva = new Object[entries.length << 1];
             int a = 0;
             for (Entry<? extends K, ? extends V> entry : entries) {
                 // implicit null checks of each array slot

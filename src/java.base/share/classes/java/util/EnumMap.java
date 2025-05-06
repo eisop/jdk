@@ -365,7 +365,7 @@ import jdk.internal.access.SharedSecrets;
     @SuppressWarnings({"nullness:contracts.precondition.override.invalid"})
     @RequiresNonNull({"keyUniverse", "vals"})
     public void putAll(@UnknownInitialization @Mutable EnumMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
-        if (m instanceof @Readonly EnumMap<?, ?> em) {
+        if (m instanceof EnumMap<?, ?> em) {
             if (em.keyType != keyType) {
                 if (em.isEmpty())
                     return;
@@ -504,7 +504,7 @@ import jdk.internal.access.SharedSecrets;
      * @return a set view of the mappings contained in this enum map
      */
     @SideEffectFree
-    @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
+    @SuppressWarnings("pico:assignment.type.incompatible") // class polymorphism qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable EnumMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es = entrySet;
         if (es != null)
