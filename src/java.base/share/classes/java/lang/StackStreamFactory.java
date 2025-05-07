@@ -24,8 +24,10 @@
  */
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.dataflow.qual.Pure;
+
 import jdk.internal.reflect.MethodAccessor;
 import jdk.internal.reflect.ConstructorAccessor;
 import java.lang.StackWalker.Option;
@@ -334,7 +336,7 @@ final class StackStreamFactory {
          *
          * @see #tryNextFrame
          */
-        final Class<?> nextFrame() {
+        final @Nullable Class<?> nextFrame() {
             if (!hasNext()) {
                 return null;
             }
@@ -519,7 +521,7 @@ final class StackStreamFactory {
          * Returns next StackFrame object in the current batch of stack frames;
          * or null if no more stack frame.
          */
-        StackFrame nextStackFrame() {
+        @Nullable StackFrame nextStackFrame() {
             if (!hasNext()) {
                 return null;
             }
@@ -563,7 +565,7 @@ final class StackStreamFactory {
         // ------- Implementation of Spliterator
 
         @Override
-        public Spliterator<StackFrame> trySplit() {
+        public @Nullable Spliterator<StackFrame> trySplit() {
             return null;   // ordered stream and do not allow to split
         }
 

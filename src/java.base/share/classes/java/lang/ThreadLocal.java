@@ -617,7 +617,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
          * for expunging).
          */
         private int expungeStaleEntry(int staleSlot) {
-            Entry[] tab = table;
+            @Nullable Entry[] tab = table;
             int len = tab.length;
 
             // expunge entry at staleSlot

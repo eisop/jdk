@@ -72,7 +72,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
 
     int nUnstartedThreads = 0;
     @LTEqLengthOf({"threads"}) @NonNegative int nthreads;
-    Thread threads[];
+    @Nullable Thread threads[];
 
     @LTEqLengthOf({"groups"}) @NonNegative int ngroups;
     ThreadGroup groups[];

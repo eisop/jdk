@@ -381,7 +381,7 @@ public abstract class Reference<T> {
     /* Implementation of refersTo(), overridden for phantom references.
      */
     @IntrinsicCandidate
-    native boolean refersTo0(Object o);
+    native boolean refersTo0(@Nullable Object o);
 
     /**
      * Clears this reference object.  Invoking this method will not cause this

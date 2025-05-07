@@ -26,6 +26,7 @@
 package java.lang;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.WeakHashMap;
@@ -199,7 +200,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
     }
 
     /** Initial, one-element, empty cache used by all Class instances.  Must never be filled. */
-    private static final Entry<?>[] EMPTY_CACHE = { null };
+    private static final @Nullable Entry<?>[] EMPTY_CACHE = { null };
 
     /**
      * Slow tail of ClassValue.get to retry at nearby locations in the cache,
@@ -327,7 +328,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
      */
     static class Entry<T> extends WeakReference<Version<T>> {
         final Object value;  // usually of type T, but sometimes (Entry)this
-        Entry(Version<T> version, T value) {
+        Entry(@Nullable Version<T> version, T value) {
             super(version);
             this.value = value;  // for a regular entry, value is of type T
         }
@@ -474,7 +475,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
 
         /** Finish a query.  Overwrite a matching placeholder.  Drop stale incoming values. */
         synchronized
-        <T> Entry<T> finishEntry(ClassValue<T> classValue, Entry<T> e) {
+        <T> @Nullable Entry<T> finishEntry(ClassValue<T> classValue, Entry<T> e) {
             @SuppressWarnings("unchecked")  // one map has entries for all value types <T>
             Entry<T> e0 = (Entry<T>) get(classValue.identity);
             if (e == e0) {
@@ -558,7 +559,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
         }
 
         /** Given that first probe was a collision, retry at nearby locations. */
-        static <T> Entry<T> probeBackupLocations(Entry<?>[] cache, ClassValue<T> classValue) {
+        static <T> @Nullable Entry<T> probeBackupLocations(Entry<?>[] cache, ClassValue<T> classValue) {
             if (PROBE_LIMIT <= 0)  return null;
             // Probe the cache carefully, in a range of slots.
             int mask = (cache.length-1);
@@ -660,7 +661,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
          *  to be found via reprobes.  Find an entry after cache[begin]
          *  to plug into the hole, or return null if none is needed.
          */
-        private Entry<?> findReplacement(Entry<?>[] cache, int home1) {
+        private @Nullable Entry<?> findReplacement(Entry<?>[] cache, int home1) {
             Entry<?> replacement = null;
             int haveReplacement = -1, replacementPos = 0;
             int mask = (cache.length-1);
@@ -741,7 +742,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
         /** Store the given entry.  Update cacheLoad, and return any live victim.
          *  'Gently' means return self rather than dislocating a live victim.
          */
-        private Entry<?> placeInCache(Entry<?>[] cache, int pos, Entry<?> e, boolean gently) {
+        private @Nullable Entry<?> placeInCache(Entry<?>[] cache, int pos, Entry<?> e, boolean gently) {
             Entry<?> e2 = overwrittenEntry(cache[pos]);
             if (gently && e2 != null) {
                 // do not overwrite a live entry
@@ -758,7 +759,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
          *  because the caller is going to store something
          *  in its place.
          */
-        private <T> Entry<T> overwrittenEntry(Entry<T> e2) {
+        private <T> @Nullable Entry<T> overwrittenEntry(Entry<T> e2) {
             if (e2 == null)  cacheLoad += 1;
             else if (e2.isLive())  return e2;
             return null;

@@ -419,7 +419,7 @@ public final class RuntimePermission extends BasicPermission {
      * @throws IllegalArgumentException if {@code name} is empty.
      */
 
-    public RuntimePermission(String name)
+    public RuntimePermission(@Nullable String name)
     {
         super(name);
     }
@@ -436,7 +436,7 @@ public final class RuntimePermission extends BasicPermission {
      * @throws IllegalArgumentException if {@code name} is empty.
      */
 
-    public RuntimePermission(String name, @Nullable String actions)
+    public RuntimePermission(@Nullable String name, @Nullable String actions)
     {
         super(name, actions);
     }

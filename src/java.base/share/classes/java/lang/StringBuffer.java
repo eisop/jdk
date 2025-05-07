@@ -126,7 +126,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
      * A cache of the last value returned by toString. Cleared
      * whenever the StringBuffer is modified.
      */
-    private transient String toStringCache;
+    private transient @Nullable String toStringCache;
 
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
     @java.io.Serial

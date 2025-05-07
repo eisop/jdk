@@ -173,17 +173,17 @@ public
     private long eetop;
 
     /* What will be run. */
-    private Runnable target;
+    private @Nullable Runnable target;
 
     /* The group of this thread */
-    private ThreadGroup group;
+    private @Nullable ThreadGroup group;
 
     /* The context ClassLoader for this thread */
     private ClassLoader contextClassLoader;
 
     /* The inherited AccessControlContext of this thread */
     @SuppressWarnings("removal")
-    private AccessControlContext inheritedAccessControlContext;
+    private @Nullable AccessControlContext inheritedAccessControlContext;
 
     /* For autonumbering anonymous threads. */
     private static int threadInitNumber;
@@ -193,13 +193,13 @@ public
 
     /* ThreadLocal values pertaining to this thread. This map is maintained
      * by the ThreadLocal class. */
-    ThreadLocal.ThreadLocalMap threadLocals = null;
+    ThreadLocal.@Nullable ThreadLocalMap threadLocals = null;
 
     /*
      * InheritableThreadLocal values pertaining to this thread. This map is
      * maintained by the InheritableThreadLocal class.
      */
-    ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
+    ThreadLocal.@Nullable ThreadLocalMap inheritableThreadLocals = null;
 
     /*
      * The requested stack size for this thread, or 0 if the creator did
@@ -237,7 +237,7 @@ public
      * operation, if any.  The blocker's interrupt method should be invoked
      * after setting this thread's interrupt status.
      */
-    private volatile Interruptible blocker;
+    private volatile @Nullable Interruptible blocker;
     private final Object blockerLock = new Object();
 
     /* Set the blocker field; invoked via jdk.internal.access.SharedSecrets
@@ -403,7 +403,7 @@ public
      *            inheritable thread-locals from the constructing thread
      */
     @SuppressWarnings("removal")
-    private Thread(ThreadGroup g, Runnable target, String name,
+    private Thread(@Nullable ThreadGroup g, Runnable target, String name,
                    long stackSize, AccessControlContext acc,
                    boolean inheritThreadLocals) {
         if (name == null) {
@@ -1923,7 +1923,7 @@ public
     }
 
     // null unless explicitly set
-    private volatile UncaughtExceptionHandler uncaughtExceptionHandler;
+    private volatile @Nullable UncaughtExceptionHandler uncaughtExceptionHandler;
 
     // null unless explicitly set
     private static volatile UncaughtExceptionHandler defaultUncaughtExceptionHandler;
@@ -2075,7 +2075,7 @@ public
          * instance with the identical non-null referent as this one.
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj == this)
                 return true;
 

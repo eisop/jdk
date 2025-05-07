@@ -25,6 +25,8 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -100,14 +102,14 @@ import sun.security.util.SecurityConstants;
 public final class Module implements AnnotatedElement {
 
     // the layer that contains this module, can be null
-    private final ModuleLayer layer;
+    private final @Nullable ModuleLayer layer;
 
     // module name and loader, these fields are read by VM
-    private final String name;
-    private final ClassLoader loader;
+    private final @Nullable String name;
+    private final @Nullable ClassLoader loader;
 
     // the module descriptor
-    private final ModuleDescriptor descriptor;
+    private final @Nullable ModuleDescriptor descriptor;
 
     // true, if this module allows restricted native access
     private volatile boolean enableNativeAccess;
@@ -147,7 +149,7 @@ public final class Module implements AnnotatedElement {
      *
      * @see ClassLoader#getUnnamedModule
      */
-    Module(ClassLoader loader) {
+    Module(@Nullable ClassLoader loader) {
         this.layer = null;
         this.name = null;
         this.loader = loader;
@@ -1541,7 +1543,7 @@ public final class Module implements AnnotatedElement {
                 // drop non-annotation attributes
             }
             @Override
-            public ModuleVisitor visitModule(String name, int flags, String version) {
+            public @Nullable ModuleVisitor visitModule(String name, int flags, String version) {
                 // drop Module attribute
                 return null;
             }
@@ -1642,7 +1644,7 @@ public final class Module implements AnnotatedElement {
      * @see Class#getResourceAsStream(String)
      */
     @CallerSensitive
-    public InputStream getResourceAsStream(String name) throws IOException {
+    public @Nullable InputStream getResourceAsStream(String name) throws IOException {
         if (name.startsWith("/")) {
             name = name.substring(1);
         }
@@ -1707,7 +1709,7 @@ public final class Module implements AnnotatedElement {
      * Returns the module that a given caller class is a member of. Returns
      * {@code null} if the caller is {@code null}.
      */
-    private Module getCallerModule(Class<?> caller) {
+    private @Nullable Module getCallerModule(Class<?> caller) {
         return (caller != null) ? caller.getModule() : null;
     }
 
@@ -1722,7 +1724,7 @@ public final class Module implements AnnotatedElement {
                                              Object[] pns);
 
     // JVM_AddReadsModule
-    private static native void addReads0(Module from, Module to);
+    private static native void addReads0(Module from, @Nullable Module to);
 
     // JVM_AddModuleExports
     private static native void addExports0(Module from, String pn, Module to);

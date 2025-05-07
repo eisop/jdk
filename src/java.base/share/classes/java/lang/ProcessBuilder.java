@@ -581,7 +581,7 @@ public final class ProcessBuilder
          * @return the file associated with this redirect,
          *         or {@code null} if there is no such file
          */
-        public File file() { return null; }
+        public @Nullable File file() { return null; }
 
         /**
          * When redirected to a destination file, indicates if the output
@@ -679,7 +679,7 @@ public final class ProcessBuilder
          * instances of the same type associated with non-null equal
          * {@code File} instances.
          */
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj == this)
                 return true;
             if (! (obj instanceof Redirect r))

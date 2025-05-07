@@ -58,6 +58,8 @@
  */
 package jdk.internal.org.objectweb.asm;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * A {@link ClassVisitor} that generates a corresponding ClassFile structure, as defined in the Java
  * Virtual Machine Specification (JVMS). It can be used alone, to generate a Java class "from
@@ -305,9 +307,9 @@ public class ClassWriter extends ClassVisitor {
             final int version,
             final int access,
             final String name,
-            final String signature,
+            final @Nullable String signature,
             final String superName,
-            final String[] interfaces) {
+            final String @Nullable [] interfaces) {
         this.version = version;
         this.accessFlags = access;
         this.thisClass = symbolTable.setMajorVersionAndClassName(version & 0xFFFF, name);

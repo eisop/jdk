@@ -24,6 +24,8 @@
  */
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import jdk.internal.reflect.ReflectionFactory;
 
 import java.lang.reflect.Method;
@@ -112,7 +114,7 @@ final class PublicMethods {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             //noinspection StringEquality (guaranteed interned String(s))
             return (o instanceof Key that)

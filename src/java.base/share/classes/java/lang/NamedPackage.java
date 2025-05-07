@@ -24,6 +24,8 @@
  */
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.module.Configuration;
 import java.lang.module.ModuleReference;
 import java.net.URI;
@@ -70,7 +72,7 @@ class NamedPackage {
      * Returns the location of the module if this named package is in
      * a named module; otherwise, returns null.
      */
-    URI location() {
+    @Nullable URI location() {
         if (module.isNamed() && module.getLayer() != null) {
             Configuration cf = module.getLayer().configuration();
             ModuleReference mref

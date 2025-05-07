@@ -25,6 +25,8 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.module.Configuration;
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ResolvedModule;
@@ -173,7 +175,7 @@ public final class ModuleLayer {
      */
     private ModuleLayer(Configuration cf,
                         List<ModuleLayer> parents,
-                        Function<String, ClassLoader> clf)
+                        @Nullable Function<String, ClassLoader> clf)
     {
         this.cf = cf;
         this.parents = parents; // no need to do defensive copy

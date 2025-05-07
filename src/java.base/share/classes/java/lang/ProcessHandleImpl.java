@@ -341,7 +341,7 @@ final class ProcessHandleImpl implements ProcessHandle {
      *      if greater than the length of the arrays, the arrays are too small
      */
     private static native int getProcessPids0(long pid, long[] pids,
-                                              long[] ppids, long[] starttimes);
+                                              long @Nullable [] ppids, long[] starttimes);
 
     /**
      * Destroy the process for this ProcessHandle.
@@ -563,12 +563,12 @@ final class ProcessHandleImpl implements ProcessHandle {
          */
         private native void info0(long pid);
 
-        String command;
-        String commandLine;
-        String[] arguments;
+        @Nullable String command;
+        @Nullable String commandLine;
+        String @Nullable [] arguments;
         long startTime;
         long totalTime;
-        String user;
+        @Nullable String user;
 
         Info() {
             command = null;

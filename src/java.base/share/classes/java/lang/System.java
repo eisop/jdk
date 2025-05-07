@@ -141,6 +141,7 @@ public final @UsesObjectEquals class System {
      * @see Console#reader()
      */
     @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null.")
+    @SuppressWarnings("nullness:assignment.type.incompatible")
     public static final @MustCall({}) InputStream in = null;
 
     /**
@@ -174,6 +175,7 @@ public final @UsesObjectEquals class System {
      * @see     Charset#defaultCharset()
      */
     @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null.")
+    @SuppressWarnings("nullness:assignment.type.incompatible")
     public static final @MustCall({}) PrintStream out = null;
 
     /**
@@ -194,7 +196,8 @@ public final @UsesObjectEquals class System {
      * @see     Console#charset()
      * @see     Charset#defaultCharset()
      */
-    @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null.")
+    @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null. Should we do it?")
+    @SuppressWarnings("nullness:assignment.type.incompatible")
     public static final @MustCall({}) PrintStream err = null;
 
     // indicates if a security manager is possible
@@ -473,7 +476,7 @@ public final @UsesObjectEquals class System {
             // which will loop infinitely if there is a non-system class
             // (in this case: the new security manager class) on the stack).
             AccessController.doPrivileged(new PrivilegedAction<>() {
-                public Object run() {
+                public @Nullable Object run() {
                     s.getClass().getProtectionDomain().implies
                         (SecurityConstants.ALL_PERMISSION);
                     return null;
@@ -932,7 +935,7 @@ public final @UsesObjectEquals class System {
      * @see        java.lang.System#getProperties()
      */
     @Pure
-    public static @Nullable String getProperty(String key) {
+    public static @Nullable String getProperty(@Nullable String key) {
         checkKey(key);
         @SuppressWarnings("removal")
         SecurityManager sm = getSecurityManager();
@@ -1518,7 +1521,7 @@ public final @UsesObjectEquals class System {
          *
          * @throws NullPointerException if {@code level} is {@code null}.
          */
-        public void log(Level level, ResourceBundle bundle, String format,
+        public void log(Level level, @Nullable ResourceBundle bundle, String format,
                 Object... params);
     }
 

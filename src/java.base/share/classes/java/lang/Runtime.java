@@ -1418,7 +1418,7 @@ public @UsesObjectEquals class Runtime {
          *
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             boolean ret = equalsIgnoreOptional(obj);
             if (!ret)
                 return false;

@@ -25,6 +25,8 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Thrown when creating a {@linkplain ModuleLayer module layer} fails.
  *
@@ -48,7 +50,7 @@ public class LayerInstantiationException extends RuntimeException {
      * @param msg
      *        The detail message; can be {@code null}
      */
-    public LayerInstantiationException(String msg) {
+    public LayerInstantiationException(@Nullable String msg) {
         super(msg);
     }
 

@@ -292,7 +292,7 @@ final class WeakPairMap<K1, K2, V> {
             }
 
             @Override
-            public boolean equals(Object obj) {
+            public boolean equals(@Nullable Object obj) {
                 return this == obj ||
                        (obj instanceof Pair &&
                         Pair.equals(first(), second(), (Pair<?, ?>) obj));
@@ -308,7 +308,7 @@ final class WeakPairMap<K1, K2, V> {
          * All its methods are purposely designed so that 'this' is never
          * passed to any other method or used as identity.
          */
-        final class Lookup<K1, K2> implements Pair<K1, K2> {
+        final class Lookup<K1 extends Object, K2 extends Object> implements Pair<K1, K2> {
             private final K1 k1;
             private final K2 k2;
 
@@ -333,7 +333,7 @@ final class WeakPairMap<K1, K2, V> {
             }
 
             @Override
-            public boolean equals(Object obj) {
+            public boolean equals(@Nullable Object obj) {
                 return obj instanceof Pair &&
                        Pair.equals(k1, k2, (Pair<?, ?>) obj);
             }

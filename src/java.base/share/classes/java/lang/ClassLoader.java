@@ -254,7 +254,7 @@ public abstract @UsesObjectEquals class ClassLoader {
     private final @Nullable ClassLoader parent;
 
     // class loader name
-    private final String name;
+    private final @Nullable String name;
 
     // the unnamed module for this ClassLoader
     private final Module unnamedModule;
@@ -373,7 +373,7 @@ public abstract @UsesObjectEquals class ClassLoader {
         return checkCreateClassLoader(null);
     }
 
-    private static Void checkCreateClassLoader(String name) {
+    private static Void checkCreateClassLoader(@Nullable String name) {
         if (name != null && name.isEmpty()) {
             throw new IllegalArgumentException("name must be non-empty or null");
         }
@@ -386,7 +386,7 @@ public abstract @UsesObjectEquals class ClassLoader {
         return null;
     }
 
-    private ClassLoader(Void unused, String name, ClassLoader parent) {
+    private ClassLoader(Void unused, @Nullable String name, @Nullable ClassLoader parent) {
         this.name = name;
         this.parent = parent;
         this.unnamedModule = new Module(this);
@@ -640,7 +640,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *         this class loader, or {@code null} if the class could not be found.
      */
     @ForName
-    final Class<?> loadClass(Module module, @BinaryName String name) {
+    final @Nullable Class<?> loadClass(Module module, @BinaryName String name) {
         synchronized (getClassLoadingLock(name)) {
             // First, check if the class has already been loaded
             Class<?> c = findLoadedClass(name);
@@ -759,7 +759,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since 9
      */
-    protected Class<?> findClass(String moduleName, String name) {
+    protected @Nullable Class<?> findClass(String moduleName, String name) {
         if (moduleName == null) {
             try {
                 return findClass(name);
@@ -1122,11 +1122,11 @@ public abstract @UsesObjectEquals class ClassLoader {
         return c;
     }
 
-    static native Class<?> defineClass1(ClassLoader loader, @BinaryName String name, byte[] b, int off, int len,
-                                        ProtectionDomain pd, String source);
+    static native Class<?> defineClass1(ClassLoader loader, @BinaryName @Nullable String name, byte[] b, int off, int len,
+                                        @Nullable ProtectionDomain pd, String source);
 
-    static native Class<?> defineClass2(ClassLoader loader, @BinaryName String name, java.nio.ByteBuffer b,
-                                        int off, int len, ProtectionDomain pd,
+    static native Class<?> defineClass2(ClassLoader loader, @BinaryName @Nullable String name, java.nio.ByteBuffer b,
+                                        int off, int len, @Nullable ProtectionDomain pd,
                                         String source);
 
     /**
@@ -1357,7 +1357,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see java.lang.module.ModuleReader#find(String)
      * @since 9
      */
-    protected URL findResource(String moduleName, String name) throws IOException {
+    protected @Nullable URL findResource(String moduleName, String name) throws IOException {
         if (moduleName == null) {
             return findResource(name);
         } else {
@@ -2088,7 +2088,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * This method does not throw IllegalArgumentException.
      */
-    Package definePackage(Class<?> c) {
+    @Nullable Package definePackage(Class<?> c) {
         if (c.isPrimitive() || c.isArray()) {
             return null;
         }
@@ -2245,7 +2245,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since  9
      */
-    public final Package getDefinedPackage(String name) {
+    public final @Nullable Package getDefinedPackage(String name) {
         Objects.requireNonNull(name, "name cannot be null");
 
         NamedPackage p = packages.get(name);
@@ -2708,7 +2708,7 @@ public abstract @UsesObjectEquals class ClassLoader {
     }
 
     // the storage for ClassLoaderValue(s) associated with this ClassLoader
-    private volatile ConcurrentHashMap<?, ?> classLoaderValueMap;
+    private volatile @Nullable ConcurrentHashMap<?, ?> classLoaderValueMap;
 
     /**
      * Attempts to atomically set a volatile field in this object. Returns

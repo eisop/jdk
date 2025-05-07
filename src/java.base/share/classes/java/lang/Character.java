@@ -3813,7 +3813,7 @@ class Character implements java.io.Serializable, Comparable<Character>, Constabl
             0x100000, // 100000..10FFFF; Supplementary Private Use Area-B
         };
 
-        private static final UnicodeBlock[] blocks = {
+        private static final @Nullable UnicodeBlock[] blocks = {
             BASIC_LATIN,
             LATIN_1_SUPPLEMENT,
             LATIN_EXTENDED_A,
@@ -11542,7 +11542,7 @@ class Character implements java.io.Serializable, Comparable<Character>, Constabl
      */
     @Pure
     @StaticallyExecutable
-    public static String getName(int codePoint) {
+    public static @Nullable String getName(int codePoint) {
         if (!isValidCodePoint(codePoint)) {
             throw new IllegalArgumentException(
                 String.format("Not a valid Unicode code point: 0x%X", codePoint));

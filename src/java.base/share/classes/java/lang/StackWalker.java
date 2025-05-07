@@ -411,7 +411,7 @@ public final class StackWalker {
     private StackWalker(EnumSet<Option> options, int estimateDepth) {
         this(options, estimateDepth, null);
     }
-    private StackWalker(EnumSet<Option> options, int estimateDepth, ExtendedOption extendedOption) {
+    private StackWalker(EnumSet<Option> options, int estimateDepth, @Nullable ExtendedOption extendedOption) {
         this.options = options;
         this.estimateDepth = estimateDepth;
         this.extendedOption = extendedOption;

@@ -65,21 +65,21 @@ public final class StackTraceElement implements java.io.Serializable {
     // construct the 'format' bitmap, and then is cleared.
     //
     // For STEs constructed using the public constructors, this field is not used.
-    private transient Class<?> declaringClassObject;
+    private transient @Nullable Class<?> declaringClassObject;
 
     // Normally initialized by VM
     /**
      * The name of the class loader.
      */
-    private String classLoaderName;
+    private @Nullable String classLoaderName;
     /**
      * The module name.
      */
-    private String moduleName;
+    private @Nullable String moduleName;
     /**
      * The module version.
      */
-    private String moduleVersion;
+    private @Nullable String moduleVersion;
     /**
      * The declaring class.
      */
@@ -91,7 +91,7 @@ public final class StackTraceElement implements java.io.Serializable {
     /**
      * The source file name.
      */
-    private String fileName;
+    private @Nullable String fileName;
     /**
      * The source line number.
      */
@@ -160,10 +160,10 @@ public final class StackTraceElement implements java.io.Serializable {
      *
      * @since 9
      */
-    public StackTraceElement(String classLoaderName,
-                             String moduleName, String moduleVersion,
+    public StackTraceElement(@Nullable String classLoaderName,
+                             @Nullable String moduleName, @Nullable String moduleVersion,
                              String declaringClass, String methodName,
-                             String fileName, int lineNumber) {
+                             @Nullable String fileName, int lineNumber) {
         this.classLoaderName = classLoaderName;
         this.moduleName      = moduleName;
         this.moduleVersion   = moduleVersion;

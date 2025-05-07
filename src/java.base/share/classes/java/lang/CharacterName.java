@@ -26,6 +26,7 @@
 package java.lang;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.DataInputStream;
@@ -144,7 +145,7 @@ import java.security.PrivilegedAction;
         return cname;
     }
 
-    public String getName(int cp) {
+    public @Nullable String getName(int cp) {
         int off = 0;
         int bk = bkIndices[cp >> 8];
         if (bk == -1 || (off = lookup[(bk << 8) + (cp & 0xff)]) == 0)

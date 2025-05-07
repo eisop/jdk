@@ -58,6 +58,8 @@
  */
 package jdk.internal.org.objectweb.asm;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * A visitor to visit a Java class. The methods of this class must be called in the following order:
  * {@code visit} [ {@code visitSource} ] [ {@code visitModule} ][ {@code visitNestHost} ][ {@code
@@ -170,7 +172,7 @@ public abstract class ClassVisitor {
       * @return a visitor to visit the module values, or {@literal null} if this visitor is not
       *     interested in visiting this module.
       */
-    public ModuleVisitor visitModule(final String name, final int access, final String version) {
+    public @Nullable ModuleVisitor visitModule(final String name, final int access, final String version) {
         if (api < Opcodes.ASM6) {
             throw new UnsupportedOperationException("This feature requires ASM6");
         }
