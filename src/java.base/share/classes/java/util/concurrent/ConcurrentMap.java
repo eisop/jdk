@@ -37,7 +37,6 @@ package java.util.concurrent;
 
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyFor;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.dataflow.qual.Pure;
@@ -77,7 +76,7 @@ import java.util.function.Function;
  * @param <V> the type of mapped values
  */
 @AnnotatedFor({"nullness"})
-public interface ConcurrentMap<K extends @NonNull Object,V extends @NonNull Object> extends Map<K,V> {
+public interface ConcurrentMap<K extends Object,V extends Object> extends Map<K,V> {
 
     /**
      * {@inheritDoc}
