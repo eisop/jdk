@@ -53,13 +53,24 @@ jobs:
     env:
       JAVA_VERSION: ${{ matrix.java_version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 for Gradle to run on
+        uses: actions/setup-java@v4
+        with:
+          # Install JDK 21 first, to make it available to Gradle using `gradle.properties` below.
+          java-version: 21
+          distribution: 'temurin'
+
       - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java_version }}
           distribution: 'temurin'
-    
+
+      - name: Inject JAVA_HOME_21_64 into `gradle.properties` to always use JDK 21 for Gradle
+        run: mkdir ~/.gradle && echo "org.gradle.java.home=$JAVA_HOME_21_X64" >> ~/.gradle/gradle.properties
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.1.0
     
@@ -83,6 +94,8 @@ jobs:
       - name: Run test script checker/bin-devel/test-${{ matrix.script }}.sh
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
         working-directory: ../checker-framework
+        env:
+          ORG_GRADLE_PROJECT_useJdkVersion: ${{ matrix.java.version }}
 
   extra:
     name: ${{ matrix.script }} on JDK ${{ matrix.java_version }}
