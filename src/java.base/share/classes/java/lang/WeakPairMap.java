@@ -45,7 +45,7 @@ import java.util.function.BiFunction;
  * @param <V>  the type of value
  * @author Peter Levart
  */
-final class WeakPairMap<K1, K2, V> {
+final class WeakPairMap<K1, K2, V extends Object> {
 
     private final ConcurrentHashMap<Pair<K1, K2>, V> map = new ConcurrentHashMap<>();
     private final ReferenceQueue<Object> queue = new ReferenceQueue<>();
