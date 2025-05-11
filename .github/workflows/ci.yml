@@ -58,15 +58,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           # Install JDK 21 first, to make it available to Gradle using `gradle.properties` below.
-          java-version: '21'
+          java-version: 21
           distribution: 'temurin'
-
       - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java_version }}
           distribution: 'temurin'
-
       - name: Inject JAVA_HOME_21_64 into `gradle.properties` to always use JDK 21 for Gradle
         run: mkdir ~/.gradle && echo "org.gradle.java.home=$JAVA_HOME_21_X64" >> ~/.gradle/gradle.properties
 
