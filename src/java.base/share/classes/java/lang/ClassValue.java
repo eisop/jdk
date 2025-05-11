@@ -190,7 +190,7 @@ public abstract @UsesObjectEquals class ClassValue<T> {
     /// --------
 
     /** Return the cache, if it exists, else a dummy empty cache. */
-    private static Entry<?>[] getCacheCarefully(Class<?> type) {
+    private static @Nullable Entry<?>[] getCacheCarefully(Class<?> type) {
         // racing type.classValueMap{.cacheArray} : null => new Entry[X] <=> new Entry[Y]
         ClassValueMap map = type.classValueMap;
         if (map == null)  return EMPTY_CACHE;

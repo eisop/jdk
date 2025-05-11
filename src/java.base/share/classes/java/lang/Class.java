@@ -3315,7 +3315,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
 
     // accessor for generic info repository;
     // generic info is lazily initialized
-    private ClassRepository getGenericInfo() {
+    private @Nullable ClassRepository getGenericInfo() {
         ClassRepository genericInfo = this.genericInfo;
         if (genericInfo == null) {
             String signature = getGenericSignature0();

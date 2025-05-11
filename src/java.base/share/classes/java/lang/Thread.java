@@ -404,7 +404,7 @@ public
      */
     @SuppressWarnings("removal")
     private Thread(@Nullable ThreadGroup g, Runnable target, String name,
-                   long stackSize, AccessControlContext acc,
+                   long stackSize, @Nullable AccessControlContext acc,
                    boolean inheritThreadLocals) {
         if (name == null) {
             throw new NullPointerException("name cannot be null");

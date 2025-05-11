@@ -768,13 +768,13 @@ public @UsesObjectEquals class Throwable implements Serializable {
     }
 
     private static class WrappedPrintStream extends PrintStreamOrWriter {
-        private final PrintStream printStream;
+        private final @Nullable PrintStream printStream;
 
-        WrappedPrintStream(PrintStream printStream) {
+        WrappedPrintStream(@Nullable PrintStream printStream) {
             this.printStream = printStream;
         }
 
-        Object lock() {
+        @Nullable Object lock() {
             return printStream;
         }
 

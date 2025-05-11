@@ -341,11 +341,11 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
          * entry can be expunged from table.  Such entries are referred to
          * as "stale entries" in the code that follows.
          */
-        static class Entry extends WeakReference<ThreadLocal<?>> {
+        static class Entry extends WeakReference<@Nullable ThreadLocal<?>> {
             /** The value associated with this ThreadLocal. */
-            Object value;
+            @Nullable Object value;
 
-            Entry(ThreadLocal<?> k, Object v) {
+            Entry(ThreadLocal<?> k, @Nullable Object v) {
                 super(k);
                 value = v;
             }
@@ -463,7 +463,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
          * @param  e the entry at table[i]
          * @return the entry associated with key, or null if no such
          */
-        private Entry getEntryAfterMiss(ThreadLocal<?> key, int i, Entry e) {
+        private @Nullable Entry getEntryAfterMiss(ThreadLocal<?> key, int i, Entry e) {
             Entry[] tab = table;
             int len = tab.length;
 

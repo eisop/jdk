@@ -308,7 +308,7 @@ public class ClassWriter extends ClassVisitor {
             final int access,
             final String name,
             final @Nullable String signature,
-            final String superName,
+            final @Nullable String superName,
             final String @Nullable [] interfaces) {
         this.version = version;
         this.accessFlags = access;

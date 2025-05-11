@@ -119,10 +119,10 @@ public final class Module implements AnnotatedElement {
      * VM but will not read any other modules, will not have any exports setup
      * and will not be registered in the service catalog.
      */
-    Module(ModuleLayer layer,
+    Module(@Nullable ModuleLayer layer,
            ClassLoader loader,
            ModuleDescriptor descriptor,
-           URI uri)
+           @Nullable URI uri)
     {
         this.layer = layer;
         this.name = descriptor.name();
@@ -162,7 +162,7 @@ public final class Module implements AnnotatedElement {
      *
      * @apiNote This constructor is for VM white-box testing.
      */
-    Module(ClassLoader loader, ModuleDescriptor descriptor) {
+    Module(@Nullable ClassLoader loader, ModuleDescriptor descriptor) {
         this.layer = null;
         this.name = descriptor.name();
         this.loader = loader;
@@ -188,7 +188,7 @@ public final class Module implements AnnotatedElement {
      *
      * @return The module name
      */
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
@@ -239,7 +239,7 @@ public final class Module implements AnnotatedElement {
      *
      * @see java.lang.reflect.Proxy
      */
-    public ModuleLayer getLayer() {
+    public @Nullable ModuleLayer getLayer() {
         if (isNamed()) {
             ModuleLayer layer = this.layer;
             if (layer != null)

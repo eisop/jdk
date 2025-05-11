@@ -260,7 +260,7 @@ final class StackStreamFactory {
          * or {@code null} if no more frame. If advanceToNextBatch is true,
          * it will only fetch the next batch.
          */
-        final Class<?> peekFrame() {
+        final @Nullable Class<?> peekFrame() {
             while (frameBuffer.isActive() && depth < maxDepth) {
                 if (frameBuffer.isEmpty()) {
                     // fetch another batch of stack frames

@@ -618,8 +618,8 @@ public abstract class Reference<T> {
      * @jls 12.6 Finalization of Class Instances
      */
     @ForceInline
-    @CFComment("nullness: Docs say the parameter can be null, but in practice, calls pass `this`")
-    public static void reachabilityFence(Object ref) {
+    @CFComment("nullness: Docs say the parameter can be null, but in practice, calls pass `this` and unbounded type parameters.")
+    public static void reachabilityFence(@Nullable Object ref) {
         // Does nothing. This method is annotated with @ForceInline to eliminate
         // most of the overhead that using @DontInline would cause with the
         // HotSpot JVM, when this fence is used in a wide variety of situations.

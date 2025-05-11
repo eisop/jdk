@@ -343,7 +343,7 @@ final class WeakPairMap<K1, K2, V extends Object> {
     /**
      * Common abstract supertype of a pair of WeakReference peers.
      */
-    private static abstract class WeakRefPeer<K> extends WeakReference<K> {
+    private static abstract class WeakRefPeer<K extends Object> extends WeakReference<K> {
 
         WeakRefPeer(K k, ReferenceQueue<Object> queue) {
             super(Objects.requireNonNull(k), queue);

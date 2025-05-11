@@ -612,7 +612,7 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
         private VersionInfo(@Nullable String spectitle, @Nullable String specversion,
                             @Nullable String specvendor, @Nullable String impltitle,
                             @Nullable String implversion, @Nullable String implvendor,
-                            URL sealbase)
+                            @Nullable URL sealbase)
         {
             this.implTitle = impltitle;
             this.implVersion = implversion;

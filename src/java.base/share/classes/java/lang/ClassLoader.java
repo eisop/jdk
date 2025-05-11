@@ -507,7 +507,7 @@ public abstract @UsesObjectEquals class ClassLoader {
 
     // package-private used by StackTraceElement to avoid
     // calling the overrideable getName method
-    final String name() {
+    final @Nullable String name() {
         return name;
     }
 
