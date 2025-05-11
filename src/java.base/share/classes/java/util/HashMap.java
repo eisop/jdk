@@ -639,7 +639,7 @@ import jdk.internal.access.SharedSecrets;
      *         previously associated {@code null} with {@code key}.)
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@Mutable @GuardSatisfied HashMap<K, V> this, K key, V value) {
+    public @Nullable V put(@Mutable @GuardSatisfied @UnknownInitialization HashMap<K, V> this, K key, V value) {
         return putVal(hash(key), key, value, false, true);
     }
 

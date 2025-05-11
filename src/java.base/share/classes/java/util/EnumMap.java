@@ -292,7 +292,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws NullPointerException if the specified key is null
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@Mutable EnumMap<K, V> this, K key, V value) {
+    public @Nullable V put(@Mutable @UnknownInitialization EnumMap<K, V> this, K key, V value) {
         typeCheck(key);
 
         int index = key.ordinal();
