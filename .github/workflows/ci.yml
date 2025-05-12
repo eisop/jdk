@@ -92,7 +92,7 @@ jobs:
         run: ./checker/bin-devel/test-${{ matrix.script }}.sh
         working-directory: ../checker-framework
         env:
-          ORG_GRADLE_PROJECT_useJdkVersion: ${{ matrix.java.version }}
+          ORG_GRADLE_PROJECT_useJdkVersion: ${{ matrix.java_version }}
 
   extra:
     name: ${{ matrix.script }} on JDK ${{ matrix.java_version }}
