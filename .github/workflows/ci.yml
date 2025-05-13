@@ -58,7 +58,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           # Install JDK 21 first, to make it available to Gradle using `gradle.properties` below.
-          java-version: 21
+          java-version: '21'
           distribution: 'temurin'
       - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v4
@@ -135,7 +135,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        java_version: [ '21' ]
+        java_version: ['21']
     env:
       JAVA_VERSION: ${{ matrix.java_version }}
     steps:
