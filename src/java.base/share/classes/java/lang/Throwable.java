@@ -205,6 +205,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @serial
      * @since 1.4
      */
+    @SuppressWarnings("initialization:assignment.type.incompatible") // EISOP#1217
     private @NotOnlyInitialized @Nullable Throwable cause = this;
 
     /**
@@ -674,7 +675,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *
      * @param s {@code PrintStream} to use for output
      */
-    public void printStackTrace(@Nullable PrintStream s) {
+    public void printStackTrace(PrintStream s) {
         printStackTrace(new WrappedPrintStream(s));
     }
 
@@ -768,13 +769,13 @@ public @UsesObjectEquals class Throwable implements Serializable {
     }
 
     private static class WrappedPrintStream extends PrintStreamOrWriter {
-        private final @Nullable PrintStream printStream;
+        private final PrintStream printStream;
 
-        WrappedPrintStream(@Nullable PrintStream printStream) {
+        WrappedPrintStream(PrintStream printStream) {
             this.printStream = printStream;
         }
 
-        @Nullable Object lock() {
+        Object lock() {
             return printStream;
         }
 
@@ -1118,6 +1119,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *         suppressed to deliver this exception.
      * @since 1.7
      */
+    @SuppressWarnings("nullness:return.type.incompatible") // False positive as the returned array's element is always nonnull
     public final synchronized Throwable[] getSuppressed() {
         if (suppressedExceptions == SUPPRESSED_SENTINEL ||
             suppressedExceptions == null)

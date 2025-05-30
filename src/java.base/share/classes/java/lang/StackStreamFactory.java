@@ -292,7 +292,8 @@ final class StackStreamFactory {
          * 2. reuse or expand the allocated buffers
          * 3. create specialized StackFrame objects
          */
-        private Object doStackWalk(long anchor, int skipFrames, int batchSize,
+        // AOSEN: let's try nullable first.
+        private @Nullable Object doStackWalk(long anchor, int skipFrames, int batchSize,
                                                 int bufStartIndex, int bufEndIndex) {
             checkState(NEW);
 
@@ -591,6 +592,7 @@ final class StackStreamFactory {
         }
 
         @Override
+        @SuppressWarnings("nullness:argument.type.incompatible") // AOSEN: why this error?
         public boolean tryAdvance(Consumer<? super StackFrame> action) {
             checkState(OPEN);
 
@@ -677,6 +679,7 @@ final class StackStreamFactory {
         }
 
         @Override
+        @SuppressWarnings("nullness:assignment.type.incompatible") // AOSEN: caller is only null if nextFrame() returns null
         protected Integer consumeFrames() {
             checkState(OPEN);
             int n = 0;

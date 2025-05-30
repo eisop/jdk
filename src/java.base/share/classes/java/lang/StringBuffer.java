@@ -357,7 +357,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
      * @since 1.8
      */
     @Override
-    synchronized StringBuffer append(@LeakedToResult StringBuffer this, @NonLeaked AbstractStringBuilder asb) {
+    synchronized StringBuffer append(@LeakedToResult StringBuffer this, @NonLeaked @Nullable AbstractStringBuilder asb) {
         toStringCache = null;
         super.append(asb);
         return this;
@@ -783,6 +783,8 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
      * @throws IOException if an I/O error occurs
      * @throws ClassNotFoundException if a serialized class cannot be loaded
      */
+    @SuppressWarnings({"nullness:argument.type.incompatible", "nullness:dereference.of.nullable"})
+    // AOSEN: if get method can return null, will there be a NPE?
     @java.io.Serial
     private void readObject(java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException {

@@ -466,6 +466,7 @@ final class StringLatin1 {
         return new String(result, LATIN1);
     }
 
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: ConditionalSpecialCasing.toLowerCaseCharArray could return null
     private static String toLowerCaseEx(String str, byte[] value,
                                         int first, Locale locale, boolean localeDependent)
     {
@@ -541,6 +542,7 @@ final class StringLatin1 {
         return new String(result, LATIN1);
     }
 
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: ConditionalSpecialCasing.toUpperCaseCharArray could return null
     private static String toUpperCaseEx(String str, byte[] value,
                                         int first, Locale locale, boolean localeDependent)
     {

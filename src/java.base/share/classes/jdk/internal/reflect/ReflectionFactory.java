@@ -25,6 +25,8 @@
 
 package jdk.internal.reflect;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.Externalizable;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -341,7 +343,7 @@ public class ReflectionFactory {
         return langReflectAccess.getExecutableSharedParameterTypes(ex);
     }
 
-    public <T> T newInstance(Constructor<T> ctor, Object[] args, Class<?> caller)
+    public <T> T newInstance(Constructor<T> ctor, Object @Nullable [] args, Class<?> caller)
         throws IllegalAccessException, InstantiationException, InvocationTargetException
     {
         return langReflectAccess.newInstance(ctor, args, caller);

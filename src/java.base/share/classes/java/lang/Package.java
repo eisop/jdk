@@ -440,7 +440,7 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
             // find package-info.class defined by loader
             String cn = packageName() + ".package-info";
             Module module = module();
-            PrivilegedAction<ClassLoader> pa = module::getClassLoader;
+            PrivilegedAction<@Nullable ClassLoader> pa = module::getClassLoader;
             @SuppressWarnings("removal")
             ClassLoader loader = AccessController.doPrivileged(pa);
             Class<?> c;
@@ -470,7 +470,7 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
      * @since 1.5
      */
     @Override
-    public <A extends Annotation> @Nullable A getAnnotation(Class<A> annotationClass) {
+    public <A extends @Nullable Annotation> @Nullable A getAnnotation(Class<A> annotationClass) {
         return getPackageInfo().getAnnotation(annotationClass);
     }
 
@@ -494,7 +494,7 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
      * @since 1.8
      */
     @Override
-    public  <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationClass) {
+    public  <A extends @Nullable Annotation> A[] getAnnotationsByType(Class<A> annotationClass) {
         return getPackageInfo().getAnnotationsByType(annotationClass);
     }
 
@@ -518,7 +518,7 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
      * @since 1.8
      */
     @Override
-    public <A extends Annotation> @Nullable A getDeclaredAnnotation(Class<A> annotationClass) {
+    public <A extends @Nullable Annotation> @Nullable A getDeclaredAnnotation(Class<A> annotationClass) {
         return getPackageInfo().getDeclaredAnnotation(annotationClass);
     }
 
@@ -527,7 +527,7 @@ public @UsesObjectEquals class Package extends NamedPackage implements java.lang
      * @since 1.8
      */
     @Override
-    public <A extends Annotation> A[] getDeclaredAnnotationsByType(Class<A> annotationClass) {
+    public <A extends @Nullable Annotation> A[] getDeclaredAnnotationsByType(Class<A> annotationClass) {
         return getPackageInfo().getDeclaredAnnotationsByType(annotationClass);
     }
 

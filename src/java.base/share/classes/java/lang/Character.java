@@ -11474,7 +11474,7 @@ class Character implements java.io.Serializable, Comparable<Character>, Constabl
      */
     @SideEffectFree
     @StaticallyExecutable
-    static char[] toUpperCaseCharArray(int codePoint) {
+    static char @Nullable [] toUpperCaseCharArray(int codePoint) {
         // As of Unicode 6.0, 1:M uppercasings only happen in the BMP.
         assert isBmpCodePoint(codePoint);
         return CharacterData.of(codePoint).toUpperCaseCharArray(codePoint);

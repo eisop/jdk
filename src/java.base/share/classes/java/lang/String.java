@@ -786,6 +786,7 @@ public final class String
         }
     }
 
+    @SuppressWarnings("throwing.nullable") // Should we call this as a true bug?
     static String newStringNoRepl(byte[] src, Charset cs) throws CharacterCodingException {
         try {
             return newStringNoRepl1(src, cs);
@@ -956,6 +957,7 @@ public final class String
     /*
      * Throws CCE, instead of replacing, if unmappable.
      */
+    @SuppressWarnings("throwing.nullable") // Should we call this as a true bug?
     static byte[] getBytesNoRepl(String s, Charset cs) throws CharacterCodingException {
         try {
             return getBytesNoRepl1(s, cs);
@@ -3249,6 +3251,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
+    @SuppressWarnings("nullness:return.type.incompatible") // False positive as the returned array's element is always nonnull
     public String @MinLen(1) [] split(@Regex String regex, int limit) {
         /* fastpath if the regex is a
          * (1) one-char String and this character is not one of the
@@ -3379,7 +3382,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static String join(CharSequence delimiter, @Nullable CharSequence... elements) {
+    public static String join(CharSequence delimiter, CharSequence... elements) {
         var delim = delimiter.toString();
         var elems = new String[elements.length];
         for (int i = 0; i < elements.length; i++) {
@@ -3474,6 +3477,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
+    @SuppressWarnings("nullness:assignment.type.incompatible") // AOSEN: this is a real NPE for me
     public static String join(CharSequence delimiter,
             Iterable<? extends @Nullable CharSequence> elements) {
         Objects.requireNonNull(delimiter);

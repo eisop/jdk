@@ -30,6 +30,7 @@ import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 import org.checkerframework.checker.signature.qual.BinaryName;
@@ -280,6 +281,7 @@ public abstract @UsesObjectEquals class ClassLoader {
          * Returns {@code true} is successfully registered; {@code false} if
          * loader's super class is not registered.
          */
+        @SuppressWarnings("nullness:argument.type.incompatible") // False positive because set interface is used.
         static boolean register(Class<? extends ClassLoader> c) {
             synchronized (loaderTypes) {
                 if (loaderTypes.contains(c.getSuperclass())) {
@@ -701,7 +703,7 @@ public abstract @UsesObjectEquals class ClassLoader {
 
             final String packageName = cls.getPackageName();
             if (!packageName.isEmpty()) {
-                AccessController.doPrivileged(new PrivilegedAction<>() {
+                AccessController.doPrivileged(new PrivilegedAction<@Nullable Void>() {
                     public Void run() {
                         sm.checkPackageAccess(packageName);
                         return null;
@@ -759,7 +761,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @since 9
      */
-    protected @Nullable Class<?> findClass(String moduleName, String name) {
+    protected @Nullable Class<?> findClass(@Nullable String moduleName, String name) {
         if (moduleName == null) {
             try {
                 return findClass(name);
@@ -1123,11 +1125,11 @@ public abstract @UsesObjectEquals class ClassLoader {
     }
 
     static native Class<?> defineClass1(ClassLoader loader, @BinaryName @Nullable String name, byte[] b, int off, int len,
-                                        @Nullable ProtectionDomain pd, String source);
+                                        @Nullable ProtectionDomain pd, @Nullable String source);
 
     static native Class<?> defineClass2(ClassLoader loader, @BinaryName @Nullable String name, java.nio.ByteBuffer b,
                                         int off, int len, @Nullable ProtectionDomain pd,
-                                        String source);
+                                        @Nullable String source);
 
     /**
      * Defines a class of the given flags via Lookup.defineClass.
@@ -1182,7 +1184,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      * check to make sure the certs for the new class (certs) are the same as
      * the certs for the first class inserted in the package (pcerts)
      */
-    private boolean compareCerts(Certificate[] pcerts, Certificate @Nullable [] certs) {
+    private boolean compareCerts(Certificate[] pcerts, Certificate[] certs) {
         // empty array fast-path
         if (certs.length == 0)
             return pcerts.length == 0;
@@ -1357,7 +1359,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @see java.lang.module.ModuleReader#find(String)
      * @since 9
      */
-    protected @Nullable URL findResource(String moduleName, String name) throws IOException {
+    protected @Nullable URL findResource(@Nullable String moduleName, String name) throws IOException {
         if (moduleName == null) {
             return findResource(name);
         } else {
@@ -1977,6 +1979,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      *
      * @see java.lang.System#initPhase3
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: I think this is a real possible NPE.
     static synchronized ClassLoader initSystemClassLoader() {
         if (VM.initLevel() != 3) {
             throw new InternalError("system class loader cannot be set at initLevel " +
@@ -2120,7 +2123,7 @@ public abstract @UsesObjectEquals class ClassLoader {
     /*
      * Returns a Package object for the named package
      */
-    private Package toPackage(String name, NamedPackage p, Module m) {
+    private Package toPackage(String name, @Nullable NamedPackage p, Module m) {
         // define Package object if the named package is not yet defined
         if (p == null)
             return NamedPackage.toPackage(name, m);
@@ -2477,14 +2480,14 @@ public abstract @UsesObjectEquals class ClassLoader {
     // none of this ClassLoader's assertion status modification methods have
     // been invoked.
     // @GuardedBy("assertionLock")
-    private @Nullable Map<@Nullable String, Boolean> packageAssertionStatus = null;
+    private @MonotonicNonNull Map<@Nullable String, Boolean> packageAssertionStatus = null;
 
     // Maps String fullyQualifiedClassName to Boolean assertionStatus If this
     // field is null then we are delegating assertion status queries to the VM,
     // i.e., none of this ClassLoader's assertion status modification methods
     // have been invoked.
     // @GuardedBy("assertionLock")
-    @Nullable Map<String, Boolean> classAssertionStatus = null;
+    @MonotonicNonNull Map<String, Boolean> classAssertionStatus = null;
 
     /**
      * Sets the default assertion status for this class loader.  This setting
@@ -2632,6 +2635,7 @@ public abstract @UsesObjectEquals class ClassLoader {
      * @since  1.4
      */
     @RequiresNonNull({"classAssertionStatus", "packageAssertionStatus"})
+    @SuppressWarnings("nullness:argument.type.incompatible") // False positive because map interface is used.
     boolean desiredAssertionStatus(String className) {
         synchronized (assertionLock) {
             // assert classAssertionStatus   != null;
@@ -2708,7 +2712,7 @@ public abstract @UsesObjectEquals class ClassLoader {
     }
 
     // the storage for ClassLoaderValue(s) associated with this ClassLoader
-    private volatile @Nullable ConcurrentHashMap<?, ?> classLoaderValueMap;
+    private volatile ConcurrentHashMap<?, ?> classLoaderValueMap;
 
     /**
      * Attempts to atomically set a volatile field in this object. Returns
@@ -2726,6 +2730,9 @@ public abstract @UsesObjectEquals class ClassLoader {
     /**
      * Called by the VM, during -Xshare:dump
      */
+    @SuppressWarnings({"nullness:assignment.type.incompatible","nullness:dereference.of.nullable"})
+    // classLoaderValueMap is null only when reset
+    // AOSEN: parallelLockMap.clear(); is this a real NPE?
     private void resetArchivedStates() {
         parallelLockMap.clear();
         packages.clear();

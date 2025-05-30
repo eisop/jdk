@@ -176,14 +176,14 @@ public
     private @Nullable Runnable target;
 
     /* The group of this thread */
-    private @Nullable ThreadGroup group;
+    private ThreadGroup group;
 
     /* The context ClassLoader for this thread */
-    private ClassLoader contextClassLoader;
+    private @Nullable ClassLoader contextClassLoader;
 
     /* The inherited AccessControlContext of this thread */
     @SuppressWarnings("removal")
-    private @Nullable AccessControlContext inheritedAccessControlContext;
+    private AccessControlContext inheritedAccessControlContext;
 
     /* For autonumbering anonymous threads. */
     private static int threadInitNumber;
@@ -403,7 +403,7 @@ public
      *            inheritable thread-locals from the constructing thread
      */
     @SuppressWarnings("removal")
-    private Thread(@Nullable ThreadGroup g, Runnable target, String name,
+    private Thread(@Nullable ThreadGroup g, @Nullable Runnable target, String name,
                    long stackSize, @Nullable AccessControlContext acc,
                    boolean inheritThreadLocals) {
         if (name == null) {
@@ -851,6 +851,7 @@ public
      * This method is called by the system to give a Thread
      * a chance to clean up before it actually exits.
      */
+    @SuppressWarnings("nullness:assignment.type.incompatible") // group is null only when exit() is called
     private void exit() {
         if (threadLocals != null && TerminatingThreadLocal.REGISTRY.isPresent()) {
             TerminatingThreadLocal.threadTerminated();
@@ -1212,7 +1213,7 @@ public
      *
      * @return  this thread's thread group.
      */
-    public final @Nullable ThreadGroup getThreadGroup() {
+    public final ThreadGroup getThreadGroup() {
         return group;
     }
 
@@ -1729,6 +1730,7 @@ public
      * override security-sensitive non-final methods.  Returns true if the
      * subclass overrides any of the methods, false otherwise.
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: Is this a real NPE? cl.getDeclaredMethod
     private static boolean auditSubclass(final Class<?> subcl) {
         @SuppressWarnings("removal")
         Boolean result = AccessController.doPrivileged(
@@ -1926,7 +1928,7 @@ public
     private volatile @Nullable UncaughtExceptionHandler uncaughtExceptionHandler;
 
     // null unless explicitly set
-    private static volatile UncaughtExceptionHandler defaultUncaughtExceptionHandler;
+    private static volatile @Nullable UncaughtExceptionHandler defaultUncaughtExceptionHandler;
 
     /**
      * Set the default handler invoked when a thread abruptly terminates
@@ -2023,6 +2025,7 @@ public
      * Dispatch an uncaught exception to the handler. This method is
      * intended to be called only by the JVM.
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: This cause possible NPE but it is not used
     private void dispatchUncaughtException(Throwable e) {
         getUncaughtExceptionHandler().uncaughtException(this, e);
     }

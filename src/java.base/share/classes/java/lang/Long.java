@@ -1575,7 +1575,7 @@ public final class Long extends Number
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static @Nullable Long getLong(@Nullable String nm) {
+    public static @Nullable Long getLong(String nm) {
         return getLong(nm, null);
     }
 
@@ -1622,7 +1622,7 @@ public final class Long extends Number
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static Long getLong(@Nullable String nm, long val) {
+    public static Long getLong(String nm, long val) {
         Long result = Long.getLong(nm, null);
         return (result == null) ? Long.valueOf(val) : result;
     }
@@ -1673,7 +1673,7 @@ public final class Long extends Number
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static @PolyNull Long getLong(@Nullable String nm, @PolyNull Long val) {
+    public static @PolyNull Long getLong(String nm, @PolyNull Long val) {
         String v = null;
         try {
             v = System.getProperty(nm);

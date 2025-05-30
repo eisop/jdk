@@ -60,6 +60,7 @@ final class PublicMethods {
      * than added method.
      * See comments in code...
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: is this a real NPE?
     void merge(Method method) {
         Key key = new Key(method);
         MethodList existing = map.get(key);
@@ -147,7 +148,7 @@ final class PublicMethods {
          *         {@code ptypes} and including or excluding static methods as
          *         requested by {@code includeStatic} flag.
          */
-        static MethodList filter(Method[] methods, String name,
+        static @Nullable MethodList filter(Method[] methods, String name,
                                  Class<?>[] ptypes, boolean includeStatic) {
             MethodList head = null, tail = null;
             for (Method method : methods) {
@@ -172,16 +173,16 @@ final class PublicMethods {
          * containing only the most specific methods for each signature
          * (i.e. return type). The returned head of the merged list may or
          * may not be the same as the {@code head} of the given list.
-         * The given {@code methodList} is not modified.
+         * The given {@code methodList} is not modified.1
          */
-        static MethodList merge(MethodList head, MethodList methodList) {
+        static @Nullable MethodList merge(@Nullable MethodList head, @Nullable MethodList methodList) {
             for (MethodList ml = methodList; ml != null; ml = ml.next) {
                 head = merge(head, ml.method);
             }
             return head;
         }
 
-        private static MethodList merge(MethodList head, Method method) {
+        private static @Nullable MethodList merge(@Nullable MethodList head, Method method) {
             Class<?> dclass = method.getDeclaringClass();
             Class<?> rtype = method.getReturnType();
             MethodList prev = null;

@@ -55,6 +55,7 @@ import java.security.PrivilegedAction;
     private CharacterName()  {
         try (@SuppressWarnings("removal") DataInputStream dis = new DataInputStream(new InflaterInputStream(
             AccessController.doPrivileged(new PrivilegedAction<>() {
+                @SuppressWarnings("nullness:return.type.incompatible")
                 public InputStream run() {
                     return getClass().getResourceAsStream("uniName.dat");
                 }

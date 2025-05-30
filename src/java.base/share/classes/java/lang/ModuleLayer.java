@@ -173,6 +173,7 @@ public final class ModuleLayer {
     /**
      * Creates a new module layer from the modules in the given configuration.
      */
+    @SuppressWarnings("nullness:argument.type.incompatible") // AOSEN: there could be possible NPE if clf is null
     private ModuleLayer(Configuration cf,
                         List<ModuleLayer> parents,
                         @Nullable Function<String, ClassLoader> clf)
@@ -882,7 +883,7 @@ public final class ModuleLayer {
      *
      * @throws SecurityException if denied by the security manager
      */
-    public ClassLoader findLoader(String name) {
+    public @Nullable ClassLoader findLoader(String name) {
         Optional<Module> om = findModule(name);
 
         // can't use map(Module::getClassLoader) as class loader can be null

@@ -25,6 +25,8 @@
 
 package sun.reflect.annotation;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -77,7 +79,7 @@ public class AnnotationType {
      *         does not represent a valid annotation type
      */
     public static AnnotationType getInstance(
-        Class<? extends Annotation> annotationClass)
+        Class<? extends @Nullable Annotation> annotationClass)
     {
         JavaLangAccess jla = SharedSecrets.getJavaLangAccess();
         AnnotationType result = jla.getAnnotationType(annotationClass); // volatile read

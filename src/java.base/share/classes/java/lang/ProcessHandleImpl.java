@@ -88,7 +88,7 @@ final class ProcessHandleImpl implements ProcessHandle {
     /**
      * The thread pool of "process reaper" daemon threads.
      */
-    @SuppressWarnings("removal")
+    @SuppressWarnings({"removal", "nullness:dereference.of.nullable"}) // AOSEN: Is this a real NPE?
     private static final Executor processReaperExecutor =
             AccessController.doPrivileged((PrivilegedAction<Executor>) () -> {
                 // Initialize ThreadLocalRandom now to avoid using the smaller stack
@@ -427,6 +427,7 @@ final class ProcessHandleImpl implements ProcessHandle {
      *            0 for all processes
      * @return a stream of ProcessHandles
      */
+    @SuppressWarnings("nullness:accessing.nullable") // AOSEN: this is a false positive to me
     static Stream<ProcessHandle> children(long pid) {
         @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();
@@ -448,6 +449,7 @@ final class ProcessHandleImpl implements ProcessHandle {
     }
 
     @Override
+    @SuppressWarnings("nullness:accessing.nullable") // AOSEN: this is a false positive to me
     public Stream<ProcessHandle> descendants() {
         @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();

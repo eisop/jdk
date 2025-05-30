@@ -138,11 +138,11 @@ final @UsesObjectEquals class ConditionalSpecialCasing {
         }
     }
 
-    static char[] toLowerCaseCharArray(String src, int index, Locale locale) {
+    static char @Nullable [] toLowerCaseCharArray(String src, int index, Locale locale) {
         return lookUpTable(src, index, locale, true);
     }
 
-    static char[] toUpperCaseCharArray(String src, int index, Locale locale) {
+    static char @Nullable [] toUpperCaseCharArray(String src, int index, Locale locale) {
         char[] result = lookUpTable(src, index, locale, false);
         if (result != null) {
             return result;
@@ -454,7 +454,7 @@ final @UsesObjectEquals class ConditionalSpecialCasing {
             return upper;
         }
 
-        String getLanguage() {
+        @Nullable String getLanguage() {
             return lang;
         }
 

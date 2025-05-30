@@ -849,6 +849,7 @@ final class StringUTF16 {
         }
     }
 
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: ConditionalSpecialCasing.toLowerCaseCharArray could return null
     private static String toLowerCaseEx(String str, byte[] value,
                                         byte[] result, int first, Locale locale,
                                         boolean localeDependent) {
@@ -950,6 +951,7 @@ final class StringUTF16 {
         }
     }
 
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: ConditionalSpecialCasing.toUpperCaseCharArray could return null
     private static String toUpperCaseEx(String str, byte[] value,
                                         byte[] result, int first,
                                         Locale locale, boolean localeDependent)

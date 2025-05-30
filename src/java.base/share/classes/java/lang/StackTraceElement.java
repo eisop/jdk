@@ -65,7 +65,7 @@ public final class StackTraceElement implements java.io.Serializable {
     // construct the 'format' bitmap, and then is cleared.
     //
     // For STEs constructed using the public constructors, this field is not used.
-    private transient @Nullable Class<?> declaringClassObject;
+    private transient Class<?> declaringClassObject;
 
     // Normally initialized by VM
     /**
@@ -220,7 +220,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * @since 9
      * @see Module#getName()
      */
-    public String getModuleName() {
+    public @Nullable String getModuleName() {
         return moduleName;
     }
 
@@ -234,7 +234,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * @since 9
      * @see java.lang.module.ModuleDescriptor.Version
      */
-    public String getModuleVersion() {
+    public @Nullable String getModuleVersion() {
         return moduleVersion;
     }
 
@@ -249,7 +249,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * @since 9
      * @see java.lang.ClassLoader#getName()
      */
-    public String getClassLoaderName() {
+    public @Nullable String getClassLoaderName() {
         return classLoaderName;
     }
 
@@ -453,6 +453,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * If the loader is one of the built-in loaders (`boot`, `platform`, or `app`)
      * then set BUILTIN_CLASS_LOADER to omit the first element (`<loader>/`).
      */
+    @SuppressWarnings("nullness:assignment.type.incompatible") // AOSEN: declaringClassObject set to null only when clearing it
     private synchronized void computeFormat() {
         try {
             Class<?> cls = (Class<?>) declaringClassObject;
@@ -534,6 +535,7 @@ public final class StackTraceElement implements java.io.Serializable {
         }
 
         @Pure
+        @SuppressWarnings("nullness:argument.type.incompatible") // False positive because set interface is used.
         static boolean contains(Module m) {
             return HASHED_MODULES.contains(m.getName());
         }

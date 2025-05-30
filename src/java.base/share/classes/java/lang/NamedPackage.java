@@ -72,6 +72,7 @@ class NamedPackage {
      * Returns the location of the module if this named package is in
      * a named module; otherwise, returns null.
      */
+    @SuppressWarnings({"nullness:dereference.of.nullable", "nullness:argument.type.incompatible"}) // The problem does not apply to named packages
     @Nullable URI location() {
         if (module.isNamed() && module.getLayer() != null) {
             Configuration cf = module.getLayer().configuration();

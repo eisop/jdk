@@ -28,6 +28,7 @@ package java.lang;
 import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.tainting.qual.Untainted;
+import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.File;
@@ -198,7 +199,7 @@ import sun.security.action.GetPropertyAction;
 public final class ProcessBuilder
 {
     private List<String> command;
-    private File directory;
+    private @Nullable File directory;
     private Map<String,String> environment;
     private boolean redirectErrorStream;
     private Redirect[] redirects;
@@ -368,7 +369,7 @@ public final class ProcessBuilder
     }
 
     // Only for use by Runtime.exec(...envp...)
-    ProcessBuilder environment(String[] envp) {
+    ProcessBuilder environment(String @Nullable [] envp) {
         assert environment == null;
         if (envp != null) {
             environment = ProcessEnvironment.emptyEnvironment(envp.length);
@@ -581,6 +582,7 @@ public final class ProcessBuilder
          * @return the file associated with this redirect,
          *         or {@code null} if there is no such file
          */
+        @Pure
         public @Nullable File file() { return null; }
 
         /**
@@ -1089,7 +1091,7 @@ public final class ProcessBuilder
      * @return the new Process
      * @throws IOException if an I/O error occurs
      */
-    private Process start(Redirect[] redirects) throws IOException {
+    private Process start(@Nullable Redirect[] redirects) throws IOException {
         // Must convert to array first -- a malicious user-supplied
         // list might try to circumvent the security check.
         String[] cmdarray = command.toArray(new String[command.size()]);
@@ -1284,7 +1286,7 @@ public final class ProcessBuilder
             Redirect prevOutput = null;
             for (int index = 0; index < builders.size(); index++) {
                 ProcessBuilder builder = builders.get(index);
-                Redirect[] redirects = builder.redirects();
+                @Nullable Redirect[] redirects = builder.redirects();
                 if (index > 0) {
                     // check the current Builder to see if it can take input from the previous
                     if (builder.redirectInput() != Redirect.PIPE) {

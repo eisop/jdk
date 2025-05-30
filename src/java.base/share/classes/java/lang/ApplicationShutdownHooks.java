@@ -96,6 +96,7 @@ import java.util.*;
      * to run in. Hooks are run concurrently and this method waits for
      * them to finish.
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: hooks is null only if illegal state exception is thrown
     static void runHooks() {
         Collection<Thread> threads;
         synchronized(ApplicationShutdownHooks.class) {
