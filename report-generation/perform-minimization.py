@@ -37,6 +37,10 @@ initial_branch_result = subprocess.run(
 )
 initial_branch = initial_branch_result.stdout.strip()
 
+#stash local changes before we fetch the remote branches (needed for config)
+print("Stashing local changes...")
+subprocess.run(["git", "stash"], check=True)
+
 #fetch remote branches
 subprocess.run(["git", "fetch", "--all", "--prune"], check=True)
 
