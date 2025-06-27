@@ -24,6 +24,8 @@
  */
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -415,7 +417,7 @@ public interface ProcessHandle extends Comparable<ProcessHandle> {
      *         the same system process; otherwise returns {@code false}
      */
     @Override
-    boolean equals(Object other);
+    boolean equals(@Nullable Object other);
 
     /**
      * Compares this ProcessHandle with the specified ProcessHandle for order.

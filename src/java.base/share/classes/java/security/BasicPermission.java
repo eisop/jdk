@@ -90,7 +90,7 @@ public abstract class BasicPermission extends Permission
     /**
      * initialize a BasicPermission object. Common to all constructors.
      */
-    private void init(String name) {
+    private void init(@Nullable String name) {
         if (name == null)
             throw new NullPointerException("name can't be null");
 
@@ -132,7 +132,7 @@ public abstract class BasicPermission extends Permission
      * @throws NullPointerException if {@code name} is {@code null}.
      * @throws IllegalArgumentException if {@code name} is empty.
      */
-    public BasicPermission(String name) {
+    public BasicPermission(@Nullable String name) {
         super(name);
         init(name);
     }
@@ -149,7 +149,7 @@ public abstract class BasicPermission extends Permission
      * @throws NullPointerException if {@code name} is {@code null}.
      * @throws IllegalArgumentException if {@code name} is empty.
      */
-    public BasicPermission(String name, String actions) {
+    public BasicPermission(@Nullable String name, @Nullable String actions) {
         super(name);
         init(name);
     }

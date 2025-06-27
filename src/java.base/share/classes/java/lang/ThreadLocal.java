@@ -88,6 +88,7 @@ import java.util.function.Supplier;
             "@SuppressWarnings(\"nullness:type.argument\") // initialValue returns non-null"
         })
 @AnnotatedFor({"interning", "nullness"})
+@SuppressWarnings("nullness") //AOSEN: I need to understand why @Nullable annotation is here
 public @UsesObjectEquals class ThreadLocal<@Nullable T> {
     /**
      * ThreadLocals rely on per-thread linear-probe hash maps attached
@@ -154,7 +155,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
      * @throws NullPointerException if the specified supplier is null
      * @since 1.8
      */
-    public static <S> ThreadLocal<S> withInitial(Supplier<? extends S> supplier) {
+    public static <@Nullable S> ThreadLocal<S> withInitial(Supplier<? extends S> supplier) {
         return new SuppliedThreadLocal<>(supplier);
     }
 
@@ -265,7 +266,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
      * @param  t the current thread
      * @return the map
      */
-    ThreadLocalMap getMap(Thread t) {
+    @Nullable ThreadLocalMap getMap(Thread t) {
         return t.threadLocals;
     }
 
@@ -307,7 +308,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
      * An extension of ThreadLocal that obtains its initial value from
      * the specified {@code Supplier}.
      */
-    static final class SuppliedThreadLocal<T> extends ThreadLocal<T> {
+    static final class SuppliedThreadLocal<@Nullable T> extends ThreadLocal<T> {
 
         private final Supplier<? extends T> supplier;
 
@@ -341,11 +342,11 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
          * entry can be expunged from table.  Such entries are referred to
          * as "stale entries" in the code that follows.
          */
-        static class Entry extends WeakReference<ThreadLocal<?>> {
+        static class Entry extends WeakReference<@Nullable ThreadLocal<?>> {
             /** The value associated with this ThreadLocal. */
-            Object value;
+            @Nullable Object value;
 
-            Entry(ThreadLocal<?> k, Object v) {
+            Entry(ThreadLocal<?> k, @Nullable Object v) {
                 super(k);
                 value = v;
             }
@@ -398,7 +399,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
          * ThreadLocalMaps are constructed lazily, so we only create
          * one when we have at least one entry to put in it.
          */
-        ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
+        ThreadLocalMap(ThreadLocal<?> firstKey, @Nullable Object firstValue) {
             table = new Entry[INITIAL_CAPACITY];
             int i = firstKey.threadLocalHashCode & (INITIAL_CAPACITY - 1);
             table[i] = new Entry(firstKey, firstValue);
@@ -463,7 +464,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
          * @param  e the entry at table[i]
          * @return the entry associated with key, or null if no such
          */
-        private Entry getEntryAfterMiss(ThreadLocal<?> key, int i, Entry e) {
+        private @Nullable Entry getEntryAfterMiss(ThreadLocal<?> key, int i, Entry e) {
             Entry[] tab = table;
             int len = tab.length;
 
@@ -617,7 +618,7 @@ public @UsesObjectEquals class ThreadLocal<@Nullable T> {
          * for expunging).
          */
         private int expungeStaleEntry(int staleSlot) {
-            Entry[] tab = table;
+            @Nullable Entry[] tab = table;
             int len = tab.length;
 
             // expunge entry at staleSlot

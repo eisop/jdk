@@ -1017,6 +1017,7 @@ public @UsesObjectEquals class Runtime {
          *
          * @return  The Version of the given string
          */
+        @SuppressWarnings("nullness:dereference.of.nullable") //AOSEN: possible NPE? I am not sure `m.group(VersionPattern.VNUM_GROUP)`
         public static Version parse(String s) {
             if (s == null)
                 throw new NullPointerException();
@@ -1418,6 +1419,7 @@ public @UsesObjectEquals class Runtime {
          *
          */
         @Override
+        @SuppressWarnings("nullness:override.param.invalid") // AOSEN: Don't use @Nullable here as null value will produce NPE.
         public boolean equals(Object obj) {
             boolean ret = equalsIgnoreOptional(obj);
             if (!ret)
@@ -1442,7 +1444,7 @@ public @UsesObjectEquals class Runtime {
          *          ignoring the optional build information
          *
          */
-        public boolean equalsIgnoreOptional(Object obj) {
+        public boolean equalsIgnoreOptional(@Nullable Object obj) {
             if (this == obj)
                 return true;
             return (obj instanceof Version that)

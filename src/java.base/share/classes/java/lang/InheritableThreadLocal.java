@@ -84,7 +84,7 @@ public class InheritableThreadLocal<@Nullable T> extends ThreadLocal<T> {
      *
      * @param t the current thread
      */
-    ThreadLocalMap getMap(Thread t) {
+    @Nullable ThreadLocalMap getMap(Thread t) {
        return t.inheritableThreadLocals;
     }
 

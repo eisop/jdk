@@ -25,6 +25,7 @@
 package java.lang;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.*;
@@ -40,7 +41,7 @@ import java.util.*;
 @AnnotatedFor({"interning"})
 @UsesObjectEquals class ApplicationShutdownHooks {
     /* The set of registered hooks */
-    private static IdentityHashMap<Thread, Thread> hooks;
+    private static @Nullable IdentityHashMap<Thread, Thread> hooks;
     static {
         try {
             Shutdown.add(1 /* shutdown hook invocation order */,
@@ -95,6 +96,7 @@ import java.util.*;
      * to run in. Hooks are run concurrently and this method waits for
      * them to finish.
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: hooks is null only if illegal state exception is thrown
     static void runHooks() {
         Collection<Thread> threads;
         synchronized(ApplicationShutdownHooks.class) {

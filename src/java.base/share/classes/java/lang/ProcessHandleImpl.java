@@ -88,7 +88,7 @@ final class ProcessHandleImpl implements ProcessHandle {
     /**
      * The thread pool of "process reaper" daemon threads.
      */
-    @SuppressWarnings("removal")
+    @SuppressWarnings({"removal", "nullness:dereference.of.nullable"}) // AOSEN: Is this a real NPE?
     private static final Executor processReaperExecutor =
             AccessController.doPrivileged((PrivilegedAction<Executor>) () -> {
                 // Initialize ThreadLocalRandom now to avoid using the smaller stack
@@ -341,7 +341,7 @@ final class ProcessHandleImpl implements ProcessHandle {
      *      if greater than the length of the arrays, the arrays are too small
      */
     private static native int getProcessPids0(long pid, long[] pids,
-                                              long[] ppids, long[] starttimes);
+                                              long @Nullable [] ppids, long[] starttimes);
 
     /**
      * Destroy the process for this ProcessHandle.
@@ -427,6 +427,7 @@ final class ProcessHandleImpl implements ProcessHandle {
      *            0 for all processes
      * @return a stream of ProcessHandles
      */
+    @SuppressWarnings("nullness:accessing.nullable") // AOSEN: this is a false positive to me
     static Stream<ProcessHandle> children(long pid) {
         @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();
@@ -448,6 +449,7 @@ final class ProcessHandleImpl implements ProcessHandle {
     }
 
     @Override
+    @SuppressWarnings("nullness:accessing.nullable") // AOSEN: this is a false positive to me
     public Stream<ProcessHandle> descendants() {
         @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();
@@ -563,12 +565,12 @@ final class ProcessHandleImpl implements ProcessHandle {
          */
         private native void info0(long pid);
 
-        String command;
-        String commandLine;
-        String[] arguments;
+        @Nullable String command;
+        @Nullable String commandLine;
+        String @Nullable [] arguments;
         long startTime;
         long totalTime;
-        String user;
+        @Nullable String user;
 
         Info() {
             command = null;

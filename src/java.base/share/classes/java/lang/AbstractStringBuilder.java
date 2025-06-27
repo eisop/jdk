@@ -612,7 +612,7 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
     /**
      * @since 1.8
      */
-    AbstractStringBuilder append(AbstractStringBuilder asb) {
+    AbstractStringBuilder append(@Nullable AbstractStringBuilder asb) {
         if (asb == null) {
             return appendNull();
         }
@@ -1676,6 +1676,7 @@ abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, Ch
     }
 
     /* for readObject() */
+    @SuppressWarnings("nullness:assignment.type.incompatible") // This like a false positive to me
     void initBytes(char[] value, int off, int len) {
         if (String.COMPACT_STRINGS) {
             this.value = StringUTF16.compress(value, off, len);

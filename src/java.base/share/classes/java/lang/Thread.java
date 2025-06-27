@@ -173,13 +173,13 @@ public
     private long eetop;
 
     /* What will be run. */
-    private Runnable target;
+    private @Nullable Runnable target;
 
     /* The group of this thread */
     private ThreadGroup group;
 
     /* The context ClassLoader for this thread */
-    private ClassLoader contextClassLoader;
+    private @Nullable ClassLoader contextClassLoader;
 
     /* The inherited AccessControlContext of this thread */
     @SuppressWarnings("removal")
@@ -193,13 +193,13 @@ public
 
     /* ThreadLocal values pertaining to this thread. This map is maintained
      * by the ThreadLocal class. */
-    ThreadLocal.ThreadLocalMap threadLocals = null;
+    ThreadLocal.@Nullable ThreadLocalMap threadLocals = null;
 
     /*
      * InheritableThreadLocal values pertaining to this thread. This map is
      * maintained by the InheritableThreadLocal class.
      */
-    ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
+    ThreadLocal.@Nullable ThreadLocalMap inheritableThreadLocals = null;
 
     /*
      * The requested stack size for this thread, or 0 if the creator did
@@ -237,7 +237,7 @@ public
      * operation, if any.  The blocker's interrupt method should be invoked
      * after setting this thread's interrupt status.
      */
-    private volatile Interruptible blocker;
+    private volatile @Nullable Interruptible blocker;
     private final Object blockerLock = new Object();
 
     /* Set the blocker field; invoked via jdk.internal.access.SharedSecrets
@@ -403,8 +403,8 @@ public
      *            inheritable thread-locals from the constructing thread
      */
     @SuppressWarnings("removal")
-    private Thread(ThreadGroup g, Runnable target, String name,
-                   long stackSize, AccessControlContext acc,
+    private Thread(@Nullable ThreadGroup g, @Nullable Runnable target, String name,
+                   long stackSize, @Nullable AccessControlContext acc,
                    boolean inheritThreadLocals) {
         if (name == null) {
             throw new NullPointerException("name cannot be null");
@@ -851,6 +851,7 @@ public
      * This method is called by the system to give a Thread
      * a chance to clean up before it actually exits.
      */
+    @SuppressWarnings("nullness:assignment.type.incompatible") // group is null only when exit() is called
     private void exit() {
         if (threadLocals != null && TerminatingThreadLocal.REGISTRY.isPresent()) {
             TerminatingThreadLocal.threadTerminated();
@@ -1212,7 +1213,7 @@ public
      *
      * @return  this thread's thread group.
      */
-    public final @Nullable ThreadGroup getThreadGroup() {
+    public final ThreadGroup getThreadGroup() {
         return group;
     }
 
@@ -1729,6 +1730,7 @@ public
      * override security-sensitive non-final methods.  Returns true if the
      * subclass overrides any of the methods, false otherwise.
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: Is this a real NPE? cl.getDeclaredMethod
     private static boolean auditSubclass(final Class<?> subcl) {
         @SuppressWarnings("removal")
         Boolean result = AccessController.doPrivileged(
@@ -1923,10 +1925,10 @@ public
     }
 
     // null unless explicitly set
-    private volatile UncaughtExceptionHandler uncaughtExceptionHandler;
+    private volatile @Nullable UncaughtExceptionHandler uncaughtExceptionHandler;
 
     // null unless explicitly set
-    private static volatile UncaughtExceptionHandler defaultUncaughtExceptionHandler;
+    private static volatile @Nullable UncaughtExceptionHandler defaultUncaughtExceptionHandler;
 
     /**
      * Set the default handler invoked when a thread abruptly terminates
@@ -2023,6 +2025,7 @@ public
      * Dispatch an uncaught exception to the handler. This method is
      * intended to be called only by the JVM.
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: This cause possible NPE but it is not used
     private void dispatchUncaughtException(Throwable e) {
         getUncaughtExceptionHandler().uncaughtException(this, e);
     }
@@ -2075,7 +2078,7 @@ public
          * instance with the identical non-null referent as this one.
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj == this)
                 return true;
 

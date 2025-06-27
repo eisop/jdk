@@ -1353,7 +1353,7 @@ public final class Integer extends Number
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static @Nullable Integer getInteger(@Nullable String nm) {
+    public static @Nullable Integer getInteger(String nm) {
         return getInteger(nm, null);
     }
 
@@ -1401,7 +1401,7 @@ public final class Integer extends Number
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static Integer getInteger(@Nullable String nm, int val) {
+    public static Integer getInteger(String nm, int val) {
         Integer result = getInteger(nm, null);
         return (result == null) ? Integer.valueOf(val) : result;
     }
@@ -1445,7 +1445,7 @@ public final class Integer extends Number
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static @PolyNull Integer getInteger(@Nullable String nm, @PolyNull Integer val) {
+    public static @PolyNull Integer getInteger(String nm, @PolyNull Integer val) {
         String v = null;
         try {
             v = System.getProperty(nm);

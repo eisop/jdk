@@ -25,6 +25,8 @@
 
 package jdk.internal.access;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -77,7 +79,7 @@ public interface JavaLangAccess {
     /**
      * Get the declared annotations for a given class, indexed by their types.
      */
-    Map<Class<? extends Annotation>, Annotation> getDeclaredAnnotationMap(Class<?> klass);
+    Map<Class<? extends @Nullable Annotation>, Annotation> getDeclaredAnnotationMap(Class<?> klass);
 
     /**
      * Get the array of bytes that is the class-file representation
@@ -102,7 +104,7 @@ public interface JavaLangAccess {
      * Class object does not represent an enum type;
      * the result is uncloned, cached, and shared by all callers.
      */
-    <E extends Enum<E>> E[] getEnumConstantsShared(Class<E> klass);
+    <E extends Enum<E>> E @Nullable [] getEnumConstantsShared(Class<E> klass);
 
     /**
      * Set current thread's blocker field.
@@ -161,7 +163,7 @@ public interface JavaLangAccess {
     /**
      * Returns a class loaded by the bootstrap class loader.
      */
-    Class<?> findBootstrapClassOrNull(String name);
+    @Nullable Class<?> findBootstrapClassOrNull(String name);
 
     /**
      * Define a Package of the given name and module by the given class loader.

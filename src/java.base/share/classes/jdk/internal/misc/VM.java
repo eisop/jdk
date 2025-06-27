@@ -25,6 +25,8 @@
 
 package jdk.internal.misc;
 
+import org.checkerframework.dataflow.qual.Pure;
+
 import static java.lang.Thread.State.*;
 
 import java.text.NumberFormat;
@@ -97,6 +99,7 @@ public class VM {
     /**
      * Returns {@code true} if the VM is fully initialized.
      */
+    @Pure
     public static boolean isBooted() {
         return initLevel >= SYSTEM_BOOTED;
     }

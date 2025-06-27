@@ -399,6 +399,7 @@ public final @NonNull class Optional<T> {
      */
     @OptionalEliminator
     @Pure
+    //Aosen: what's the difference if we don't use @PolyNull at all here?
     public @PolyNull T orElse(@PolyNull T other) {
         return value != null ? value : other;
     }

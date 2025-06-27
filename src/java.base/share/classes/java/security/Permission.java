@@ -25,6 +25,8 @@
 
 package java.security;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Abstract class for representing access to a system resource.
  * All permissions have a name (whose interpretation depends on the subclass),
@@ -80,7 +82,7 @@ public abstract class Permission implements Guard, java.io.Serializable {
      *
      */
 
-    public Permission(String name) {
+    public Permission(@Nullable String name) {
         this.name = name;
     }
 

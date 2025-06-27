@@ -25,6 +25,9 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
+
 import java.lang.ProcessBuilder.Redirect;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -144,7 +147,7 @@ final class ProcessImpl extends Process {
     private static final LaunchMechanism launchMechanism = platform.launchMechanism();
     private static final byte[] helperpath = toCString(StaticProperty.javaHome() + "/lib/jspawnhelper");
 
-    private static byte[] toCString(String s) {
+    private static byte @PolyNull [] toCString(@PolyNull String s) {
         if (s == null)
             return null;
         byte[] bytes = s.getBytes();
@@ -159,8 +162,8 @@ final class ProcessImpl extends Process {
     // Only for use by ProcessBuilder.start()
     static Process start(String[] cmdarray,
                          java.util.Map<String,String> environment,
-                         String dir,
-                         ProcessBuilder.Redirect[] redirects,
+                         @Nullable String dir,
+                         ProcessBuilder.@Nullable Redirect[] redirects,
                          boolean redirectErrorStream)
             throws IOException
     {

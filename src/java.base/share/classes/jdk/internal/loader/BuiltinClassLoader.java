@@ -25,6 +25,8 @@
 
 package jdk.internal.loader;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.module.ModuleDescriptor;
@@ -289,7 +291,7 @@ public class BuiltinClassLoader
      * defined to this class loader.
      */
     @SuppressWarnings("removal")
-    public InputStream findResourceAsStream(String mn, String name)
+    public InputStream findResourceAsStream(@Nullable String mn, String name)
         throws IOException
     {
         // Need URL to resource when running with a security manager so that

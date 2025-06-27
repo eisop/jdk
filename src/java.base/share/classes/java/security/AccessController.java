@@ -26,6 +26,7 @@
 package java.security;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.annotation.ElementType;
@@ -450,7 +451,7 @@ public final @UsesObjectEquals class AccessController {
      */
     @CallerSensitive
     public static <T> T doPrivileged(PrivilegedAction<T> action,
-            @SuppressWarnings("removal") AccessControlContext context,
+            @SuppressWarnings("removal") @Nullable AccessControlContext context,
             Permission... perms) {
 
         @SuppressWarnings("removal")

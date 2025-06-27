@@ -479,7 +479,7 @@ public class ObjectInputStream
      *          stream instead of objects.
      * @throws  IOException Any of the usual Input/Output related exceptions.
      */
-    public final @Nullable Object readObject()
+    public final Object readObject()
         throws IOException, ClassNotFoundException {
         return readObject(Object.class);
     }

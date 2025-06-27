@@ -24,8 +24,10 @@
  */
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.dataflow.qual.Pure;
+
 import jdk.internal.reflect.MethodAccessor;
 import jdk.internal.reflect.ConstructorAccessor;
 import java.lang.StackWalker.Option;
@@ -258,7 +260,7 @@ final class StackStreamFactory {
          * or {@code null} if no more frame. If advanceToNextBatch is true,
          * it will only fetch the next batch.
          */
-        final Class<?> peekFrame() {
+        final @Nullable Class<?> peekFrame() {
             while (frameBuffer.isActive() && depth < maxDepth) {
                 if (frameBuffer.isEmpty()) {
                     // fetch another batch of stack frames
@@ -290,7 +292,8 @@ final class StackStreamFactory {
          * 2. reuse or expand the allocated buffers
          * 3. create specialized StackFrame objects
          */
-        private Object doStackWalk(long anchor, int skipFrames, int batchSize,
+        // AOSEN: let's try nullable first.
+        private @Nullable Object doStackWalk(long anchor, int skipFrames, int batchSize,
                                                 int bufStartIndex, int bufEndIndex) {
             checkState(NEW);
 
@@ -334,7 +337,7 @@ final class StackStreamFactory {
          *
          * @see #tryNextFrame
          */
-        final Class<?> nextFrame() {
+        final @Nullable Class<?> nextFrame() {
             if (!hasNext()) {
                 return null;
             }
@@ -519,7 +522,7 @@ final class StackStreamFactory {
          * Returns next StackFrame object in the current batch of stack frames;
          * or null if no more stack frame.
          */
-        StackFrame nextStackFrame() {
+        @Nullable StackFrame nextStackFrame() {
             if (!hasNext()) {
                 return null;
             }
@@ -563,7 +566,7 @@ final class StackStreamFactory {
         // ------- Implementation of Spliterator
 
         @Override
-        public Spliterator<StackFrame> trySplit() {
+        public @Nullable Spliterator<StackFrame> trySplit() {
             return null;   // ordered stream and do not allow to split
         }
 
@@ -589,6 +592,7 @@ final class StackStreamFactory {
         }
 
         @Override
+        @SuppressWarnings("nullness:argument.type.incompatible") // AOSEN: why this error?
         public boolean tryAdvance(Consumer<? super StackFrame> action) {
             checkState(OPEN);
 
@@ -675,6 +679,7 @@ final class StackStreamFactory {
         }
 
         @Override
+        @SuppressWarnings("nullness:assignment.type.incompatible") // AOSEN: caller is only null if nextFrame() returns null
         protected Integer consumeFrames() {
             checkState(OPEN);
             int n = 0;

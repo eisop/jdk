@@ -141,6 +141,7 @@ public final @UsesObjectEquals class System {
      * @see Console#reader()
      */
     @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null.")
+    @SuppressWarnings("nullness:assignment.type.incompatible")
     public static final @MustCall({}) InputStream in = null;
 
     /**
@@ -174,6 +175,7 @@ public final @UsesObjectEquals class System {
      * @see     Charset#defaultCharset()
      */
     @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null.")
+    @SuppressWarnings("nullness:assignment.type.incompatible")
     public static final @MustCall({}) PrintStream out = null;
 
     /**
@@ -194,7 +196,8 @@ public final @UsesObjectEquals class System {
      * @see     Console#charset()
      * @see     Charset#defaultCharset()
      */
-    @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null.")
+    @CFComment("This field can be null. The Checker Framework conservatively annotates it as @NonNull, forbidding programs that set it to null. Should we do it?")
+    @SuppressWarnings("nullness:assignment.type.incompatible")
     public static final @MustCall({}) PrintStream err = null;
 
     // indicates if a security manager is possible
@@ -202,11 +205,12 @@ public final @UsesObjectEquals class System {
     private static final int MAYBE = 2;
     private static @Stable int allowSecurityManager;
 
-    // current security manager
+    // current security manage9
     @SuppressWarnings("removal")
-    private static volatile SecurityManager security;   // read by VM
+    private static volatile @Nullable SecurityManager security;   // read by VM
 
     // return true if a security manager is allowed
+    @Pure
     private static boolean allowSecurityManager() {
         return (allowSecurityManager != NEVER);
     }
@@ -216,7 +220,7 @@ public final @UsesObjectEquals class System {
      *
      * First, if there is a security manager, its {@code checkPermission}
      * method is called with a {@code RuntimePermission("setIO")} permission
-     *  to see if it's ok to reassign the "standard" input stream.
+     *  to see if it's ok to reassign the "standard" input str1eam.
      *
      * @param in the new standard input stream.
      *
@@ -359,7 +363,7 @@ public final @UsesObjectEquals class System {
     // Remember initial System.err. setSecurityManager() warning goes here
     private static volatile @Stable PrintStream initialErrStream;
 
-    private static URL codeSource(Class<?> clazz) {
+    private static @Nullable URL codeSource(Class<?> clazz) {
         PrivilegedAction<ProtectionDomain> pa = clazz::getProtectionDomain;
         @SuppressWarnings("removal")
         CodeSource cs = AccessController.doPrivileged(pa).getCodeSource();
@@ -433,7 +437,7 @@ public final @UsesObjectEquals class System {
         }
     }
 
-    private static void implSetSecurityManager(@SuppressWarnings("removal") SecurityManager sm) {
+    private static void implSetSecurityManager(@SuppressWarnings("removal") @Nullable SecurityManager sm) {
         if (security == null) {
             // ensure image reader is initialized
             Object.class.getResource("java/lang/ANY");
@@ -455,7 +459,7 @@ public final @UsesObjectEquals class System {
 
     @SuppressWarnings("removal")
     private static synchronized
-    void setSecurityManager0(final SecurityManager s) {
+    void setSecurityManager0(final @Nullable SecurityManager s) {
         SecurityManager sm = getSecurityManager();
         if (sm != null) {
             // ask the currently installed security manager if we
@@ -472,8 +476,8 @@ public final @UsesObjectEquals class System {
             // calls the installed security manager's checkPermission method
             // which will loop infinitely if there is a non-system class
             // (in this case: the new security manager class) on the stack).
-            AccessController.doPrivileged(new PrivilegedAction<>() {
-                public Object run() {
+            AccessController.doPrivileged(new PrivilegedAction<@Nullable Object>() {
+                public @Nullable Object run() {
                     s.getClass().getProtectionDomain().implies
                         (SecurityConstants.ALL_PERMISSION);
                     return null;
@@ -500,6 +504,7 @@ public final @UsesObjectEquals class System {
      */
     @SuppressWarnings("removal")
     @Deprecated(since="17", forRemoval=true)
+    @Pure
     public static @Nullable SecurityManager getSecurityManager() {
         if (allowSecurityManager()) {
             return security;
@@ -854,11 +859,11 @@ public final @UsesObjectEquals class System {
      * @since 1.7
      */
     @Pure
-    public static String lineSeparator() {
+    public static @Nullable String lineSeparator() {
         return lineSeparator;
     }
 
-    private static String lineSeparator;
+    private static @Nullable String lineSeparator;
 
     /**
      * Sets the system properties to the {@code Properties} argument.
@@ -1066,7 +1071,7 @@ public final @UsesObjectEquals class System {
         return (String) props.remove(key);
     }
 
-    private static void checkKey(String key) {
+    private static void checkKey(@Nullable String key) {
         if (key == null) {
             throw new NullPointerException("key can't be null");
         }
@@ -1496,7 +1501,7 @@ public final @UsesObjectEquals class System {
          *
          * @throws NullPointerException if {@code level} is {@code null}.
          */
-        public void log(Level level, ResourceBundle bundle, String msg,
+        public void log(Level level, @Nullable ResourceBundle bundle, String msg,
                 Throwable thrown);
 
         /**
@@ -1518,8 +1523,8 @@ public final @UsesObjectEquals class System {
          *
          * @throws NullPointerException if {@code level} is {@code null}.
          */
-        public void log(Level level, ResourceBundle bundle, String format,
-                Object... params);
+        public void log(Level level, @Nullable ResourceBundle bundle, String format,
+                Object @Nullable... params);
     }
 
     /**
@@ -2032,7 +2037,7 @@ public final @UsesObjectEquals class System {
     /**
      * Create PrintStream for stdout/err based on encoding.
      */
-    private static PrintStream newPrintStream(FileOutputStream fos, String enc) {
+    private static PrintStream newPrintStream(FileOutputStream fos, @Nullable String enc) {
        if (enc != null) {
             try {
                 return new PrintStream(new BufferedOutputStream(fos, 128), true, enc);
@@ -2103,6 +2108,7 @@ public final @UsesObjectEquals class System {
     /**
      * Initialize the system class.  Called after thread initialization.
      */
+    @SuppressWarnings("nullness:dereference.of.nullable")
     private static void initPhase1() {
 
         // register the shared secrets - do this first, since SystemProps.initProperties
@@ -2294,7 +2300,7 @@ public final @UsesObjectEquals class System {
             public AnnotationType getAnnotationType(Class<?> klass) {
                 return klass.getAnnotationType();
             }
-            public Map<Class<? extends Annotation>, Annotation> getDeclaredAnnotationMap(Class<?> klass) {
+            public Map<Class<? extends @Nullable Annotation>, Annotation> getDeclaredAnnotationMap(Class<?> klass) {
                 return klass.getDeclaredAnnotationMap();
             }
             public byte[] getRawClassAnnotations(Class<?> klass) {
@@ -2307,7 +2313,7 @@ public final @UsesObjectEquals class System {
                 return Class.getExecutableTypeAnnotationBytes(executable);
             }
             public <E extends Enum<E>>
-            E[] getEnumConstantsShared(Class<E> klass) {
+            E @Nullable [] getEnumConstantsShared(Class<E> klass) {
                 return klass.getEnumConstantsShared();
             }
             public void blockedOn(Interruptible b) {
@@ -2333,7 +2339,7 @@ public final @UsesObjectEquals class System {
                                         boolean initialize, int flags, Object classData) {
                 return ClassLoader.defineClass0(loader, lookup, name, b, 0, b.length, pd, initialize, flags, classData);
             }
-            public Class<?> findBootstrapClassOrNull(String name) {
+            public @Nullable Class<?> findBootstrapClassOrNull(String name) {
                 return ClassLoader.findBootstrapClassOrNull(name);
             }
             public Package definePackage(ClassLoader cl, String name, Module module) {
