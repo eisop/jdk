@@ -108,7 +108,7 @@ import java.util.function.Predicate;
  * @param <E> the type of elements held in this deque
  */
 @AnnotatedFor({"nullness"})
-public class ConcurrentLinkedDeque<E extends @NonNull Object>
+public class ConcurrentLinkedDeque<E extends Object>
     extends AbstractCollection<E>
     implements Deque<E>, java.io.Serializable {
 
@@ -1641,7 +1641,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean removeAll(Collection<? extends @NonNull @UnknownSignedness Object> c) {
+    public boolean removeAll(Collection<? extends @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> c.contains(e));
     }
@@ -1649,7 +1649,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean retainAll(Collection<? extends @NonNull @UnknownSignedness Object> c) {
+    public boolean retainAll(Collection<? extends @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> !c.contains(e));
     }
