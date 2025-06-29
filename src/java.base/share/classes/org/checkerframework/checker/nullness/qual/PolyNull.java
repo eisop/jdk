@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
  * A polymorphic qualifier for the non-null type system.
  *
  * <p>Any method written using {@link PolyNull} conceptually has two versions: one in which every
- * instance of {@link PolyNull} has been replaced by {@link NonNull}, and one in which every
- * instance of {@link PolyNull} has been replaced by {@link Nullable}.
+ * instance of {@link PolyNull} has been replaced by {@link org.checkerframework.checker.nullness.qual.NonNull}, and one in which every
+ * instance of {@link PolyNull} has been replaced by {@link org.checkerframework.checker.nullness.qual.Nullable}.
  *
  * @checker_framework.manual #nullness-checker Nullness Checker
  * @checker_framework.manual #qualifier-polymorphism Qualifier polymorphism
@@ -21,5 +21,13 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@PolymorphicQualifier(Nullable.class)
-public @interface PolyNull {}
+@PolymorphicQualifier(org.checkerframework.checker.nullness.qual.Nullable.class)
+public @interface PolyNull {
+    /**
+     * The value of a polymorphic qualifier. It is used to distinguish different polymorphic
+     * qualifiers.
+     *
+     * @return the value of the annotation
+     */
+    String value() default "";
+}
