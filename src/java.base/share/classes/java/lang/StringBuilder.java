@@ -31,6 +31,8 @@ import org.checkerframework.checker.index.qual.LTLengthOf;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.regex.qual.PolyRegex;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -177,7 +179,7 @@ public final class StringBuilder
     }
 
     @Override
-    public StringBuilder append(@GuardSatisfied @Nullable Object obj) {
+    public StringBuilder append(@Readonly @GuardSatisfied @Nullable Object obj) {
         return append(String.valueOf(obj));
     }
 
@@ -331,7 +333,7 @@ public final class StringBuilder
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    public StringBuilder insert(@NonNegative int offset, @GuardSatisfied @Nullable Object obj) {
+    public StringBuilder insert(@NonNegative int offset, @Readonly @GuardSatisfied @Nullable Object obj) {
             super.insert(offset, obj);
             return this;
     }

@@ -25,6 +25,8 @@
 
 package javax.lang.model.element;
 
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+
 import java.util.Map;
 import javax.lang.model.type.DeclaredType;
 
@@ -41,7 +43,7 @@ import javax.lang.model.type.DeclaredType;
  * @author Peter von der Ah&eacute;
  * @since 1.6
  */
-public interface AnnotationMirror {
+@ReceiverDependentMutable public interface AnnotationMirror {
 
     /**
      * {@return the type of this annotation}

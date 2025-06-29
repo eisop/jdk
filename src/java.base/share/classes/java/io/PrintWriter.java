@@ -32,6 +32,9 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.mustcall.qual.MustCallAlias;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.Objects;
@@ -68,7 +71,7 @@ import java.nio.charset.UnsupportedCharsetException;
  */
 
 @AnnotatedFor({"formatter", "index", "initialization", "lock", "mustcall", "nullness"})
-public class PrintWriter extends Writer {
+public @ReceiverDependentMutable class PrintWriter extends Writer {
 
     /**
      * The underlying character-output stream of this
@@ -705,7 +708,7 @@ public class PrintWriter extends Writer {
      * @param      obj   The {@code Object} to be printed
      * @see        java.lang.Object#toString()
      */
-    public void print(@GuardSatisfied PrintWriter this, @Nullable Object obj) {
+    public void print(@GuardSatisfied PrintWriter this, @Nullable @Readonly Object obj) {
         write(String.valueOf(obj));
     }
 
@@ -841,7 +844,7 @@ public class PrintWriter extends Writer {
      *
      * @param x  The {@code Object} to be printed.
      */
-    public void println(@GuardSatisfied PrintWriter this, @Nullable Object x) {
+    public void println(@GuardSatisfied PrintWriter this, @Nullable @Readonly Object x) {
         String s = String.valueOf(x);
         synchronized (lock) {
             print(s);
@@ -894,7 +897,7 @@ public class PrintWriter extends Writer {
      * @since  1.5
      */
     @FormatMethod
-    public @MustCallAlias PrintWriter printf(@GuardSatisfied @MustCallAlias PrintWriter this, String format, @Nullable Object ... args) {
+    public @MustCallAlias PrintWriter printf(@GuardSatisfied @MustCallAlias PrintWriter this, String format, @Nullable @Readonly Object ... args) {
         return format(format, args);
     }
 
@@ -948,7 +951,7 @@ public class PrintWriter extends Writer {
      * @since  1.5
      */
     @FormatMethod
-    public @MustCallAlias PrintWriter printf(@GuardSatisfied @MustCallAlias PrintWriter this, @Nullable Locale l, String format, @Nullable Object ... args) {
+    public @MustCallAlias PrintWriter printf(@GuardSatisfied @MustCallAlias PrintWriter this, @Nullable Locale l, String format, @Nullable @Readonly Object ... args) {
         return format(l, format, args);
     }
 
@@ -993,7 +996,7 @@ public class PrintWriter extends Writer {
      * @since  1.5
      */
     @FormatMethod
-    public @MustCallAlias PrintWriter format(@GuardSatisfied @MustCallAlias PrintWriter this, String format, @Nullable Object ... args) {
+    public @MustCallAlias PrintWriter format(@GuardSatisfied @MustCallAlias PrintWriter this, String format, @Nullable @Readonly Object ... args) {
         try {
             synchronized (lock) {
                 ensureOpen();
@@ -1054,7 +1057,7 @@ public class PrintWriter extends Writer {
      * @since  1.5
      */
     @FormatMethod
-    public @MustCallAlias PrintWriter format(@GuardSatisfied @MustCallAlias PrintWriter this, @Nullable Locale l, String format, @Nullable Object ... args) {
+    public @MustCallAlias PrintWriter format(@GuardSatisfied @MustCallAlias PrintWriter this, @Nullable Locale l, String format, @Nullable @Readonly Object ... args) {
         try {
             synchronized (lock) {
                 ensureOpen();

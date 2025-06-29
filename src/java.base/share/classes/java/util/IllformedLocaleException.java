@@ -41,6 +41,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see Locale
  * @since 1.7
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 @AnnotatedFor({"index"})
 public class IllformedLocaleException extends RuntimeException {
 

@@ -35,6 +35,9 @@ import java.util.function.LongConsumer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -47,6 +50,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.8
  */
 @AnnotatedFor("nullness")
+@SuppressWarnings("pico") // Not interesting class, fix later
 public final class Spliterators {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -150,7 +154,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(Object[])
      */
-    public static <T> Spliterator<@PolyNull T> spliterator(@PolyNull Object[] array,
+    public static <T> Spliterator<@PolyNull @PolyMutable T> spliterator(@PolyNull @PolyMutable Object @Readonly [] array,
                                                  int additionalCharacteristics) {
         return new ArraySpliterator<>(Objects.requireNonNull(array),
                                       additionalCharacteristics);
@@ -185,7 +189,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(Object[], int, int)
      */
-    public static <T> Spliterator<@PolyNull T> spliterator(@PolyNull Object[] array, int fromIndex, int toIndex,
+    public static <T> Spliterator<@PolyNull @PolyMutable T> spliterator(@PolyNull @PolyMutable Object @Readonly [] array, int fromIndex, int toIndex,
                                                  int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new ArraySpliterator<>(array, fromIndex, toIndex, additionalCharacteristics);
@@ -214,7 +218,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(int[])
      */
-    public static Spliterator.OfInt spliterator(int[] array,
+    public static Spliterator.OfInt spliterator(int @Readonly [] array,
                                                 int additionalCharacteristics) {
         return new IntArraySpliterator(Objects.requireNonNull(array), additionalCharacteristics);
     }
@@ -247,7 +251,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(int[], int, int)
      */
-    public static Spliterator.OfInt spliterator(int[] array, int fromIndex, int toIndex,
+    public static Spliterator.OfInt spliterator(int @Readonly [] array, int fromIndex, int toIndex,
                                                 int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new IntArraySpliterator(array, fromIndex, toIndex, additionalCharacteristics);
@@ -276,7 +280,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(long[])
      */
-    public static Spliterator.OfLong spliterator(long[] array,
+    public static Spliterator.OfLong spliterator(long @Readonly [] array,
                                                  int additionalCharacteristics) {
         return new LongArraySpliterator(Objects.requireNonNull(array), additionalCharacteristics);
     }
@@ -313,7 +317,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(long[], int, int)
      */
-    public static Spliterator.OfLong spliterator(long[] array, int fromIndex, int toIndex,
+    public static Spliterator.OfLong spliterator(long @Readonly [] array, int fromIndex, int toIndex,
                                                  int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new LongArraySpliterator(array, fromIndex, toIndex, additionalCharacteristics);
@@ -342,7 +346,7 @@ public final class Spliterators {
      * @throws NullPointerException if the given array is {@code null}
      * @see Arrays#spliterator(double[])
      */
-    public static Spliterator.OfDouble spliterator(double[] array,
+    public static Spliterator.OfDouble spliterator(double @Readonly [] array,
                                                    int additionalCharacteristics) {
         return new DoubleArraySpliterator(Objects.requireNonNull(array), additionalCharacteristics);
     }
@@ -379,7 +383,7 @@ public final class Spliterators {
      *         {@code toIndex} is greater than the array size
      * @see Arrays#spliterator(double[], int, int)
      */
-    public static Spliterator.OfDouble spliterator(double[] array, int fromIndex, int toIndex,
+    public static Spliterator.OfDouble spliterator(double @Readonly [] array, int fromIndex, int toIndex,
                                                    int additionalCharacteristics) {
         checkFromToBounds(Objects.requireNonNull(array).length, fromIndex, toIndex);
         return new DoubleArraySpliterator(array, fromIndex, toIndex, additionalCharacteristics);
@@ -428,7 +432,7 @@ public final class Spliterators {
      * @return A spliterator from an iterator
      * @throws NullPointerException if the given collection is {@code null}
      */
-    public static <T> Spliterator<T> spliterator(Collection<? extends T> c,
+    public static <T> Spliterator<T> spliterator(@Readonly Collection<? extends T> c,
                                                  int characteristics) {
         return new IteratorSpliterator<>(Objects.requireNonNull(c),
                                          characteristics);

@@ -32,6 +32,8 @@ import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.PolySigned;
+import org.checkerframework.checker.pico.qual.PolyMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.TerminatesExecution;
@@ -665,8 +667,8 @@ public final @UsesObjectEquals class System {
      */
     @SideEffectFree
     @IntrinsicCandidate
-    public static native void arraycopy(@PolySigned @GuardSatisfied Object src,  @NonNegative int  srcPos,
-                                        @PolySigned @GuardSatisfied Object dest, @NonNegative int destPos,
+    public static native void arraycopy(@PolySigned @GuardSatisfied @Readonly Object src,  @NonNegative int  srcPos,
+                                        @PolySigned @GuardSatisfied @Readonly Object dest, @NonNegative int destPos,
                                         @LTLengthOf(value={"#1", "#3"}, offset={"#2 - 1", "#4 - 1"}) @NonNegative int length);
 
     /**
@@ -684,7 +686,7 @@ public final @UsesObjectEquals class System {
      */
     @Pure
     @IntrinsicCandidate
-    public static native int identityHashCode(@GuardSatisfied @Nullable Object x);
+    public static native int identityHashCode(@GuardSatisfied @Nullable @Readonly Object x);
 
     /**
      * System properties.

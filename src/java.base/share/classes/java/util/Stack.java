@@ -27,6 +27,7 @@ package java.util;
 
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -71,7 +72,7 @@ public class Stack<E> extends Vector<E> {
      * @return  the {@code item} argument.
      * @see     java.util.Vector#addElement
      */
-    public E push(@GuardSatisfied Stack<E> this, E item) {
+    public E push(@Mutable @GuardSatisfied Stack<E> this, E item) {
         addElement(item);
 
         return item;
@@ -85,7 +86,7 @@ public class Stack<E> extends Vector<E> {
      *          of the {@code Vector} object).
      * @throws  EmptyStackException  if this stack is empty.
      */
-    public synchronized E pop(@GuardSatisfied Stack<E> this) {
+    public synchronized E pop(@Mutable @GuardSatisfied Stack<E> this) {
         E       obj;
         int     len = size();
 
@@ -104,7 +105,7 @@ public class Stack<E> extends Vector<E> {
      * @throws  EmptyStackException  if this stack is empty.
      */
     @Pure
-    public synchronized E peek() {
+    public synchronized E peek(Stack<E> this) {
         int     len = size();
 
         if (len == 0)
@@ -120,7 +121,7 @@ public class Stack<E> extends Vector<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean empty() {
+    public boolean empty(Stack<E> this) {
         return size() == 0;
     }
 
@@ -138,7 +139,7 @@ public class Stack<E> extends Vector<E> {
      *          the object is located; the return value {@code -1}
      *          indicates that the object is not on the stack.
      */
-    public synchronized int search(Object o) {
+    public synchronized int search(Stack<E> this, Object o) {
         int i = lastIndexOf(o);
 
         if (i >= 0) {

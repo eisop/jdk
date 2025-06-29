@@ -25,6 +25,7 @@
 
 package java.util;
 
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -67,5 +68,5 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.4
  */
 @AnnotatedFor({"lock", "nullness"})
-public interface RandomAccess {
+@ReceiverDependentMutable public interface RandomAccess {
 }

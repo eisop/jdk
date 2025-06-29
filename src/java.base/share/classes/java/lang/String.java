@@ -42,6 +42,7 @@ import org.checkerframework.checker.lock.qual.NewObject;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.regex.qual.PolyRegex;
 import org.checkerframework.checker.regex.qual.Regex;
 import org.checkerframework.checker.signature.qual.PolySignature;
@@ -1910,7 +1911,7 @@ public final class String
     @EnsuresNonNullIf(expression={"#1"}, result=true)
     @Pure
     @StaticallyExecutable
-    public boolean equals(@GuardSatisfied @Nullable Object anObject) {
+    public boolean equals(@Readonly @GuardSatisfied @Nullable Object anObject) {
         if (this == anObject) {
             return true;
         }
@@ -2993,7 +2994,7 @@ public final class String
     @Pure
     @StaticallyExecutable
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(CharSequence s) {
+    public boolean contains(@Readonly CharSequence s) {
         return indexOf(s.toString()) >= 0;
     }
 
@@ -4327,7 +4328,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     @FormatMethod
-    public static String format(String format, @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
+    public static String format(String format, @Readonly @GuardSatisfied @Nullable Object @GuardSatisfied @Readonly ... args) {
         return new Formatter().format(format, args).toString();
     }
 
@@ -4371,7 +4372,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     @FormatMethod
-    public static String format(@GuardSatisfied @Nullable Locale l, String format, @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
+    public static String format(@Readonly @GuardSatisfied @Nullable Locale l, String format, @Readonly @GuardSatisfied @Nullable Object @GuardSatisfied ... args) {
         return new Formatter(l).format(format, args).toString();
     }
 
@@ -4408,7 +4409,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static @NewObject String valueOf(@GuardSatisfied @Nullable Object obj) {
+    public static @NewObject String valueOf(@Readonly @GuardSatisfied @Nullable Object obj) {
         return (obj == null) ? "null" : obj.toString();
     }
 

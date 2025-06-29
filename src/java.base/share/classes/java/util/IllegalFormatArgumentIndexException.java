@@ -33,6 +33,7 @@ package java.util;
  *
  * @since 16
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 class IllegalFormatArgumentIndexException extends IllegalFormatException {
 
     @java.io.Serial

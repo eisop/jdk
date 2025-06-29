@@ -28,6 +28,7 @@ package java.util;
 import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.checkerframework.checker.mustcall.qual.MustCallAlias;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -1935,6 +1936,7 @@ import sun.util.locale.provider.ResourceBundleBasedAdapter;
  * @since 1.5
  */
 @AnnotatedFor({"formatter", "index", "lock", "mustcall", "nullness"})
+@SuppressWarnings("pico") // Not interesting class, fix later
 public final class Formatter implements Closeable, Flushable {
     private Appendable a;
     private final Locale l;

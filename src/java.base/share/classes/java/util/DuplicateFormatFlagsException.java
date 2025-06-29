@@ -35,6 +35,7 @@ package java.util;
  *
  * @since 1.5
  */
+@SuppressWarnings("pico") // Not interesting class, fix later
 public class DuplicateFormatFlagsException extends IllegalFormatException {
 
     @java.io.Serial

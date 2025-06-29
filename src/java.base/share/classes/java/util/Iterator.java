@@ -28,6 +28,9 @@ package java.util;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
@@ -67,8 +70,8 @@ import java.util.function.Consumer;
             "ListIterator (a subclass of Iterator), which supports a set operation."
 })
 @AnnotatedFor({"lock", "nullness"})
-@Covariant({0})
-public interface Iterator<E> {
+@Covariant(0)
+@ReceiverDependentMutable public interface Iterator<E> {
     /**
      * Returns {@code true} if the iteration has more elements.
      * (In other words, returns {@code true} if {@link #next} would
@@ -78,7 +81,7 @@ public interface Iterator<E> {
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    boolean hasNext(@GuardSatisfied Iterator<E> this);
+    boolean hasNext(@GuardSatisfied @Readonly Iterator<E> this);
 
     /**
      * Returns the next element in the iteration.
@@ -113,7 +116,7 @@ public interface Iterator<E> {
      *         been called after the last call to the {@code next}
      *         method
      */
-    default void remove(@GuardSatisfied Iterator<E> this) {
+    default void remove(@Mutable @GuardSatisfied Iterator<E> this) {
         throw new UnsupportedOperationException("remove");
     }
 
@@ -142,7 +145,7 @@ public interface Iterator<E> {
      * @throws NullPointerException if the specified action is null
      * @since 1.8
      */
-    default void forEachRemaining(Consumer<? super E> action) {
+     default void forEachRemaining(@Mutable Iterator<E> this, Consumer<? super E> action) {
         Objects.requireNonNull(action);
         while (hasNext())
             action.accept(next());

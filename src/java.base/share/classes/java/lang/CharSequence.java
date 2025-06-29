@@ -32,9 +32,12 @@ import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
+import org.checkerframework.framework.qual.DefaultQualifierForUse;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -68,7 +71,7 @@ import java.util.stream.StreamSupport;
  */
 
 @AnnotatedFor({"lock", "nullness", "index"})
-public interface CharSequence {
+@ReceiverDependentMutable public interface CharSequence {
 
     /**
      * Returns the length of this character sequence.  The length is the number

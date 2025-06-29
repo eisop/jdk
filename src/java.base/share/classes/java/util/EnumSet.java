@@ -26,6 +26,8 @@
 package java.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import jdk.internal.access.SharedSecrets;
@@ -142,7 +144,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * Adds all of the elements from the appropriate enum type to this enum
      * set, which is empty prior to the call.
      */
-    abstract void addAll();
+    abstract void addAll(@Mutable EnumSet<E> this);
 
     /**
      * Creates an enum set with the same element type as the specified enum
@@ -373,7 +375,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * Adds the specified range to this enum set, which is empty prior
      * to the call.
      */
-    abstract void addRange(E from, E to);
+    abstract void addRange(@Mutable EnumSet<E> this, E from, E to);
 
     /**
      * Returns a copy of this set.
@@ -397,6 +399,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     /**
      * Throws an exception if e is not of the correct type for this enum set.
      */
+    @SuppressWarnings("pico:type.invalid.annotations.on.use") // Aosen: This is a bug in validator
     final void typeCheck(E e) {
         Class<?> eClass = e.getClass();
         if (eClass != elementType && eClass.getSuperclass() != elementType)

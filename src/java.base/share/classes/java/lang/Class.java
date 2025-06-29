@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.nullness.qual.UnknownKeyFor;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.signature.qual.CanonicalName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.ClassGetSimpleName;
@@ -223,7 +224,7 @@ import sun.reflect.misc.ReflectUtil;
             "meaning, but are unrelated by the Java type hierarchy.",
             "@Covariant makes Class<@NonNull String> a subtype of Class<@Nullable String>."})
 @AnnotatedFor({"index", "interning", "lock", "nullness", "signature"})
-@Covariant({0})
+@Covariant(0)
 public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializable,
                               GenericDeclaration,
                               Type,
@@ -719,7 +720,7 @@ public final @Interned class Class<@UnknownKeyFor T> implements java.io.Serializ
     @Pure
     @EnsuresNonNullIf(expression={"#1"}, result=true)
     @IntrinsicCandidate
-    public native boolean isInstance(@GuardSatisfied Class<T> this, @Nullable Object obj);
+    public native boolean isInstance(@GuardSatisfied Class<T> this, @Nullable @Readonly Object obj);
 
 
     /**
