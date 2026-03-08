@@ -1158,7 +1158,11 @@ public final @UsesObjectEquals class Pattern
      * @return  The source of this pattern
      */
     @Pure
+<<<<<<< HEAD
     public @PolyRegex String pattern(@PolyRegex Pattern this) {
+=======
+    public @Regex String pattern() {
+>>>>>>> ef188caeb09 (`Pattern.pattern()` and `Pattern.toString()` return a regex)
         return pattern;
     }
 
@@ -1171,7 +1175,11 @@ public final @UsesObjectEquals class Pattern
      * @since 1.5
      */
     @Pure
+<<<<<<< HEAD
     public @PolyRegex String toString(@GuardSatisfied @PolyRegex Pattern this) {
+=======
+    public @Regex String toString(@GuardSatisfied Pattern this) {
+>>>>>>> ef188caeb09 (`Pattern.pattern()` and `Pattern.toString()` return a regex)
         return pattern;
     }
 
