@@ -1131,7 +1131,6 @@ public final @UsesObjectEquals class Pattern
      * @return  The string representation of this pattern
      * @since 1.5
      */
-    @Override
     @Pure
     public @PolyRegex String toString(@GuardSatisfied @PolyRegex Pattern this) {
         return pattern;
