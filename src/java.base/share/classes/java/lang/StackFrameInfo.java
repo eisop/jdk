@@ -24,6 +24,8 @@
  */
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import jdk.internal.access.JavaLangInvokeAccess;
 import jdk.internal.access.SharedSecrets;
 
@@ -96,7 +98,7 @@ class StackFrameInfo implements StackFrame {
     }
 
     @Override
-    public String getFileName() {
+    public @Nullable String getFileName() {
         return toStackTraceElement().getFileName();
     }
 

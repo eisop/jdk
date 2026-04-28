@@ -25,6 +25,8 @@
 
 package jdk.internal.misc;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import jdk.internal.ref.Cleaner;
 import jdk.internal.vm.annotation.ForceInline;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
@@ -1391,7 +1393,7 @@ public final class Unsafe {
     }
 
     /** Throws the exception without telling the verifier. */
-    public native void throwException(Throwable ee);
+    public native void throwException(@Nullable Throwable ee);
 
     /**
      * Atomically updates Java variable to {@code x} if it is currently
@@ -1404,7 +1406,7 @@ public final class Unsafe {
      */
     @IntrinsicCandidate
     public final native boolean compareAndSetReference(Object o, long offset,
-                                                       Object expected,
+                                                       @Nullable Object expected,
                                                        Object x);
 
     @IntrinsicCandidate

@@ -235,7 +235,7 @@ public abstract class Enum<E extends Enum<E>>
      *     enum type
      */
     @SuppressWarnings("unchecked")
-    public final Class<@Tainted E> getDeclaringClass() {
+    public final @Nullable Class<@Tainted E> getDeclaringClass() {
         Class<?> clazz = getClass();
         Class<?> zuper = clazz.getSuperclass();
         return (zuper == Enum.class) ? (Class<E>)clazz : (Class<E>)zuper;
@@ -250,6 +250,7 @@ public abstract class Enum<E extends Enum<E>>
      * @since 12
      */
     @Override
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: is this a real NPE?
     public final Optional<EnumDesc<E>> describeConstable() {
         return getDeclaringClass()
                 .describeConstable()

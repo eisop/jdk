@@ -24,6 +24,8 @@
  */
 package jdk.internal.loader;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.module.ModuleReference;
@@ -160,7 +162,7 @@ public class BootLoader {
     /**
      * Returns a URL to a resource in a module defined to the boot loader.
      */
-    public static URL findResource(String mn, String name) throws IOException {
+    public static URL findResource(@Nullable String mn, String name) throws IOException {
         return ClassLoaders.bootLoader().findResource(mn, name);
     }
 
@@ -168,7 +170,7 @@ public class BootLoader {
      * Returns an input stream to a resource in a module defined to the
      * boot loader.
      */
-    public static InputStream findResourceAsStream(String mn, String name)
+    public static InputStream findResourceAsStream(@Nullable String mn, String name)
         throws IOException
     {
         return ClassLoaders.bootLoader().findResourceAsStream(mn, name);

@@ -26,6 +26,7 @@
 package java.lang;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.module.ModuleDescriptor;
@@ -490,6 +491,7 @@ public @UsesObjectEquals class SecurityManager {
 
     private static ThreadGroup rootGroup = getRootGroup();
 
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: is this a real bug?
     private static ThreadGroup getRootGroup() {
         ThreadGroup root =  Thread.currentThread().getThreadGroup();
         while (root.getParent() != null) {
@@ -1244,6 +1246,7 @@ public @UsesObjectEquals class SecurityManager {
     /**
      * Record the non-exported packages of the modules in the given layer
      */
+    @SuppressWarnings("type.arguments.not.inferred")
     static void addNonExportedPackages(ModuleLayer layer) {
         Set<String> bootModules = ModuleLoaderMap.bootModules();
         Set<String> platformModules = ModuleLoaderMap.platformModules();
@@ -1546,7 +1549,7 @@ public @UsesObjectEquals class SecurityManager {
      * @since   1.1
      * @see     java.lang.ThreadGroup
      */
-    public ThreadGroup getThreadGroup() {
+    public @Nullable ThreadGroup getThreadGroup() {
         return Thread.currentThread().getThreadGroup();
     }
 

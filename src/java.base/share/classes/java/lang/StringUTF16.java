@@ -25,6 +25,8 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Spliterator;
@@ -157,7 +159,7 @@ final class StringUTF16 {
         return val;
     }
 
-    public static byte[] compress(char[] val, int off, int len) {
+    public static byte @Nullable [] compress(char[] val, int off, int len) {
         byte[] ret = new byte[len];
         if (compress(val, off, ret, 0, len) == len) {
             return ret;
@@ -165,7 +167,7 @@ final class StringUTF16 {
         return null;
     }
 
-    public static byte[] compress(byte[] val, int off, int len) {
+    public static byte @Nullable [] compress(byte[] val, int off, int len) {
         byte[] ret = new byte[len];
         if (compress(val, off, ret, 0, len) == len) {
             return ret;
@@ -633,7 +635,7 @@ final class StringUTF16 {
         return -1;
     }
 
-    public static String replace(byte[] value, char oldChar, char newChar) {
+    public static @Nullable String replace(byte[] value, char oldChar, char newChar) {
         int len = value.length >> 1;
         int i = -1;
         while (++i < len) {
@@ -665,7 +667,7 @@ final class StringUTF16 {
         return null;
     }
 
-    public static String replace(byte[] value, int valLen, boolean valLat1,
+    public static @Nullable String replace(byte[] value, int valLen, boolean valLat1,
                                  byte[] targ, int targLen, boolean targLat1,
                                  byte[] repl, int replLen, boolean replLat1)
     {
@@ -847,6 +849,7 @@ final class StringUTF16 {
         }
     }
 
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: ConditionalSpecialCasing.toLowerCaseCharArray could return null
     private static String toLowerCaseEx(String str, byte[] value,
                                         byte[] result, int first, Locale locale,
                                         boolean localeDependent) {
@@ -948,6 +951,7 @@ final class StringUTF16 {
         }
     }
 
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: ConditionalSpecialCasing.toUpperCaseCharArray could return null
     private static String toUpperCaseEx(String str, byte[] value,
                                         byte[] result, int first,
                                         Locale locale, boolean localeDependent)
@@ -1001,7 +1005,7 @@ final class StringUTF16 {
         return newString(result, 0, resultOffset);
     }
 
-    public static String trim(byte[] value) {
+    public static @Nullable String trim(byte[] value) {
         int length = value.length >> 1;
         int len = length;
         int st = 0;
@@ -1042,7 +1046,7 @@ final class StringUTF16 {
         return right;
     }
 
-    public static String strip(byte[] value) {
+    public static @Nullable String strip(byte[] value) {
         int length = value.length >>> 1;
         int left = indexOfNonWhitespace(value);
         if (left == length) {
@@ -1053,13 +1057,13 @@ final class StringUTF16 {
         return ifChanged ? newString(value, left, right - left) : null;
     }
 
-    public static String stripLeading(byte[] value) {
+    public static @Nullable String stripLeading(byte[] value) {
         int length = value.length >>> 1;
         int left = indexOfNonWhitespace(value);
         return (left != 0) ? newString(value, left, length - left) : null;
     }
 
-    public static String stripTrailing(byte[] value) {
+    public static @Nullable String stripTrailing(byte[] value) {
         int length = value.length >>> 1;
         int right = lastIndexOfNonWhitespace(value);
         return (right != length) ? newString(value, 0, right) : null;
@@ -1129,7 +1133,7 @@ final class StringUTF16 {
         }
 
         @Override
-        public Spliterator<String> trySplit() {
+        public @Nullable Spliterator<String> trySplit() {
             int half = (fence + index) >>> 1;
             int mid = skipLineSeparator(indexOfLineSeparator(half));
             if (mid < fence) {
@@ -1202,7 +1206,7 @@ final class StringUTF16 {
         }
 
         @Override
-        public OfInt trySplit() {
+        public @Nullable OfInt trySplit() {
             int lo = index, mid = (lo + fence) >>> 1;
             return (lo >= mid)
                    ? null
@@ -1262,7 +1266,7 @@ final class StringUTF16 {
         }
 
         @Override
-        public OfInt trySplit() {
+        public @Nullable OfInt trySplit() {
             int lo = index, mid = (lo + fence) >>> 1;
             if (lo >= mid)
                 return null;

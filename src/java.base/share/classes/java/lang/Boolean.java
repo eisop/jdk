@@ -313,7 +313,7 @@ public final class Boolean implements java.io.Serializable,
     @Pure
     @StaticallyExecutable
     @EnsuresNonNullIf(expression="#1", result=true)
-    public static boolean getBoolean(@Nullable String name) {
+    public static boolean getBoolean(String name) {
         boolean result = false;
         try {
             result = parseBoolean(System.getProperty(name));

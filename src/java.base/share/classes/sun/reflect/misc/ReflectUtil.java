@@ -26,6 +26,8 @@
 
 package sun.reflect.misc;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -193,7 +195,7 @@ public final class ReflectUtil {
      * attempts to access system domain classes, it requires package
      * access check and this method will return true.
      */
-    public static boolean needsPackageAccessCheck(ClassLoader from, ClassLoader to) {
+    public static boolean needsPackageAccessCheck(@Nullable ClassLoader from, @Nullable ClassLoader to) {
         if (from == null || from == to)
             return false;
 
@@ -236,7 +238,7 @@ public final class ReflectUtil {
      * @param ccl the caller's class loader
      * @param interfaces the list of interfaces that a proxy class implements
      */
-    public static void checkProxyPackageAccess(ClassLoader ccl,
+    public static void checkProxyPackageAccess(@Nullable ClassLoader ccl,
                                                Class<?>... interfaces)
     {
         @SuppressWarnings("removal")

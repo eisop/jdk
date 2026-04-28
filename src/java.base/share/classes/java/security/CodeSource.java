@@ -101,7 +101,7 @@ public class CodeSource implements java.io.Serializable {
      * @param certs the certificate(s). It may be {@code null}. The contents
      * of the array are copied to protect against subsequent modification.
      */
-    public CodeSource(URL url, java.security.cert.Certificate[] certs) {
+    public CodeSource(@Nullable URL url, java.security.cert.Certificate @Nullable [] certs) {
         this.location = url;
         if (url != null) {
             this.locationNoFragString = URLUtil.urlNoFragString(url);

@@ -71,15 +71,15 @@ public final class StackTraceElement implements java.io.Serializable {
     /**
      * The name of the class loader.
      */
-    private String classLoaderName;
+    private @Nullable String classLoaderName;
     /**
      * The module name.
      */
-    private String moduleName;
+    private @Nullable String moduleName;
     /**
      * The module version.
      */
-    private String moduleVersion;
+    private @Nullable String moduleVersion;
     /**
      * The declaring class.
      */
@@ -91,7 +91,7 @@ public final class StackTraceElement implements java.io.Serializable {
     /**
      * The source file name.
      */
-    private String fileName;
+    private @Nullable String fileName;
     /**
      * The source line number.
      */
@@ -160,10 +160,10 @@ public final class StackTraceElement implements java.io.Serializable {
      *
      * @since 9
      */
-    public StackTraceElement(String classLoaderName,
-                             String moduleName, String moduleVersion,
+    public StackTraceElement(@Nullable String classLoaderName,
+                             @Nullable String moduleName, @Nullable String moduleVersion,
                              String declaringClass, String methodName,
-                             String fileName, int lineNumber) {
+                             @Nullable String fileName, int lineNumber) {
         this.classLoaderName = classLoaderName;
         this.moduleName      = moduleName;
         this.moduleVersion   = moduleVersion;
@@ -220,7 +220,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * @since 9
      * @see Module#getName()
      */
-    public String getModuleName() {
+    public @Nullable String getModuleName() {
         return moduleName;
     }
 
@@ -234,7 +234,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * @since 9
      * @see java.lang.module.ModuleDescriptor.Version
      */
-    public String getModuleVersion() {
+    public @Nullable String getModuleVersion() {
         return moduleVersion;
     }
 
@@ -249,7 +249,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * @since 9
      * @see java.lang.ClassLoader#getName()
      */
-    public String getClassLoaderName() {
+    public @Nullable String getClassLoaderName() {
         return classLoaderName;
     }
 
@@ -453,6 +453,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * If the loader is one of the built-in loaders (`boot`, `platform`, or `app`)
      * then set BUILTIN_CLASS_LOADER to omit the first element (`<loader>/`).
      */
+    @SuppressWarnings("nullness:assignment.type.incompatible") // AOSEN: declaringClassObject set to null only when clearing it
     private synchronized void computeFormat() {
         try {
             Class<?> cls = (Class<?>) declaringClassObject;
@@ -534,6 +535,7 @@ public final class StackTraceElement implements java.io.Serializable {
         }
 
         @Pure
+        @SuppressWarnings("nullness:argument.type.incompatible") // False positive because set interface is used.
         static boolean contains(Module m) {
             return HASHED_MODULES.contains(m.getName());
         }

@@ -200,7 +200,7 @@ public final class StackWalker {
          *
          * @jvms 4.7.10 The {@code SourceFile} Attribute
          */
-        public String getFileName();
+        public @Nullable String getFileName();
 
         /**
          * Returns the line number of the source line containing the execution
@@ -296,7 +296,7 @@ public final class StackWalker {
         new StackWalker(DEFAULT_EMPTY_OPTION);
 
     private final Set<Option> options;
-    private final ExtendedOption extendedOption;
+    private final @Nullable ExtendedOption extendedOption;
     private final int estimateDepth;
     final boolean retainClassRef; // cached for performance
 
@@ -334,6 +334,7 @@ public final class StackWalker {
      * @throws SecurityException if a security manager exists and its
      *         {@code checkPermission} method denies access.
      */
+    @SuppressWarnings("nullness:argument.type.incompatible") // AOSEN: I don't understand this error
     public static StackWalker getInstance(Option option) {
         return getInstance(EnumSet.of(Objects.requireNonNull(option)));
     }
@@ -411,7 +412,7 @@ public final class StackWalker {
     private StackWalker(EnumSet<Option> options, int estimateDepth) {
         this(options, estimateDepth, null);
     }
-    private StackWalker(EnumSet<Option> options, int estimateDepth, ExtendedOption extendedOption) {
+    private StackWalker(EnumSet<Option> options, int estimateDepth, @Nullable ExtendedOption extendedOption) {
         this.options = options;
         this.estimateDepth = estimateDepth;
         this.extendedOption = extendedOption;

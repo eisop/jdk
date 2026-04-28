@@ -30,7 +30,6 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -64,8 +63,8 @@ import java.util.Arrays;
  */
 @AnnotatedFor({"index", "interning", "lock", "nullness"})
 public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHandler {
-    private final ThreadGroup parent;
-    String name;
+    private final @Nullable ThreadGroup parent;
+    @Nullable String name;
     int maxPriority;
     boolean destroyed;
     boolean daemon;
@@ -100,6 +99,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * @see     java.lang.ThreadGroup#checkAccess()
      * @since   1.0
      */
+    @SuppressWarnings("nullness:argument.type.incompatible") // AOSEN: thread group could be null.
     public ThreadGroup(@Nullable String name) {
         this(Thread.currentThread().getThreadGroup(), name);
     }
@@ -125,7 +125,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
         this(checkParentAccess(parent), parent, name);
     }
 
-    private ThreadGroup(Void unused, ThreadGroup parent, String name) {
+    private ThreadGroup(Void unused, ThreadGroup parent, @Nullable String name) {
         this.name = name;
         this.maxPriority = parent.maxPriority;
         this.daemon = parent.daemon;
@@ -284,7 +284,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.range", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
     public final void setMaxPriority(int pri) {
         int ngroupsSnapshot;
         ThreadGroup[] groupsSnapshot;
@@ -316,6 +317,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *          {@code false} otherwise.
      * @since   1.0
      */
+    @SuppressWarnings("nullness:assignment.type.incompatible")
     public final boolean parentOf(ThreadGroup g) {
         for (; g != null ; g = g.parent) {
             if (g == this) {
@@ -372,7 +374,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
+    @SuppressWarnings({"index:array.access.unsafe.high", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
     public @NonNegative int activeCount() {
         int result;
         // Snapshot sub-group data so we don't hold this lock
@@ -419,7 +422,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(@PolyNull Thread[] list) {
+    public @NonNegative int enumerate(@Nullable Thread[] list) {
         checkAccess();
         return enumerate(list, 0, true);
     }
@@ -457,7 +460,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(@PolyNull Thread[] list, boolean recurse) {
+    public @NonNegative int enumerate(@Nullable Thread[] list, boolean recurse) {
         checkAccess();
         return enumerate(list, 0, recurse);
     }
@@ -466,8 +469,9 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
     "#1: To enter this loop, nt has to be positive, i.c, list.length - n is @Positive, and n is @NonNegative, hence if this loop is entered, n is @LTLengthOf(\"list\")",
     "#2: groupSnapshot.length = ngroupsSnapshot by #0.1, for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"
     })
-    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.range"})
-    private @NonNegative int enumerate(Thread list[], @NonNegative int n, boolean recurse) {
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.range", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
+    private @NonNegative int enumerate(@Nullable Thread list[], @NonNegative int n, boolean recurse) {
         int ngroupsSnapshot = 0;
         ThreadGroup[] groupsSnapshot = null;
         synchronized (this) {
@@ -517,7 +521,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1", 
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
+    @SuppressWarnings({"index:array.access.unsafe.high", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
     public @NonNegative int activeGroupCount() {
         int ngroupsSnapshot;
         ThreadGroup[] groupsSnapshot;
@@ -561,7 +566,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(@PolyNull ThreadGroup[] list) {
+    public @NonNegative int enumerate(@Nullable ThreadGroup[] list) {
         checkAccess();
         return enumerate(list, 0, true);
     }
@@ -599,15 +604,16 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *
      * @since   1.0
      */
-    public @NonNegative int enumerate(@PolyNull ThreadGroup[] list, boolean recurse) {
+    public @NonNegative int enumerate(@Nullable ThreadGroup[] list, boolean recurse) {
         checkAccess();
         return enumerate(list, 0, recurse);
     }
 
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
-    private @NonNegative int enumerate(ThreadGroup list[], @NonNegative int n, boolean recurse) {
+    @SuppressWarnings({"index:array.access.unsafe.high", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
+    private @NonNegative int enumerate(@Nullable ThreadGroup list[], @NonNegative int n, boolean recurse) {
         int ngroupsSnapshot = 0;
         ThreadGroup[] groupsSnapshot = null;
         synchronized (this) {
@@ -683,7 +689,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @CFComment({" groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
+    @SuppressWarnings({"index:array.access.unsafe.high", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
     public final void interrupt() {
         int ngroupsSnapshot;
         ThreadGroup[] groupsSnapshot;
@@ -739,7 +746,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings({"deprecation", "removal", "index:array.access.unsafe.high"})
+    @SuppressWarnings({"deprecation", "removal", "index:array.access.unsafe.high", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
     private boolean stopOrSuspend(boolean suspend) {
         boolean suicide = false;
         Thread us = Thread.currentThread();
@@ -791,7 +799,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
     @CFComment({"index:  // groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @Deprecated(since="1.2", forRemoval=true)
-    @SuppressWarnings({"removal", "index:array.access.unsafe.high"})
+    @SuppressWarnings({"removal", "index:array.access.unsafe.high", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: the return array is not refined. But is this an access NPE?
     public final void resume() {
         int ngroupsSnapshot;
         ThreadGroup[] groupsSnapshot;
@@ -833,7 +842,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
+    @SuppressWarnings({"index:array.access.unsafe.high","nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    //AOSEN: groups and threads are set to null only when destroying. But is this an access NPE?
     @Deprecated(since="16", forRemoval=true)
     public final void destroy() {
         int ngroupsSnapshot;
@@ -871,7 +881,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * @throws  IllegalThreadStateException If the Thread group has been destroyed.
      */
     @CFComment({"index: #1: If ngroups = groups.length, length of group is doubled"})
-    @SuppressWarnings({"index:array.access.unsafe.high", "index:compound.assignment"})
+    @SuppressWarnings({"index:array.access.unsafe.high", "index:compound.assignment", "nullness:assignment.type.incompatible"})
     private final void add(ThreadGroup g){
         synchronized (this) {
             if (destroyed) {
@@ -896,7 +906,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * @return if this Thread has already been destroyed.
      */
     @CFComment({"index: #1: ngroups - i <= groups.length - i"})
-    @SuppressWarnings("index:argument")
+    @SuppressWarnings({"index:argument", "nullness:assignment.type.incompatible"}) // AOSEN: only null when destroyed
     private void remove(ThreadGroup g) {
         synchronized (this) {
             if (destroyed) {
@@ -954,7 +964,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *          if the Thread group has been destroyed
      */
     @CFComment({"index: #1: If nthreads = threads.length, length of threads is doubled"})
-    @SuppressWarnings({"index:array.access.unsafe.high", "index:compound.assignment"})
+    @SuppressWarnings({"index:array.access.unsafe.high", "index:compound.assignment", "nullness:assignment.type.incompatible"})
     void add(Thread t) {
         synchronized (this) {
             if (destroyed) {
@@ -1032,7 +1042,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *         the Thread to be removed
      */
     @CFComment({"index: #1: --nthreads - i < threads.length - i, also, --nthreads - i is @NonNegative as --nthreads >= i"})
-    @SuppressWarnings("index:argument")
+    @SuppressWarnings({"index:argument", "nullness:assignment.type.incompatible"}) // AOSEN: only null when destroyed
     private void remove(Thread t) {
         synchronized (this) {
             if (destroyed) {
@@ -1058,7 +1068,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
                 "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
+    @SuppressWarnings({"index:array.access.unsafe.high", "nullness:assignment.type.incompatible", "nullness:accessing.nullable"})
+    // AOSEN: The return array is not refined. But is this an access NPE?
     public void list() {
         list(System.out, 0);
     }

@@ -311,7 +311,7 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.5
      */
-    <T extends Annotation> @Nullable T getAnnotation(Class<T> annotationClass);
+    <T extends @Nullable Annotation> @Nullable T getAnnotation(Class<T> annotationClass);
 
     /**
      * Returns annotations that are <em>present</em> on this element.
@@ -362,7 +362,7 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.8
      */
-    default <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
+    default <T extends @Nullable Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
          /*
           * Definition of associated: directly or indirectly present OR
           * neither directly nor indirectly present AND the element is
@@ -406,7 +406,7 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.8
      */
-    default <T extends Annotation> @Nullable T getDeclaredAnnotation(Class<T> annotationClass) {
+    default <T extends @Nullable Annotation> @Nullable T getDeclaredAnnotation(Class<T> annotationClass) {
          Objects.requireNonNull(annotationClass);
          // Loop over all directly-present annotations looking for a matching one
          for (Annotation annotation : getDeclaredAnnotations()) {
@@ -463,7 +463,7 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.8
      */
-    default <T extends Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass) {
+    default <T extends @Nullable Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass) {
         Objects.requireNonNull(annotationClass);
         return AnnotationSupport.
             getDirectlyAndIndirectlyPresent(Arrays.stream(getDeclaredAnnotations()).

@@ -25,6 +25,10 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.dataflow.qual.Pure;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -100,14 +104,14 @@ import sun.security.util.SecurityConstants;
 public final class Module implements AnnotatedElement {
 
     // the layer that contains this module, can be null
-    private final ModuleLayer layer;
+    private final @Nullable ModuleLayer layer;
 
     // module name and loader, these fields are read by VM
-    private final String name;
-    private final ClassLoader loader;
+    private final @Nullable String name;
+    private final @Nullable ClassLoader loader;
 
     // the module descriptor
-    private final ModuleDescriptor descriptor;
+    private final @Nullable ModuleDescriptor descriptor;
 
     // true, if this module allows restricted native access
     private volatile boolean enableNativeAccess;
@@ -117,10 +121,10 @@ public final class Module implements AnnotatedElement {
      * VM but will not read any other modules, will not have any exports setup
      * and will not be registered in the service catalog.
      */
-    Module(ModuleLayer layer,
+    Module(@Nullable ModuleLayer layer,
            ClassLoader loader,
            ModuleDescriptor descriptor,
-           URI uri)
+           @Nullable URI uri)
     {
         this.layer = layer;
         this.name = descriptor.name();
@@ -147,7 +151,7 @@ public final class Module implements AnnotatedElement {
      *
      * @see ClassLoader#getUnnamedModule
      */
-    Module(ClassLoader loader) {
+    Module(@Nullable ClassLoader loader) {
         this.layer = null;
         this.name = null;
         this.loader = loader;
@@ -160,7 +164,7 @@ public final class Module implements AnnotatedElement {
      *
      * @apiNote This constructor is for VM white-box testing.
      */
-    Module(ClassLoader loader, ModuleDescriptor descriptor) {
+    Module(@Nullable ClassLoader loader, ModuleDescriptor descriptor) {
         this.layer = null;
         this.name = descriptor.name();
         this.loader = loader;
@@ -176,6 +180,9 @@ public final class Module implements AnnotatedElement {
      * @see ClassLoader#getUnnamedModule()
      * @jls 7.7.5 Unnamed Modules
      */
+    @SuppressWarnings({"contracts.postcondition.not.satisfied"})
+    @EnsuresNonNull({"name", "descriptor"}) // Named modules always have non-null name and descriptor
+    @Pure
     public boolean isNamed() {
         return name != null;
     }
@@ -186,7 +193,8 @@ public final class Module implements AnnotatedElement {
      *
      * @return The module name
      */
-    public String getName() {
+    @Pure
+    public @Nullable String getName() {
         return name;
     }
 
@@ -203,7 +211,7 @@ public final class Module implements AnnotatedElement {
      * @throws SecurityException
      *         If denied by the security manager
      */
-    public ClassLoader getClassLoader() {
+    public @Nullable ClassLoader getClassLoader() {
         @SuppressWarnings("removal")
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
@@ -218,11 +226,11 @@ public final class Module implements AnnotatedElement {
      *
      * @return The module descriptor for this module
      */
-    public ModuleDescriptor getDescriptor() {
+    public @Nullable ModuleDescriptor getDescriptor() {
         return descriptor;
     }
 
-    /**
+    /**1
      * Returns the module layer that contains this module or {@code null} if
      * this module is not in a module layer.
      *
@@ -237,7 +245,7 @@ public final class Module implements AnnotatedElement {
      *
      * @see java.lang.reflect.Proxy
      */
-    public ModuleLayer getLayer() {
+    public @Nullable ModuleLayer getLayer() {
         if (isNamed()) {
             ModuleLayer layer = this.layer;
             if (layer != null)
@@ -1124,6 +1132,7 @@ public final class Module implements AnnotatedElement {
      *         If the module cannot be defined to the VM or its packages overlap
      *         with another module mapped to the same class loader
      */
+    @SuppressWarnings("nullness:assignment.type.incompatible") // toArray returns a non-null element array
     static Map<String, Module> defineModules(Configuration cf,
                                              Function<String, ClassLoader> clf,
                                              ModuleLayer layer)
@@ -1273,7 +1282,7 @@ public final class Module implements AnnotatedElement {
      * Find the runtime Module corresponding to the given ResolvedModule
      * in the given parent layer (or its parents).
      */
-    private static Module findModule(ModuleLayer parent,
+    private static @Nullable Module findModule(ModuleLayer parent,
                                      ResolvedModule resolvedModule) {
         Configuration cf = resolvedModule.configuration();
         String dn = resolvedModule.name();
@@ -1296,6 +1305,7 @@ public final class Module implements AnnotatedElement {
      * @param m the module
      * @param nameToModule map of module name to Module (for qualified exports)
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: is this a NPE?
     private static void initExports(Module m, Map<String, Module> nameToModule) {
         Map<String, Set<Module>> exportedPackages = new HashMap<>();
 
@@ -1334,6 +1344,7 @@ public final class Module implements AnnotatedElement {
      *                     under construction
      * @param parents the parent layers
      */
+    @SuppressWarnings("nullness:dereference.of.nullable") // AOSEN: is this a NPE?
     private static void initExportsAndOpens(Module m,
                                             Map<String, Module> nameToSource,
                                             Map<String, Module> nameToModule,
@@ -1413,7 +1424,7 @@ public final class Module implements AnnotatedElement {
      * @param nameToModule The modules in the layer under construction
      * @param parents The parent layers
      */
-    private static Module findModule(String target,
+    private static @Nullable Module findModule(String target,
                                      Map<String, Module> nameToSource,
                                      Map<String, Module> nameToModule,
                                      List<ModuleLayer> parents) {
@@ -1441,7 +1452,7 @@ public final class Module implements AnnotatedElement {
      * declaration annotation.
      */
     @Override
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+    public <T extends @Nullable Annotation> @Nullable T getAnnotation(Class<T> annotationClass) {
         return moduleInfoClass().getDeclaredAnnotation(annotationClass);
     }
 
@@ -1482,7 +1493,7 @@ public final class Module implements AnnotatedElement {
             clazz = this.moduleInfoClass;
             if (clazz == null) {
                 if (isNamed()) {
-                    PrivilegedAction<Class<?>> pa = this::loadModuleInfoClass;
+                    PrivilegedAction<@Nullable Class<?>> pa = this::loadModuleInfoClass;
                     clazz = AccessController.doPrivileged(pa);
                 }
                 if (clazz == null) {
@@ -1495,7 +1506,7 @@ public final class Module implements AnnotatedElement {
         }
     }
 
-    private Class<?> loadModuleInfoClass() {
+    private @Nullable Class<?> loadModuleInfoClass() {
         Class<?> clazz = null;
         try (InputStream in = getResourceAsStream("module-info.class")) {
             if (in != null)
@@ -1541,7 +1552,7 @@ public final class Module implements AnnotatedElement {
                 // drop non-annotation attributes
             }
             @Override
-            public ModuleVisitor visitModule(String name, int flags, String version) {
+            public @Nullable ModuleVisitor visitModule(String name, int flags, String version) {
                 // drop Module attribute
                 return null;
             }
@@ -1642,7 +1653,9 @@ public final class Module implements AnnotatedElement {
      * @see Class#getResourceAsStream(String)
      */
     @CallerSensitive
-    public InputStream getResourceAsStream(String name) throws IOException {
+    @SuppressWarnings("nullness:argument.type.incompatible") // This code is updated in the latest JDK.
+    //https://github.com/openjdk/jdk/blob/4a4209ffef8f8d65054cbf46ebf8e169d100c0d8/src/java.base/share/classes/java/lang/Module.java#L1688C21-L1695C22
+    public @Nullable InputStream getResourceAsStream(String name) throws IOException {
         if (name.startsWith("/")) {
             name = name.substring(1);
         }
@@ -1707,7 +1720,7 @@ public final class Module implements AnnotatedElement {
      * Returns the module that a given caller class is a member of. Returns
      * {@code null} if the caller is {@code null}.
      */
-    private Module getCallerModule(Class<?> caller) {
+    private @Nullable Module getCallerModule(Class<?> caller) {
         return (caller != null) ? caller.getModule() : null;
     }
 
@@ -1717,12 +1730,12 @@ public final class Module implements AnnotatedElement {
     // JVM_DefineModule
     private static native void defineModule0(Module module,
                                              boolean isOpen,
-                                             String version,
-                                             String location,
+                                             @Nullable String version,
+                                             @Nullable String location,
                                              Object[] pns);
 
     // JVM_AddReadsModule
-    private static native void addReads0(Module from, Module to);
+    private static native void addReads0(Module from, @Nullable Module to);
 
     // JVM_AddModuleExports
     private static native void addExports0(Module from, String pn, Module to);

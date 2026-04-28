@@ -25,6 +25,8 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -98,8 +100,8 @@ final class ProcessImpl extends Process {
     // System-dependent portion of ProcessBuilder.start()
     static Process start(String cmdarray[],
                          java.util.Map<String,String> environment,
-                         String dir,
-                         ProcessBuilder.Redirect[] redirects,
+                         @Nullable String dir,
+                         ProcessBuilder.@Nullable Redirect[] redirects,
                          boolean redirectErrorStream)
         throws IOException
     {

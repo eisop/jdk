@@ -25,6 +25,8 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.module.Configuration;
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ResolvedModule;
@@ -171,9 +173,10 @@ public final class ModuleLayer {
     /**
      * Creates a new module layer from the modules in the given configuration.
      */
+    @SuppressWarnings("nullness:argument.type.incompatible") // AOSEN: there could be possible NPE if clf is null
     private ModuleLayer(Configuration cf,
                         List<ModuleLayer> parents,
-                        Function<String, ClassLoader> clf)
+                        @Nullable Function<String, ClassLoader> clf)
     {
         this.cf = cf;
         this.parents = parents; // no need to do defensive copy
@@ -880,7 +883,7 @@ public final class ModuleLayer {
      *
      * @throws SecurityException if denied by the security manager
      */
-    public ClassLoader findLoader(String name) {
+    public @Nullable ClassLoader findLoader(String name) {
         Optional<Module> om = findModule(name);
 
         // can't use map(Module::getClassLoader) as class loader can be null

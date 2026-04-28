@@ -25,6 +25,8 @@
 
 package sun.reflect.annotation;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.security.AccessController;
@@ -62,8 +64,8 @@ public final class AnnotationSupport {
      * @return an array of instances of {@code annoClass} or an empty
      *         array if none were found
      */
-    public static <A extends Annotation> A[] getDirectlyAndIndirectlyPresent(
-            Map<Class<? extends Annotation>, Annotation> annotations,
+    public static <A extends @Nullable Annotation> A[] getDirectlyAndIndirectlyPresent(
+            Map<Class<? extends @Nullable Annotation>, Annotation> annotations,
             Class<A> annoClass) {
         List<A> result = new ArrayList<>();
 
@@ -95,8 +97,8 @@ public final class AnnotationSupport {
      * @return an array of instances of {@code annoClass} or an empty array if no
      *         indirectly present annotations were found
      */
-    private static <A extends Annotation> A[] getIndirectlyPresent(
-            Map<Class<? extends Annotation>, Annotation> annotations,
+    private static <A extends @Nullable Annotation> A[] getIndirectlyPresent(
+            Map<Class<? extends @Nullable Annotation>, Annotation> annotations,
             Class<A> annoClass) {
 
         Repeatable repeatable = annoClass.getDeclaredAnnotation(Repeatable.class);
@@ -124,11 +126,11 @@ public final class AnnotationSupport {
      * @return true if container class is found before containee class when
      *         iterating over annotations.keySet().
      */
-    private static <A extends Annotation> boolean containerBeforeContainee(
-            Map<Class<? extends Annotation>, Annotation> annotations,
+    private static <A extends @Nullable Annotation> boolean containerBeforeContainee(
+            Map<Class<? extends @Nullable Annotation>, Annotation> annotations,
             Class<A> annoClass) {
 
-        Class<? extends Annotation> containerClass =
+        Class<? extends @Nullable Annotation> containerClass =
                 annoClass.getDeclaredAnnotation(Repeatable.class).value();
 
         for (Class<? extends Annotation> c : annotations.keySet()) {
@@ -156,8 +158,8 @@ public final class AnnotationSupport {
      *
      * @return an array of instances of {@code annoClass} or an empty array if none were found.
      */
-    public static <A extends Annotation> A[] getAssociatedAnnotations(
-            Map<Class<? extends Annotation>, Annotation> declaredAnnotations,
+    public static <A extends @Nullable Annotation> A[] getAssociatedAnnotations(
+            Map<Class<? extends @Nullable Annotation>, Annotation> declaredAnnotations,
             Class<?> decl,
             Class<A> annoClass) {
         Objects.requireNonNull(decl);
@@ -182,13 +184,13 @@ public final class AnnotationSupport {
      * (container), cast it to an array of annotations and return the result.
      */
     @SuppressWarnings("removal")
-    private static <A extends Annotation> A[] getValueArray(Annotation container) {
+    private static <A extends @Nullable Annotation> A[] getValueArray(Annotation container) {
         try {
             // According to JLS the container must have an array-valued value
             // method. Get the AnnotationType, get the "value" method and invoke
             // it to get the content.
 
-            Class<? extends Annotation> containerClass = container.annotationType();
+            Class<? extends @Nullable Annotation> containerClass = container.annotationType();
             AnnotationType annoType = AnnotationType.getInstance(containerClass);
             if (annoType == null)
                 throw invalidContainerException(container, null);
@@ -269,7 +271,7 @@ public final class AnnotationSupport {
     /* Sanity check type of all the annotation instances of type {@code annoClass}
      * from {@code container}.
      */
-    private static <A extends Annotation> void checkTypes(A[] annotations,
+    private static <A extends @Nullable Annotation> void checkTypes(A[] annotations,
                                                           Annotation container,
                                                           Class<A> annoClass) {
         for (A a : annotations) {
