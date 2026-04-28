@@ -38,7 +38,6 @@ package java.util.concurrent;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -186,7 +185,7 @@ import java.util.Queue;
  * @param <E> the type of elements held in this queue
  */
 @AnnotatedFor({"nullness"})
-public interface BlockingQueue<E extends @NonNull Object> extends Queue<E> {
+public interface BlockingQueue<E extends Object> extends Queue<E> {
     /**
      * Inserts the specified element into this queue if it is possible to do
      * so immediately without violating capacity restrictions, returning

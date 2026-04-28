@@ -38,7 +38,6 @@ package java.util.concurrent;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.PolySigned;
@@ -86,7 +85,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <E> the type of elements held in this queue
  */
 @AnnotatedFor({"nullness"})
-public class DelayQueue<E extends @NonNull Delayed> extends AbstractQueue<E>
+public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
     implements BlockingQueue<E> {
 
     private final transient ReentrantLock lock = new ReentrantLock();

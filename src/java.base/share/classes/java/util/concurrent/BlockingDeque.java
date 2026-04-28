@@ -206,7 +206,7 @@ import java.util.NoSuchElementException;
  * @param <E> the type of elements held in this deque
  */
 @AnnotatedFor({"nullness"})
-public interface BlockingDeque<E extends @NonNull Object> extends BlockingQueue<E>, Deque<E> {
+public interface BlockingDeque<E extends Object> extends BlockingQueue<E>, Deque<E> {
     /*
      * We have "diamond" multiple interface inheritance here, and that
      * introduces ambiguities.  Methods might end up with different

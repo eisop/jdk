@@ -41,7 +41,6 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.PolySigned;
@@ -103,7 +102,7 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.6
  */
 @AnnotatedFor({"lock", "nullness", "index"})
-public class ArrayDeque<E extends @NonNull Object> extends AbstractCollection<E>
+public class ArrayDeque<E extends Object> extends AbstractCollection<E>
                            implements Deque<E>, Cloneable, Serializable
 {
     /*

@@ -334,7 +334,7 @@ public final @UsesObjectEquals class Objects {
      *        the {@code supplier.get()} value is {@code null}
      * @since 9
      */
-    public static <T extends @NonNull Object> T requireNonNullElseGet(@Nullable T obj, Supplier<? extends T> supplier) {
+    public static <T extends Object> T requireNonNullElseGet(@Nullable T obj, Supplier<? extends T> supplier) {
         return (obj != null) ? obj
                 : requireNonNull(requireNonNull(supplier, "supplier").get(), "supplier.get()");
     }

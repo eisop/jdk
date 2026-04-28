@@ -38,7 +38,6 @@ package java.util.concurrent;
 
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.PolySigned;
@@ -99,7 +98,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <E> the type of elements held in this queue
  */
 @AnnotatedFor({"nullness"})
-public class SynchronousQueue<E extends @NonNull Object> extends AbstractQueue<E>
+public class SynchronousQueue<E extends Object> extends AbstractQueue<E>
     implements BlockingQueue<E>, java.io.Serializable {
     private static final long serialVersionUID = -3223113410248163686L;
 
