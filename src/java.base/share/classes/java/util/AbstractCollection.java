@@ -78,8 +78,9 @@ import jdk.internal.util.ArraysSupport;
  */
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
-@AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable public abstract class AbstractCollection<E> implements Collection<E> {
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@ReceiverDependentMutable
+public abstract class AbstractCollection<E> implements Collection<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
@@ -424,7 +425,7 @@ import jdk.internal.util.ArraysSupport;
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    public boolean retainAll(@Mutable @GuardSatisfied AbstractCollection<E> this, Collection<? extends @UnknownSignedness @Readonly Object> c) {
+    public boolean retainAll(@Mutable @GuardSatisfied AbstractCollection<E> this, @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c) {
         Objects.requireNonNull(c);
         boolean modified = false;
         Iterator<E> it = iterator();

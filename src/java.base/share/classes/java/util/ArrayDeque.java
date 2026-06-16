@@ -107,7 +107,8 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.6
  */
 @AnnotatedFor({"lock", "nullness", "index", "pico"})
-@ReceiverDependentMutable public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCollection<E>
+@ReceiverDependentMutable
+public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCollection<E>
                            implements Deque<E>, Cloneable, Serializable
 {
     /*
@@ -226,7 +227,7 @@ import jdk.internal.access.SharedSecrets;
      * @param c the collection whose elements are to be placed into the deque
      * @throws NullPointerException if the specified collection is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("pico") // PICO RDM constructor call mutable method
     public @PolyNonEmpty ArrayDeque(@PolyNonEmpty Collection<? extends E> c) {
         this(c.size());
         copyElements(c);
@@ -1104,7 +1105,7 @@ import jdk.internal.access.SharedSecrets;
      * @return an array containing all of the elements in this deque
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // How to annotate class literal
+    @SuppressWarnings("pico:argument.type.incompatible") // annotate class literal
     public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly ArrayDeque<@PolyNull @PolySigned @PolyMutable E> this) {
         return this.<@PolyMutable Object>toArray(Object[].class);
     }

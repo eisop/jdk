@@ -66,7 +66,8 @@ import jdk.internal.vm.annotation.Stable;
  * classes use a serial proxy and thus have no need to declare serialVersionUID.
  */
 @SuppressWarnings("serial")
-@Immutable class ImmutableCollections {
+@Immutable
+class ImmutableCollections {
     /**
      * A "salt" value used for randomizing iteration order. This is initialized once
      * and stays constant for the lifetime of the JVM. It need not be truly random, but
@@ -159,17 +160,18 @@ import jdk.internal.vm.annotation.Stable;
     static UnsupportedOperationException uoe() { return new UnsupportedOperationException(); }
 
     @jdk.internal.ValueBased
-    @Immutable static abstract class AbstractImmutableCollection<E> extends AbstractCollection<E> {
+    @Immutable
+    static abstract class AbstractImmutableCollection<E> extends AbstractCollection<E> {
         // all mutating methods throw UnsupportedOperationException
         @Override
         @EnsuresNonEmpty("this")
         public boolean add(E e) { throw uoe(); }
         @Override public boolean addAll(Collection<? extends E> c) { throw uoe(); }
         @Override public void    clear() { throw uoe(); }
-        @Override public boolean remove(@UnknownSignedness Object o) { throw uoe(); }
-        @Override public boolean removeAll(Collection<? extends @UnknownSignedness Object> c) { throw uoe(); }
+        @Override public boolean remove(@UnknownSignedness @Readonly Object o) { throw uoe(); }
+        @Override public boolean removeAll(Collection<? extends @UnknownSignedness @Readonly Object> c) { throw uoe(); }
         @Override public boolean removeIf(Predicate<? super E> filter) { throw uoe(); }
-        @Override public boolean retainAll(Collection<? extends @UnknownSignedness Object> c) { throw uoe(); }
+        @Override public boolean retainAll(Collection<? extends @UnknownSignedness @Readonly Object> c) { throw uoe(); }
     }
 
     // ---------- List Static Factory Methods ----------
@@ -201,7 +203,7 @@ import jdk.internal.vm.annotation.Stable;
      * @return the new list
      */
     @SafeVarargs
-    @SuppressWarnings("pico") // convert mutable to immutable
+    @SuppressWarnings("pico") // cast from @Unique @Mutable to @Immutable
     static <E> @Immutable List<E> listFromArray(E @Readonly... input) {
         // copy and check manually to avoid TOCTOU
         @SuppressWarnings("unchecked")
@@ -226,8 +228,8 @@ import jdk.internal.vm.annotation.Stable;
      * @param input the input array
      * @return the new list
      */
-    @SuppressWarnings("unchecked")
-    static <E> @Immutable List<E> listFromTrustedArray(@Readonly Object @Immutable... input) {
+    @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // This array should be unique
+    static <E> @Immutable List<E> listFromTrustedArray(@Readonly Object @Readonly... input) {
         assert input.getClass() == Object[].class;
         for (Object o : input) { // implicit null check of 'input' array
             Objects.requireNonNull(o);
@@ -269,7 +271,8 @@ import jdk.internal.vm.annotation.Stable;
     // ---------- List Implementations ----------
 
     @jdk.internal.ValueBased
-    @Immutable static abstract class AbstractImmutableList<E> extends AbstractImmutableCollection<E>
+    @Immutable
+    static abstract class AbstractImmutableList<E> extends AbstractImmutableCollection<E>
             implements List<E>, RandomAccess {
 
         // all mutating methods throw UnsupportedOperationException
@@ -356,7 +359,8 @@ import jdk.internal.vm.annotation.Stable;
         }
     }
 
-    @ReceiverDependentMutable static final class ListItr<E> implements ListIterator<E> {
+    @ReceiverDependentMutable
+    static final class ListItr<E> implements ListIterator<E> {
 
         @Stable
         private final @Readonly List<E> list;
@@ -568,7 +572,8 @@ import jdk.internal.vm.annotation.Stable;
     }
 
     @jdk.internal.ValueBased
-    @Immutable static final class List12<E> extends AbstractImmutableList<E>
+    @Immutable
+    static final class List12<E> extends AbstractImmutableList<E>
             implements Serializable {
 
         @Stable
@@ -577,7 +582,7 @@ import jdk.internal.vm.annotation.Stable;
         @Stable
         private final Object e1;
 
-        @SuppressWarnings("pico") // covariant
+        @SuppressWarnings("pico:assignment.type.incompatible") // type parameter covariant
         List12(E e0) {
             this.e0 = Objects.<@Readonly E>requireNonNull(e0);
             // Use EMPTY as a sentinel for an unused element: not using null
@@ -585,7 +590,7 @@ import jdk.internal.vm.annotation.Stable;
             this.e1 = EMPTY;
         }
 
-        @SuppressWarnings("pico") // covariant
+        @SuppressWarnings("pico:assignment.type.incompatible") // type parameter covariant
         List12(E e0, E e1) {
             this.e0 = Objects.<@Readonly E>requireNonNull(e0);
             this.e1 = Objects.<@Readonly E>requireNonNull(e1);
@@ -679,7 +684,8 @@ import jdk.internal.vm.annotation.Stable;
     }
 
     @jdk.internal.ValueBased
-    @Immutable static final class ListN<E> extends AbstractImmutableList<E>
+    @Immutable
+    static final class ListN<E> extends AbstractImmutableList<E>
             implements Serializable {
 
         @Stable
@@ -728,7 +734,7 @@ import jdk.internal.vm.annotation.Stable;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
         public <T> @Nullable T[] toArray(@PolyNull T[] a) {
             int size = elements.length;
             if (a.length < size) {
@@ -774,7 +780,8 @@ import jdk.internal.vm.annotation.Stable;
     // ---------- Set Implementations ----------
 
     @jdk.internal.ValueBased
-    @Immutable static abstract class AbstractImmutableSet<E> extends AbstractImmutableCollection<E>
+    @Immutable
+    static abstract class AbstractImmutableSet<E> extends AbstractImmutableCollection<E>
             implements Set<E> {
 
         @Override
@@ -802,7 +809,8 @@ import jdk.internal.vm.annotation.Stable;
     }
 
     @jdk.internal.ValueBased
-    @Immutable static final class Set12<E> extends AbstractImmutableSet<E>
+    @Immutable
+    static final class Set12<E> extends AbstractImmutableSet<E>
             implements Serializable {
 
         @Stable
@@ -934,7 +942,8 @@ import jdk.internal.vm.annotation.Stable;
      * @param <E> the element type
      */
     @jdk.internal.ValueBased
-    @Immutable static final class SetN<E> extends AbstractImmutableSet<E>
+    @Immutable
+    static final class SetN<E> extends AbstractImmutableSet<E>
             implements Serializable {
 
         @Stable
@@ -1107,7 +1116,8 @@ import jdk.internal.vm.annotation.Stable;
     // ---------- Map Implementations ----------
 
     @jdk.internal.ValueBased
-    @Immutable abstract static class AbstractImmutableMap<K extends @Immutable Object,V> extends AbstractMap<K,V> implements Serializable {
+    @Immutable
+    abstract static class AbstractImmutableMap<K extends @Immutable Object,V> extends AbstractMap<K,V> implements Serializable {
         @Override public void clear() { throw uoe(); }
         @Override public @PolyNull V compute(K key, BiFunction<? super K,? super V,? extends @PolyNull V> rf) { throw uoe(); }
         @Override public @PolyNull V computeIfAbsent(K key, Function<? super K,? extends @PolyNull V> mf) { throw uoe(); }
@@ -1138,7 +1148,8 @@ import jdk.internal.vm.annotation.Stable;
     }
 
     @jdk.internal.ValueBased
-    @Immutable static final class Map1<K extends @Immutable Object,V> extends AbstractImmutableMap<K,V> {
+    @Immutable
+    static final class Map1<K extends @Immutable Object,V> extends AbstractImmutableMap<K,V> {
         @Stable
         private final K k0;
         @Stable
@@ -1209,7 +1220,8 @@ import jdk.internal.vm.annotation.Stable;
      * @param <V> the value type
      */
     @jdk.internal.ValueBased
-    @Immutable static final class MapN<K extends @Immutable Object,V> extends AbstractImmutableMap<K,V> {
+    @Immutable
+    static final class MapN<K extends @Immutable Object,V> extends AbstractImmutableMap<K,V> {
 
         @Stable
         final @Readonly Object[] table; // pairs of key, value
@@ -1302,7 +1314,7 @@ import jdk.internal.vm.annotation.Stable;
             return size == 0;
         }
 
-        class MapNIterator implements Iterator<Map.Entry<K,V>> {
+        class MapNIterator implements Iterator<Map.@Immutable Entry<K,V>> {
 
             private int remaining;
 
@@ -1337,7 +1349,7 @@ import jdk.internal.vm.annotation.Stable;
             }
 
             @Override
-            public Map.Entry<K,V> next(@NonEmpty MapNIterator this) {
+            public Map.@Immutable Entry<K,V> next(@NonEmpty MapNIterator this) {
                 if (remaining > 0) {
                     int idx;
                     while (table[idx = nextIndex()] == null) {}
@@ -1363,7 +1375,7 @@ import jdk.internal.vm.annotation.Stable;
                 }
 
                 @Override
-                public Iterator<Map.Entry<K,V>> iterator() {
+                public Iterator<Map.@Immutable Entry<K,V>> iterator() {
                     return new MapNIterator();
                 }
             };
@@ -1541,7 +1553,7 @@ final class CollSer implements Serializable {
      * @since 9
      */
     @java.io.Serial
-    @SuppressWarnings("pico:argument.type.incompatible") // covariant
+    @SuppressWarnings("pico:argument.type.incompatible") // array component type
     private @Immutable Object readResolve() throws ObjectStreamException {
         try {
             if (array == null) {

@@ -186,8 +186,9 @@ import java.io.Serializable;
  * @since 1.2
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness", "index", "aliasing", "nonempty"})
-@ReceiverDependentMutable public interface Map<K extends @Immutable Object, V> {
+@AnnotatedFor({"lock", "nullness", "index", "aliasing", "nonempty", "pico"})
+@ReceiverDependentMutable
+public interface Map<K extends @Immutable Object, V> {
     // Query Operations
 
     /**
@@ -471,7 +472,8 @@ import java.io.Serializable;
      * @since 1.2
      */
     @Covariant(0)
-    @ReceiverDependentMutable interface Entry<K extends @Immutable Object, V> {
+    @ReceiverDependentMutable
+    interface Entry<K extends @Immutable Object, V> {
         /**
          * Returns the key corresponding to this entry.
          *
@@ -1184,7 +1186,7 @@ import java.io.Serializable;
      *         (<a href="{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    default @Nullable V computeIfPresent(K key,
+    default @Nullable V computeIfPresent(@Mutable Map<K, V> this, K key,
             BiFunction<? super K, ? super @NonNull V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue;
@@ -1270,7 +1272,7 @@ import java.io.Serializable;
      *         (<a href="{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    default @Nullable V compute(K key,
+    default @Nullable V compute(@Mutable Map<K, V> this, K key,
             BiFunction<? super K, ? super @Nullable V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue = get(key);
@@ -1368,7 +1370,7 @@ import java.io.Serializable;
      *         null
      * @since 1.8
      */
-    default @Nullable V merge(K key, @NonNull V value,
+    default @Nullable V merge(@Mutable Map<K, V> this, K key, @NonNull V value,
             BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         Objects.requireNonNull(value);

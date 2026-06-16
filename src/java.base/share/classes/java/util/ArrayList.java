@@ -129,7 +129,7 @@ import jdk.internal.util.ArraysSupport;
  * @since   1.2
  */
 @CFComment("lock/nullness: Permit null elements")
-@AnnotatedFor({"index", "initialization", "lock", "nullness"})
+@AnnotatedFor({"index", "initialization", "lock", "nullness", "pico"})
 @ReceiverDependentMutable public class ArrayList<E> extends AbstractList<E>
         implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 {
@@ -404,7 +404,7 @@ import jdk.internal.util.ArraysSupport;
      *         proper sequence
      */
     @SideEffectFree
-    @SuppressWarnings("pico")// Backing array element type
+    @SuppressWarnings("pico:argument.type.incompatible") // Backing array element type
     public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly ArrayList<@PolyNull @PolySigned @PolyMutable E> this) {
         return Arrays.<@PolyMutable Object>copyOf(elementData, size);
     }
@@ -434,7 +434,7 @@ import jdk.internal.util.ArraysSupport;
      * @throws NullPointerException if the specified array is null
      */
     @SideEffectFree
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
     public <T> @Nullable T[] toArray(@PolyNull T[] a) {
         if (a.length < size)
             // Make a new array of a's runtime type, but my contents:
@@ -996,7 +996,8 @@ import jdk.internal.util.ArraysSupport;
     /**
      * An optimized version of AbstractList.Itr
      */
-    @ReceiverDependentMutable private class Itr implements Iterator<E> {
+    @ReceiverDependentMutable
+    private class Itr implements Iterator<E> {
         int cursor;       // index of next element to return
         int lastRet = -1; // index of last element returned; -1 if no such
         int expectedModCount = modCount;
@@ -1066,7 +1067,8 @@ import jdk.internal.util.ArraysSupport;
     /**
      * An optimized version of AbstractList.ListItr
      */
-    @ReceiverDependentMutable private class ListItr extends Itr implements ListIterator<E> {
+    @ReceiverDependentMutable
+    private class ListItr extends Itr implements ListIterator<E> {
         ListItr(int index) {
             super();
             cursor = index;
@@ -1158,7 +1160,8 @@ import jdk.internal.util.ArraysSupport;
         return new @PolyMutable SubList<>(this, fromIndex, toIndex);
     }
 
-    @ReceiverDependentMutable private static class SubList<E> extends AbstractList<E> implements RandomAccess {
+    @ReceiverDependentMutable
+    private static class SubList<E> extends AbstractList<E> implements RandomAccess {
         private final ArrayList<E> root;
         private final SubList<E> parent;
         private final int offset;
@@ -1273,13 +1276,13 @@ import jdk.internal.util.ArraysSupport;
             return modified;
         }
 
-        @SuppressWarnings("pico")// Backing array element type
-        public @PolyNull @PolySigned @PolyMutable Object[] toArray(SubList<@PolyNull @PolySigned @PolyMutable E> this) {
+        @SuppressWarnings("pico:argument.type.incompatible")// poly does not work on field's type argument
+        public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly SubList<@PolyNull @PolySigned @PolyMutable E> this) {
             checkForComodification();
             return Arrays.<@PolyMutable Object>copyOfRange(root.elementData, offset, offset + size);
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
         public <T> @Nullable T[] toArray(T[] a) {
             checkForComodification();
             if (a.length < size)

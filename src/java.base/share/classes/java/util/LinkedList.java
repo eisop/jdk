@@ -103,8 +103,9 @@ import java.util.function.Consumer;
  */
 
 @CFComment({"lock/nullness: This class permits null elements"})
-@AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable public class LinkedList<E>
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@ReceiverDependentMutable
+public class LinkedList<E>
     extends AbstractSequentialList<E>
     implements List<E>, Deque<E>, Cloneable, java.io.Serializable
 {
@@ -131,7 +132,7 @@ import java.util.function.Consumer;
     /**
      * Constructs an empty list.
      */
-    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    // @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public LinkedList() {
     }
 
@@ -143,7 +144,7 @@ import java.util.function.Consumer;
      * @param  c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
     public @PolyNonEmpty LinkedList(@PolyNonEmpty @Readonly Collection<? extends E> c) {
         this();
         addAll(c);
@@ -910,13 +911,14 @@ import java.util.function.Consumer;
         return new ListItr(index);
     }
 
-    @ReceiverDependentMutable private class ListItr implements ListIterator<E> {
+    @ReceiverDependentMutable
+    private class ListItr implements ListIterator<E> {
         private @Readonly Node<E> lastReturned;
         private @Readonly Node<E> next;
         private int nextIndex;
         private int expectedModCount = modCount;
 
-        @SuppressWarnings("pico:initialization.fields.uninitialized") // Lazy
+        // @SuppressWarnings("pico:initialization.fields.uninitialized") // Lazy
         ListItr(int index) {
             // assert isPositionIndex(index);
             next = (index == size) ? null : node(index);
@@ -962,7 +964,7 @@ import java.util.function.Consumer;
             return nextIndex - 1;
         }
 
-        @SuppressWarnings("pico") // PICO not expressive enough
+        @SuppressWarnings("pico") // Outter receiver dependence
         public void remove(@Mutable LinkedList<E>.@Mutable ListItr this) {
             checkForComodification();
             if (lastReturned == null)
@@ -978,7 +980,7 @@ import java.util.function.Consumer;
             expectedModCount++;
         }
 
-        @SuppressWarnings("pico") // PICO not expressive enough
+        @SuppressWarnings("pico") // Outter receiver dependence
         public void set(@Mutable LinkedList<E>.@Mutable ListItr this, E e) {
             if (lastReturned == null)
                 throw new IllegalStateException();
@@ -986,7 +988,7 @@ import java.util.function.Consumer;
             lastReturned.item = e;
         }
 
-        @SuppressWarnings("pico") // PICO not expressive enough
+        @SuppressWarnings("pico") // Outter receiver dependence
         public void add(@Mutable LinkedList<E>.@Mutable ListItr this, E e) {
             checkForComodification();
             lastReturned = null;
@@ -1015,7 +1017,8 @@ import java.util.function.Consumer;
         }
     }
 
-    @ReceiverDependentMutable private static class Node<E> {
+    @ReceiverDependentMutable
+    private static class Node<E> {
         E item;
         Node<E> next;
         Node<E> prev;
@@ -1037,7 +1040,8 @@ import java.util.function.Consumer;
     /**
      * Adapter to provide descending iterators via ListItr.previous
      */
-    @ReceiverDependentMutable private class DescendingIterator implements Iterator<E> {
+    @ReceiverDependentMutable
+    private class DescendingIterator implements Iterator<E> {
         private final ListItr itr = new @ReceiverDependentMutable ListItr(size());
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
@@ -1098,7 +1102,7 @@ import java.util.function.Consumer;
      *         in proper sequence
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // PICO not expressive enough
+    @SuppressWarnings("pico") // multiple polymorphic qualifiers
     public @PolyNull @PolySigned @PolyMutable Object[] toArray(LinkedList<@PolyNull @PolySigned @PolyMutable E> this) {
         @PolyMutable Object[] result = new @PolyMutable Object[size];
         int i = 0;
@@ -1229,13 +1233,14 @@ import java.util.function.Consumer;
     }
 
     /** A customized variant of Spliterators.IteratorSpliterator */
+    @ReceiverDependentMutable
     static final class LLSpliterator<E> implements Spliterator<E> {
         static final int BATCH_UNIT = 1 << 10;  // batch array size increment
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
         final @Readonly LinkedList<E> list; // null OK unless traversed
-        @Readonly Node<E> current;      // current node; null until initialized
-        int est;              // size estimate; -1 until first needed
-        int expectedModCount; // initialized when est set
+        @Assignable /* should be @LazyFinal */ @Readonly Node<E> current;      // current node; null until initialized
+        @Assignable /* should be @LazyFinal */ int est;              // size estimate; -1 until first needed
+        @Assignable /* should be @LazyFinal */ int expectedModCount; // initialized when est set
         int batch;            // batch size for splits
 
         LLSpliterator(@Readonly LinkedList<E> list, int est, int expectedModCount) {
@@ -1244,7 +1249,7 @@ import java.util.function.Consumer;
             this.expectedModCount = expectedModCount;
         }
 
-        final int getEst() {
+        final int getEst(@Readonly LLSpliterator<E> this) {
             int s; // force initialization
             final LinkedList<E> lst;
             if ((s = est) < 0) {
@@ -1259,9 +1264,9 @@ import java.util.function.Consumer;
             return s;
         }
 
-        public long estimateSize() { return (long) getEst(); }
-        @SuppressWarnings("pico:return.type.incompatible") // covariant return
-        public Spliterator<E> trySplit() {
+        public long estimateSize(@Readonly LLSpliterator<E> this) { return (long) getEst(); }
+        @SuppressWarnings("pico:return.type.incompatible") // covariant type parameter
+        public Spliterator<E> trySplit(@Mutable LLSpliterator<E> this) {
             Node<E> p;
             int s = getEst();
             if (s > 1 && (p = current) != null) {
@@ -1281,7 +1286,7 @@ import java.util.function.Consumer;
             return null;
         }
 
-        public void forEachRemaining(Consumer<? super E> action) {
+        public void forEachRemaining(@Mutable LLSpliterator<E> this, Consumer<? super E> action) {
             Node<E> p; int n;
             if (action == null) throw new NullPointerException();
             if ((n = getEst()) > 0 && (p = current) != null) {
@@ -1297,7 +1302,7 @@ import java.util.function.Consumer;
                 throw new ConcurrentModificationException();
         }
 
-        public boolean tryAdvance(Consumer<? super E> action) {
+        public boolean tryAdvance(@Mutable LLSpliterator<E> this, Consumer<? super E> action) {
             Node<E> p;
             if (action == null) throw new NullPointerException();
             if (getEst() > 0 && (p = current) != null) {
@@ -1312,7 +1317,7 @@ import java.util.function.Consumer;
             return false;
         }
 
-        public int characteristics() {
+        public int characteristics(@Readonly LLSpliterator<E> this) {
             return Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED;
         }
     }

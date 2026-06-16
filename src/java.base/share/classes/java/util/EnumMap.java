@@ -98,7 +98,8 @@ import jdk.internal.access.SharedSecrets;
  * @since 1.5
  */
 @AnnotatedFor({"nullness", "index"})
-@ReceiverDependentMutable public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
+@ReceiverDependentMutable
+public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
     implements java.io.Serializable, Cloneable
 {
     /**
@@ -106,7 +107,7 @@ import jdk.internal.access.SharedSecrets;
      *
      * @serial
      */
-    private final @Mutable Class<K> keyType;
+    private final Class<K> keyType;
 
     /**
      * All of the values comprising K.  (Cached for performance.)
@@ -138,7 +139,7 @@ import jdk.internal.access.SharedSecrets;
         }
     };
 
-    @SuppressWarnings("pico") // Not expressive enough
+    @SuppressWarnings("pico") // Not precise enough
     private @PolyMutable Object maskNull(@Readonly EnumMap<K,V> this, @Nullable @PolyMutable Object value) {
         return (value == null ? NULL : value);
     }
@@ -168,7 +169,7 @@ import jdk.internal.access.SharedSecrets;
      * @param m the enum map from which to initialize this enum map
      * @throws NullPointerException if {@code m} is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("pico:method.invocation.invalid") // array clone
     public EnumMap(@ReceiverDependentMutable EnumMap<K, ? extends V> m) {
         keyType = m.keyType;
         keyUniverse = m.keyUniverse;
@@ -188,7 +189,7 @@ import jdk.internal.access.SharedSecrets;
      *     {@code EnumMap} instance and contains no mappings
      * @throws NullPointerException if {@code m} is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
     public EnumMap(@ReceiverDependentMutable Map<K, ? extends V> m) {
         if (m instanceof EnumMap) {
             EnumMap<K, ? extends V> em = (@ReceiverDependentMutable EnumMap<K, ? extends V>) m;
@@ -201,7 +202,7 @@ import jdk.internal.access.SharedSecrets;
                 throw new IllegalArgumentException("Specified map is empty");
             keyType = m.keySet().iterator().next().getDeclaringClass();
             keyUniverse = getKeyUniverse(keyType);
-            vals = new Object[keyUniverse.length];
+            vals = new Object @ReceiverDependentMutable [keyUniverse.length];
             putAll(m);
         }
     }
@@ -400,7 +401,7 @@ import jdk.internal.access.SharedSecrets;
      * view the first time this view is requested.  The view is stateless,
      * so there's no reason to create more than one.
      */
-    private transient @Assignable @Nullable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
+    private transient @Assignable /* should be @LazyFinal */ @Nullable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
 
     /**
      * Returns a {@link Set} view of the keys contained in this map.
@@ -420,7 +421,8 @@ import jdk.internal.access.SharedSecrets;
         return ks;
     }
 
-    @ReceiverDependentMutable private class KeySet extends AbstractSet<K> {
+    @ReceiverDependentMutable
+    private class KeySet extends AbstractSet<K> {
         @SideEffectFree
         public Iterator<K> iterator(@Readonly KeySet this) {
             return new KeyIterator();
@@ -463,7 +465,8 @@ import jdk.internal.access.SharedSecrets;
         return vs;
     }
 
-    @ReceiverDependentMutable private class Values extends AbstractCollection<V> {
+    @ReceiverDependentMutable
+    private class Values extends AbstractCollection<V> {
         @SideEffectFree
         public Iterator<V> iterator(@Readonly Values this) {
             return new ValueIterator();
@@ -513,7 +516,8 @@ import jdk.internal.access.SharedSecrets;
             return entrySet = new @PolyMutable EntrySet();
     }
 
-    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
+    @ReceiverDependentMutable
+    private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
         public Iterator<Map.Entry<K,V>> iterator(@Readonly EntrySet this) {
             return new EntryIterator();
@@ -570,7 +574,8 @@ import jdk.internal.access.SharedSecrets;
         }
     }
 
-    @ReceiverDependentMutable private abstract class EnumMapIterator<T> implements Iterator<T> {
+    @ReceiverDependentMutable
+    private abstract class EnumMapIterator<T> implements Iterator<T> {
         // Lower bound on index of next element to return
         @Assignable int index = 0;
 
@@ -601,7 +606,8 @@ import jdk.internal.access.SharedSecrets;
         }
     }
 
-    @ReceiverDependentMutable private class KeyIterator extends EnumMapIterator<K> {
+    @ReceiverDependentMutable
+    private class KeyIterator extends EnumMapIterator<K> {
         public K next(@NonEmpty @Readonly KeyIterator this) {
             if (!hasNext())
                 throw new NoSuchElementException();
@@ -610,7 +616,8 @@ import jdk.internal.access.SharedSecrets;
         }
     }
 
-    @ReceiverDependentMutable private class ValueIterator extends EnumMapIterator<V> {
+    @ReceiverDependentMutable
+    private class ValueIterator extends EnumMapIterator<V> {
         @CFComment({"nullness: Value returned by unmaskNull",
                     "will be of type V (not @Nullable V) for mapped value"})
         @SuppressWarnings({"nullness:return"})
@@ -622,7 +629,8 @@ import jdk.internal.access.SharedSecrets;
         }
     }
 
-    @ReceiverDependentMutable private class EntryIterator extends EnumMapIterator<Map.Entry<K,V>> {
+    @ReceiverDependentMutable
+    private class EntryIterator extends EnumMapIterator<Map.Entry<K,V>> {
         private @Assignable Entry lastReturnedEntry;
 
         public Map.Entry<K,V> next(@Mutable @NonEmpty EntryIterator this) {
@@ -640,7 +648,8 @@ import jdk.internal.access.SharedSecrets;
             lastReturnedEntry = null;
         }
 
-        @ReceiverDependentMutable private class Entry implements Map.Entry<K,V> {
+        @ReceiverDependentMutable
+        private class Entry implements Map.Entry<K,V> {
             private int index;
 
             private Entry(int index) {
@@ -807,7 +816,7 @@ import jdk.internal.access.SharedSecrets;
     /**
      * Throws an exception if e is not of the correct type for this enum set.
      */
-    @SuppressWarnings("pico:type.invalid.annotations.on.use") // Aosen: This is a bug in validator
+    // @SuppressWarnings("pico:type.invalid.annotations.on.use") // Aosen: This is a bug in validator
     private void typeCheck(@Readonly EnumMap<K,V> this, K key) {
         Class<?> keyClass = key.getClass();
         if (keyClass != keyType && keyClass.getSuperclass() != keyType)
@@ -818,7 +827,8 @@ import jdk.internal.access.SharedSecrets;
      * Returns all of the values comprising K.
      * The result is uncloned, cached, and shared by all callers.
      */
-    private static <K extends Enum<K>> K [] getKeyUniverse(Class<K> keyType) {
+    @SuppressWarnings("pico:return.type.incompatible") // return type
+    private static <K extends Enum<K>> K @ReceiverDependentMutable [] getKeyUniverse(Class<K> keyType) {
         return SharedSecrets.getJavaLangAccess()
                                         .getEnumConstantsShared(keyType);
     }
@@ -860,7 +870,7 @@ import jdk.internal.access.SharedSecrets;
      * Reconstitute the {@code EnumMap} instance from a stream (i.e.,
      * deserialize it).
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "pico:assignment.type.incompatible"}) // why getKeyUniverse return type not adapted?
     @java.io.Serial
     private void readObject(@Mutable EnumMap<K,V> this, java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException

@@ -158,8 +158,9 @@ import jdk.internal.access.SharedSecrets;
  * @see     Hashtable
  * @since   1.2
  */
-@AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@ReceiverDependentMutable
+public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
     implements Map<K,V>, Cloneable, Serializable {
 
     @java.io.Serial
@@ -301,7 +302,8 @@ import jdk.internal.access.SharedSecrets;
      * Basic hash bin node, used for most entries.  (See below for
      * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
      */
-    @ReceiverDependentMutable static class Node<K extends @Immutable Object,V> implements Map.Entry<K,V> {
+    @ReceiverDependentMutable
+    static class Node<K extends @Immutable Object,V> implements Map.Entry<K,V> {
         final int hash;
         final K key;
         V value;
@@ -365,6 +367,7 @@ import jdk.internal.access.SharedSecrets;
      * Returns x's Class if it is of the form "class C implements
      * Comparable<C>", else null.
      */
+    @SuppressWarnings("pico:static.receiverdependentmutable.forbidden") // getClass error
     static Class<?> comparableClassFor(@Readonly Object x) {
         if (x instanceof Comparable) {
             Class<?> c; Type[] ts, as; ParameterizedType p;
@@ -416,7 +419,7 @@ import jdk.internal.access.SharedSecrets;
      * Holds cached entrySet(). Note that AbstractMap fields are used
      * for keySet() and values().
      */
-    transient @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
+    transient @Assignable /* should be @LazyFinal */ Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
 
     /**
      * The number of key-value mappings contained in this map.
@@ -461,7 +464,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws IllegalArgumentException if the initial capacity is negative
      *         or the load factor is nonpositive
      */
-    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    // @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public HashMap(@NonNegative int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal initial capacity: " +
@@ -490,7 +493,7 @@ import jdk.internal.access.SharedSecrets;
      * Constructs an empty {@code HashMap} with the default initial capacity
      * (16) and the default load factor (0.75).
      */
-    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    // @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     public HashMap() {
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
     }
@@ -504,8 +507,8 @@ import jdk.internal.access.SharedSecrets;
      * @param   m the map whose mappings are to be placed in this map
      * @throws  NullPointerException if the specified map is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
-    public @PolyNonEmpty HashMap(@PolyNonEmpty Map<? extends K, ? extends V> m) {
+    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
+    public @PolyNonEmpty HashMap(@PolyNonEmpty @Readonly Map<? extends K, ? extends V> m) {
         this.loadFactor = DEFAULT_LOAD_FACTOR;
         putMapEntries(m, false);
     }
@@ -1013,7 +1016,8 @@ import jdk.internal.access.SharedSecrets;
         return a;
     }
 
-    @ReceiverDependentMutable final class KeySet extends AbstractSet<K> {
+    @ReceiverDependentMutable
+    final class KeySet extends AbstractSet<K> {
         @Pure
         public final @NonNegative int size(@Readonly KeySet this)                 { return size; }
         public final void clear(@Mutable KeySet this)               { HashMap.this.clear(); }
@@ -1079,7 +1083,8 @@ import jdk.internal.access.SharedSecrets;
         return vs;
     }
 
-    @ReceiverDependentMutable final class Values extends AbstractCollection<V> {
+    @ReceiverDependentMutable
+    final class Values extends AbstractCollection<V> {
         @Pure
         public final @NonNegative int size(@Readonly Values this)                 { return size; }
         public final void clear(@Mutable HashMap<K, V>. @Mutable Values this)               { HashMap.this.clear(); }
@@ -1140,7 +1145,8 @@ import jdk.internal.access.SharedSecrets;
         return (es = entrySet) == null ? (entrySet = new @PolyMutable EntrySet()) : es;
     }
 
-    @ReceiverDependentMutable final class EntrySet extends AbstractSet<Map.@ReceiverDependentMutable Entry<K,V>> {
+    @ReceiverDependentMutable
+    final class EntrySet extends AbstractSet<Map.@ReceiverDependentMutable Entry<K,V>> {
         @Pure
         public final @NonNegative int size(@Readonly EntrySet this)                 { return size; }
         public final void clear(@Mutable HashMap<K,V>.@Mutable EntrySet this)               { HashMap.this.clear(); }
@@ -1610,7 +1616,8 @@ import jdk.internal.access.SharedSecrets;
     /* ------------------------------------------------------------ */
     // iterators
 
-    @ReceiverDependentMutable abstract class HashIterator {
+    @ReceiverDependentMutable
+    abstract class HashIterator {
         @Readonly Node<K,V> next;        // next entry to return
         @Readonly Node<K,V> current;     // current entry
         int expectedModCount;  // for fast-fail
@@ -1632,7 +1639,7 @@ import jdk.internal.access.SharedSecrets;
             return next != null;
         }
 
-        @SuppressWarnings("pico:return.type.incompatible") //field depends on outer class
+        @SuppressWarnings("pico:return.type.incompatible") // field depends on outer class
         final @PolyMutable Node<K,V> nextNode(@PolyMutable HashMap<K,V>.@NonEmpty @Mutable HashIterator this) {
             @PolyMutable Node<K,V>[] t;
             Node<K,V> e = next;
@@ -1658,17 +1665,20 @@ import jdk.internal.access.SharedSecrets;
         }
     }
 
-    @ReceiverDependentMutable final class KeyIterator extends HashIterator
+    @ReceiverDependentMutable
+    final class KeyIterator extends HashIterator
         implements Iterator<K> {
         public final K next(@NonEmpty @Mutable KeyIterator this) { return nextNode().key; }
     }
 
-    @ReceiverDependentMutable final class ValueIterator extends HashIterator
+    @ReceiverDependentMutable
+    final class ValueIterator extends HashIterator
         implements Iterator<V> {
         public final V next(@NonEmpty @Mutable ValueIterator this) { return nextNode().value; }
     }
 
-    @ReceiverDependentMutable final class EntryIterator extends HashIterator
+    @ReceiverDependentMutable
+    final class EntryIterator extends HashIterator
         implements Iterator<Map.Entry<K,V>> {
         public final Map.Entry<K,V> next(@NonEmpty @Mutable EntryIterator this) { return nextNode(); }
     }
@@ -1998,7 +2008,8 @@ import jdk.internal.access.SharedSecrets;
      * extends Node) so can be used as extension of either regular or
      * linked node.
      */
-    @ReceiverDependentMutable static final class TreeNode<K extends @Immutable Object,V> extends LinkedHashMap.Entry<K,V> {
+    @ReceiverDependentMutable
+    static final class TreeNode<K extends @Immutable Object,V> extends LinkedHashMap.Entry<K,V> {
         @Assignable TreeNode<K,V> parent;  // red-black tree links
         @Assignable TreeNode<K,V> left;
         @Assignable TreeNode<K,V> right;

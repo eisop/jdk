@@ -217,8 +217,9 @@ import org.checkerframework.framework.qual.CFComment;
  * @param <E> the type of elements held in this deque
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable public interface Deque<E> extends Queue<E> {
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@ReceiverDependentMutable
+public interface Deque<E> extends Queue<E> {
     /**
      * Inserts the specified element at the front of this deque if it is
      * possible to do so immediately without violating capacity restrictions,

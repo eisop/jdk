@@ -1067,7 +1067,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @Immutable static class UnmodifiableCollection<E> implements Collection<E>, Serializable {
+    @Immutable
+    static class UnmodifiableCollection<E> implements Collection<E>, Serializable {
         @java.io.Serial
         private static final long serialVersionUID = 1820017752578914078L;
 
@@ -1089,7 +1090,7 @@ public class Collections {
         @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o)          {return c.contains(o);}
         @SideEffectFree
-        @SuppressWarnings("pico") // poly does not work on field's type argument
+        @SuppressWarnings("pico:return.type.incompatible") // poly does not work on field's type argument
         public @PolyNull @PolySigned @PolyMutable Object[] toArray(Collections.UnmodifiableCollection<@PolyNull @PolySigned @PolyMutable E> this)                  {return c.toArray();}
         @SideEffectFree
         public <T> @Nullable T[] toArray(@PolyNull T[] a)              {return c.toArray(a);}
@@ -1182,7 +1183,7 @@ public class Collections {
      * @param  s the set for which an unmodifiable view is to be returned.
      * @return an unmodifiable view of the specified set.
      */
-    @SuppressWarnings({"unchecked", "pico"}) // PICO Flow
+    // @SuppressWarnings({"unchecked", "pico"}) // PICO Flow
     @SideEffectFree
     public static <T> @PolyNonEmpty @Immutable Set<T> unmodifiableSet(@PolyNonEmpty @Readonly Set<? extends T> s) {
         // Not checking for subclasses because of heap pollution and information leakage.
@@ -1292,7 +1293,8 @@ public class Collections {
      * @param <E> type of elements
      * @serial include
      */
-    @Immutable static class UnmodifiableNavigableSet<E>
+    @Immutable
+    static class UnmodifiableNavigableSet<E extends @Immutable Object>
                              extends UnmodifiableSortedSet<E>
                              implements NavigableSet<E>, Serializable {
 
@@ -1305,15 +1307,15 @@ public class Collections {
          *
          * @param <E> type of elements, if there were any, and bounds
          */
-        @Immutable private static class EmptyNavigableSet<E> extends UnmodifiableNavigableSet<E>
+        @Immutable
+        private static class EmptyNavigableSet<E extends @Immutable Object> extends UnmodifiableNavigableSet<E>
             implements Serializable {
             @java.io.Serial
             private static final long serialVersionUID = -6291252904449939134L;
 
             @SideEffectFree
-            @SuppressWarnings("pico") //PICO covariant
             public EmptyNavigableSet() {
-                super(new @Immutable TreeSet<@Immutable E>());
+                super(new @Immutable TreeSet<E>());
             }
 
             @java.io.Serial
@@ -1546,7 +1548,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @Immutable private static class UnmodifiableMap<K extends @Immutable Object,V> implements Map<K,V>, Serializable {
+    @Immutable
+    private static class UnmodifiableMap<K extends @Immutable Object,V> implements Map<K,V>, Serializable {
         @java.io.Serial
         private static final long serialVersionUID = -1034234728574286014L;
 
@@ -1566,9 +1569,9 @@ public class Collections {
         public boolean isEmpty()                 {return m.isEmpty();}
         @Pure
         @EnsuresKeyForIf(expression={"#1"}, result=true, map={"this"})
-        public boolean containsKey(@UnknownSignedness Object key)   {return m.containsKey(key);}
+        public boolean containsKey(@UnknownSignedness @Readonly Object key)   {return m.containsKey(key);}
         @Pure
-        public boolean containsValue(@UnknownSignedness Object val) {return m.containsValue(val);}
+        public boolean containsValue(@UnknownSignedness @Readonly Object val) {return m.containsValue(val);}
         public V get(Object key)                 {return m.get(key);}
 
         @EnsuresKeyFor(value={"#1"}, map={"this"})
@@ -1585,31 +1588,30 @@ public class Collections {
             throw new UnsupportedOperationException();
         }
 
-        private transient @Assignable Set<K> keySet;
-        private transient @Assignable Set<Map.@Immutable Entry<K,V>> entrySet;
-        private transient @Assignable Collection<V> values;
+        private transient @Assignable /* should be @LazyFinal */ @Readonly Set<K> keySet;
+        private transient @Assignable /* should be @LazyFinal */ @Readonly Set<Map.@Readonly Entry<K,V>> entrySet;
+        private transient @Assignable /* should be @LazyFinal */ @Readonly Collection<V> values;
 
-        public @Immutable Set<K> keySet() {
+        public @Readonly Set<K> keySet() {
             if (keySet==null)
                 keySet = unmodifiableSet(m.keySet());
             return keySet;
         }
 
         @SideEffectFree
-        @SuppressWarnings("pico:assignment.type.incompatible") // covariant
-        public @Immutable Set<Map.@Immutable Entry<K,V>> entrySet() {
+        public @Readonly Set<Map.@Readonly Entry<K,V>> entrySet() {
             if (entrySet==null)
                 entrySet = new UnmodifiableEntrySet<>(m.entrySet());
             return entrySet;
         }
 
-        public @Immutable Collection<V> values() {
+        public @Readonly Collection<V> values() {
             if (values==null)
                 values = unmodifiableCollection(m.values());
             return values;
         }
 
-        public boolean equals(Object o) {return o == this || m.equals(o);}
+        public boolean equals(@Readonly Object o) {return o == this || m.equals(o);}
         public int hashCode()           {return m.hashCode();}
         public String toString()        {return m.toString();}
 
@@ -1617,7 +1619,7 @@ public class Collections {
         @Override
         @SuppressWarnings("unchecked")
         @Pure
-        public V getOrDefault(Object k, V defaultValue) {
+        public V getOrDefault(@Readonly Object k, V defaultValue) {
             // Safe cast as we don't change the value
             return ((Map<K, V>)m).getOrDefault(k, defaultValue);
         }
@@ -1639,7 +1641,7 @@ public class Collections {
         }
 
         @Override
-        public boolean remove(@UnknownSignedness Object key, @UnknownSignedness Object value) {
+        public boolean remove(@UnknownSignedness @Readonly Object key, @UnknownSignedness @Readonly Object value) {
             throw new UnsupportedOperationException();
         }
 
@@ -1684,7 +1686,8 @@ public class Collections {
          *
          * @serial include
          */
-        @Immutable static class UnmodifiableEntrySet<K extends @Immutable Object,V>
+        @Immutable
+        static class UnmodifiableEntrySet<K extends @Immutable Object,V>
             extends UnmodifiableSet<Map.@Readonly Entry<K,V>> {
             @java.io.Serial
             private static final long serialVersionUID = 7854390611657943733L;
@@ -2147,7 +2150,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @ReceiverDependentMutable static class SynchronizedCollection<E> implements Collection<E>, Serializable {
+    @ReceiverDependentMutable
+    static class SynchronizedCollection<E> implements Collection<E>, Serializable {
         @java.io.Serial
         private static final long serialVersionUID = 3053995032091335093L;
 
@@ -2360,7 +2364,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @ReceiverDependentMutable static class SynchronizedSortedSet<E>
+    @ReceiverDependentMutable
+    static class SynchronizedSortedSet<E>
         extends SynchronizedSet<E>
         implements SortedSet<E>
     {
@@ -2456,7 +2461,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @ReceiverDependentMutable static class SynchronizedNavigableSet<E>
+    @ReceiverDependentMutable
+    static class SynchronizedNavigableSet<E>
         extends SynchronizedSortedSet<E>
         implements NavigableSet<E>
     {
@@ -2568,7 +2574,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @ReceiverDependentMutable static class SynchronizedList<E>
+    @ReceiverDependentMutable
+    static class SynchronizedList<E>
         extends SynchronizedCollection<E>
         implements List<E> {
         @java.io.Serial
@@ -2666,7 +2673,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @ReceiverDependentMutable static class SynchronizedRandomAccessList<E>
+    @ReceiverDependentMutable
+    static class SynchronizedRandomAccessList<E>
         extends SynchronizedList<E>
         implements RandomAccess {
 
@@ -2793,9 +2801,9 @@ public class Collections {
             synchronized (mutex) {m.clear();}
         }
 
-        private transient @Assignable Set<K> keySet;
-        private transient @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
-        private transient @Assignable Collection<V> values;
+        private transient @Assignable /* should be @LazyFinal */ Set<K> keySet;
+        private transient @Assignable /* should be @LazyFinal */ Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
+        private transient @Assignable /* should be @LazyFinal */ Collection<V> values;
 
         public @PolyMutable Set<K> keySet(@PolyMutable SynchronizedMap<K,V> this) {
             synchronized (mutex) {
@@ -3250,7 +3258,7 @@ public class Collections {
         @SuppressWarnings("serial") // Conditionally serializable
         final Collection<E> c;
         @SuppressWarnings("serial") // Conditionally serializable
-        final @Mutable Class<E> type;
+        final Class<E> type;
 
         @SuppressWarnings("unchecked")
         E typeCheck(@Readonly Object o) {
@@ -3326,7 +3334,7 @@ public class Collections {
                 (zeroLengthElementArray = zeroLengthArray(type));
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
         Collection<E> checkedCopyOf(@Mutable CheckedCollection<E> this, @Readonly Collection<? extends E> coll) {
             @Readonly Object[] a;
             try {
@@ -3467,7 +3475,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @ReceiverDependentMutable static class CheckedSet<E> extends CheckedCollection<E>
+    @ReceiverDependentMutable
+    static class CheckedSet<E> extends CheckedCollection<E>
                                  implements Set<E>, Serializable
     {
         @java.io.Serial
@@ -3699,7 +3708,7 @@ public class Collections {
         }
         public ListIterator<E> listIterator(@Readonly CheckedList<E> this)   { return listIterator(0); }
 
-        @SuppressWarnings("pico") // Not denotable
+        @SuppressWarnings("pico") // receiver in anonymous class not denotable, see typetool#2433
         public ListIterator<E> listIterator(@Readonly CheckedList<E> this, final int index) {
             final ListIterator<E> i = list.listIterator(index);
 
@@ -3818,7 +3827,8 @@ public class Collections {
     /**
      * @serial include
      */
-    @ReceiverDependentMutable private static class CheckedMap<K extends @Immutable Object,V>
+    @ReceiverDependentMutable
+    private static class CheckedMap<K extends @Immutable Object,V>
         implements Map<K,V>, Serializable
     {
         @java.io.Serial
@@ -3827,9 +3837,9 @@ public class Collections {
         @SuppressWarnings("serial") // Conditionally serializable
         private final Map<K, V> m;
         @SuppressWarnings("serial") // Conditionally serializable
-        final @Mutable Class<K> keyType;
+        final Class<K> keyType;
         @SuppressWarnings("serial") // Conditionally serializable
-        final @Mutable Class<V> valueType;
+        final Class<V> valueType;
 
         private void typeCheck(@Readonly Object key, @Readonly Object value) {
             if (key != null && !keyType.isInstance(key))
@@ -3911,7 +3921,7 @@ public class Collections {
                 m.put(e.getKey(), e.getValue());
         }
 
-        private transient @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
+        private transient @Assignable /* should be @LazyFinal */ Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
 
         @SideEffectFree
         @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
@@ -3998,9 +4008,10 @@ public class Collections {
          *
          * @serial exclude
          */
-        @ReceiverDependentMutable static class CheckedEntrySet<K extends @Immutable Object,V> implements Set<Map.@Readonly Entry<K,V>> {
+        @ReceiverDependentMutable
+        static class CheckedEntrySet<K extends @Immutable Object,V> implements Set<Map.@ReceiverDependentMutable Entry<K,V>> {
             private final Set<Map.@ReceiverDependentMutable Entry<K,V>> s;
-            private final @Mutable Class<V> valueType;
+            private final Class<V> valueType;
 
             CheckedEntrySet(@ReceiverDependentMutable Set<Map.@ReceiverDependentMutable Entry<K, V>> s, Class<V> valueType) {
                 this.s = s;
@@ -4153,9 +4164,10 @@ public class Collections {
              * an ill-behaved Map.Entry that attempts to modify another
              * Map.Entry when asked to perform an equality check.
              */
-            @ReceiverDependentMutable private static class CheckedEntry<K extends @Immutable Object,V,T> implements Map.Entry<K,V> {
+            @ReceiverDependentMutable
+            private static class CheckedEntry<K extends @Immutable Object,V,T> implements Map.Entry<K,V> {
                 private final Map.Entry<K, V> e;
-                private final @Mutable Class<T> valueType;
+                private final Class<T> valueType;
 
                 CheckedEntry(Map.@ReceiverDependentMutable Entry<K, V> e, Class<T> valueType) {
                     this.e = Objects.requireNonNull(e);
@@ -5020,7 +5032,7 @@ public class Collections {
         return new SingletonSet<>(o);
     }
 
-    @SuppressWarnings("pico") // Not denotable
+    @SuppressWarnings("pico") // receiver in anonymous class not denotable, see typetool#2433
     static <E> @Immutable Iterator<E> singletonIterator(final E e) {
         return new @Immutable Iterator<E>() {
             private boolean hasNext = true;
@@ -5264,10 +5276,10 @@ public class Collections {
         @Pure
         public boolean containsValue(@UnknownSignedness @Readonly Object value)       {return eq(value, v);}
         public V get(@Readonly Object key)              {return (eq(key, k) ? v : null);}
-        // PICO: initial only once
-        private transient @Assignable Set<K> keySet;
-        private transient @Assignable Set<Map.@Immutable Entry<K,V>> entrySet;
-        private transient @Assignable Collection<V> values;
+
+        private transient @Assignable /* should be @LazyFinal */ Set<K> keySet;
+        private transient @Assignable /* should be @LazyFinal */ Set<Map.@Immutable Entry<K,V>> entrySet;
+        private transient @Assignable /* should be @LazyFinal */ Collection<V> values;
 
         public @Immutable Set<K> keySet() {
             if (keySet==null)

@@ -110,7 +110,8 @@ import org.checkerframework.framework.qual.CFComment;
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness"})
-@ReceiverDependentMutable public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
+@ReceiverDependentMutable
+public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
     implements NavigableSet<E>, Cloneable, java.io.Serializable
 {
     /**
@@ -176,7 +177,7 @@ import org.checkerframework.framework.qual.CFComment;
      *         not {@link Comparable}, or are not mutually comparable
      * @throws NullPointerException if the specified collection is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
     public @PolyNonEmpty TreeSet(@PolyNonEmpty Collection<? extends E> c) {
         this();
         addAll(c);
@@ -189,7 +190,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @param s sorted set whose elements will comprise the new set
      * @throws NullPointerException if the specified sorted set is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
     public @PolyNonEmpty TreeSet(@PolyNonEmpty SortedSet<E> s) {
         this(s.comparator());
         addAll(s);
@@ -201,7 +202,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @return an iterator over the elements in this set in ascending order
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // lost can not invoke poly method.
+    @SuppressWarnings("pico:method.invocation.invalid") // lost can not invoke poly method.
     public @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty @Readonly TreeSet<E> this) {
         return m.navigableKeySet().iterator();
     }
@@ -212,7 +213,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @return an iterator over the elements in this set in descending order
      * @since 1.6
      */
-    @SuppressWarnings("pico") // lost can not invoke poly method.
+    @SuppressWarnings("pico:method.invocation.invalid") // lost can not invoke poly method.
     public @PolyNonEmpty Iterator<E> descendingIterator(@PolyNonEmpty @Readonly TreeSet<E> this) {
         return m.descendingKeySet().iterator();
     }

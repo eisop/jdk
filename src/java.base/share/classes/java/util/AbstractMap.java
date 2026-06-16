@@ -89,8 +89,9 @@ import java.util.Map.Entry;
  */
 
 @CFComment("lock: Subclasses of this interface/class may opt to prohibit null elements")
-@AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable public abstract class AbstractMap<K extends @Immutable Object,V> implements Map<K,V> {
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@ReceiverDependentMutable
+public abstract class AbstractMap<K extends @Immutable Object,V> implements Map<K,V> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
@@ -359,8 +360,8 @@ import java.util.Map.Entry;
      * }
      *}</pre>
      */
-    transient @Assignable Set<K>        keySet;
-    transient @Assignable Collection<V> values;
+    transient @Assignable /* should be @LazyFinal */ Set<K>        keySet;
+    transient @Assignable /* should be @LazyFinal */ Collection<V> values;
 
     /**
      * {@inheritDoc}
@@ -378,7 +379,7 @@ import java.util.Map.Entry;
      * is performed, so there is a slight chance that multiple calls to this
      * method will not all return the same set.
      */
-    @SuppressWarnings("pico") // Not denotable
+    @SuppressWarnings("pico") // receiver in anonymous class not denotable, see typetool#2433
     @SideEffectFree
     public @PolyMutable Set<@KeyFor({"this"}) K> keySet(@GuardSatisfied @PolyMutable AbstractMap<K, V> this) {
         Set<K> ks = keySet;
@@ -445,7 +446,7 @@ import java.util.Map.Entry;
      * performed, so there is a slight chance that multiple calls to this
      * method will not all return the same collection.
      */
-    @SuppressWarnings("pico") // Not denotable
+    @SuppressWarnings("pico") // receiver in anonymous class not denotable, see typetool#2433
     @SideEffectFree
     public @PolyMutable Collection<V> values(@GuardSatisfied @PolyMutable AbstractMap<K, V> this) {
         Collection<V> vals = values;

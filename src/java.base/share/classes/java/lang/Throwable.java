@@ -26,10 +26,14 @@
 package java.lang;
 
 import org.checkerframework.checker.initialization.qual.PolyInitialized;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.Assignable;
+import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.Pure;
@@ -122,8 +126,9 @@ import java.util.*;
  * @jls 11.2 Compile-Time Checking of Exceptions
  * @since 1.0
  */
-@AnnotatedFor({"interning", "lock", "nullness"})
-@ReceiverDependentMutable public @UsesObjectEquals class Throwable implements Serializable {
+@AnnotatedFor({"interning", "lock", "nullness", "pico"})
+@ReceiverDependentMutable
+public @UsesObjectEquals class Throwable implements Serializable {
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
     @java.io.Serial
     private static final long serialVersionUID = -3042686055658047285L;
@@ -220,7 +225,8 @@ import java.util.*;
      * @serial
      * @since 1.4
      */
-    private StackTraceElement[] stackTrace = UNASSIGNED_STACK;
+    @SuppressWarnings("pico:assignment.type.incompatible") // initialize field with static variable
+    private @Assignable /* should be @LazyFinal */ StackTraceElement @Mutable [] stackTrace = UNASSIGNED_STACK;
 
     /**
      * The JVM code sets the depth of the backtrace for later retrieval
@@ -229,7 +235,7 @@ import java.util.*;
 
     // Setting this static field introduces an acceptable
     // initialization dependency on a few java.util classes.
-    private static final List<Throwable> SUPPRESSED_SENTINEL = Collections.emptyList();
+    private static final @Immutable List<Throwable> SUPPRESSED_SENTINEL = Collections.emptyList();
 
     /**
      * The list of suppressed exceptions, as returned by {@link
@@ -241,7 +247,8 @@ import java.util.*;
      * @serial
      * @since 1.7
      */
-    @SuppressWarnings("serial") // Not statically typed as Serializable
+    // PICO: sentinel list is immutable.
+    @SuppressWarnings({"serial", "pico:assignment.type.incompatible"}) // Not statically typed as Serializable
     private List<Throwable> suppressedExceptions = SUPPRESSED_SENTINEL;
 
     /** Message for trying to suppress a null exception. */
@@ -265,6 +272,7 @@ import java.util.*;
      * the stack trace data in the newly created throwable.
      */
     @SideEffectFree
+    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
     public Throwable() {
         fillInStackTrace();
     }
@@ -281,6 +289,7 @@ import java.util.*;
      *          later retrieval by the {@link #getMessage()} method.
      */
     @SideEffectFree
+    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
     public Throwable(@Nullable String message) {
         fillInStackTrace();
         detailMessage = message;
@@ -304,7 +313,8 @@ import java.util.*;
      * @since  1.4
      */
     @SideEffectFree
-    public Throwable(@Nullable String message, @Nullable Throwable cause) {
+    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    public Throwable(@Nullable String message, @Nullable @ReceiverDependentMutable Throwable cause) {
         fillInStackTrace();
         detailMessage = message;
         this.cause = cause;
@@ -328,7 +338,8 @@ import java.util.*;
      * @since  1.4
      */
     @SideEffectFree
-    public Throwable(@Nullable Throwable cause) {
+    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    public Throwable(@Nullable @ReceiverDependentMutable Throwable cause) {
         fillInStackTrace();
         detailMessage = (cause==null ? null : cause.toString());
         this.cause = cause;
@@ -376,7 +387,8 @@ import java.util.*;
      * @since 1.7
      */
     @SideEffectFree
-    protected Throwable(@Nullable String message, @Nullable Throwable cause,
+    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    protected Throwable(@Nullable String message, @Nullable @ReceiverDependentMutable Throwable cause,
                         boolean enableSuppression,
                         boolean writableStackTrace) {
         if (writableStackTrace) {
@@ -397,7 +409,7 @@ import java.util.*;
      *          (which may be {@code null}).
      */
     @Pure
-    public @Nullable String getMessage(@ReceiverDependentMutable @GuardSatisfied Throwable this) {
+    public @Nullable String getMessage(@GuardSatisfied @Readonly Throwable this) {
         return detailMessage;
     }
 
@@ -412,7 +424,7 @@ import java.util.*;
      * @since   1.1
      */
     @SideEffectFree
-    public @Nullable String getLocalizedMessage(@ReceiverDependentMutable @GuardSatisfied Throwable this) {
+    public @Nullable String getLocalizedMessage(@GuardSatisfied @Readonly Throwable this) {
         return getMessage();
     }
 
@@ -437,7 +449,7 @@ import java.util.*;
      * @since 1.4
      */
     @Pure
-    public synchronized @Nullable Throwable getCause(@ReceiverDependentMutable @GuardSatisfied Throwable this) {
+    public synchronized @Nullable @PolyMutable Throwable getCause(@GuardSatisfied @PolyMutable Throwable this) {
         return (cause==this ? null : cause);
     }
 
@@ -477,12 +489,13 @@ import java.util.*;
      *         been called on this throwable.
      * @since  1.4
      */
-    public synchronized @PolyInitialized Throwable initCause(@PolyInitialized Throwable this, @Nullable @Readonly Throwable cause) {
+    @SuppressWarnings("pico:illegal.field.write") // should the receiver be underinitialization then?
+    public synchronized @PolyInitialized @ReceiverDependentMutable Throwable initCause(@PolyInitialized Throwable this, @Nullable @ReceiverDependentMutable Throwable cause) {
         if (this.cause != this)
-            throw new IllegalStateException("Can't overwrite cause with " +
+            throw new @ReceiverDependentMutable IllegalStateException("Can't overwrite cause with " +
                                             Objects.toString(cause, "a null"), this);
         if (cause == this)
-            throw new IllegalArgumentException("Self-causation not permitted", this);
+            throw new @ReceiverDependentMutable IllegalArgumentException("Self-causation not permitted", this);
         this.cause = cause;
         return this;
     }
@@ -493,7 +506,7 @@ import java.util.*;
      * a stream output from an older runtime version where the cause may
      * have set to null.
      */
-    final void setCause(Throwable t) {
+    final void setCause(@Mutable Throwable this, @Mutable Throwable t) {
         this.cause = t;
     }
 
@@ -512,7 +525,7 @@ import java.util.*;
      * @return a string representation of this throwable.
      */
     @SideEffectFree
-    public String toString(@GuardSatisfied Throwable this) {
+    public String toString(@GuardSatisfied @Readonly Throwable this) {
         String s = getClass().getName();
         String message = getLocalizedMessage();
         return (message != null) ? (s + ": " + message) : s;
@@ -667,7 +680,7 @@ import java.util.*;
      *          ... 2 more
      * </pre>
      */
-    public void printStackTrace(@ReceiverDependentMutable Throwable this) {
+    public void printStackTrace(@Readonly Throwable this) {
         printStackTrace(System.err);
     }
 
@@ -676,14 +689,16 @@ import java.util.*;
      *
      * @param s {@code PrintStream} to use for output
      */
-    public void printStackTrace(@ReceiverDependentMutable Throwable this, PrintStream s) {
+    public void printStackTrace(@Readonly Throwable this, PrintStream s) {
         printStackTrace(new WrappedPrintStream(s));
     }
 
-    private void printStackTrace(@ReceiverDependentMutable Throwable this, PrintStreamOrWriter s) {
+    // AOSEN: this is annoying that I have to make the receiver type as immutable to make sure the method type check
+    @SuppressWarnings("pico:argument.type.incompatible") // Add readonly this to dejaVu set
+    private void printStackTrace(@Readonly Throwable this, PrintStreamOrWriter s) {
         // Guard against malicious overrides of Throwable.equals by
         // using a Set with identity equality semantics.
-        Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<@Immutable Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
         dejaVu.add(this);
 
         synchronized (s.lock()) {
@@ -708,11 +723,12 @@ import java.util.*;
      * Print our stack trace as an enclosed exception for the specified
      * stack trace.
      */
-    private void printEnclosedStackTrace(PrintStreamOrWriter s,
+    private void printEnclosedStackTrace(@Readonly Throwable this,
+            PrintStreamOrWriter s,
                                          StackTraceElement[] enclosingTrace,
                                          String caption,
                                          String prefix,
-                                         Set<Throwable> dejaVu) {
+                                         Set<@Readonly Throwable> dejaVu) {
         assert Thread.holdsLock(s.lock());
         if (dejaVu.contains(this)) {
             s.println(prefix + caption + "[CIRCULAR REFERENCE: " + this + "]");
@@ -766,7 +782,7 @@ import java.util.*;
         abstract Object lock();
 
         /** Prints the specified string as a line on this StreamOrWriter */
-        abstract void println(Object o);
+        abstract void println(@Readonly Object o);
     }
 
     private static class WrappedPrintStream extends PrintStreamOrWriter {
@@ -780,7 +796,7 @@ import java.util.*;
             return printStream;
         }
 
-        void println(Object o) {
+        void println(@Readonly Object o) {
             printStream.println(o);
         }
     }
@@ -796,7 +812,7 @@ import java.util.*;
             return printWriter;
         }
 
-        void println(Object o) {
+        void println(@Readonly Object o) {
             printWriter.println(o);
         }
     }
@@ -813,7 +829,7 @@ import java.util.*;
      * @return  a reference to this {@code Throwable} instance.
      * @see     java.lang.Throwable#printStackTrace()
      */
-    public synchronized Throwable fillInStackTrace() {
+    public synchronized Throwable fillInStackTrace(@UnderInitialization @Mutable Throwable this) {
         if (stackTrace != null ||
             backtrace != null /* Out of protocol state */ ) {
             fillInStackTrace(0);
@@ -852,7 +868,7 @@ import java.util.*;
         return getOurStackTrace().clone();
     }
 
-    private synchronized StackTraceElement[] getOurStackTrace() {
+    private synchronized StackTraceElement[] getOurStackTrace(@Readonly Throwable this) {
         // Initialize stack trace field with information from
         // backtrace if this is the first call to this method
         if (stackTrace == UNASSIGNED_STACK ||
@@ -892,7 +908,7 @@ import java.util.*;
      *
      * @since  1.4
      */
-    public void setStackTrace(StackTraceElement[] stackTrace) {
+    public void setStackTrace(@Mutable Throwable this, StackTraceElement[] stackTrace) {
         // Validate argument
         StackTraceElement[] defensiveCopy = stackTrace.clone();
         for (int i = 0; i < defensiveCopy.length; i++) {
@@ -928,7 +944,8 @@ import java.util.*;
      * @throws ClassNotFoundException if a serialized class cannot be loaded
      */
     @java.io.Serial
-    private void readObject(ObjectInputStream s)
+    @SuppressWarnings("pico:assignment.type.incompatible") // suppressedExceptions being assigned sentinel value
+    private void readObject(@Mutable Throwable this, ObjectInputStream s)
         throws IOException, ClassNotFoundException {
         s.defaultReadObject();     // read in all fields
 
@@ -1020,7 +1037,7 @@ import java.util.*;
      * @throws IOException if an I/O error occurs
      */
     @java.io.Serial
-    private synchronized void writeObject(ObjectOutputStream s)
+    private synchronized void writeObject(@Mutable Throwable this, ObjectOutputStream s)
         throws IOException {
         // Ensure that the stackTrace field is initialized to a
         // non-null value, if appropriate.  As of JDK 7, a null stack
@@ -1088,7 +1105,7 @@ import java.util.*;
      * @throws NullPointerException if {@code exception} is {@code null}
      * @since 1.7
      */
-    public final synchronized void addSuppressed(Throwable exception) {
+    public final synchronized void addSuppressed(@Mutable Throwable this, Throwable exception) {
         if (exception == this)
             throw new IllegalArgumentException(SELF_SUPPRESSION_MESSAGE, exception);
 
@@ -1120,7 +1137,7 @@ import java.util.*;
      *         suppressed to deliver this exception.
      * @since 1.7
      */
-    public final synchronized Throwable[] getSuppressed() {
+    public final synchronized Throwable[] getSuppressed(@Readonly Throwable this) {
         if (suppressedExceptions == SUPPRESSED_SENTINEL ||
             suppressedExceptions == null)
             return EMPTY_THROWABLE_ARRAY;

@@ -77,8 +77,9 @@ import org.checkerframework.framework.qual.CFComment;
  */
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
-@AnnotatedFor({"lock", "nullness"})
-@ReceiverDependentMutable public abstract class AbstractSequentialList<E> extends AbstractList<E> {
+@AnnotatedFor({"lock", "nullness", "pico"})
+@ReceiverDependentMutable
+public abstract class AbstractSequentialList<E> extends AbstractList<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)

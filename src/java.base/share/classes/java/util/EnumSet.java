@@ -27,6 +27,8 @@ package java.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
+import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -82,6 +84,7 @@ import jdk.internal.access.SharedSecrets;
  * @see EnumMap
  */
 @AnnotatedFor({"index", "initialization", "nullness"})
+@ReceiverDependentMutable
 public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     implements Cloneable, java.io.Serializable
 {
@@ -99,7 +102,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      */
     final transient Enum<?>[] universe;
 
-    EnumSet(Class<E>elementType, Enum<?>[] universe) {
+    EnumSet(Class<E>elementType, Enum<?> @ReceiverDependentMutable [] universe) {
         this.elementType = elementType;
         this.universe    = universe;
     }
@@ -155,7 +158,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @return A copy of the specified enum set.
      * @throws NullPointerException if {@code s} is null
      */
-    public static <E extends Enum<E>> EnumSet<E> copyOf(EnumSet<E> s) {
+    public static <E extends Enum<E>> @PolyMutable EnumSet<E> copyOf(@PolyMutable EnumSet<E> s) {
         return s.clone();
     }
 
@@ -173,7 +176,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      *     {@code EnumSet} instance and contains no elements
      * @throws NullPointerException if {@code c} is null
      */
-    public static <E extends Enum<E>> EnumSet<E> copyOf(Collection<E> c) {
+    public static <E extends Enum<E>> EnumSet<E> copyOf(@Readonly Collection<E> c) {
         if (c instanceof EnumSet) {
             return ((EnumSet<E>)c).clone();
         } else {
@@ -383,9 +386,9 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * @return a copy of this set
      */
     @SuppressWarnings("unchecked")
-    public EnumSet<E> clone() {
+    public @PolyMutable EnumSet<E> clone(@PolyMutable EnumSet<E> this) {
         try {
-            return (EnumSet<E>) super.clone();
+            return (@PolyMutable EnumSet<E>) super.clone();
         } catch(CloneNotSupportedException e) {
             throw new AssertionError(e);
         }
@@ -399,7 +402,6 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     /**
      * Throws an exception if e is not of the correct type for this enum set.
      */
-    @SuppressWarnings("pico:type.invalid.annotations.on.use") // Aosen: This is a bug in validator
     final void typeCheck(E e) {
         Class<?> eClass = e.getClass();
         if (eClass != elementType && eClass.getSuperclass() != elementType)
@@ -482,7 +484,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      * representing the state of this instance
      */
     @java.io.Serial
-    Object writeReplace() {
+    Object writeReplace(@Mutable EnumSet<E> this) {
         return new SerializationProxy<>(this);
     }
 

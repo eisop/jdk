@@ -164,9 +164,10 @@ import java.util.function.UnaryOperator;
  */
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"index", "initialization", "lock", "nullness"})
-@SuppressWarnings("pico:varargs.type.incompatible") // how to annotated varargs use.
-@ReceiverDependentMutable public interface List<E> extends Collection<E> {
+@AnnotatedFor({"index", "initialization", "lock", "nullness", "pico"})
+// @SuppressWarnings("pico:varargs.type.incompatible") // how to annotated varargs use.
+@ReceiverDependentMutable
+public interface List<E> extends Collection<E> {
     // Query Operations
 
     /**
@@ -274,7 +275,7 @@ import java.util.function.UnaryOperator;
      * @throws NullPointerException if the specified array is null
      */
     @SideEffectFree
-    <T extends @UnknownSignedness @Readonly Object> @Nullable T @PolyMutable [] toArray(@PolyMutable List<E> this, @PolyNull T @PolyMutable [] a);
+    <T extends @UnknownSignedness @Readonly Object> @Nullable T @PolyMutable [] toArray(@Readonly List<E> this, @PolyNull T @PolyMutable [] a);
 
 
     // Modification Operations

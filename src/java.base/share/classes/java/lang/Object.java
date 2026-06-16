@@ -34,6 +34,7 @@ import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.pico.qual.PolyMutable;
 import org.checkerframework.checker.pico.qual.Readonly;
 import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
@@ -55,16 +56,17 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * @see     java.lang.Class
  * @since   1.0
  */
-@AnnotatedFor({"aliasing", "guieffect", "index", "lock", "nullness"})
+@AnnotatedFor({"aliasing", "guieffect", "index", "lock", "nullness", "pico"})
 @PolyUIType
-@ReceiverDependentMutable public class Object {
+@ReceiverDependentMutable
+public class Object {
 
     /**
      * Constructs a new object.
      */
     @Pure
     @IntrinsicCandidate
-    public @ReceiverDependentMutable @Unique @Untainted Object() {}
+    public @Unique @Untainted Object() {}
 
     /**
      * Returns the runtime class of this {@code Object}. The returned
@@ -89,7 +91,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
     @SafeEffect
     @Pure
     @IntrinsicCandidate
-    public final native Class<? extends @MustCall() Object> getClass(@Readonly @PolyUI @GuardSatisfied @UnknownInitialization @UnknownSignedness Object this);
+    public final native Class<? extends @MustCall() @Readonly Object> getClass(@Readonly @PolyUI @GuardSatisfied @UnknownInitialization @UnknownSignedness Object this);
 
     /**
      * Returns a hash code value for the object. This method is
@@ -255,7 +257,8 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
      */
     @SideEffectFree
     @IntrinsicCandidate
-    protected native @ReceiverDependentMutable Object clone(@ReceiverDependentMutable @GuardSatisfied Object this) throws CloneNotSupportedException;
+    @CFComment("pico: clone is poly because it be implemented as shallow copy?")
+    protected native @PolyMutable Object clone(@GuardSatisfied @PolyMutable Object this) throws CloneNotSupportedException;
 
     /**
      * Returns a string representation of the object.
@@ -368,7 +371,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
      * @see    #wait(long)
      * @see    #wait(long, int)
      */
-    public final void wait(@UnknownInitialization Object this) throws InterruptedException {
+    public final void wait(@UnknownInitialization @Readonly Object this) throws InterruptedException {
         wait(0L);
     }
 
@@ -393,7 +396,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
      * @see    #wait()
      * @see    #wait(long, int)
      */
-    public final native void wait(@UnknownInitialization Object this, @NonNegative long timeoutMillis) throws InterruptedException;
+    public final native void wait(@UnknownInitialization @Readonly Object this, @NonNegative long timeoutMillis) throws InterruptedException;
 
     /**
      * Causes the current thread to wait until it is awakened, typically
@@ -489,7 +492,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
      * @see    #wait()
      * @see    #wait(long)
      */
-    public final void wait(@UnknownInitialization Object this, long timeoutMillis, @NonNegative int nanos) throws InterruptedException {
+    public final void wait(@UnknownInitialization @Readonly Object this, long timeoutMillis, @NonNegative int nanos) throws InterruptedException {
         if (timeoutMillis < 0) {
             throw new IllegalArgumentException("timeoutMillis value is negative");
         }

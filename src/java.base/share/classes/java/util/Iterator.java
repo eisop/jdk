@@ -69,9 +69,10 @@ import java.util.function.Consumer;
 @CFComment({"nullness: This @Covariant annotation is sound, but it would not be sound on",
             "ListIterator (a subclass of Iterator), which supports a set operation."
 })
-@AnnotatedFor({"lock", "nullness"})
+@AnnotatedFor({"lock", "nullness", "pico"})
 @Covariant(0)
-@ReceiverDependentMutable public interface Iterator<E> {
+@ReceiverDependentMutable
+public interface Iterator<E> {
     /**
      * Returns {@code true} if the iteration has more elements.
      * (In other words, returns {@code true} if {@link #next} would
@@ -89,7 +90,7 @@ import java.util.function.Consumer;
      * @return the next element in the iteration
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    E next(@GuardSatisfied @NonEmpty Iterator<E> this);
+    E next(@GuardSatisfied @NonEmpty @Mutable Iterator<E> this);
 
     /**
      * Removes from the underlying collection the last element returned

@@ -156,8 +156,9 @@ import jdk.internal.access.SharedSecrets;
  * @since 1.0
  */
 @CFComment({"lock: This collection can only contain nonnull values"})
-@AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable  public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull Object>
+@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@ReceiverDependentMutable
+public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull Object>
     extends Dictionary<K,V>
     implements Map<K,V>, Cloneable, java.io.Serializable {
 
@@ -208,7 +209,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws     IllegalArgumentException  if the initial capacity is less
      *             than zero, or if the load factor is nonpositive.
      */
-    @SuppressWarnings("pico") // There is a crash...
+    @SuppressWarnings("pico") // Annotated new expression's array's component type will crash PICO
     public Hashtable(@NonNegative int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal Capacity: "+
@@ -252,7 +253,7 @@ import jdk.internal.access.SharedSecrets;
      * @throws NullPointerException if the specified map is null.
      * @since   1.2
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
     public Hashtable(Map<? extends K, ? extends V> t) {
         this(Math.max(2*t.size(), 11), 0.75f);
         putAll(t);
@@ -264,7 +265,7 @@ import jdk.internal.access.SharedSecrets;
      *
      * @param dummy a dummy parameter
      */
-    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    // @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
     Hashtable(Void dummy) {}
 
     /**
@@ -678,9 +679,9 @@ import jdk.internal.access.SharedSecrets;
      * appropriate view the first time this view is requested.  The views are
      * stateless, so there's no reason to create more than one of each.
      */
-    private transient volatile @Assignable Set<K> keySet;
-    private transient volatile @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
-    private transient volatile @Assignable Collection<V> values;
+    private transient volatile @Assignable /* should be @LazyFinal */ Set<K> keySet;
+    private transient volatile @Assignable /* should be @LazyFinal */ Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
+    private transient volatile @Assignable /* should be @LazyFinal */ Collection<V> values;
 
     /**
      * Returns a {@link Set} view of the keys contained in this map.
@@ -704,7 +705,8 @@ import jdk.internal.access.SharedSecrets;
         return keySet;
     }
 
-    @ReceiverDependentMutable private class KeySet extends AbstractSet<K> {
+    @ReceiverDependentMutable
+    private class KeySet extends AbstractSet<K> {
         @SideEffectFree
         public Iterator<K> iterator(@Readonly KeySet this) {
             return getIterator(KEYS);
@@ -743,14 +745,15 @@ import jdk.internal.access.SharedSecrets;
      * @since 1.2
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // Aosen: class polymorphism qualifier
+    @SuppressWarnings("pico:argument.type.incompatible") // Aosen: class polymorphism qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable Hashtable<K, V> this) {
         if (entrySet==null)
             entrySet = Collections.synchronizedSet(new @PolyMutable EntrySet(), this);
         return entrySet;
     }
 
-    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
+    @ReceiverDependentMutable
+    private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
         public Iterator<Map.@Readonly Entry<K,V>> iterator(@Readonly EntrySet this) {
             return getIterator(ENTRIES);
@@ -836,7 +839,8 @@ import jdk.internal.access.SharedSecrets;
         return values;
     }
 
-    @ReceiverDependentMutable private class ValueCollection extends AbstractCollection<V> {
+    @ReceiverDependentMutable
+    private class ValueCollection extends AbstractCollection<V> {
         @SideEffectFree
         public Iterator<V> iterator(@Readonly ValueCollection this) {
             return getIterator(VALUES);
@@ -1411,7 +1415,8 @@ import jdk.internal.access.SharedSecrets;
     /**
      * Hashtable bucket collision list entry
      */
-    @ReceiverDependentMutable private static class Entry<K extends @Immutable Object,V> implements Map.Entry<K,V> {
+    @ReceiverDependentMutable
+    private static class Entry<K extends @Immutable Object,V> implements Map.Entry<K,V> {
         final int hash;
         final K key;
         V value;
@@ -1479,7 +1484,8 @@ import jdk.internal.access.SharedSecrets;
      * to avoid unintentionally increasing the capabilities granted a user
      * by passing an Enumeration.
      */
-    @ReceiverDependentMutable private class Enumerator<T> implements Enumeration<T>, Iterator<T> {
+    @ReceiverDependentMutable
+    private class Enumerator<T> implements Enumeration<T>, Iterator<T> {
         @SuppressWarnings("pico:assignment.type.incompatible") // PICO field use
         final @Readonly Entry<?,?>[] table = Hashtable.this.table;
         @Assignable int index = table.length;

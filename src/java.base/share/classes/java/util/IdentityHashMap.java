@@ -162,7 +162,8 @@ import jdk.internal.access.SharedSecrets;
 
 @CFComment({"lock/nullness: This collection can only contain null values"})
 @AnnotatedFor({"lock", "nullness", "index"})
-@ReceiverDependentMutable public class IdentityHashMap<K extends @Immutable Object,V>
+@ReceiverDependentMutable
+public class IdentityHashMap<K extends @Immutable Object,V>
     extends AbstractMap<K,V>
     implements Map<K,V>, java.io.Serializable, Cloneable
 {
@@ -748,12 +749,13 @@ import jdk.internal.access.SharedSecrets;
         }
     }
 
-    @ReceiverDependentMutable private abstract class IdentityHashMapIterator<T> implements Iterator<T> {
+    @ReceiverDependentMutable
+    private abstract class IdentityHashMapIterator<T> implements Iterator<T> {
         @Assignable int index = (size != 0 ? 0 : table.length); // current slot.
         int expectedModCount = modCount; // to support fast-fail
         int lastReturnedIndex = -1;      // to allow remove()
         @Assignable boolean indexValid; // To avoid unnecessary next computation
-        @SuppressWarnings("pico") // This assignment should work but does not. Try to come up with minimal example that default use of outter class
+        @SuppressWarnings("pico") // Field use from outter class
         @Readonly Object[] traversalTable = table; // reference to main table or copy
 
         @Pure
@@ -861,24 +863,27 @@ import jdk.internal.access.SharedSecrets;
         }
     }
 
-    @ReceiverDependentMutable private class KeyIterator extends IdentityHashMapIterator<K> {
+    @ReceiverDependentMutable
+    private class KeyIterator extends IdentityHashMapIterator<K> {
         @SuppressWarnings("unchecked")
         public K next(@NonEmpty @Mutable KeyIterator this) {
             return (K) unmaskNull(traversalTable[nextIndex()]);
         }
     }
 
-    @ReceiverDependentMutable private class ValueIterator extends IdentityHashMapIterator<V> {
+    @ReceiverDependentMutable
+    private class ValueIterator extends IdentityHashMapIterator<V> {
         @SuppressWarnings("unchecked")
         public V next(@NonEmpty @Mutable ValueIterator this) {
             return (V) traversalTable[nextIndex() + 1];
         }
     }
 
-    @ReceiverDependentMutable private class EntryIterator
+    @ReceiverDependentMutable
+    private class EntryIterator
         extends IdentityHashMapIterator<Map.@Readonly Entry<K,V>>
     {
-        @SuppressWarnings("pico:initialization.field.uninitialized") // lazy
+        // @SuppressWarnings("pico:initialization.field.uninitialized") // lazy
         private @Readonly Entry lastReturnedEntry;
 
         public Map.@Readonly Entry<K,V> next(@NonEmpty @Mutable EntryIterator this) {
@@ -894,7 +899,8 @@ import jdk.internal.access.SharedSecrets;
             lastReturnedEntry = null;
         }
 
-        @ReceiverDependentMutable private class Entry implements Map.Entry<K,V> {
+        @ReceiverDependentMutable
+        private class Entry implements Map.Entry<K,V> {
             private @Assignable int index;
 
             private Entry(int index) {
@@ -963,7 +969,7 @@ import jdk.internal.access.SharedSecrets;
      * view the first time this view is requested.  The view is stateless,
      * so there's no reason to create more than one.
      */
-    private transient @Assignable Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
+    private transient @Assignable /* should be @LazyFinal */ Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
 
     /**
      * Returns an identity-based set view of the keys contained in this map.
@@ -1013,7 +1019,8 @@ import jdk.internal.access.SharedSecrets;
         return ks;
     }
 
-    @ReceiverDependentMutable private class KeySet extends AbstractSet<K> {
+    @ReceiverDependentMutable
+    private class KeySet extends AbstractSet<K> {
         @SideEffectFree
         public Iterator<K> iterator(@Readonly KeySet this) {
             return new KeyIterator();
@@ -1127,7 +1134,8 @@ import jdk.internal.access.SharedSecrets;
         return vs;
     }
 
-    @ReceiverDependentMutable private class Values extends AbstractCollection<V> {
+    @ReceiverDependentMutable
+    private class Values extends AbstractCollection<V> {
         @SideEffectFree
         public Iterator<V> iterator(@Readonly Values this) {
             return new ValueIterator();
@@ -1240,7 +1248,8 @@ import jdk.internal.access.SharedSecrets;
             return entrySet = new @PolyMutable EntrySet();
     }
 
-    @ReceiverDependentMutable private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
+    @ReceiverDependentMutable
+    private class EntrySet extends AbstractSet<Map.@Readonly Entry<K,V>> {
         @SideEffectFree
         public Iterator<Map.@Readonly Entry<K,V>> iterator(@Readonly EntrySet this) {
             return new EntryIterator();
@@ -1446,12 +1455,13 @@ import jdk.internal.access.SharedSecrets;
      * Similar form as array-based Spliterators, but skips blank elements,
      * and guestimates size as decreasing by half per split.
      */
+    @ReceiverDependentMutable
     static class IdentityHashMapSpliterator<K extends @Immutable Object,V> {
         final @Readonly IdentityHashMap<K,V> map;
         int index;             // current index, modified on advance/split
-        int fence;             // -1 until first use; then one past last index
-        int est;               // size estimate
-        int expectedModCount;  // initialized when fence set
+        @Assignable /* should be @LazyFinal */ int fence;             // -1 until first use; then one past last index
+        @Assignable /* should be @LazyFinal */ int est;               // size estimate
+        @Assignable /* should be @LazyFinal */ int expectedModCount;  // initialized when fence set
 
         IdentityHashMapSpliterator(@Readonly IdentityHashMap<K,V> map, int origin,
                                    int fence, int est, int expectedModCount) {
@@ -1462,7 +1472,7 @@ import jdk.internal.access.SharedSecrets;
             this.expectedModCount = expectedModCount;
         }
 
-        final int getFence() { // initialize fence and size on first use
+        final int getFence(@Readonly IdentityHashMapSpliterator<K,V> this) { // initialize fence and size on first use
             int hi;
             if ((hi = fence) < 0) {
                 est = map.size;
@@ -1472,12 +1482,13 @@ import jdk.internal.access.SharedSecrets;
             return hi;
         }
 
-        public final long estimateSize() {
+        public final long estimateSize(@Readonly IdentityHashMapSpliterator<K,V> this) {
             getFence(); // force init
             return (long) est;
         }
     }
 
+    @ReceiverDependentMutable
     static final class KeySpliterator<K extends @Immutable Object,V>
         extends IdentityHashMapSpliterator<K,V>
         implements Spliterator<K> {
@@ -1486,7 +1497,7 @@ import jdk.internal.access.SharedSecrets;
             super(map, origin, fence, est, expectedModCount);
         }
 
-        public KeySpliterator<K,V> trySplit() {
+        public KeySpliterator<K,V> trySplit(@Mutable KeySpliterator<K,V> this) {
             int hi = getFence(), lo = index, mid = ((lo + hi) >>> 1) & ~1;
             return (lo >= mid) ? null :
                 new KeySpliterator<>(map, lo, index = mid, est >>>= 1,
@@ -1494,7 +1505,7 @@ import jdk.internal.access.SharedSecrets;
         }
 
         @SuppressWarnings("unchecked")
-        public void forEachRemaining(Consumer<? super K> action) {
+        public void forEachRemaining(@Mutable KeySpliterator<K,V> this, Consumer<? super K> action) {
             if (action == null)
                 throw new NullPointerException();
             int i, hi, mc; Object key;
@@ -1512,7 +1523,7 @@ import jdk.internal.access.SharedSecrets;
         }
 
         @SuppressWarnings("unchecked")
-        public boolean tryAdvance(Consumer<? super K> action) {
+        public boolean tryAdvance(@Mutable KeySpliterator<K,V> this, Consumer<? super K> action) {
             if (action == null)
                 throw new NullPointerException();
             @Readonly Object[] a = map.table;
@@ -1530,11 +1541,12 @@ import jdk.internal.access.SharedSecrets;
             return false;
         }
 
-        public int characteristics() {
+        public int characteristics(@Readonly KeySpliterator<K,V> this) {
             return (fence < 0 || est == map.size ? SIZED : 0) | Spliterator.DISTINCT;
         }
     }
 
+    @ReceiverDependentMutable
     static final class ValueSpliterator<K extends @Immutable Object,V>
         extends IdentityHashMapSpliterator<K,V>
         implements Spliterator<V> {
@@ -1543,14 +1555,14 @@ import jdk.internal.access.SharedSecrets;
             super(m, origin, fence, est, expectedModCount);
         }
 
-        public ValueSpliterator<K,V> trySplit() {
+        public ValueSpliterator<K,V> trySplit(@Mutable ValueSpliterator<K,V> this) {
             int hi = getFence(), lo = index, mid = ((lo + hi) >>> 1) & ~1;
             return (lo >= mid) ? null :
                 new ValueSpliterator<>(map, lo, index = mid, est >>>= 1,
                                        expectedModCount);
         }
 
-        public void forEachRemaining(Consumer<? super V> action) {
+        public void forEachRemaining(@Mutable ValueSpliterator<K,V> this, Consumer<? super V> action) {
             if (action == null)
                 throw new NullPointerException();
             int i, hi, mc;
@@ -1569,7 +1581,7 @@ import jdk.internal.access.SharedSecrets;
             throw new ConcurrentModificationException();
         }
 
-        public boolean tryAdvance(Consumer<? super V> action) {
+        public boolean tryAdvance(@Mutable ValueSpliterator<K,V> this, Consumer<? super V> action) {
             if (action == null)
                 throw new NullPointerException();
             @Readonly Object[] a = map.table;
@@ -1588,12 +1600,13 @@ import jdk.internal.access.SharedSecrets;
             return false;
         }
 
-        public int characteristics() {
+        public int characteristics(@Readonly ValueSpliterator<K,V> this) {
             return (fence < 0 || est == map.size ? SIZED : 0);
         }
 
     }
 
+    @ReceiverDependentMutable
     static final class EntrySpliterator<K extends @Immutable Object,V>
         extends IdentityHashMapSpliterator<K,V>
         implements Spliterator<Map.Entry<K,V>> {
@@ -1602,14 +1615,14 @@ import jdk.internal.access.SharedSecrets;
             super(m, origin, fence, est, expectedModCount);
         }
 
-        public EntrySpliterator<K,V> trySplit() {
+        public EntrySpliterator<K,V> trySplit(@Mutable EntrySpliterator<K,V> this) {
             int hi = getFence(), lo = index, mid = ((lo + hi) >>> 1) & ~1;
             return (lo >= mid) ? null :
                 new EntrySpliterator<>(map, lo, index = mid, est >>>= 1,
                                        expectedModCount);
         }
 
-        public void forEachRemaining(Consumer<? super Map.@Immutable Entry<K, V>> action) {
+        public void forEachRemaining(@Mutable EntrySpliterator<K,V> this, Consumer<? super Map.@Immutable Entry<K, V>> action) {
             if (action == null)
                 throw new NullPointerException();
             int i, hi, mc;
@@ -1633,7 +1646,7 @@ import jdk.internal.access.SharedSecrets;
             throw new ConcurrentModificationException();
         }
 
-        public boolean tryAdvance(Consumer<? super Map.@Immutable Entry<K,V>> action) {
+        public boolean tryAdvance(@Mutable EntrySpliterator<K,V> this, Consumer<? super Map.@Immutable Entry<K,V>> action) {
             if (action == null)
                 throw new NullPointerException();
             @Readonly Object[] a = map.table;
@@ -1655,7 +1668,7 @@ import jdk.internal.access.SharedSecrets;
             return false;
         }
 
-        public int characteristics() {
+        public int characteristics(@Readonly EntrySpliterator<K,V> this) {
             return (fence < 0 || est == map.size ? SIZED : 0) | Spliterator.DISTINCT;
         }
     }

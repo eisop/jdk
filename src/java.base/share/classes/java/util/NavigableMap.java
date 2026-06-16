@@ -107,8 +107,9 @@ import org.checkerframework.framework.qual.CFComment;
  * @since 1.6
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness"})
-@ReceiverDependentMutable public interface NavigableMap<K extends @Immutable Object,V> extends SortedMap<K,V> {
+@AnnotatedFor({"lock", "nullness", "pico"})
+@ReceiverDependentMutable
+public interface NavigableMap<K extends @Immutable Object,V> extends SortedMap<K,V> {
     /**
      * Returns a key-value mapping associated with the greatest key
      * strictly less than the given key, or {@code null} if there is
@@ -122,7 +123,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @throws NullPointerException if the specified key is null
      *         and this map does not permit null keys
      */
-    Map.@Nullable @PolyMutable  Entry<K,V> lowerEntry(@PolyMutable NavigableMap<K,V> this, K key);
+    Map.@Nullable @PolyMutable Entry<K,V> lowerEntry(@PolyMutable NavigableMap<K,V> this, K key);
 
     /**
      * Returns the greatest key strictly less than the given key, or
@@ -180,7 +181,7 @@ import org.checkerframework.framework.qual.CFComment;
      * @throws NullPointerException if the specified key is null
      *         and this map does not permit null keys
      */
-    Map.@Nullable @PolyMutable  Entry<K,V> ceilingEntry(@PolyMutable NavigableMap<K,V> this, K key);
+    Map.@Nullable @PolyMutable Entry<K,V> ceilingEntry(@PolyMutable NavigableMap<K,V> this, K key);
 
     /**
      * Returns the least key greater than or equal to the given key,
