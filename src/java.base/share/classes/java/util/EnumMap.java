@@ -25,6 +25,7 @@
 
 package java.util;
 
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -364,7 +365,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
                 "and vals are private class members for EnumMap and are absent in AbstractMap."})
     @SuppressWarnings({"nullness:contracts.precondition.override.invalid"})
     @RequiresNonNull({"keyUniverse", "vals"})
-    public void putAll(@Mutable EnumMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
+    public void putAll(@UnknownInitialization @Mutable EnumMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         if (m instanceof EnumMap<?, ?> em) {
             if (em.keyType != keyType) {
                 if (em.isEmpty())

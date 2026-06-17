@@ -29,6 +29,7 @@ import org.checkerframework.checker.guieffect.qual.PolyUI;
 import org.checkerframework.checker.guieffect.qual.PolyUIType;
 import org.checkerframework.checker.guieffect.qual.SafeEffect;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
@@ -90,7 +91,7 @@ public class Object {
     @SafeEffect
     @Pure
     @IntrinsicCandidate
-    public final native Class<? extends @MustCall() @Readonly Object> getClass(@Readonly @PolyUI @GuardSatisfied @UnknownSignedness Object this);
+    public final native Class<? extends @MustCall() @Readonly Object> getClass(@Readonly @PolyUI @GuardSatisfied @UnknownInitialization @UnknownSignedness Object this);
 
     /**
      * Returns a hash code value for the object. This method is
@@ -370,7 +371,7 @@ public class Object {
      * @see    #wait(long)
      * @see    #wait(long, int)
      */
-    public final void wait(@Readonly Object this) throws InterruptedException {
+    public final void wait(@UnknownInitialization @Readonly Object this) throws InterruptedException {
         wait(0L);
     }
 
@@ -395,7 +396,7 @@ public class Object {
      * @see    #wait()
      * @see    #wait(long, int)
      */
-    public final native void wait(@Readonly Object this, @NonNegative long timeoutMillis) throws InterruptedException;
+    public final native void wait(@UnknownInitialization @Readonly Object this, @NonNegative long timeoutMillis) throws InterruptedException;
 
     /**
      * Causes the current thread to wait until it is awakened, typically
@@ -491,7 +492,7 @@ public class Object {
      * @see    #wait()
      * @see    #wait(long)
      */
-    public final void wait(@Readonly Object this, long timeoutMillis, @NonNegative int nanos) throws InterruptedException {
+    public final void wait(@UnknownInitialization @Readonly Object this, long timeoutMillis, @NonNegative int nanos) throws InterruptedException {
         if (timeoutMillis < 0) {
             throw new IllegalArgumentException("timeoutMillis value is negative");
         }
