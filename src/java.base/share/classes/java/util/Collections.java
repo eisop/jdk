@@ -27,7 +27,6 @@ package java.util;
 
 import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -2158,7 +2157,7 @@ public class Collections {
         @SuppressWarnings("serial") // Conditionally serializable
         final Collection<E> c;  // Backing Collection
         @SuppressWarnings("serial") // Conditionally serializable
-        final @NotOnlyInitialized @Readonly Object mutex;     // Object on which to synchronize
+        final @Readonly Object mutex;     // Object on which to synchronize
 
         SynchronizedCollection(@ReceiverDependentMutable Collection<E> c) {
             this.c = Objects.requireNonNull(c);
@@ -2753,7 +2752,7 @@ public class Collections {
         @SuppressWarnings("serial") // Conditionally serializable
         private final Map<K,V> m;     // Backing Map
         @SuppressWarnings("serial") // Conditionally serializable
-        final @NotOnlyInitialized @Readonly Object      mutex;        // Object on which to synchronize
+        final @Readonly Object      mutex;        // Object on which to synchronize
 
         SynchronizedMap(@ReceiverDependentMutable Map<K,V> m) {
             this.m = Objects.requireNonNull(m);

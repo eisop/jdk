@@ -25,8 +25,6 @@
 
 package java.lang;
 
-import org.checkerframework.checker.initialization.qual.PolyInitialized;
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -490,7 +488,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since  1.4
      */
     @SuppressWarnings("pico:illegal.field.write") // should the receiver be underinitialization then?
-    public synchronized @PolyInitialized @ReceiverDependentMutable Throwable initCause(@PolyInitialized Throwable this, @Nullable @ReceiverDependentMutable Throwable cause) {
+    public synchronized @ReceiverDependentMutable Throwable initCause(Throwable this, @Nullable @ReceiverDependentMutable Throwable cause) {
         if (this.cause != this)
             throw new @ReceiverDependentMutable IllegalStateException("Can't overwrite cause with " +
                                             Objects.toString(cause, "a null"), this);
@@ -829,7 +827,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @return  a reference to this {@code Throwable} instance.
      * @see     java.lang.Throwable#printStackTrace()
      */
-    public synchronized Throwable fillInStackTrace(@UnderInitialization @Mutable Throwable this) {
+    public synchronized Throwable fillInStackTrace(@Mutable Throwable this) {
         if (stackTrace != null ||
             backtrace != null /* Out of protocol state */ ) {
             fillInStackTrace(0);

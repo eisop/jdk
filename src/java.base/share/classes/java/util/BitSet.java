@@ -25,8 +25,6 @@
 
 package java.util;
 
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
-import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
@@ -135,7 +133,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
     /**
      * Every public method must preserve these invariants.
      */
-    private void checkInvariants(@Readonly @UnknownInitialization BitSet this) {
+    private void checkInvariants(@Readonly BitSet this) {
         assert(wordsInUse == 0 || words[wordsInUse - 1] != 0);
         assert(wordsInUse >= 0 && wordsInUse <= words.length);
         assert(wordsInUse == words.length || words[wordsInUse] == 0);
@@ -184,7 +182,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
         sizeIsSticky = true;
     }
 
-    private void initWords(@UnderInitialization(Object.class) BitSet this, int nbits) {
+    private void initWords(BitSet this, int nbits) {
         words = new long @ReceiverDependentMutable [wordIndex(nbits-1) + 1];
     }
 

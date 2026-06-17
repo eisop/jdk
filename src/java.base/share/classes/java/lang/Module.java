@@ -70,7 +70,6 @@ import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
 import sun.security.util.SecurityConstants;
 
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.pico.qual.Assignable;
 import org.checkerframework.checker.pico.qual.Immutable;
 import org.checkerframework.checker.pico.qual.Mutable;
@@ -1308,7 +1307,7 @@ public final class Module implements AnnotatedElement {
      * @param nameToModule map of module name to Module (for qualified exports)
      */
     @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
-    private static void initExports(@UnderInitialization Module m, Map<String, Module> nameToModule) {
+    private static void initExports(Module m, Map<String, Module> nameToModule) {
         Map<String, @Immutable Set<Module>> exportedPackages = new HashMap<>();
 
         for (Exports exports : m.getDescriptor().exports()) {
@@ -1347,7 +1346,7 @@ public final class Module implements AnnotatedElement {
      * @param parents the parent layers
      */
     @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
-    private static void initExportsAndOpens(@UnderInitialization Module m,
+    private static void initExportsAndOpens(Module m,
                                             @Readonly Map<String, Module> nameToSource,
                                             @Readonly Map<String, Module> nameToModule,
                                             @Readonly List<ModuleLayer> parents) {

@@ -26,7 +26,6 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
@@ -344,7 +343,7 @@ public class TreeMap<K extends @Immutable Object,V>
      *         the specified map contains a null key and this map does not
      *         permit null keys
      */
-    public void putAll(@GuardSatisfied @Mutable @UnknownInitialization TreeMap<K, V> this, @Readonly Map<? extends K, ? extends V> map) {
+    public void putAll(@GuardSatisfied @Mutable TreeMap<K, V> this, @Readonly Map<? extends K, ? extends V> map) {
         int mapSize = map.size();
         if (size==0 && mapSize!=0 && map instanceof SortedMap) {
             if (Objects.equals(comparator, ((SortedMap<?,?>)map).comparator())) {
@@ -564,7 +563,7 @@ public class TreeMap<K extends @Immutable Object,V>
      *         does not permit null keys
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@GuardSatisfied @Mutable @UnknownInitialization TreeMap<K, V> this, K key, V value) {
+    public @Nullable V put(@GuardSatisfied @Mutable TreeMap<K, V> this, K key, V value) {
         return put(key, value, true);
     }
 
@@ -1870,7 +1869,7 @@ public class TreeMap<K extends @Immutable Object,V>
         }
 
         @EnsuresKeyFor(value={"#1"}, map={"this"})
-        public final V put(@Mutable @UnknownInitialization  NavigableSubMap<K,V> this, K key, V value) {
+        public final V put(@Mutable NavigableSubMap<K,V> this, K key, V value) {
             if (!inRange(key))
                 throw new IllegalArgumentException("key out of range");
             return m.put(key, value);

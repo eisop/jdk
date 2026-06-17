@@ -26,7 +26,6 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.lock.qual.ReleasesNoLocks;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -241,7 +240,7 @@ public abstract class AbstractMap<K extends @Immutable Object,V> implements Map<
      */
     @ReleasesNoLocks
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@Mutable @UnknownInitialization @GuardSatisfied AbstractMap<K, V> this, K key, V value) {
+    public @Nullable V put(@Mutable @GuardSatisfied AbstractMap<K, V> this, K key, V value) {
         throw new UnsupportedOperationException();
     }
 
@@ -312,7 +311,7 @@ public abstract class AbstractMap<K extends @Immutable Object,V> implements Map<
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
-    public void putAll(@Mutable @UnknownInitialization @GuardSatisfied AbstractMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
+    public void putAll(@Mutable @GuardSatisfied AbstractMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
             put(e.getKey(), e.getValue());
     }

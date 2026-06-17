@@ -26,7 +26,6 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
@@ -455,7 +454,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
      * @see     #containsKey(Object)
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@GuardSatisfied @Mutable @UnknownInitialization IdentityHashMap<K, V> this, K key, V value) {
+    public @Nullable V put(@GuardSatisfied @Mutable IdentityHashMap<K, V> this, K key, V value) {
         final Object k = maskNull(key);
 
         retryAfterResize: for (;;) {
@@ -493,7 +492,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
      * @param newCapacity the new capacity, must be a power of two.
      * @return whether a resize did in fact take place
      */
-    private boolean resize(@Mutable @UnknownInitialization IdentityHashMap<K, V> this, int newCapacity) {
+    private boolean resize(@Mutable IdentityHashMap<K, V> this, int newCapacity) {
         // assert (newCapacity & -newCapacity) == newCapacity; // power of 2
         int newLength = newCapacity * 2;
 
@@ -534,7 +533,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
      */
-    public void putAll(@GuardSatisfied @Mutable @UnknownInitialization IdentityHashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
+    public void putAll(@GuardSatisfied @Mutable IdentityHashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         int n = m.size();
         if (n == 0)
             return;

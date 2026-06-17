@@ -25,7 +25,6 @@
 
 package java.util;
 
-import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
@@ -1123,8 +1122,8 @@ class ImmutableCollections {
         @Override public @PolyNull V computeIfAbsent(K key, Function<? super K,? extends @PolyNull V> mf) { throw uoe(); }
         @Override public @PolyNull V computeIfPresent(K key, BiFunction<? super K,? super V,? extends @PolyNull V> rf) { throw uoe(); }
         @Override public @PolyNull V merge(K key, @NonNull V value, BiFunction<? super @NonNull V,? super @NonNull V,? extends @PolyNull V> rf) { throw uoe(); }
-        @Override public V put(@UnknownInitialization AbstractImmutableMap<K,V> this, K key, V value) { throw uoe(); }
-        @Override public void putAll(@UnknownInitialization AbstractImmutableMap<K,V> this, Map<? extends K,? extends V> m) { throw uoe(); }
+        @Override public V put(AbstractImmutableMap<K,V> this, K key, V value) { throw uoe(); }
+        @Override public void putAll(AbstractImmutableMap<K,V> this, Map<? extends K,? extends V> m) { throw uoe(); }
         @Override public V putIfAbsent(K key, V value) { throw uoe(); }
         @Override public V remove(Object key) { throw uoe(); }
         @Override public boolean remove(@UnknownSignedness Object key, @UnknownSignedness Object value) { throw uoe(); }

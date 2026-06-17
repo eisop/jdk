@@ -26,7 +26,6 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
@@ -520,7 +519,7 @@ public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
      * @param evict false when initially constructing this map, else
      * true (relayed to method afterNodeInsertion).
      */
-    final void putMapEntries(@Mutable @UnknownInitialization HashMap<K,V> this, @Readonly Map<? extends K, ? extends V> m, boolean evict) {
+    final void putMapEntries(@Mutable HashMap<K,V> this, @Readonly Map<? extends K, ? extends V> m, boolean evict) {
         int s = m.size();
         if (s > 0) {
             if (table == null) { // pre-size
@@ -642,7 +641,7 @@ public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
      *         previously associated {@code null} with {@code key}.)
      */
     @EnsuresKeyFor(value={"#1"}, map={"this"})
-    public @Nullable V put(@Mutable @GuardSatisfied @UnknownInitialization HashMap<K, V> this, K key, V value) {
+    public @Nullable V put(@Mutable @GuardSatisfied HashMap<K, V> this, K key, V value) {
         return putVal(hash(key), key, value, false, true);
     }
 
@@ -656,7 +655,7 @@ public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
      * @param evict if false, the table is in creation mode.
      * @return previous value, or null if none
      */
-    final V putVal(@Mutable @UnknownInitialization HashMap<K, V> this, int hash, K key, V value, boolean onlyIfAbsent,
+    final V putVal(@Mutable HashMap<K, V> this, int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
@@ -709,7 +708,7 @@ public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
      * @return the table
      */
     @SuppressWarnings("cast.unsafe") // https://github.com/typetools/checker-framework/issues/2731
-    final Node<K,V>[] resize(@Mutable @UnknownInitialization HashMap<K, V> this) {
+    final Node<K,V>[] resize(@Mutable HashMap<K, V> this) {
         Node<K,V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
         int oldThr = threshold;
@@ -816,7 +815,7 @@ public class HashMap<K extends @Immutable Object,V> extends AbstractMap<K,V>
      * @param m mappings to be stored in this map
      * @throws NullPointerException if the specified map is null
      */
-    public void putAll(@Mutable @UnknownInitialization @GuardSatisfied HashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
+    public void putAll(@Mutable @GuardSatisfied HashMap<K, V> this, @Readonly Map<? extends K, ? extends V> m) {
         putMapEntries(m, true);
     }
 
