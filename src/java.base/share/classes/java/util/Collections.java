@@ -103,7 +103,7 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.2
  */
 
-@AnnotatedFor({"lock", "index", "nonempty", "nullness"})
+@AnnotatedFor({"lock", "index", "nonempty", "nullness", "value"})
 public class Collections {
     // Suppresses default constructor, ensuring non-instantiability.
     private Collections() {
