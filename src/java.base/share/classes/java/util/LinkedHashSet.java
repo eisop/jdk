@@ -25,8 +25,8 @@
 
 package java.util;
 
-import org.checkerframework.checker.pico.qual.Immutable;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 

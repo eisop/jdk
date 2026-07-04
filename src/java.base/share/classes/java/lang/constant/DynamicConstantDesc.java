@@ -44,8 +44,8 @@ import static java.lang.constant.ConstantUtils.validateMemberName;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
-import org.checkerframework.checker.pico.qual.Immutable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
 
 /**
  * A <a href="package-summary.html#nominal">nominal descriptor</a> for a

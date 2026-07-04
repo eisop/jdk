@@ -40,7 +40,7 @@ import sun.nio.cs.ArrayDecoder;
 import sun.nio.cs.ArrayEncoder;
 import static sun.nio.cs.CharsetMapping.*;
 
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 
 /*
  * Four types of "DoubleByte" charsets are implemented in this class

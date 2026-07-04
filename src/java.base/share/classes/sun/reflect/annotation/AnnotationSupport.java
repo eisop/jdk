@@ -39,7 +39,7 @@ import jdk.internal.access.SharedSecrets;
 import jdk.internal.access.JavaLangAccess;
 import jdk.internal.reflect.ReflectionFactory;
 
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 
 public final class AnnotationSupport {
     private static final JavaLangAccess LANG_ACCESS = SharedSecrets.getJavaLangAccess();

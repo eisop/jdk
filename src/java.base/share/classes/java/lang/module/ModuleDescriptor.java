@@ -60,7 +60,7 @@ import static java.util.Objects.*;
 import jdk.internal.module.Checks;
 import jdk.internal.module.ModuleInfo;
 
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 
 /**
  * A module descriptor.

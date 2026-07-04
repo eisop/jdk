@@ -32,7 +32,7 @@ import org.checkerframework.checker.interning.qual.Interned;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.lock.qual.NewObject;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.SignedPositive;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;

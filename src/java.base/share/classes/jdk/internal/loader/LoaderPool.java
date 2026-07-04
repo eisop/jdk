@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 
 /**
  * A pool of class loaders.

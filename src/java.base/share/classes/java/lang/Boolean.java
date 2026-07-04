@@ -29,7 +29,7 @@ import org.checkerframework.checker.interning.qual.Interned;
 import org.checkerframework.checker.lock.qual.NewObject;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.common.value.qual.PolyValue;
 import org.checkerframework.common.value.qual.StaticallyExecutable;
 import org.checkerframework.common.value.qual.StringVal;

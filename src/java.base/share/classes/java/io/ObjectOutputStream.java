@@ -30,7 +30,7 @@ import org.checkerframework.checker.index.qual.LTLengthOf;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.mustcall.qual.MustCallAlias;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.framework.qual.AnnotatedFor;
 

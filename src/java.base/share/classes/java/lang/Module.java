@@ -70,10 +70,10 @@ import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
 import sun.security.util.SecurityConstants;
 
-import org.checkerframework.checker.pico.qual.Assignable;
-import org.checkerframework.checker.pico.qual.Immutable;
-import org.checkerframework.checker.pico.qual.Mutable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Assignable;
+import org.checkerframework.checker.mutability.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Mutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**

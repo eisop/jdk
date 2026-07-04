@@ -27,7 +27,7 @@ package jdk.internal.util;
 import jdk.internal.misc.Unsafe;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 
 /**
  * Utility methods to work with arrays.  This includes a set of methods

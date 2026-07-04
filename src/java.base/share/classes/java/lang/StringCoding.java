@@ -26,7 +26,7 @@
 package java.lang;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import jdk.internal.vm.annotation.IntrinsicCandidate;

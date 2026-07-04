@@ -26,7 +26,7 @@
 package java.lang;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**

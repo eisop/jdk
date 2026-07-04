@@ -25,7 +25,7 @@
 package java.lang.invoke;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import java.util.List;
 
 /**

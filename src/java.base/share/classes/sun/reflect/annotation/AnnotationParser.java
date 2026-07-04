@@ -42,7 +42,7 @@ import sun.reflect.generics.factory.CoreReflectionFactory;
 import sun.reflect.generics.visitor.Reifier;
 import sun.reflect.generics.scope.ClassScope;
 
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 
 /**
  * Parser for Java programming language annotations.  Translates

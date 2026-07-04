@@ -25,7 +25,7 @@
 
 package java.lang.reflect;
 
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 
 /**
  * Type is the common superinterface for all types in the Java

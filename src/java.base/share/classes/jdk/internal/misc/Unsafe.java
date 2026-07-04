@@ -35,7 +35,7 @@ import java.security.ProtectionDomain;
 
 import static jdk.internal.misc.UnsafeConstants.*;
 
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 
 /**
  * A collection of methods for performing low-level, unsafe operations.

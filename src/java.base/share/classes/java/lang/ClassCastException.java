@@ -26,7 +26,7 @@
 package java.lang;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 

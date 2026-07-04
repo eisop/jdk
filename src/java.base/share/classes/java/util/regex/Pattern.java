@@ -31,7 +31,7 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.regex.qual.PolyRegex;
 import org.checkerframework.checker.regex.qual.Regex;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.checker.signedness.qual.SignedPositive;
 import org.checkerframework.common.value.qual.MinLen;
 import org.checkerframework.dataflow.qual.Pure;

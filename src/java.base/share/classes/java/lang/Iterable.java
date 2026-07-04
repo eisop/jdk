@@ -26,9 +26,9 @@ package java.lang;
 
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.common.aliasing.qual.NonLeaked;
-import org.checkerframework.checker.pico.qual.Mutable;
-import org.checkerframework.checker.pico.qual.Readonly;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.Mutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.Iterator;

@@ -31,8 +31,8 @@ import org.checkerframework.checker.index.qual.LTEqLengthOf;
 import org.checkerframework.checker.index.qual.LTLengthOf;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.mustcall.qual.MustCallAlias;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.nio.channels.FileChannel;

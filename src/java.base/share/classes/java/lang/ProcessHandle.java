@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**

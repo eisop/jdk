@@ -25,7 +25,7 @@
 
 package sun.nio.cs;
 
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 /*
  * FastPath byte[]->char[] decoder, REPLACE on malformed or
  * unmappable input.

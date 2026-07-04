@@ -36,9 +36,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.checkerframework.checker.pico.qual.Immutable;
-import org.checkerframework.checker.pico.qual.Mutable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Mutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**

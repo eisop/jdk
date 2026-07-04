@@ -33,8 +33,8 @@ import java.security.PrivilegedAction;
 import jdk.internal.access.SharedSecrets;
 import jdk.internal.access.JavaLangAccess;
 
-import org.checkerframework.checker.pico.qual.Immutable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
 
 /**
  * Represents an annotation type at run time.  Used to type-check annotations

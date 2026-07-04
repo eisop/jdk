@@ -26,7 +26,7 @@
 package java.lang;
 
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.common.value.qual.PolyValue;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;

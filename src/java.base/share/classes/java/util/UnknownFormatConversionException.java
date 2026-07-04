@@ -25,7 +25,7 @@
 
 package java.util;
 
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**

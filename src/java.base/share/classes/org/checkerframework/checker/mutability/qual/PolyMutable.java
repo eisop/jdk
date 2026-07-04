@@ -1,4 +1,4 @@
-package org.checkerframework.checker.pico.qual;
+package org.checkerframework.checker.mutability.qual;
 
 import org.checkerframework.framework.qual.PolymorphicQualifier;
 import org.checkerframework.framework.qual.TargetLocations;

@@ -39,7 +39,7 @@ import org.checkerframework.checker.lock.qual.EnsuresLockHeld;
 import org.checkerframework.checker.lock.qual.EnsuresLockHeldIf;
 import org.checkerframework.checker.lock.qual.MayReleaseLocks;
 import org.checkerframework.checker.lock.qual.ReleasesNoLocks;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.Collection;

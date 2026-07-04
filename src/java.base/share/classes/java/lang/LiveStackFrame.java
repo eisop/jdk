@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static java.lang.StackWalker.ExtendedOption.LOCALS_AND_OPERANDS;
 
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**

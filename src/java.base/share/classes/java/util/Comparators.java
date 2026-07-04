@@ -24,7 +24,7 @@
  */
 package java.util;
 
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.Serializable;

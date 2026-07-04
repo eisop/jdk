@@ -27,7 +27,7 @@ package java.lang;
 
 import org.checkerframework.checker.lock.qual.NewObject;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.common.value.qual.DoubleVal;
 import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.qual.PolyValue;

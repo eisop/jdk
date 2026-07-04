@@ -36,8 +36,8 @@
 package java.util.concurrent.atomic;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
-import org.checkerframework.checker.pico.qual.Assignable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Assignable;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.invoke.VarHandle;

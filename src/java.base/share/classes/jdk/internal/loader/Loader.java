@@ -63,7 +63,7 @@ import java.util.stream.Stream;
 import jdk.internal.access.SharedSecrets;
 import jdk.internal.module.Resources;
 
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 
 /**
  * A class loader that loads classes and resources from a collection of

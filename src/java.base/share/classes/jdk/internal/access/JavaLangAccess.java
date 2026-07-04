@@ -48,7 +48,7 @@ import jdk.internal.reflect.ConstantPool;
 import sun.reflect.annotation.AnnotationType;
 import sun.nio.ch.Interruptible;
 
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 
 public interface JavaLangAccess {
 

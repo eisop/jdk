@@ -30,7 +30,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle.VarHandleDesc;
 
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 
 /**
  * A <a href="package-summary.html#nominal">nominal descriptor</a> for a loadable

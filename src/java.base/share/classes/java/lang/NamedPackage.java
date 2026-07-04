@@ -28,7 +28,7 @@ import java.lang.module.Configuration;
 import java.lang.module.ModuleReference;
 import java.net.URI;
 
-import org.checkerframework.checker.pico.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Immutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**

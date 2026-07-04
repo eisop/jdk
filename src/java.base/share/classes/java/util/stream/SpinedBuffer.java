@@ -38,7 +38,7 @@ import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.LongConsumer;
 
-import org.checkerframework.checker.pico.qual.Mutable;
+import org.checkerframework.checker.mutability.qual.Mutable;
 
 /**
  * An ordered collection of elements.  Elements can be added, but not removed.

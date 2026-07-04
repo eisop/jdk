@@ -29,7 +29,7 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 import java.util.Optional;
 
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 
 /**
  * Represents a type which is <em>constable</em>.  A constable type is one whose
