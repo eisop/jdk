@@ -25,7 +25,7 @@
 
 package javax.lang.model.element;
 
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 
 import java.util.Map;
 import javax.lang.model.type.DeclaredType;

@@ -29,8 +29,8 @@ import org.checkerframework.checker.guieffect.qual.SafeEffect;
 import org.checkerframework.checker.guieffect.qual.UIType;
 import org.checkerframework.checker.initialization.qual.UnknownInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Readonly;
-import org.checkerframework.checker.pico.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.awt.dnd.DropTarget;

@@ -29,7 +29,7 @@ import org.checkerframework.checker.interning.qual.Interned;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.pico.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.Readonly;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
