@@ -107,7 +107,7 @@ import java.lang.*;
  * @since   1.0
  */
 @AnnotatedFor({"index", "interning", "lock", "nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public @UsesObjectEquals class StringTokenizer implements Enumeration<Object> {
     private int currentPosition;
     private int newPosition;

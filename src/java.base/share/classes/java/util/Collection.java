@@ -270,7 +270,7 @@ import java.util.stream.StreamSupport;
  */
 
 @CFComment("lock/nullness: Subclasses of this interface/class may opt to prohibit null elements")
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public interface Collection<E> extends Iterable<E> {
     // Query Operations

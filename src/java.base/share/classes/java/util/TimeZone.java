@@ -137,7 +137,7 @@ import sun.util.locale.provider.TimeZoneNameUtility;
  * @since        1.1
  */
 @AnnotatedFor({"lock", "nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public abstract class TimeZone implements Serializable, Cloneable {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically

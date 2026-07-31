@@ -483,7 +483,7 @@ public class Collections {
      * @throws UnsupportedOperationException if the specified list or its
      *         list-iterator does not support the {@code set} operation.
      */
-    @SuppressWarnings({"rawtypes", "unchecked", "pico:argument.type.incompatible"}) // Revisit later, seems to be a bug
+    @SuppressWarnings({"rawtypes", "unchecked", "mutability:argument.type.incompatible"}) // Revisit later, seems to be a bug
     public static void shuffle(@GuardSatisfied List<? extends @Readonly Object> list, Random rnd) {
         int size = list.size();
         if (size < SHUFFLE_THRESHOLD || list instanceof RandomAccess) {
@@ -1089,7 +1089,7 @@ public class Collections {
         @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@UnknownSignedness Object o)          {return c.contains(o);}
         @SideEffectFree
-        @SuppressWarnings("pico:return.type.incompatible") // poly does not work on field's type argument
+        @SuppressWarnings("mutability:return.type.incompatible") // poly does not work on field's type argument
         public @PolyNull @PolySigned @PolyMutable Object[] toArray(Collections.UnmodifiableCollection<@PolyNull @PolySigned @PolyMutable E> this)                  {return c.toArray();}
         @SideEffectFree
         public <T> @Nullable T[] toArray(@PolyNull T[] a)              {return c.toArray(a);}
@@ -1182,7 +1182,7 @@ public class Collections {
      * @param  s the set for which an unmodifiable view is to be returned.
      * @return an unmodifiable view of the specified set.
      */
-    // @SuppressWarnings({"unchecked", "pico"}) // PICO Flow
+    // @SuppressWarnings({"unchecked", "mutability"}) // PICO Flow
     @SideEffectFree
     public static <T> @PolyNonEmpty @Immutable Set<T> unmodifiableSet(@PolyNonEmpty @Readonly Set<? extends T> s) {
         // Not checking for subclasses because of heap pollution and information leakage.
@@ -1222,7 +1222,7 @@ public class Collections {
      *        returned.
      * @return an unmodifiable view of the specified sorted set.
      */
-    @SuppressWarnings("pico") // PICO Flow
+    @SuppressWarnings("mutability") // PICO Flow
     public static <T> @PolyNonEmpty @Immutable SortedSet<T> unmodifiableSortedSet(@PolyNonEmpty @Readonly SortedSet<T> s) {
         // Not checking for subclasses because of heap pollution and information leakage.
         if (s.getClass() == UnmodifiableSortedSet.class) {
@@ -1278,7 +1278,7 @@ public class Collections {
      * @return an unmodifiable view of the specified navigable set
      * @since 1.8
      */
-    @SuppressWarnings("pico") // PICO Flow
+    @SuppressWarnings("mutability") // PICO Flow
     public static <T> @PolyNonEmpty @Immutable NavigableSet<T> unmodifiableNavigableSet(@PolyNonEmpty @Readonly NavigableSet<T> s) {
         if (s.getClass() == UnmodifiableNavigableSet.class) {
             return s;
@@ -2184,7 +2184,7 @@ public class Collections {
             synchronized (mutex) {return c.contains(o);}
         }
         @SideEffectFree
-        @SuppressWarnings("pico") // poly does not work on field's type argument
+        @SuppressWarnings("mutability") // poly does not work on field's type argument
         public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly SynchronizedCollection<@PolyNull @PolySigned @PolyMutable E> this) {
             synchronized (mutex) {return c.toArray();}
         }
@@ -3285,7 +3285,7 @@ public class Collections {
         @EnsuresNonEmptyIf(result = true, expression = "this")
         public boolean contains(@Readonly CheckedCollection<E> this, @UnknownSignedness @Readonly Object o)          { return c.contains(o); }
         @SideEffectFree
-        @SuppressWarnings("pico") // poly does not work on field's type argument
+        @SuppressWarnings("mutability") // poly does not work on field's type argument
         public @PolyNull @PolySigned @PolyMutable Object[] toArray(Collections.CheckedCollection<@PolyNull @PolySigned @PolyMutable E> this)                  { return c.toArray(); }
         @SideEffectFree
         public <T> @Nullable T[] toArray(@PolyNull T[] a)              { return c.toArray(a); }
@@ -3333,7 +3333,7 @@ public class Collections {
                 (zeroLengthElementArray = zeroLengthArray(type));
         }
 
-        @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
+        @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // getClass error
         Collection<E> checkedCopyOf(@Mutable CheckedCollection<E> this, @Readonly Collection<? extends E> coll) {
             @Readonly Object[] a;
             try {
@@ -3610,7 +3610,7 @@ public class Collections {
         public E pollLast(@Mutable CheckedNavigableSet<E> this)                            {return ns.pollLast(); }
         public @PolyMutable NavigableSet<E> descendingSet(@PolyMutable CheckedNavigableSet<E> this)
                       { return checkedNavigableSet(ns.descendingSet(), type); }
-        @SuppressWarnings("pico") // lost can not invoke poly method.
+        @SuppressWarnings("mutability") // lost can not invoke poly method.
         public Iterator<E> descendingIterator(@Readonly CheckedNavigableSet<E> this)
             {return checkedNavigableSet(ns.descendingSet(), type).iterator(); }
 
@@ -3707,7 +3707,7 @@ public class Collections {
         }
         public ListIterator<E> listIterator(@Readonly CheckedList<E> this)   { return listIterator(0); }
 
-        @SuppressWarnings("pico") // receiver in anonymous class not denotable, see typetool#2433
+        @SuppressWarnings("mutability") // receiver in anonymous class not denotable, see typetool#2433
         public ListIterator<E> listIterator(@Readonly CheckedList<E> this, final int index) {
             final ListIterator<E> i = list.listIterator(index);
 
@@ -3923,7 +3923,7 @@ public class Collections {
         private transient @Assignable /* should be @LazyFinal */ Set<Map.@ReceiverDependentMutable Entry<K,V>> entrySet;
 
         @SideEffectFree
-        @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
+        @SuppressWarnings("mutability:assignment.type.incompatible") // polyq on supertype's type argument
         public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable CheckedMap<K,V> this) {
             if (entrySet==null)
                 entrySet = new @PolyMutable CheckedEntrySet<>(m.entrySet(), valueType);
@@ -4054,7 +4054,7 @@ public class Collections {
                 };
             }
 
-            @SuppressWarnings({"unchecked", "pico:type.arguments.not.inferred"}) // Aosen: not sure how to fix this
+            @SuppressWarnings({"unchecked", "mutability:type.arguments.not.inferred"}) // Aosen: not sure how to fix this
             public Object[] toArray(@Mutable CheckedEntrySet<K,V> this) {
                 Object[] source = s.toArray();
 
@@ -5031,7 +5031,7 @@ public class Collections {
         return new SingletonSet<>(o);
     }
 
-    @SuppressWarnings("pico") // receiver in anonymous class not denotable, see typetool#2433
+    @SuppressWarnings("mutability") // receiver in anonymous class not denotable, see typetool#2433
     static <E> @Immutable Iterator<E> singletonIterator(final E e) {
         return new @Immutable Iterator<E>() {
             private boolean hasNext = true;
@@ -6047,7 +6047,7 @@ public class Collections {
         @SideEffectFree
         public Iterator<E> iterator(@Readonly AsLIFOQueue<E> this)               { return q.iterator(); }
         @SideEffectFree
-        @SuppressWarnings("pico") // poly does not work on field's type argument
+        @SuppressWarnings("mutability") // poly does not work on field's type argument
         public @PolyNull @PolySigned @PolyMutable Object[] toArray(Collections.AsLIFOQueue<@PolyNull @PolySigned @PolyMutable E> this)                   { return q.toArray(); }
         @SideEffectFree
         public <T> @Nullable T[] toArray(@PolyNull T[] a)               { return q.toArray(a); }

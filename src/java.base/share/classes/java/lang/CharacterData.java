@@ -29,7 +29,7 @@ import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.common.value.qual.IntRange;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-@AnnotatedFor({"index", "interning", "pico"})
+@AnnotatedFor({"index", "interning", "mutability"})
 abstract @UsesObjectEquals class CharacterData {
     abstract int getProperties(int ch);
     abstract int getType(int ch);

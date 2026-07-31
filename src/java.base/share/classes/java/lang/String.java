@@ -174,7 +174,7 @@ import sun.nio.cs.UTF_8;
  * @jls     15.18.1 String Concatenation Operator +
  */
 
-@AnnotatedFor({"aliasing", "formatter", "index", "initialization", "interning", "lock", "nullness", "pico", "regex", "signature", "signedness"})
+@AnnotatedFor({"aliasing", "formatter", "index", "initialization", "interning", "lock", "nullness", "mutability", "regex", "signature", "signedness"})
 @Immutable
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence,
@@ -382,7 +382,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public @Unique String(int @GuardSatisfied [] codePoints, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int count) {
         checkBoundsOffCount(offset, count, codePoints.length);
         if (count == 0) {
@@ -445,7 +445,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     @Deprecated(since="1.1")
-    @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public @Unique String(byte ascii @GuardSatisfied [], int hibyte, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int count) {
         checkBoundsOffCount(offset, count, ascii.length);
         if (count == 0) {
@@ -576,7 +576,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    @SuppressWarnings({"removal", "pico"}) // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings({"removal", "mutability"}) // cast from @Unique @Mutable to @Immutable
     public @Unique String(@PolySigned byte @GuardSatisfied @Immutable [] bytes, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length, Charset charset) {
         Objects.requireNonNull(charset);
         checkBoundsOffCount(offset, length, bytes.length);
@@ -737,7 +737,7 @@ public final class String
     /*
      * Throws iae, instead of replacing, if malformed or unmappable.
      */
-    @SuppressWarnings("pico") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability") // cast from @Unique @Mutable to @Immutable
     static String newStringUTF8NoRepl(byte[] bytes, int offset, int length) {
         checkBoundsOffCount(offset, length, bytes.length);
         if (length == 0) {
@@ -806,7 +806,7 @@ public final class String
         }
     }
 
-    @SuppressWarnings({"removal", "pico"}) // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings({"removal", "mutability"}) // cast from @Unique @Mutable to @Immutable
     private static String newStringNoRepl1(byte[] src, Charset cs) {
         int len = src.length;
         if (len == 0) {
@@ -976,7 +976,7 @@ public final class String
         }
     }
 
-    @SuppressWarnings("pico:return.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:return.type.incompatible") // cast from @Unique @Mutable to @Immutable
     private static byte @Immutable [] getBytesNoRepl1(String s, Charset cs) {
         byte[] val = s.value();
         byte coder = s.coder();
@@ -1257,7 +1257,7 @@ public final class String
         return dp;
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // ByteBuffer not exist in EISOP JDK
+    @SuppressWarnings("mutability:argument.type.incompatible") // ByteBuffer not exist in EISOP JDK
     private static int decodeWithDecoder(CharsetDecoder cd, char[] dst, byte @Readonly [] src, int offset, int length) {
         ByteBuffer bb = ByteBuffer.wrap(src, offset, length);
         CharBuffer cb = CharBuffer.wrap(dst, 0, dst.length);
@@ -2449,7 +2449,7 @@ public final class String
      */
     @Pure
     @StaticallyExecutable
-    @SuppressWarnings("pico:illegal.field.write") // Lazy
+    @SuppressWarnings("mutability:illegal.field.write") // Lazy
     public int hashCode() {
         // The hash or hashIsZero fields are subject to a benign data race,
         // making it crucial to ensure that any observable result of the
@@ -3409,7 +3409,7 @@ public final class String
      * @return the joined string
      */
     @ForceInline
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     static String join(String prefix, String suffix, String delimiter, String[] elements, int size) {
         int icoder = prefix.coder() | suffix.coder();
         long len = (long) prefix.length() + suffix.length();
@@ -4142,7 +4142,7 @@ public final class String
      * @since 15
      */
     @SideEffectFree
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public String translateEscapes() {
         if (isEmpty()) {
             return "";
@@ -4522,7 +4522,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static @NewObject @ArrayLen(1) String valueOf(char c) {
         if (COMPACT_STRINGS && StringLatin1.canEncode(c)) {
             return new String(StringLatin1.toBytes(c), LATIN1);
@@ -4641,7 +4641,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public String repeat(int count) {
         if (count < 0) {
             throw new IllegalArgumentException("count is negative: " + count);
@@ -4721,7 +4721,7 @@ public final class String
      * contains only latin1 character. Or a byte[] that stores all
      * characters in their byte sequences defined by the {@code StringUTF16}.
      */
-    @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
     String(char @Immutable [] value, int off, int len, Void sig) {
         if (len == 0) {
             this.value = "".value;
@@ -4744,7 +4744,7 @@ public final class String
      * Package private constructor. Trailing Void argument is there for
      * disambiguating it against other (public) constructors.
      */
-    @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
     String(AbstractStringBuilder asb, Void sig) {
         byte[] val = asb.getValue();
         int length = asb.length();
@@ -4851,7 +4851,7 @@ public final class String
      *          {@code codePoint} is not a {@linkplain Character#isValidCodePoint
      *          valid Unicode code point}.
      */
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     static String valueOfCodePoint(int codePoint) {
         if (COMPACT_STRINGS && StringLatin1.canEncode(codePoint)) {
             return new String(StringLatin1.toBytes((char)codePoint), LATIN1);

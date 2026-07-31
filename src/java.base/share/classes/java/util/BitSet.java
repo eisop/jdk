@@ -76,7 +76,7 @@ import java.util.stream.StreamSupport;
  * @author  Martin Buchholz
  * @since   1.0
  */
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public class BitSet implements Cloneable, java.io.Serializable {
     /*
@@ -157,7 +157,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
     /**
      * Creates a new bit set. All bits are initially {@code false}.
      */
-    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    @SuppressWarnings("mutability:initialization.fields.uninitialized") // Conservative
     public BitSet() {
         initWords(BITS_PER_WORD);
         sizeIsSticky = false;
@@ -172,7 +172,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @throws NegativeArraySizeException if the specified initial size
      *         is negative
      */
-    @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    @SuppressWarnings("mutability:initialization.fields.uninitialized") // Conservative
     public BitSet(@NonNegative int nbits) {
         // nbits can't be negative; size 0 is OK
         if (nbits < 0)
@@ -263,7 +263,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @return a {@code BitSet} containing all the bits in the byte array
      * @since 1.7
      */
-    @SuppressWarnings("pico") // ByteBuffer not exist in EISOP JDK
+    @SuppressWarnings("mutability") // ByteBuffer not exist in EISOP JDK
     public static BitSet valueOf(byte @Readonly [] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }

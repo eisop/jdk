@@ -117,7 +117,7 @@ import sun.util.logging.PlatformLogger;
  * @since 1.4
  */
 @AnnotatedFor({"interning", "lock", "nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final @UsesObjectEquals class Currency implements Serializable {
 
     @java.io.Serial

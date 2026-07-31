@@ -68,5 +68,5 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 public @interface FunctionalInterface {}

@@ -157,7 +157,7 @@ import jdk.internal.util.xml.PropertiesDefaultHandler;
  * @since   1.0
  */
 @AnnotatedFor({"index", "lock", "nullness", "propkey"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class Properties extends Hashtable<Object,Object> {
     /**
      * use serialVersionUID from JDK 1.1.X for interoperability

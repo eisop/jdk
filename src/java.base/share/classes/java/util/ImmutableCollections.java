@@ -202,7 +202,7 @@ class ImmutableCollections {
      * @return the new list
      */
     @SafeVarargs
-    @SuppressWarnings("pico") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability") // cast from @Unique @Mutable to @Immutable
     static <E> @Immutable List<E> listFromArray(E @Readonly... input) {
         // copy and check manually to avoid TOCTOU
         @SuppressWarnings("unchecked")
@@ -227,7 +227,7 @@ class ImmutableCollections {
      * @param input the input array
      * @return the new list
      */
-    @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // This array should be unique
+    @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // This array should be unique
     static <E> @Immutable List<E> listFromTrustedArray(@Readonly Object @Readonly... input) {
         assert input.getClass() == Object[].class;
         for (Object o : input) { // implicit null check of 'input' array
@@ -581,7 +581,7 @@ class ImmutableCollections {
         @Stable
         private final Object e1;
 
-        @SuppressWarnings("pico:assignment.type.incompatible") // type parameter covariant
+        @SuppressWarnings("mutability:assignment.type.incompatible") // type parameter covariant
         List12(E e0) {
             this.e0 = Objects.<@Readonly E>requireNonNull(e0);
             // Use EMPTY as a sentinel for an unused element: not using null
@@ -589,7 +589,7 @@ class ImmutableCollections {
             this.e1 = EMPTY;
         }
 
-        @SuppressWarnings("pico:assignment.type.incompatible") // type parameter covariant
+        @SuppressWarnings("mutability:assignment.type.incompatible") // type parameter covariant
         List12(E e0, E e1) {
             this.e0 = Objects.<@Readonly E>requireNonNull(e0);
             this.e1 = Objects.<@Readonly E>requireNonNull(e1);
@@ -733,7 +733,7 @@ class ImmutableCollections {
         }
 
         @Override
-        @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
+        @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // getClass error
         public <T> @Nullable T[] toArray(@PolyNull T[] a) {
             int size = elements.length;
             if (a.length < size) {
@@ -1552,7 +1552,7 @@ final class CollSer implements Serializable {
      * @since 9
      */
     @java.io.Serial
-    @SuppressWarnings("pico:argument.type.incompatible") // array component type
+    @SuppressWarnings("mutability:argument.type.incompatible") // array component type
     private @Immutable Object readResolve() throws ObjectStreamException {
         try {
             if (array == null) {

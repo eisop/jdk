@@ -58,7 +58,7 @@ import org.checkerframework.framework.qual.CFComment;
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness", "index"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 @ReceiverDependentMutable
 public abstract class Dictionary<K,V> {
     /**

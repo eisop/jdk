@@ -57,7 +57,7 @@ import java.util.stream.Stream;
  * @since 9
  */
 @jdk.internal.ValueBased
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Immutable
 final class ProcessHandleImpl implements ProcessHandle {
     /**

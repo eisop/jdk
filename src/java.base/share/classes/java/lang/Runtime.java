@@ -59,7 +59,7 @@ import jdk.internal.reflect.Reflection;
  * @since   1.0
  */
 
-@AnnotatedFor({"interning", "nullness", "pico", "tainting"})
+@AnnotatedFor({"interning", "nullness", "mutability", "tainting"})
 public @UsesObjectEquals class Runtime {
     private static final Runtime currentRuntime = new Runtime();
 
@@ -834,7 +834,7 @@ public @UsesObjectEquals class Runtime {
      *
      * @since  9
      */
-    @SuppressWarnings("pico:argument.type.incompatible") //AOSEN: there is no VersionProps in our JDK?
+    @SuppressWarnings("mutability:argument.type.incompatible") //AOSEN: there is no VersionProps in our JDK?
     public static Version version() {
         var v = version;
         if (v == null) {

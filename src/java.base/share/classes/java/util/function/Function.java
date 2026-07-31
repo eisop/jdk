@@ -41,7 +41,7 @@ import java.util.Objects;
  *
  * @since 1.8
  */
-@AnnotatedFor({"lock", "nullness", "pico"})
+@AnnotatedFor({"lock", "nullness", "mutability"})
 @Covariant(1)
 @FunctionalInterface
 @ReceiverDependentMutable

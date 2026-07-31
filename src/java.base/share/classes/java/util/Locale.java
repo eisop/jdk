@@ -502,7 +502,7 @@ import sun.util.locale.provider.TimeZoneNameUtility;
  * @since 1.1
  */
 @AnnotatedFor({"index", "interning", "lock", "nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 @Immutable
 public final class Locale implements Cloneable, Serializable {
 

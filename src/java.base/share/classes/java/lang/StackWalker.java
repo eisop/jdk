@@ -94,7 +94,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 9
  */
 
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Immutable
 public final class StackWalker {
     /**

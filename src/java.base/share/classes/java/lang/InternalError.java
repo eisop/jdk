@@ -37,7 +37,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @since   1.0
  */
-@AnnotatedFor({"nullness", "pico"})
+@AnnotatedFor({"nullness", "mutability"})
 @ReceiverDependentMutable
 public class InternalError extends VirtualMachineError {
     private static final long serialVersionUID = -9062593416125562365L;

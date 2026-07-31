@@ -81,7 +81,7 @@ import sun.reflect.annotation.TypeAnnotationParser;
 	    "require a receiver. Static field accesses need to suppress the errors.",
 	    "initialization: using fully-initialized types should make the typical use case easier.",
 	    "lock: require @GuardSatisfied to ensure type system soundness."})
-@AnnotatedFor({"interning", "lock", "nullness", "pico"})
+@AnnotatedFor({"interning", "lock", "nullness", "mutability"})
 @Immutable
 public final
 class Field extends AccessibleObject implements Member {

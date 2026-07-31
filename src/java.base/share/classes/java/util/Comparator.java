@@ -124,7 +124,7 @@ import java.util.Comparators;
  */
 @CFComment({"lock/nullness: Javadoc says: \"a comparator may optionally permit comparison of null",
 "arguments, while maintaining the requirements for an equivalence relation.\""})
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @FunctionalInterface
 @ReceiverDependentMutable
 public interface Comparator<T extends @Readonly Object> {

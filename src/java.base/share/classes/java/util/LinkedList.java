@@ -103,7 +103,7 @@ import java.util.function.Consumer;
  */
 
 @CFComment({"lock/nullness: This class permits null elements"})
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public class LinkedList<E>
     extends AbstractSequentialList<E>
@@ -132,7 +132,7 @@ public class LinkedList<E>
     /**
      * Constructs an empty list.
      */
-    // @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    // @SuppressWarnings("mutability:initialization.fields.uninitialized") // Conservative
     public LinkedList() {
     }
 
@@ -144,7 +144,7 @@ public class LinkedList<E>
      * @param  c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
      */
-    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
+    @SuppressWarnings("mutability:method.invocation.invalid") // PICO constructor fix
     public @PolyNonEmpty LinkedList(@PolyNonEmpty @Readonly Collection<? extends E> c) {
         this();
         addAll(c);
@@ -918,7 +918,7 @@ public class LinkedList<E>
         private int nextIndex;
         private int expectedModCount = modCount;
 
-        // @SuppressWarnings("pico:initialization.fields.uninitialized") // Lazy
+        // @SuppressWarnings("mutability:initialization.fields.uninitialized") // Lazy
         ListItr(int index) {
             // assert isPositionIndex(index);
             next = (index == size) ? null : node(index);
@@ -964,7 +964,7 @@ public class LinkedList<E>
             return nextIndex - 1;
         }
 
-        @SuppressWarnings("pico") // Outter receiver dependence
+        @SuppressWarnings("mutability") // Outter receiver dependence
         public void remove(@Mutable LinkedList<E>.@Mutable ListItr this) {
             checkForComodification();
             if (lastReturned == null)
@@ -980,7 +980,7 @@ public class LinkedList<E>
             expectedModCount++;
         }
 
-        @SuppressWarnings("pico") // Outter receiver dependence
+        @SuppressWarnings("mutability") // Outter receiver dependence
         public void set(@Mutable LinkedList<E>.@Mutable ListItr this, E e) {
             if (lastReturned == null)
                 throw new IllegalStateException();
@@ -988,7 +988,7 @@ public class LinkedList<E>
             lastReturned.item = e;
         }
 
-        @SuppressWarnings("pico") // Outter receiver dependence
+        @SuppressWarnings("mutability") // Outter receiver dependence
         public void add(@Mutable LinkedList<E>.@Mutable ListItr this, E e) {
             checkForComodification();
             lastReturned = null;
@@ -1102,7 +1102,7 @@ public class LinkedList<E>
      *         in proper sequence
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // multiple polymorphic qualifiers
+    @SuppressWarnings("mutability") // multiple polymorphic qualifiers
     public @PolyNull @PolySigned @PolyMutable Object[] toArray(LinkedList<@PolyNull @PolySigned @PolyMutable E> this) {
         @PolyMutable Object[] result = new @PolyMutable Object[size];
         int i = 0;
@@ -1265,7 +1265,7 @@ public class LinkedList<E>
         }
 
         public long estimateSize(@Readonly LLSpliterator<E> this) { return (long) getEst(); }
-        @SuppressWarnings("pico:return.type.incompatible") // covariant type parameter
+        @SuppressWarnings("mutability:return.type.incompatible") // covariant type parameter
         public Spliterator<E> trySplit(@Mutable LLSpliterator<E> this) {
             Node<E> p;
             int s = getEst();

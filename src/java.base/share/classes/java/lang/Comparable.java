@@ -111,7 +111,7 @@ import java.util.*;
  * @see java.util.Comparator
  * @since 1.2
  */
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public interface Comparable<T extends @NonNull @Readonly Object> {
     /**

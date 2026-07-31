@@ -48,7 +48,7 @@ import sun.text.Normalizer;
  * Note that the unconditional case mappings (including 1:M mappings)
  * are handled in {@code Character.toLower/UpperCase()}.
  */
-@AnnotatedFor({"interning", "pico"})
+@AnnotatedFor({"interning", "mutability"})
 @Immutable
 final @UsesObjectEquals class ConditionalSpecialCasing {
 

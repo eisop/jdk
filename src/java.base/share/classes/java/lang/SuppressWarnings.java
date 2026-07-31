@@ -54,7 +54,7 @@ import static java.lang.annotation.ElementType.*;
  * @jls 5.5 Casting Contexts
  * @jls 9.6.4.5 @SuppressWarnings
  */
-@AnnotatedFor({"nullness", "pico"})
+@AnnotatedFor({"nullness", "mutability"})
 @Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, MODULE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface SuppressWarnings {

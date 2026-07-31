@@ -68,7 +68,7 @@ import java.util.stream.DoubleStream;
  * @since 1.8
  */
 @AnnotatedFor({"lock", "nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class DoubleSummaryStatistics implements DoubleConsumer {
     private long count;
     private double sum;

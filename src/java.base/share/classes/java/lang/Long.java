@@ -91,7 +91,7 @@ import static java.lang.String.UTF16;
  * @author  Joseph D. Darcy
  * @since   1.0
  */
-@AnnotatedFor({"nullness", "index", "pico", "signedness", "value"})
+@AnnotatedFor({"nullness", "index", "mutability", "signedness", "value"})
 @jdk.internal.ValueBased
 @Immutable
 public final class Long extends Number
@@ -422,7 +422,7 @@ public final class Long extends Number
      * @param val the value to format
      * @param shift the log2 of the base to format in (4 for hex, 3 for octal, 1 for binary)
      */
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     static String toUnsignedString0(@Unsigned long val, @IntVal({1, 2, 3, 4, 5}) int shift) {
         // assert shift > 0 && shift <=5 : "Illegal shift value";
         int mag = Long.SIZE - Long.numberOfLeadingZeros(val);
@@ -480,7 +480,7 @@ public final class Long extends Number
         } while (charPos > offset);
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     static String fastUUID(long lsb, long msb) {
         if (COMPACT_STRINGS) {
             byte[] buf = new byte[36];
@@ -526,7 +526,7 @@ public final class Long extends Number
      */
     @SideEffectFree
     @StaticallyExecutable
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static @ArrayLenRange(from = 1, to = 20) String toString(long i) {
         int size = stringSize(i);
         if (COMPACT_STRINGS) {

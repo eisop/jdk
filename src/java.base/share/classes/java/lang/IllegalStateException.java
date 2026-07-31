@@ -39,7 +39,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author  Jonni Kanerva
  * @since   1.1
  */
-@AnnotatedFor({"nullness", "pico"})
+@AnnotatedFor({"nullness", "mutability"})
 @ReceiverDependentMutable
 public class IllegalStateException extends RuntimeException {
     /**

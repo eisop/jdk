@@ -45,7 +45,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import static java.lang.String.UTF16;
 import static java.lang.String.LATIN1;
 
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 final class StringUTF16 {
 
     public static byte[] newBytesFor(int len) {
@@ -639,7 +639,7 @@ final class StringUTF16 {
         return -1;
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static String replace(byte @Readonly [] value, char oldChar, char newChar) {
         int len = value.length >> 1;
         int i = -1;
@@ -672,7 +672,7 @@ final class StringUTF16 {
         return null;
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static String replace(byte @Readonly [] value, int valLen, boolean valLat1,
                                  byte @Readonly [] targ, int targLen, boolean targLat1,
                                  byte @Readonly [] repl, int replLen, boolean replLat1)
@@ -800,7 +800,7 @@ final class StringUTF16 {
         return StringLatin1.regionMatchesCI_UTF16(other, ooffset, value, toffset, len);
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static String toLowerCase(String str, byte @Readonly [] value, Locale locale) {
         if (locale == null) {
             throw new NullPointerException();
@@ -905,7 +905,7 @@ final class StringUTF16 {
         return newString(result, 0, resultOffset);
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static String toUpperCase(String str, byte @Readonly [] value, Locale locale) {
         if (locale == null) {
             throw new NullPointerException();
@@ -1011,7 +1011,7 @@ final class StringUTF16 {
         return newString(result, 0, resultOffset);
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static String trim(byte @Readonly [] value) {
         int length = value.length >> 1;
         int len = length;
@@ -1177,7 +1177,7 @@ final class StringUTF16 {
         }
     }
 
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static String newString(byte @Readonly [] val, int index, int len) {
         if (len == 0) {
             return "";

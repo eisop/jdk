@@ -46,7 +46,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author synwee
  * @stable ICU 2.6
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Immutable
 public final class VersionInfo
 {

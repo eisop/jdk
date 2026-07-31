@@ -103,7 +103,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @jls 7.7 Module Declarations
  */
 
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Immutable
 public final class Module implements AnnotatedElement {
 
@@ -977,7 +977,7 @@ public final class Module implements AnnotatedElement {
      *
      * @apiNote Used during startup to open packages for illegal access.
      */
-    @SuppressWarnings("pico") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability") // cast from @Unique @Mutable to @Immutable
     void implAddOpensToAllUnnamed(Set<String> concealedPkgs, Set<String> exportedPkgs) {
         if (jdk.internal.misc.VM.isModuleSystemInited()) {
             throw new IllegalStateException("Module system already initialized");
@@ -1133,7 +1133,7 @@ public final class Module implements AnnotatedElement {
      *         If the module cannot be defined to the VM or its packages overlap
      *         with another module mapped to the same class loader
      */
-    @SuppressWarnings("pico:method.invocation.invalid") // Type system is not precise enough at line nameToSource.put(other.name(), m2);
+    @SuppressWarnings("mutability:method.invocation.invalid") // Type system is not precise enough at line nameToSource.put(other.name(), m2);
     static Map<String, Module> defineModules(Configuration cf,
                                              Function<String, ClassLoader> clf,
                                              ModuleLayer layer)
@@ -1306,7 +1306,7 @@ public final class Module implements AnnotatedElement {
      * @param m the module
      * @param nameToModule map of module name to Module (for qualified exports)
      */
-    @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
     private static void initExports(Module m, Map<String, Module> nameToModule) {
         Map<String, @Immutable Set<Module>> exportedPackages = new HashMap<>();
 
@@ -1345,7 +1345,7 @@ public final class Module implements AnnotatedElement {
      *                     under construction
      * @param parents the parent layers
      */
-    @SuppressWarnings("pico:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:assignment.type.incompatible") // cast from @Unique @Mutable to @Immutable
     private static void initExportsAndOpens(Module m,
                                             @Readonly Map<String, Module> nameToSource,
                                             @Readonly Map<String, Module> nameToModule,

@@ -36,7 +36,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.util.Iterator#next()
  * @since   1.0
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 public class NoSuchElementException extends RuntimeException {
     @java.io.Serial

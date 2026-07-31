@@ -91,7 +91,7 @@ import java.util.stream.Stream;
 @Covariant(0)
 @jdk.internal.ValueBased
 @Immutable
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final @NonNull class Optional<T> {
     /**
      * Common instance for {@code empty()}.

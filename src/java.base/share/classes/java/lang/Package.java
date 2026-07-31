@@ -126,7 +126,7 @@ import jdk.internal.reflect.Reflection;
  * @since 1.2
  * @revised 9
  */
-@AnnotatedFor({"interning", "lock", "nullness", "pico", "signature"})
+@AnnotatedFor({"interning", "lock", "nullness", "mutability", "signature"})
 @Immutable
 public @UsesObjectEquals class Package extends NamedPackage implements java.lang.reflect.AnnotatedElement {
     /**

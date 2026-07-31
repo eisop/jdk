@@ -42,7 +42,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see Locale
  * @since 1.7
  */
-@AnnotatedFor({"index", "pico"})
+@AnnotatedFor({"index", "mutability"})
 @ReceiverDependentMutable
 public class IllformedLocaleException extends RuntimeException {
 

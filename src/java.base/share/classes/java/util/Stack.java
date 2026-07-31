@@ -56,7 +56,7 @@ import org.checkerframework.framework.qual.CFComment;
  * @since   1.0
  */
 @CFComment({"lock/nullness: permit null elements"})
-@AnnotatedFor({"lock", "nullness", "pico"})
+@AnnotatedFor({"lock", "nullness", "mutability"})
 @ReceiverDependentMutable
 public class Stack<E> extends Vector<E> {
     /**

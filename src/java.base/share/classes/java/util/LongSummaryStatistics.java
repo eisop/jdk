@@ -67,7 +67,7 @@ import java.util.stream.Collector;
  * @since 1.8
  */
 @AnnotatedFor({"lock", "nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class LongSummaryStatistics implements LongConsumer, IntConsumer {
     private long count;
     private long sum;

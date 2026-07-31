@@ -41,7 +41,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author John Rose, JSR 292 EG
  * @since 1.7
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 public class BootstrapMethodError extends LinkageError {
     @java.io.Serial
     private static final long serialVersionUID = 292L;

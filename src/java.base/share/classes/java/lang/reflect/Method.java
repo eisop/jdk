@@ -77,7 +77,7 @@ import java.util.StringJoiner;
  * @author Nakul Saraiya
  * @since 1.1
  */
-@AnnotatedFor({"interning", "lock", "nullness", "pico"})
+@AnnotatedFor({"interning", "lock", "nullness", "mutability"})
 @SuppressWarnings({"rawtypes"})
 @Immutable
 public final class Method extends Executable {

@@ -129,7 +129,7 @@ import jdk.internal.util.ArraysSupport;
  * @since   1.2
  */
 @CFComment("lock/nullness: Permit null elements")
-@AnnotatedFor({"index", "initialization", "lock", "nullness", "pico"})
+@AnnotatedFor({"index", "initialization", "lock", "nullness", "mutability"})
 @ReceiverDependentMutable public class ArrayList<E> extends AbstractList<E>
         implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 {
@@ -176,7 +176,7 @@ import jdk.internal.util.ArraysSupport;
      *         is negative
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // static field can not be RDM
+    @SuppressWarnings("mutability") // static field can not be RDM
     public ArrayList(@NonNegative int initialCapacity) {
         if (initialCapacity > 0) {
             this.elementData = new Object @ReceiverDependentMutable [initialCapacity];
@@ -192,7 +192,7 @@ import jdk.internal.util.ArraysSupport;
      * Constructs an empty list with an initial capacity of ten.
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // static field can not be RDM
+    @SuppressWarnings("mutability") // static field can not be RDM
     public ArrayList() {
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
     }
@@ -206,7 +206,7 @@ import jdk.internal.util.ArraysSupport;
      * @throws NullPointerException if the specified collection is null
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // static field can not be RDM
+    @SuppressWarnings("mutability") // static field can not be RDM
     public @PolyNonEmpty ArrayList(@Readonly @PolyNonEmpty Collection<? extends E> c) {
         @Readonly Object[] a = c.toArray();
         if ((size = a.length) != 0) {
@@ -404,7 +404,7 @@ import jdk.internal.util.ArraysSupport;
      *         proper sequence
      */
     @SideEffectFree
-    @SuppressWarnings("pico:argument.type.incompatible") // Backing array element type
+    @SuppressWarnings("mutability:argument.type.incompatible") // Backing array element type
     public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly ArrayList<@PolyNull @PolySigned @PolyMutable E> this) {
         return Arrays.<@PolyMutable Object>copyOf(elementData, size);
     }
@@ -434,7 +434,7 @@ import jdk.internal.util.ArraysSupport;
      * @throws NullPointerException if the specified array is null
      */
     @SideEffectFree
-    @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
+    @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // getClass error
     public <T> @Nullable T[] toArray(@PolyNull T[] a) {
         if (a.length < size)
             // Make a new array of a's runtime type, but my contents:
@@ -1276,13 +1276,13 @@ import jdk.internal.util.ArraysSupport;
             return modified;
         }
 
-        @SuppressWarnings("pico:argument.type.incompatible")// poly does not work on field's type argument
+        @SuppressWarnings("mutability:argument.type.incompatible")// poly does not work on field's type argument
         public @PolyNull @PolySigned @PolyMutable Object[] toArray(@Readonly SubList<@PolyNull @PolySigned @PolyMutable E> this) {
             checkForComodification();
             return Arrays.<@PolyMutable Object>copyOfRange(root.elementData, offset, offset + size);
         }
 
-        @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
+        @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // getClass error
         public <T> @Nullable T[] toArray(T[] a) {
             checkForComodification();
             if (a.length < size)

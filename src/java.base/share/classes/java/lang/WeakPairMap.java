@@ -51,7 +51,7 @@ import java.util.function.BiFunction;
  * @param <V>  the type of value
  * @author Peter Levart
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 final class WeakPairMap<K1 extends @Immutable Object, K2 extends @Immutable Object, V> {
 
@@ -195,7 +195,7 @@ final class WeakPairMap<K1 extends @Immutable Object, K2 extends @Immutable Obje
      * keys in key pair has been found weakly-reachable and corresponding
      * WeakRefPeer(s) enqueued. Called as part of each public operation.
      */
-    @SuppressWarnings("pico:method.invocation.invalid") // need to refactor the code because PICO does not typecheck
+    @SuppressWarnings("mutability:method.invocation.invalid") // need to refactor the code because PICO does not typecheck
     private void expungeStaleAssociations(@Readonly WeakPairMap<K1, K2, V> this) {
         WeakRefPeer<?> peer;
         while ((peer = (WeakRefPeer<?>) queue.poll()) != null) {

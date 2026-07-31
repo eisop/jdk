@@ -233,7 +233,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
      * Constructs a new, empty identity hash map with a default expected
      * maximum size (21).
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("mutability") // PICO constructor fix
     public IdentityHashMap() {
         init(DEFAULT_CAPACITY);
     }
@@ -247,7 +247,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
      * @param expectedMaxSize the expected maximum size of the map
      * @throws IllegalArgumentException if {@code expectedMaxSize} is negative
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("mutability") // PICO constructor fix
     public IdentityHashMap(@NonNegative int expectedMaxSize) {
         if (expectedMaxSize < 0)
             throw new IllegalArgumentException("expectedMaxSize is negative: "
@@ -290,7 +290,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
      * @param m the map whose mappings are to be placed into this map
      * @throws NullPointerException if the specified map is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("mutability") // PICO constructor fix
     public IdentityHashMap(Map<? extends K, ? extends V> m) {
         // Allow for a bit of growth
         this((int) ((1 + m.size()) * 1.1));
@@ -754,7 +754,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
         int expectedModCount = modCount; // to support fast-fail
         int lastReturnedIndex = -1;      // to allow remove()
         @Assignable boolean indexValid; // To avoid unnecessary next computation
-        @SuppressWarnings("pico") // Field use from outter class
+        @SuppressWarnings("mutability") // Field use from outter class
         @Readonly Object[] traversalTable = table; // reference to main table or copy
 
         @Pure
@@ -882,7 +882,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
     private class EntryIterator
         extends IdentityHashMapIterator<Map.@Readonly Entry<K,V>>
     {
-        // @SuppressWarnings("pico:initialization.field.uninitialized") // lazy
+        // @SuppressWarnings("mutability:initialization.field.uninitialized") // lazy
         private @Readonly Entry lastReturnedEntry;
 
         public Map.@Readonly Entry<K,V> next(@NonEmpty @Mutable EntryIterator this) {
@@ -1238,7 +1238,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
      * @return a set view of the identity-mappings contained in this map
      */
     @SideEffectFree
-    @SuppressWarnings("pico:assignment.type.incompatible") // polyq on supertype's type argument
+    @SuppressWarnings("mutability:assignment.type.incompatible") // polyq on supertype's type argument
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable IdentityHashMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es = entrySet;
         if (es != null)
@@ -1292,7 +1292,7 @@ public class IdentityHashMap<K extends @Immutable Object,V>
             return toArray(new Object[0]);
         }
 
-        @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // overappoximation
+        @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // overappoximation
         @SideEffectFree
         public <T> @Nullable T[] toArray(@PolyNull T[] a) {
             int expectedModCount = modCount;

@@ -69,7 +69,7 @@ import static java.lang.String.checkOffset;
  * @author      Ulf Zibis
  * @since       1.5
  */
-@AnnotatedFor({"index", "initialization", "interning", "lock", "nullness", "pico"})
+@AnnotatedFor({"index", "initialization", "interning", "lock", "nullness", "mutability"})
 abstract @UsesObjectEquals class AbstractStringBuilder implements Appendable, CharSequence {
     /**
      * The value is used for character storage.

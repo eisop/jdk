@@ -98,7 +98,7 @@ import org.checkerframework.framework.qual.CFComment;
  * @since 1.6
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness", "pico"})
+@AnnotatedFor({"lock", "nullness", "mutability"})
 @ReceiverDependentMutable
 public interface NavigableSet<E> extends SortedSet<E> {
     /**

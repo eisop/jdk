@@ -49,7 +49,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author Laurence P. G. Cable
  * @since  1.1
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 public class TooManyListenersException extends Exception {
     @java.io.Serial

@@ -50,7 +50,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see Spliterator
  * @since 1.8
  */
-@AnnotatedFor({"nullness", "pico"})
+@AnnotatedFor({"nullness", "mutability"})
 public final class Spliterators {
 
     // Suppresses default constructor, ensuring non-instantiability.

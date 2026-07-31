@@ -38,7 +38,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since  1.4
  * @author Josh Bloch
  */
-@AnnotatedFor({"interning", "nullness", "pico"})
+@AnnotatedFor({"interning", "nullness", "mutability"})
 class AssertionStatusDirectives {
     /**
      * The classes for which assertions are to be enabled or disabled.

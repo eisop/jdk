@@ -62,7 +62,7 @@ import static java.lang.StackStreamFactory.WalkerState.*;
  * 2. StackWalker::getCallerClass
  * 3. AccessControlContext getting ProtectionDomain
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 final class StackStreamFactory {
     private StackStreamFactory() {}
 

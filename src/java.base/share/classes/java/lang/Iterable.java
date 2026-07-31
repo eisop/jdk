@@ -46,7 +46,7 @@ import java.util.function.Consumer;
  * @since 1.5
  * @jls 14.14.2 The enhanced {@code for} statement
  */
-@AnnotatedFor({"aliasing", "lock", "nullness", "pico"})
+@AnnotatedFor({"aliasing", "lock", "nullness", "mutability"})
 @ReceiverDependentMutable
 public interface Iterable<T> {
     /**

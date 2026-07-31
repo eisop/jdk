@@ -134,7 +134,7 @@ import org.checkerframework.framework.qual.DefaultQualifierForUse;
  */
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public interface Set<E> extends Collection<E> {
     // Query Operations

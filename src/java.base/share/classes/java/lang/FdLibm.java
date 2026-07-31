@@ -59,7 +59,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * operations in terms of floating-point operations when convenient to
  * do so.
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 class FdLibm {
     // Constants used by multiple algorithms
     private static final double INFINITY = Double.POSITIVE_INFINITY;

@@ -41,7 +41,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  */
 
 
-@AnnotatedFor({"nullness", "pico"})
+@AnnotatedFor({"nullness", "mutability"})
 public class InstantiationError extends IncompatibleClassChangeError {
     @java.io.Serial
     private static final long serialVersionUID = -4885810657349421204L;

@@ -77,7 +77,7 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.5
  */
 @AnnotatedFor({"lock", "nullness", "index"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final class UUID implements java.io.Serializable, Comparable<UUID> {
 
     /**

@@ -70,7 +70,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     AbstractList
  * @since   1.2
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 public class ConcurrentModificationException extends RuntimeException {
     @java.io.Serial

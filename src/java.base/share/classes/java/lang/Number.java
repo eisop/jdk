@@ -58,7 +58,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @jls 5.1.3 Narrowing Primitive Conversion
  * @since   1.0
  */
-@AnnotatedFor({"lock", "nullness", "value", "pico"})
+@AnnotatedFor({"lock", "nullness", "value", "mutability"})
 @Immutable
 public abstract class Number implements java.io.Serializable {
     /**

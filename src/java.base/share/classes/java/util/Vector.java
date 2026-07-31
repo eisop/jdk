@@ -162,7 +162,7 @@ public class Vector<E>
      * @throws IllegalArgumentException if the specified initial capacity
      *         is negative
      */
-    @SuppressWarnings("pico:assignment.type.incompatible") // array component type
+    @SuppressWarnings("mutability:assignment.type.incompatible") // array component type
     public Vector(@NonNegative int initialCapacity, int capacityIncrement) {
         super();
         if (initialCapacity < 0)
@@ -203,7 +203,7 @@ public class Vector<E>
      * @throws NullPointerException if the specified collection is null
      * @since   1.2
      */
-    @SuppressWarnings("pico") // cast from @Unique @Mutable to @RDM and class literal
+    @SuppressWarnings("mutability") // cast from @Unique @Mutable to @RDM and class literal
     public @PolyNonEmpty Vector(@PolyNonEmpty Collection<? extends E> c) {
         @Readonly Object @ReceiverDependentMutable [] a = c.toArray();
         elementCount = a.length;
@@ -750,7 +750,7 @@ public class Vector<E>
      * @since 1.2
      */
     @SideEffectFree
-    @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
+    @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // getClass error
     public synchronized <T> @Nullable T[] toArray(@PolyNull T[] a) {
         if (a.length < elementCount)
             return (T[]) Arrays.copyOf(elementData, elementCount, a.getClass());

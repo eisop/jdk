@@ -91,7 +91,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * @author  Joseph D. Darcy
  * @since   1.3
  */
-@AnnotatedFor({"interning", "nullness", "pico"})
+@AnnotatedFor({"interning", "nullness", "mutability"})
 public final @UsesObjectEquals class StrictMath {
 
     /**

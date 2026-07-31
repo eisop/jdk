@@ -163,7 +163,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * @author  Joseph D. Darcy
  * @since 1.0
  */
-@AnnotatedFor({"nullness", "index", "value", "pico"})
+@AnnotatedFor({"nullness", "index", "value", "mutability"})
 @jdk.internal.ValueBased
 @Immutable
 public final class Double extends Number

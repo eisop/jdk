@@ -50,7 +50,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author      Mark Davis
  * @since       1.1
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 public class MissingResourceException extends RuntimeException {
 

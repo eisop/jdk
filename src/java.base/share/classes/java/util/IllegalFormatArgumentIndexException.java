@@ -36,7 +36,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @since 16
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 class IllegalFormatArgumentIndexException extends IllegalFormatException {
 

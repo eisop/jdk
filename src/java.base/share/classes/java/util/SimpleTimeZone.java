@@ -156,7 +156,7 @@ import sun.util.calendar.Gregorian;
  */
 
 @AnnotatedFor({"lock", "nullness", "index"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class SimpleTimeZone extends TimeZone {
     /**
      * Constructs a SimpleTimeZone with the given base time zone offset from GMT

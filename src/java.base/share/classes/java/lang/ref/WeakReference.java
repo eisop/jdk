@@ -50,7 +50,7 @@ import org.checkerframework.framework.qual.CFComment;
  * @since    1.2
  */
 
-@AnnotatedFor({"nullness", "pico"})
+@AnnotatedFor({"nullness", "mutability"})
 @ReceiverDependentMutable
 public class WeakReference<T> extends Reference<T> {
 

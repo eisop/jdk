@@ -925,7 +925,7 @@ public class Arrays {
      *
      * @since 1.8
      */
-    @SuppressWarnings({"unchecked", "pico:assignment.type.incompatible"}) // Poly substitution error
+    @SuppressWarnings({"unchecked", "mutability:assignment.type.incompatible"}) // Poly substitution error
     @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
     public static <T> void parallelSort(@UnknownSignedness T[] a, Comparator<? super T> cmp) {
         if (cmp == null)
@@ -985,7 +985,7 @@ public class Arrays {
      *
      * @since 1.8
      */
-    @SuppressWarnings({"unchecked", "pico:assignment.type.incompatible"}) // Poly substitution error
+    @SuppressWarnings({"unchecked", "mutability:assignment.type.incompatible"}) // Poly substitution error
     @CFComment("A comparator that can handle the array elements needs to be provided. Otherwise, use method without comparator.")
     public static <T> void parallelSort(@UnknownSignedness T[] a, @IndexOrHigh({"#1"}) int fromIndex, @IndexOrHigh({"#1"}) int toIndex,
                                         Comparator<? super T> cmp) {
@@ -3524,7 +3524,7 @@ public class Arrays {
      * @since 1.6
      */
     @SideEffectFree
-    @SuppressWarnings({"unchecked", "pico:argument.type.incompatible"}) // getClass error
+    @SuppressWarnings({"unchecked", "mutability:argument.type.incompatible"}) // getClass error
     @CFComment("The return type is refined when safe. See " +
             "https://github.com/eisop/checker-framework/blob/17991582bc3a35509f15065b051d8e4c45c3e9ae/checker/src/main/java/org/checkerframework/checker/nullness/NullnessNoInitAnnotatedTypeFactory.java#L756")
     public static <T> @Nullable T[] copyOf(T @Readonly [] original, @NonNegative int newLength) {
@@ -4219,7 +4219,7 @@ public class Arrays {
 
         @SideEffectFree
         @Override
-        @SuppressWarnings("pico") // class literal is not detoable
+        @SuppressWarnings("mutability") // class literal is not detoable
         public @PolyNull @PolySigned @PolyMutable Object[] toArray(Arrays.@Readonly ArrayList<@PolyNull @PolySigned @PolyMutable E> this) {
             return Arrays.copyOf(a, a.length, Object[].class);
         }
@@ -4273,7 +4273,7 @@ public class Arrays {
 
         @SideEffectFree
         @Override
-        @SuppressWarnings("pico:return.type.incompatible") // poly get subs into both bounds, should be only upperbound
+        @SuppressWarnings("mutability:return.type.incompatible") // poly get subs into both bounds, should be only upperbound
         public Spliterator<E> spliterator() {
             return Spliterators.spliterator(a, Spliterator.ORDERED);
         }
@@ -4311,7 +4311,7 @@ public class Arrays {
         private int cursor;
         private final E @Readonly [] a;
 
-        @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+        @SuppressWarnings("mutability:initialization.fields.uninitialized") // Conservative
         ArrayItr(E @Readonly [] a) {
             this.a = a;
         }
@@ -5073,7 +5073,7 @@ public class Arrays {
      * @since 1.5
      */
     @SideEffectFree
-    @SuppressWarnings("pico:argument.type.incompatible") // PICO hashset upperbound is more restrictive
+    @SuppressWarnings("mutability:argument.type.incompatible") // PICO hashset upperbound is more restrictive
     public static @MinLen(2) String deepToString(@PolyInterned @PolyMustCall @PolyNull @PolySigned @Readonly Object @PolyMustCall @Nullable @Readonly [] a) {
         if (a == null)
             return "null";
@@ -5086,7 +5086,7 @@ public class Arrays {
         return buf.toString();
     }
 
-    @SuppressWarnings("pico:static.receiverdependentmutable.forbidden") // getClass error
+    @SuppressWarnings("mutability:static.receiverdependentmutable.forbidden") // getClass error
     private static void deepToString(@Readonly Object @Readonly [] a, StringBuilder buf,
                                      Set<@Readonly Object @Readonly []> dejaVu) {
         if (a == null) {
@@ -5380,7 +5380,7 @@ public class Arrays {
      * @since 1.8
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // covariant type parameter
+    @SuppressWarnings("mutability") // covariant type parameter
     public static <T> Spliterator<T> spliterator(T @Readonly [] array) {
         return Spliterators.spliterator(array,
                                         Spliterator.ORDERED | Spliterator.IMMUTABLE);
@@ -5406,7 +5406,7 @@ public class Arrays {
      * @since 1.8
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // covariant type parameter
+    @SuppressWarnings("mutability") // covariant type parameter
     public static <T> Spliterator<T> spliterator(T @Readonly [] array, int startInclusive, int endExclusive) {
         return Spliterators.spliterator(array, startInclusive, endExclusive,
                                         Spliterator.ORDERED | Spliterator.IMMUTABLE);

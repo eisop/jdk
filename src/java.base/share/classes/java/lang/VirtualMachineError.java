@@ -38,7 +38,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author  Frank Yellin
  * @since   1.0
  */
-@AnnotatedFor({"nullness", "pico"})
+@AnnotatedFor({"nullness", "mutability"})
 @ReceiverDependentMutable
 public abstract class VirtualMachineError extends Error {
     @java.io.Serial

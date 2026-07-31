@@ -34,7 +34,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see LinkageError
  * @since 1.7
  */
-@AnnotatedFor({"pico"})
+@AnnotatedFor({"mutability"})
 public class ReflectiveOperationException extends Exception {
     @java.io.Serial
     static final long serialVersionUID = 123456789L;

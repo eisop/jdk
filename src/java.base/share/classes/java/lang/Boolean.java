@@ -69,7 +69,7 @@ import static java.lang.constant.ConstantDescs.CD_Boolean;
  * @author  Arthur van Hoff
  * @since   1.0
  */
-@AnnotatedFor({"interning", "nullness", "pico", "value"})
+@AnnotatedFor({"interning", "nullness", "mutability", "value"})
 @jdk.internal.ValueBased
 @Immutable
 public final class Boolean implements java.io.Serializable,

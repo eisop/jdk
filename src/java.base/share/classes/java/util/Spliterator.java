@@ -301,7 +301,7 @@ import java.util.function.LongConsumer;
  * @see Collection
  * @since 1.8
  */
-@AnnotatedFor({"lock", "nullness", "pico"})
+@AnnotatedFor({"lock", "nullness", "mutability"})
 @ReceiverDependentMutable
 public interface Spliterator<T> {
     /**

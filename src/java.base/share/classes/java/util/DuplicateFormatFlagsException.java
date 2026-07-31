@@ -38,7 +38,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @since 1.5
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 public class DuplicateFormatFlagsException extends IllegalFormatException {
 

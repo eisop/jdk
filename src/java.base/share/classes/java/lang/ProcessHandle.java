@@ -95,7 +95,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 9
  */
 @jdk.internal.ValueBased
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Immutable
 public interface ProcessHandle extends Comparable<ProcessHandle> {
 

@@ -82,7 +82,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  */
 
 @AnnotatedFor({"signedness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class Base64 {
 
     private Base64() {}

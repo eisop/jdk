@@ -41,7 +41,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * {@link #merge(Method)} method. Only the most specific methods for a
  * particular signature are kept.
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 final class PublicMethods {
 
     /**

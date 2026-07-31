@@ -49,7 +49,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.5
  * @serial exclude
  */
-@AnnotatedFor({"index", "pico"})
+@AnnotatedFor({"index", "mutability"})
 @ReceiverDependentMutable
 class RegularEnumSet<E extends Enum<E>> extends EnumSet<E> {
     @java.io.Serial

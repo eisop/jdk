@@ -73,7 +73,7 @@ import jdk.internal.access.SharedSecrets;
  * @since  1.8
 */
 @AnnotatedFor({"nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final class StringJoiner {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 

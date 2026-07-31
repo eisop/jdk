@@ -55,7 +55,7 @@ import java.util.concurrent.RecursiveTask;
  * @since 1.7 * 14
  */
 @AnnotatedFor({"index", "interning"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 final @UsesObjectEquals class DualPivotQuicksort {
 
     /**

@@ -64,7 +64,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author Josh Bloch
  */
 @AnnotatedFor({"index", "interning"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 @UsesObjectEquals class TimSort<T> {
     /**
      * This is the minimum sized sequence that will be merged.  Shorter

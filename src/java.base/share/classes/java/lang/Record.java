@@ -92,7 +92,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @jls 8.10 Record Types
  * @since 16
  */
-@AnnotatedFor({"initialization", "nullness", "pico"})
+@AnnotatedFor({"initialization", "nullness", "mutability"})
 @Immutable
 public abstract class Record {
     /**

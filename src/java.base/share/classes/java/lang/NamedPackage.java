@@ -43,7 +43,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * packages with minimal footprint and avoid constructing Package
  * object.
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Immutable
 class NamedPackage {
     private final String name;

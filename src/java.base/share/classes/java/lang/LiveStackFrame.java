@@ -44,7 +44,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @jvms 2.6 Frames
  */
 /* package-private */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 interface LiveStackFrame extends StackFrame {
     /**
      * Return the monitors held by this stack frame. This method returns
@@ -159,7 +159,7 @@ interface LiveStackFrame extends StackFrame {
      * @throws SecurityException if the security manager is present and
      * denies access to {@code RuntimePermission("liveStackFrames")}
      */
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     public static StackWalker getStackWalker() {
         return getStackWalker(EnumSet.noneOf(StackWalker.Option.class));
     }

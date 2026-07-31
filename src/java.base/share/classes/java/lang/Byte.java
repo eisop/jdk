@@ -80,7 +80,7 @@ import static java.lang.constant.ConstantDescs.DEFAULT_NAME;
  * @see     java.lang.Number
  * @since   1.1
  */
-@AnnotatedFor({"index", "interning", "nullness", "pico", "signedness", "value"})
+@AnnotatedFor({"index", "interning", "nullness", "mutability", "signedness", "value"})
 @jdk.internal.ValueBased
 @Immutable
 public final class Byte extends Number implements Comparable<Byte>, Constable {

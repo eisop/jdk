@@ -33,7 +33,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see ModuleLayer
  * @since 9
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 public class LayerInstantiationException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = -906239691613568347L;

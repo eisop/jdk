@@ -36,7 +36,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.util.Stack
  * @since   1.0
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @ReceiverDependentMutable
 public class EmptyStackException extends RuntimeException {
     @java.io.Serial

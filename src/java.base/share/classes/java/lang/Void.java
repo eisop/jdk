@@ -36,7 +36,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  *
  * @since   1.1
  */
-@AnnotatedFor({"interning", "nullness", "pico"})
+@AnnotatedFor({"interning", "nullness", "mutability"})
 @Immutable
 public final
 @UsesObjectEquals class Void {

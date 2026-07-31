@@ -186,7 +186,7 @@ import java.io.Serializable;
  * @since 1.2
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness", "index", "aliasing", "nonempty", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "aliasing", "nonempty", "mutability"})
 @ReceiverDependentMutable
 public interface Map<K extends @Immutable Object, V> {
     // Query Operations
@@ -573,7 +573,7 @@ public interface Map<K extends @Immutable Object, V> {
          * @since 1.8
          */
         @Pure
-        @SuppressWarnings("pico") // covariant
+        @SuppressWarnings("mutability") // covariant
         public static <K extends @Immutable Comparable<? super K>, V> Comparator<Map.Entry<K, V>> comparingByKey() {
             return (Comparator<Map.Entry<K, V>> & Serializable)
                 (c1, c2) -> c1.getKey().compareTo(c2.getKey());

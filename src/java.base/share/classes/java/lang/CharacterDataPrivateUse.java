@@ -29,7 +29,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 /** The CharacterData class encapsulates the large tables found in
     Java.lang.Character. */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 class CharacterDataPrivateUse extends CharacterData {
 
     int getProperties(int ch) {

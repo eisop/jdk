@@ -139,7 +139,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
         }
     };
 
-    @SuppressWarnings("pico") // Not precise enough
+    @SuppressWarnings("mutability") // Not precise enough
     private @PolyMutable Object maskNull(@Readonly EnumMap<K,V> this, @Nullable @PolyMutable Object value) {
         return (value == null ? NULL : value);
     }
@@ -155,7 +155,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
      * @param keyType the class object of the key type for this enum map
      * @throws NullPointerException if {@code keyType} is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("mutability") // PICO constructor fix
     public EnumMap(Class<K> keyType) {
         this.keyType = keyType;
         keyUniverse = getKeyUniverse(keyType);
@@ -169,7 +169,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
      * @param m the enum map from which to initialize this enum map
      * @throws NullPointerException if {@code m} is null
      */
-    @SuppressWarnings("pico:method.invocation.invalid") // array clone
+    @SuppressWarnings("mutability:method.invocation.invalid") // array clone
     public EnumMap(@ReceiverDependentMutable EnumMap<K, ? extends V> m) {
         keyType = m.keyType;
         keyUniverse = m.keyUniverse;
@@ -189,7 +189,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
      *     {@code EnumMap} instance and contains no mappings
      * @throws NullPointerException if {@code m} is null
      */
-    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
+    @SuppressWarnings("mutability:method.invocation.invalid") // PICO constructor fix
     public EnumMap(@ReceiverDependentMutable Map<K, ? extends V> m) {
         if (m instanceof EnumMap) {
             EnumMap<K, ? extends V> em = (@ReceiverDependentMutable EnumMap<K, ? extends V>) m;
@@ -507,7 +507,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
      * @return a set view of the mappings contained in this enum map
      */
     @SideEffectFree
-    @SuppressWarnings("pico:assignment.type.incompatible") // class polymorphism qualifier
+    @SuppressWarnings("mutability:assignment.type.incompatible") // class polymorphism qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<K,V>> entrySet(@PolyMutable EnumMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es = entrySet;
         if (es != null)
@@ -816,7 +816,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
     /**
      * Throws an exception if e is not of the correct type for this enum set.
      */
-    // @SuppressWarnings("pico:type.invalid.annotations.on.use") // Aosen: This is a bug in validator
+    // @SuppressWarnings("mutability:type.invalid.annotations.on.use") // Aosen: This is a bug in validator
     private void typeCheck(@Readonly EnumMap<K,V> this, K key) {
         Class<?> keyClass = key.getClass();
         if (keyClass != keyType && keyClass.getSuperclass() != keyType)
@@ -827,7 +827,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
      * Returns all of the values comprising K.
      * The result is uncloned, cached, and shared by all callers.
      */
-    @SuppressWarnings("pico:return.type.incompatible") // return type
+    @SuppressWarnings("mutability:return.type.incompatible") // return type
     private static <K extends Enum<K>> K @ReceiverDependentMutable [] getKeyUniverse(Class<K> keyType) {
         return SharedSecrets.getJavaLangAccess()
                                         .getEnumConstantsShared(keyType);
@@ -870,7 +870,7 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
      * Reconstitute the {@code EnumMap} instance from a stream (i.e.,
      * deserialize it).
      */
-    @SuppressWarnings({"unchecked", "pico:assignment.type.incompatible"}) // why getKeyUniverse return type not adapted?
+    @SuppressWarnings({"unchecked", "mutability:assignment.type.incompatible"}) // why getKeyUniverse return type not adapted?
     @java.io.Serial
     private void readObject(@Mutable EnumMap<K,V> this, java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException

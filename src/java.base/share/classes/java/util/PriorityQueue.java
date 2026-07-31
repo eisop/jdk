@@ -103,7 +103,7 @@ import jdk.internal.util.ArraysSupport;
  */
 @CFComment({"lock/nullness: This class doesn't permits null elements"})
 @AnnotatedFor({"lock", "nullness", "index"})
-@SuppressWarnings({"unchecked", "pico"}) // Not interesting class, fix later
+@SuppressWarnings({"unchecked", "mutability"}) // Not interesting class, fix later
 public class PriorityQueue<E extends @NonNull Object> extends AbstractQueue<E>
     implements java.io.Serializable {
 

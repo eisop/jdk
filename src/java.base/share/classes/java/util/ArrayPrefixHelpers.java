@@ -50,7 +50,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author Doug Lea
  * @since 1.8
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 class ArrayPrefixHelpers {
     private ArrayPrefixHelpers() {} // non-instantiable
 

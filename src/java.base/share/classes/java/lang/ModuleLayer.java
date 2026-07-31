@@ -149,7 +149,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 9
  * @see Module#getLayer()
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Immutable
 public final class ModuleLayer {
 

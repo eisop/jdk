@@ -40,7 +40,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * from {@link java.lang.invoke.StringConcatFactory}, and used in {@link java.lang.invoke.MethodHandle}
  * combinators there.
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 final class StringConcatHelper {
 
     private StringConcatHelper() {
@@ -385,7 +385,7 @@ final class StringConcatHelper {
      * @param indexCoder    remaining index (should be zero) and coder
      * @return String       resulting string
      */
-    @SuppressWarnings("pico:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
+    @SuppressWarnings("mutability:argument.type.incompatible") // cast from @Unique @Mutable to @Immutable
     static String newString(byte @Readonly [] buf, long indexCoder) {
         // Use the private, non-copying constructor (unsafe!)
         if (indexCoder == LATIN1) {

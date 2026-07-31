@@ -125,7 +125,7 @@ import java.util.*;
  * @jls 11.2 Compile-Time Checking of Exceptions
  * @since 1.0
  */
-@AnnotatedFor({"interning", "lock", "nullness", "pico"})
+@AnnotatedFor({"interning", "lock", "nullness", "mutability"})
 @ReceiverDependentMutable
 public @UsesObjectEquals class Throwable implements Serializable {
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
@@ -224,7 +224,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @serial
      * @since 1.4
      */
-    @SuppressWarnings("pico:assignment.type.incompatible") // initialize field with static variable
+    @SuppressWarnings("mutability:assignment.type.incompatible") // initialize field with static variable
     private @Assignable /* should be @LazyFinal */ StackTraceElement @Mutable [] stackTrace = UNASSIGNED_STACK;
 
     /**
@@ -247,7 +247,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since 1.7
      */
     // PICO: sentinel list is immutable.
-    @SuppressWarnings({"serial", "pico:assignment.type.incompatible"}) // Not statically typed as Serializable
+    @SuppressWarnings({"serial", "mutability:assignment.type.incompatible"}) // Not statically typed as Serializable
     private List<Throwable> suppressedExceptions = SUPPRESSED_SENTINEL;
 
     /** Message for trying to suppress a null exception. */
@@ -271,7 +271,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * the stack trace data in the newly created throwable.
      */
     @SideEffectFree
-    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    @SuppressWarnings("mutability:method.invocation.invalid") // Underinitialization or mutable
     public Throwable() {
         fillInStackTrace();
     }
@@ -288,7 +288,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *          later retrieval by the {@link #getMessage()} method.
      */
     @SideEffectFree
-    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    @SuppressWarnings("mutability:method.invocation.invalid") // Underinitialization or mutable
     public Throwable(@Nullable String message) {
         fillInStackTrace();
         detailMessage = message;
@@ -312,7 +312,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since  1.4
      */
     @SideEffectFree
-    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    @SuppressWarnings("mutability:method.invocation.invalid") // Underinitialization or mutable
     public Throwable(@Nullable String message, @Nullable @ReceiverDependentMutable Throwable cause) {
         fillInStackTrace();
         detailMessage = message;
@@ -337,7 +337,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since  1.4
      */
     @SideEffectFree
-    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    @SuppressWarnings("mutability:method.invocation.invalid") // Underinitialization or mutable
     public Throwable(@Nullable @ReceiverDependentMutable Throwable cause) {
         fillInStackTrace();
         detailMessage = (cause==null ? null : cause.toString());
@@ -386,7 +386,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @since 1.7
      */
     @SideEffectFree
-    @SuppressWarnings("pico:method.invocation.invalid") // Underinitialization or mutable
+    @SuppressWarnings("mutability:method.invocation.invalid") // Underinitialization or mutable
     protected Throwable(@Nullable String message, @Nullable @ReceiverDependentMutable Throwable cause,
                         boolean enableSuppression,
                         boolean writableStackTrace) {
@@ -488,7 +488,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      *         been called on this throwable.
      * @since  1.4
      */
-    @SuppressWarnings("pico:illegal.field.write") // should the receiver be underinitialization then?
+    @SuppressWarnings("mutability:illegal.field.write") // should the receiver be underinitialization then?
     public synchronized @PolyInitialized @ReceiverDependentMutable Throwable initCause(@PolyInitialized Throwable this, @Nullable @ReceiverDependentMutable Throwable cause) {
         if (this.cause != this)
             throw new @ReceiverDependentMutable IllegalStateException("Can't overwrite cause with " +
@@ -693,7 +693,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
     }
 
     // AOSEN: this is annoying that I have to make the receiver type as immutable to make sure the method type check
-    @SuppressWarnings("pico:argument.type.incompatible") // Add readonly this to dejaVu set
+    @SuppressWarnings("mutability:argument.type.incompatible") // Add readonly this to dejaVu set
     private void printStackTrace(@Readonly Throwable this, PrintStreamOrWriter s) {
         // Guard against malicious overrides of Throwable.equals by
         // using a Set with identity equality semantics.
@@ -943,7 +943,7 @@ public @UsesObjectEquals class Throwable implements Serializable {
      * @throws ClassNotFoundException if a serialized class cannot be loaded
      */
     @java.io.Serial
-    @SuppressWarnings("pico:assignment.type.incompatible") // suppressedExceptions being assigned sentinel value
+    @SuppressWarnings("mutability:assignment.type.incompatible") // suppressedExceptions being assigned sentinel value
     private void readObject(@Mutable Throwable this, ObjectInputStream s)
         throws IOException, ClassNotFoundException {
         s.defaultReadObject();     // read in all fields

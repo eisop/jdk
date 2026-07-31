@@ -74,7 +74,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * @author  Joseph D. Darcy
  * @since 1.0
  */
-@AnnotatedFor({"nullness", "pico", "value"})
+@AnnotatedFor({"nullness", "mutability", "value"})
 @jdk.internal.ValueBased
 @Immutable
 public final class Float extends Number

@@ -52,7 +52,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @jls 11.2 Compile-Time Checking of Exceptions
  * @since   1.0
  */
-@AnnotatedFor({"lock", "nullness", "pico"})
+@AnnotatedFor({"lock", "nullness", "mutability"})
 @ReceiverDependentMutable
 public class Error extends Throwable {
     @java.io.Serial

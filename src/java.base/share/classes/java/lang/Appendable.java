@@ -55,7 +55,7 @@ import java.io.IOException;
  *
  * @since 1.5
  */
-@AnnotatedFor({"nullness", "index", "pico"})
+@AnnotatedFor({"nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public interface Appendable {
 

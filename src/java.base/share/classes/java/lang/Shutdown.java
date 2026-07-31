@@ -43,7 +43,7 @@ import jdk.internal.misc.VM;
  * @see java.io.DeleteOnExitHook
  */
 
-@AnnotatedFor({"interning", "nullness", "pico"})
+@AnnotatedFor({"interning", "nullness", "mutability"})
 @UsesObjectEquals class Shutdown {
 
     // The system shutdown hooks are registered with a predefined slot.

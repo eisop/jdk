@@ -2376,7 +2376,7 @@ public abstract @UsesObjectEquals class ClassLoader {
     /**
      * Returns a stream of Packages defined in this class loader
      */
-    @SuppressWarnings("pico") // lost can not invoke poly method.
+    @SuppressWarnings("mutability") // lost can not invoke poly method.
     Stream<Package> packages(@Readonly ClassLoader this) {
         return packages.values().stream()
                        .map(p -> definePackage(p.packageName(), p.module()));

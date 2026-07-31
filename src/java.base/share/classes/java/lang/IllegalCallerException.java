@@ -33,7 +33,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 9
  * @see StackWalker#getCallerClass
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 public class IllegalCallerException extends RuntimeException {
     /**
      * Constructs an IllegalCallerException with no detail message.

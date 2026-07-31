@@ -48,7 +48,7 @@ import org.checkerframework.common.aliasing.qual.Unique;
  * @jls 11.2 Compile-Time Checking of Exceptions
  * @since   1.0
  */
-@AnnotatedFor({"aliasing", "nullness", "pico"})
+@AnnotatedFor({"aliasing", "nullness", "mutability"})
 @ReceiverDependentMutable
 public class Exception extends Throwable {
     @java.io.Serial

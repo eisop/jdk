@@ -89,7 +89,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @jls 8.4.1 Formal Parameters
  * @jls 9.6.4.7 @SafeVarargs
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD})

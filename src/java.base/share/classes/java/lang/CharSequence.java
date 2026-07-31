@@ -71,7 +71,7 @@ import java.util.stream.StreamSupport;
  * @since 1.4
  */
 
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public interface CharSequence {
 

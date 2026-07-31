@@ -96,7 +96,7 @@ import jdk.internal.ref.CleanerFactory;
  */
 
 @AnnotatedFor({"index", "interning", "lock", "nullness"})
-@SuppressWarnings("pico") // Not interesting class, fix later
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public @UsesObjectEquals class Timer {
     /**
      * The timer task queue.  This data structure is shared with the timer

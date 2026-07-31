@@ -157,7 +157,7 @@ import java.util.function.Consumer;
 @CFComment({"lock: permits null keys and values"})
 @AnnotatedFor({"lock", "index", "nullness"})
 @ReceiverDependentMutable
-@SuppressWarnings("pico")
+@SuppressWarnings("mutability")
 public class WeakHashMap<K extends @Immutable Object,V>
     extends AbstractMap<K,V>
     implements Map<K,V> {
@@ -276,7 +276,7 @@ public class WeakHashMap<K extends @Immutable Object,V>
      * @throws  NullPointerException if the specified map is null
      * @since   1.3
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("mutability") // PICO constructor fix
     public @PolyNonEmpty WeakHashMap(@PolyNonEmpty Map<? extends K, ? extends V> m) {
         this(Math.max((int) ((float)m.size() / DEFAULT_LOAD_FACTOR + 1.0F),
                 DEFAULT_INITIAL_CAPACITY),

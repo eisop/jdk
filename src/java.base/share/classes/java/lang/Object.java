@@ -56,7 +56,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
  * @see     java.lang.Class
  * @since   1.0
  */
-@AnnotatedFor({"aliasing", "guieffect", "index", "lock", "nullness", "pico"})
+@AnnotatedFor({"aliasing", "guieffect", "index", "lock", "nullness", "mutability"})
 @PolyUIType
 @ReceiverDependentMutable
 public class Object {
@@ -257,7 +257,7 @@ public class Object {
      */
     @SideEffectFree
     @IntrinsicCandidate
-    @CFComment("pico: clone is poly because it be implemented as shallow copy?")
+    @CFComment("mutability: clone is poly because it be implemented as shallow copy?")
     protected native @PolyMutable Object clone(@GuardSatisfied @PolyMutable Object this) throws CloneNotSupportedException;
 
     /**

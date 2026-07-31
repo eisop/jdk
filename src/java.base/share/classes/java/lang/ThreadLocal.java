@@ -86,7 +86,7 @@ import java.util.function.Supplier;
             "* the subclass needs to suppress a warning:",
             "@SuppressWarnings(\"nullness:type.argument\") // initialValue returns non-null"
         })
-@AnnotatedFor({"interning", "nullness", "pico"})
+@AnnotatedFor({"interning", "nullness", "mutability"})
 public @UsesObjectEquals class ThreadLocal<@Nullable T> {
     /**
      * ThreadLocals rely on per-thread linear-probe hash maps attached

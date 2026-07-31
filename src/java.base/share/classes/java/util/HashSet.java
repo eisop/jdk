@@ -107,7 +107,7 @@ import jdk.internal.access.SharedSecrets;
  * @since   1.2
  */
 
- @AnnotatedFor({"index", "initialization", "lock", "nullness", "pico"})
+ @AnnotatedFor({"index", "initialization", "lock", "nullness", "mutability"})
  @ReceiverDependentMutable
  public class HashSet<E extends @Immutable Object>
     extends AbstractSet<E>
@@ -138,7 +138,7 @@ import jdk.internal.access.SharedSecrets;
      * @param c the collection whose elements are to be placed into this set
      * @throws NullPointerException if the specified collection is null
      */
-    @SuppressWarnings("pico") // PICO constructor fix
+    @SuppressWarnings("mutability") // PICO constructor fix
     public @PolyNonEmpty HashSet(@PolyNonEmpty @Readonly Collection<? extends E> c) {
         map = new @ReceiverDependentMutable HashMap<E, @Readonly Object>(Math.max((int) (c.size()/.75f) + 1, 16));
         addAll(c);
@@ -194,7 +194,7 @@ import jdk.internal.access.SharedSecrets;
      * @see ConcurrentModificationException
      */
     @SideEffectFree
-    @SuppressWarnings("pico") // lost can not invoke poly method.
+    @SuppressWarnings("mutability") // lost can not invoke poly method.
     public @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty @Readonly HashSet<E> this) {
         return map.keySet().iterator();
     }

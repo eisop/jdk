@@ -37,7 +37,7 @@ import java.util.function.ToLongFunction;
 /**
  * Package private supporting class for {@link Comparator}.
  */
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 class Comparators {
     private Comparators() {
         throw new AssertionError("no instances");

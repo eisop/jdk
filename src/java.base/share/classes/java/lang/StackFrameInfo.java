@@ -32,7 +32,7 @@ import java.lang.invoke.MethodType;
 
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-@AnnotatedFor("pico")
+@AnnotatedFor("mutability")
 class StackFrameInfo implements StackFrame {
     private static final JavaLangInvokeAccess JLIA =
         SharedSecrets.getJavaLangInvokeAccess();

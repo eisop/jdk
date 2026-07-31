@@ -179,7 +179,7 @@ import java.io.IOException;
  * @see     Hashtable
  * @since   1.4
  */
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public class LinkedHashMap<K extends @Immutable Object,V>
     extends HashMap<K,V>
@@ -326,7 +326,7 @@ public class LinkedHashMap<K extends @Immutable Object,V>
         }
     }
 
-    @SuppressWarnings("pico") // Still can not type this as readonly
+    @SuppressWarnings("mutability") // Still can not type this as readonly
     void afterNodeAccess(@Readonly LinkedHashMap<K,V> this, @Readonly Node<K,V> e) { // move node to last
         LinkedHashMap.Entry<K,V> last;
         if (accessOrder && (last = tail) != e) {
@@ -403,7 +403,7 @@ public class LinkedHashMap<K extends @Immutable Object,V>
      * @param  m the map whose mappings are to be placed in this map
      * @throws NullPointerException if the specified map is null
      */
-    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
+    @SuppressWarnings("mutability:method.invocation.invalid") // PICO constructor fix
     public @PolyNonEmpty LinkedHashMap(@PolyNonEmpty @Readonly Map<? extends K, ? extends V> m) {
         super();
         accessOrder = false;
@@ -711,7 +711,7 @@ public class LinkedHashMap<K extends @Immutable Object,V>
      * @return a set view of the mappings contained in this map
      */
     @SideEffectFree
-    @SuppressWarnings("pico:assignment.type.incompatible") // class polymorphic qualifier
+    @SuppressWarnings("mutability:assignment.type.incompatible") // class polymorphic qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable LinkedHashMap<K, V> this) {
         Set<Map.@PolyMutable Entry<K,V>> es;
         return (es = entrySet) == null ? (entrySet = new @PolyMutable LinkedEntrySet()) : es;

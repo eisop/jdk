@@ -44,7 +44,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author  Frank Yellin
  * @since   1.0
  */
-@AnnotatedFor({"interning", "nullness", "pico"})
+@AnnotatedFor({"interning", "nullness", "mutability"})
 @Deprecated(since="9", forRemoval=true)
 public final @UsesObjectEquals class Compiler  {
     private Compiler() {}               // don't make instances

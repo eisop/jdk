@@ -156,7 +156,7 @@ import jdk.internal.access.SharedSecrets;
  * @since 1.0
  */
 @CFComment({"lock: This collection can only contain nonnull values"})
-@AnnotatedFor({"lock", "nullness", "index", "pico"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 @ReceiverDependentMutable
 public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull Object>
     extends Dictionary<K,V>
@@ -209,7 +209,7 @@ public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull O
      * @throws     IllegalArgumentException  if the initial capacity is less
      *             than zero, or if the load factor is nonpositive.
      */
-    @SuppressWarnings("pico") // Annotated new expression's array's component type will crash PICO
+    @SuppressWarnings("mutability") // Annotated new expression's array's component type will crash PICO
     public Hashtable(@NonNegative int initialCapacity, float loadFactor) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal Capacity: "+
@@ -253,7 +253,7 @@ public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull O
      * @throws NullPointerException if the specified map is null.
      * @since   1.2
      */
-    @SuppressWarnings("pico:method.invocation.invalid") // PICO constructor fix
+    @SuppressWarnings("mutability:method.invocation.invalid") // PICO constructor fix
     public Hashtable(Map<? extends K, ? extends V> t) {
         this(Math.max(2*t.size(), 11), 0.75f);
         putAll(t);
@@ -265,7 +265,7 @@ public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull O
      *
      * @param dummy a dummy parameter
      */
-    // @SuppressWarnings("pico:initialization.fields.uninitialized") // Conservative
+    // @SuppressWarnings("mutability:initialization.fields.uninitialized") // Conservative
     Hashtable(Void dummy) {}
 
     /**
@@ -745,7 +745,7 @@ public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull O
      * @since 1.2
      */
     @SideEffectFree
-    @SuppressWarnings("pico:argument.type.incompatible") // Aosen: class polymorphism qualifier
+    @SuppressWarnings("mutability:argument.type.incompatible") // Aosen: class polymorphism qualifier
     public @PolyMutable Set<Map.@PolyMutable Entry<@KeyFor({"this"}) K,V>> entrySet(@GuardSatisfied @PolyMutable Hashtable<K, V> this) {
         if (entrySet==null)
             entrySet = Collections.synchronizedSet(new @PolyMutable EntrySet(), this);
@@ -1486,7 +1486,7 @@ public class Hashtable<K extends @NonNull @Immutable Object,V extends @NonNull O
      */
     @ReceiverDependentMutable
     private class Enumerator<T> implements Enumeration<T>, Iterator<T> {
-        @SuppressWarnings("pico:assignment.type.incompatible") // PICO field use
+        @SuppressWarnings("mutability:assignment.type.incompatible") // PICO field use
         final @Readonly Entry<?,?>[] table = Hashtable.this.table;
         @Assignable int index = table.length;
         @Assignable @Readonly Entry<?,?> entry;
