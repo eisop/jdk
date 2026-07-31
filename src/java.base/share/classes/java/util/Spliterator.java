@@ -31,7 +31,6 @@ import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.SignedPositive;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
-import org.checkerframework.framework.qual.Covariant;
 
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -303,7 +302,6 @@ import java.util.function.LongConsumer;
  * @since 1.8
  */
 @AnnotatedFor({"lock", "nullness", "pico"})
-@Covariant(0)
 @ReceiverDependentMutable
 public interface Spliterator<T> {
     /**
