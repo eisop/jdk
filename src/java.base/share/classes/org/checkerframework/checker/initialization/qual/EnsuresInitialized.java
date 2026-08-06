@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 @InheritedAnnotation
 @Repeatable(EnsuresInitialized.List.class)
 public @interface EnsuresInitialized {
-     /**
+    /**
      * The Java expressions that are initialized upon successful method termination.
      *
      * @return the Java expressions that are initialized
