@@ -220,7 +220,8 @@ public interface Queue<E> extends Collection<E> {
      *
      * @return the head of this queue, or {@code null} if this queue is empty
      */
-    @Nullable E peek();
+    @Pure
+    @Nullable E peek(@GuardSatisfied Queue<E> this);
 
     @CFComment("Copied from Collection to make it annotatable")
     @Pure
