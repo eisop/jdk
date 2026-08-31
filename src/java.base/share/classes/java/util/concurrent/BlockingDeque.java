@@ -589,6 +589,7 @@ public interface BlockingDeque<E extends @NonNull Object> extends BlockingQueue<
      *
      * @return the head of this deque, or {@code null} if this deque is empty
      */
+    @Pure
     @Nullable E peek();
 
     /**
