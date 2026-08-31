@@ -1878,7 +1878,7 @@ public class TreeMap<K,V>
             return m.computeIfAbsent(key, mappingFunction);
         }
 
-        public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        public V compute(K key, BiFunction<? super K, ? super @Nullable V, ? extends V> remappingFunction) {
             if (!inRange(key)) {
                 // Do not throw if remapping function returns null
                 // to preserve compatibility with default computeIfAbsent implementation
