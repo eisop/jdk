@@ -38,7 +38,7 @@ import java.io.IOException;
  *
  * @since 1.5
  */
-@AnnotatedFor({"lock", "nullness", "index"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
 public interface Readable {
 
     /**

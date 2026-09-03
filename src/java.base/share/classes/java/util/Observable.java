@@ -88,6 +88,7 @@ import org.checkerframework.framework.qual.CFComment;
 })
 @AnnotatedFor({"index", "interning", "lock", "nullness"})
 @Deprecated(since="9")
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public @UsesObjectEquals class Observable {
     private boolean changed = false;
     private Vector<Observer> obs;

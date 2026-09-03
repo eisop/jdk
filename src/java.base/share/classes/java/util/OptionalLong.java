@@ -69,6 +69,7 @@ import java.util.stream.LongStream;
  */
 @AnnotatedFor({"lock", "nullness", "optional"})
 @jdk.internal.ValueBased
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final @NonNull class OptionalLong {
     /**
      * Common instance for {@code empty()}.

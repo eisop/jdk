@@ -30,6 +30,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import org.checkerframework.checker.mutability.qual.Immutable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * ProcessHandle identifies and provides control of native processes. Each
  * individual process can be monitored for liveness, list its children,
@@ -92,6 +95,8 @@ import java.util.stream.Stream;
  * @since 9
  */
 @jdk.internal.ValueBased
+@AnnotatedFor("mutability")
+@Immutable
 public interface ProcessHandle extends Comparable<ProcessHandle> {
 
     /**

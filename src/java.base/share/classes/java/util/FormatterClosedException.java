@@ -25,6 +25,9 @@
 
 package java.util;
 
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Unchecked exception thrown when the formatter has been closed.
  *
@@ -34,6 +37,8 @@ package java.util;
  *
  * @since 1.5
  */
+@AnnotatedFor("mutability")
+@ReceiverDependentMutable
 public class FormatterClosedException extends IllegalStateException {
 
     @java.io.Serial
