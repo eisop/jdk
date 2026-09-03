@@ -363,7 +363,8 @@ public interface Deque<E> extends Queue<E> {
      *
      * @return the head of this deque, or {@code null} if this deque is empty
      */
-    @Nullable E peekFirst(@Readonly Deque<E> this);
+    @Pure
+    @Nullable E peekFirst(@Readonly @GuardSatisfied Deque<E> this);
 
     /**
      * Retrieves, but does not remove, the last element of this deque,
@@ -371,7 +372,8 @@ public interface Deque<E> extends Queue<E> {
      *
      * @return the tail of this deque, or {@code null} if this deque is empty
      */
-    @Nullable E peekLast(@Readonly Deque<E> this);
+    @Pure
+    @Nullable E peekLast(@Readonly @GuardSatisfied Deque<E> this);
 
     /**
      * Removes the first occurrence of the specified element from this deque.
@@ -509,7 +511,8 @@ public interface Deque<E> extends Queue<E> {
      * @return the head of the queue represented by this deque, or
      *         {@code null} if this deque is empty
      */
-    @Nullable E peek(@Readonly Deque<E> this);
+    @Pure
+    @Nullable E peek(@Readonly @GuardSatisfied Deque<E> this);
 
     /**
      * Adds all of the elements in the specified collection at the end
