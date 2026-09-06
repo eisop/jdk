@@ -25,6 +25,9 @@
 
 package java.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 
 /**
  * Error thrown when something goes wrong while locating, loading, or
@@ -35,6 +38,7 @@ package java.util;
  * @see ServiceLoader
  */
 
+@AnnotatedFor({"nullness"})
 public class ServiceConfigurationError
     extends Error
 {
@@ -48,7 +52,7 @@ public class ServiceConfigurationError
      * @param  msg  The message, or {@code null} if there is no message
      *
      */
-    public ServiceConfigurationError(String msg) {
+    public ServiceConfigurationError(@Nullable String msg) {
         super(msg);
     }
 
@@ -60,7 +64,7 @@ public class ServiceConfigurationError
      * @param  cause  The cause, or {@code null} if the cause is nonexistent
      *                or unknown
      */
-    public ServiceConfigurationError(String msg, Throwable cause) {
+    public ServiceConfigurationError(@Nullable String msg, @Nullable Throwable cause) {
         super(msg, cause);
     }
 

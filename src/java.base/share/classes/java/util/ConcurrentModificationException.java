@@ -25,6 +25,9 @@
 
 package java.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * This exception may be thrown by methods that have detected concurrent
  * modification of an object when such modification is not permissible.
@@ -67,6 +70,7 @@ package java.util;
  * @see     AbstractList
  * @since   1.2
  */
+@AnnotatedFor({"nullness"})
 public class ConcurrentModificationException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = -3666751008965953603L;
@@ -84,7 +88,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *
      * @param message the detail message pertaining to this exception.
      */
-    public ConcurrentModificationException(String message) {
+    public ConcurrentModificationException(@Nullable String message) {
         super(message);
     }
 
@@ -99,7 +103,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since  1.7
      */
-    public ConcurrentModificationException(Throwable cause) {
+    public ConcurrentModificationException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -119,7 +123,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since 1.7
      */
-    public ConcurrentModificationException(String message, Throwable cause) {
+    public ConcurrentModificationException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 }

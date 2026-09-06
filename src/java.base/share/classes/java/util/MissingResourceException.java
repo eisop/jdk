@@ -40,6 +40,9 @@
 
 package java.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Signals that a resource is missing.
  * @see java.lang.Exception
@@ -47,6 +50,7 @@ package java.util;
  * @author      Mark Davis
  * @since       1.1
  */
+@AnnotatedFor({"nullness"})
 public class MissingResourceException extends RuntimeException {
 
     /**
@@ -56,7 +60,7 @@ public class MissingResourceException extends RuntimeException {
      * @param className the name of the resource class
      * @param key the key for the missing resource.
      */
-    public MissingResourceException(String s, String className, String key) {
+    public MissingResourceException(@Nullable String s, String className, String key) {
         super(s);
         this.className = className;
         this.key = key;
@@ -80,7 +84,7 @@ public class MissingResourceException extends RuntimeException {
      *        permitted, and indicates that the cause is nonexistent
      *        or unknown.)
      */
-    MissingResourceException(String message, String className, String key, Throwable cause) {
+    MissingResourceException(@Nullable String message, String className, String key, @Nullable Throwable cause) {
         super(message, cause);
         this.className = className;
         this.key = key;

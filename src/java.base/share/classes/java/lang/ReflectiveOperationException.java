@@ -25,6 +25,9 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Common superclass of exceptions thrown by reflective operations in
  * core reflection.
@@ -32,6 +35,7 @@ package java.lang;
  * @see LinkageError
  * @since 1.7
  */
+@AnnotatedFor({"nullness"})
 public class ReflectiveOperationException extends Exception {
     @java.io.Serial
     static final long serialVersionUID = 123456789L;
@@ -53,7 +57,7 @@ public class ReflectiveOperationException extends Exception {
      * @param   message   the detail message. The detail message is saved for
      *          later retrieval by the {@link #getMessage()} method.
      */
-    public ReflectiveOperationException(String message) {
+    public ReflectiveOperationException(@Nullable String message) {
         super(message);
     }
 
@@ -72,7 +76,7 @@ public class ReflectiveOperationException extends Exception {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public ReflectiveOperationException(String message, Throwable cause) {
+    public ReflectiveOperationException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -86,7 +90,7 @@ public class ReflectiveOperationException extends Exception {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public ReflectiveOperationException(Throwable cause) {
+    public ReflectiveOperationException(@Nullable Throwable cause) {
         super(cause);
     }
 }
