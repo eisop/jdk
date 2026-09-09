@@ -25,6 +25,9 @@
 
 package java.lang.invoke;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown to indicate that code has attempted to call a method handle
  * via the wrong method type.  As with the bytecode representation of
@@ -40,6 +43,7 @@ package java.lang.invoke;
  * @author John Rose, JSR 292 EG
  * @since 1.7
  */
+@AnnotatedFor({"nullness"})
 public class WrongMethodTypeException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = 292L;
@@ -57,7 +61,7 @@ public class WrongMethodTypeException extends RuntimeException {
      *
      * @param s the detail message.
      */
-    public WrongMethodTypeException(String s) {
+    public WrongMethodTypeException(@Nullable String s) {
         super(s);
     }
 
@@ -70,7 +74,7 @@ public class WrongMethodTypeException extends RuntimeException {
      */
     //FIXME: make this public in MR1
     /*non-public*/
-    WrongMethodTypeException(String s, Throwable cause) {
+    WrongMethodTypeException(@Nullable String s, @Nullable Throwable cause) {
         super(s, cause);
     }
 
@@ -82,7 +86,7 @@ public class WrongMethodTypeException extends RuntimeException {
      */
     //FIXME: make this public in MR1
     /*non-public*/
-    WrongMethodTypeException(Throwable cause) {
+    WrongMethodTypeException(@Nullable Throwable cause) {
         super(cause);
     }
 }

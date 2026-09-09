@@ -25,6 +25,9 @@
 
 package java.lang.module;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown by a {@link ModuleFinder ModuleFinder} when an error occurs finding
  * a module. Also thrown by {@link
@@ -35,6 +38,7 @@ package java.lang.module;
  * @since 9
  */
 
+@AnnotatedFor({"nullness"})
 public class FindException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = -5817081036963388391L;
@@ -52,7 +56,7 @@ public class FindException extends RuntimeException {
      * @param msg
      *        The detail message; can be {@code null}
      */
-    public FindException(String msg) {
+    public FindException(@Nullable String msg) {
         super(msg);
     }
 
@@ -62,7 +66,7 @@ public class FindException extends RuntimeException {
      * @param cause
      *        The cause; can be {@code null}
      */
-    public FindException(Throwable cause) {
+    public FindException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -75,7 +79,7 @@ public class FindException extends RuntimeException {
      * @param cause
      *        The cause; can be {@code null}
      */
-    public FindException(String msg, Throwable cause) {
+    public FindException(@Nullable String msg, @Nullable Throwable cause) {
         super(msg, cause);
     }
 }
