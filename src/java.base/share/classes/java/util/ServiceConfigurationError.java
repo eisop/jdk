@@ -28,7 +28,6 @@ package java.util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
-
 /**
  * Error thrown when something goes wrong while locating, loading, or
  * instantiating a service provider.
