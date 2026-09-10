@@ -25,10 +25,11 @@
 
 package java.util;
 
-import java.io.NotSerializableException;
-import java.io.IOException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
+
+import java.io.NotSerializableException;
+import java.io.IOException;
 
 /**
  * Thrown to indicate that an operation could not complete because
