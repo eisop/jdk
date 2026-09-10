@@ -49,8 +49,6 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
 import jdk.internal.vm.annotation.Stable;
 
 import static java.lang.invoke.MethodHandleStatics.UNSAFE;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
  * A VarHandle is a dynamically strongly typed reference to a variable, or to a
