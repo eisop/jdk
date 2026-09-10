@@ -25,6 +25,9 @@
 
 package java.lang.invoke;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 import java.lang.constant.ClassDesc;
 import java.lang.constant.Constable;
 import java.lang.constant.ConstantDesc;
@@ -476,6 +479,7 @@ import static java.lang.invoke.MethodHandleStatics.UNSAFE;
  * @see MethodType
  * @since 9
  */
+@AnnotatedFor({"nullness"})
 public abstract class VarHandle implements Constable {
     final VarForm vform;
     final boolean exact;
@@ -545,7 +549,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object get(Object... args);
+    @Nullable Object get(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, with memory
@@ -603,7 +607,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getVolatile(Object... args);
+    @Nullable Object getVolatile(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, with memory
@@ -663,7 +667,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getOpaque(Object... args);
+    @Nullable Object getOpaque(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, in program order,
@@ -727,7 +731,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAcquire(Object... args);
+    @Nullable Object getAcquire(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, and ensures that
@@ -829,7 +833,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object compareAndExchange(Object... args);
+    @Nullable Object compareAndExchange(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -864,7 +868,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object compareAndExchangeAcquire(Object... args);
+    @Nullable Object compareAndExchangeAcquire(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -899,7 +903,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object compareAndExchangeRelease(Object... args);
+    @Nullable Object compareAndExchangeRelease(Object... args);
 
     // Weak (spurious failures allowed)
 
@@ -1084,7 +1088,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAndSet(Object... args);
+    @Nullable Object getAndSet(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -1117,7 +1121,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAndSetAcquire(Object... args);
+    @Nullable Object getAndSetAcquire(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -1150,7 +1154,7 @@ public abstract class VarHandle implements Constable {
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAndSetRelease(Object... args);
+    @Nullable Object getAndSetRelease(Object... args);
 
     // Primitive adders
     // Throw UnsupportedOperationException for refs
