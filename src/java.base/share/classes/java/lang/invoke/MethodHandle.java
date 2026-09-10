@@ -25,6 +25,9 @@
 
 package java.lang.invoke;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 
 import jdk.internal.vm.annotation.IntrinsicCandidate;
 
@@ -41,8 +44,6 @@ import java.util.function.Function;
 import static java.lang.invoke.MethodHandleInfo.*;
 import static java.lang.invoke.MethodHandleStatics.*;
 import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
  * A method handle is a typed, directly executable reference to an underlying method,
