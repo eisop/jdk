@@ -26,6 +26,7 @@
 package java.util;
 
 import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -70,7 +71,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     AbstractList
  * @since   1.2
  */
-@AnnotatedFor("mutability")
+@AnnotatedFor({"nullness", "mutability"})
 @ReceiverDependentMutable
 public class ConcurrentModificationException extends RuntimeException {
     @java.io.Serial
@@ -89,7 +90,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *
      * @param message the detail message pertaining to this exception.
      */
-    public ConcurrentModificationException(String message) {
+    public ConcurrentModificationException(@Nullable String message) {
         super(message);
     }
 
@@ -104,7 +105,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since  1.7
      */
-    public ConcurrentModificationException(@ReceiverDependentMutable Throwable cause) {
+    public ConcurrentModificationException(@Nullable @ReceiverDependentMutable Throwable cause) {
         super(cause);
     }
 
@@ -124,7 +125,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since 1.7
      */
-    public ConcurrentModificationException(String message, @ReceiverDependentMutable Throwable cause) {
+    public ConcurrentModificationException(@Nullable String message, @Nullable @ReceiverDependentMutable Throwable cause) {
         super(message, cause);
     }
 }

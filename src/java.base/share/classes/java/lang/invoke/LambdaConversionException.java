@@ -25,11 +25,15 @@
 
 package java.lang.invoke;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * LambdaConversionException
  *
  * @since 1.8
  */
+@AnnotatedFor({"nullness"})
 public class LambdaConversionException extends Exception {
     @java.io.Serial
     private static final long serialVersionUID = 292L + 8L;
@@ -44,7 +48,7 @@ public class LambdaConversionException extends Exception {
      * Constructs a {@code LambdaConversionException} with a message.
      * @param message the detail message
      */
-    public LambdaConversionException(String message) {
+    public LambdaConversionException(@Nullable String message) {
         super(message);
     }
 
@@ -53,7 +57,7 @@ public class LambdaConversionException extends Exception {
      * @param message the detail message
      * @param cause the cause
      */
-    public LambdaConversionException(String message, Throwable cause) {
+    public LambdaConversionException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -61,7 +65,7 @@ public class LambdaConversionException extends Exception {
      * Constructs a {@code LambdaConversionException} with a cause.
      * @param cause the cause
      */
-    public LambdaConversionException(Throwable cause) {
+    public LambdaConversionException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -73,7 +77,7 @@ public class LambdaConversionException extends Exception {
      * @param enableSuppression whether or not suppressed exceptions are enabled
      * @param writableStackTrace whether or not the stack trace is writable
      */
-    public LambdaConversionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public LambdaConversionException(@Nullable String message, @Nullable Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

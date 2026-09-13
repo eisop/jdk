@@ -25,12 +25,16 @@
 
 package java.lang.invoke;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * StringConcatException is thrown by {@link StringConcatFactory} when linkage
  * invariants are violated.
  *
  * @since 9
  */
+@AnnotatedFor({"nullness"})
 public class StringConcatException extends Exception {
     @java.io.Serial
     private static final long serialVersionUID = 292L + 9L;
@@ -39,7 +43,7 @@ public class StringConcatException extends Exception {
      * Constructs an exception with a message
      * @param msg exception message
      */
-    public StringConcatException(String msg) {
+    public StringConcatException(@Nullable String msg) {
         super(msg);
     }
 
@@ -48,7 +52,7 @@ public class StringConcatException extends Exception {
      * @param msg   exception message
      * @param cause throwable cause
      */
-    public StringConcatException(String msg, Throwable cause) {
+    public StringConcatException(@Nullable String msg, @Nullable Throwable cause) {
         super(msg, cause);
     }
 }

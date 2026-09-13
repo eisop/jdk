@@ -41,6 +41,7 @@
 package java.util;
 
 import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -50,7 +51,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @author      Mark Davis
  * @since       1.1
  */
-@AnnotatedFor("mutability")
+@AnnotatedFor({"nullness", "mutability"})
 @ReceiverDependentMutable
 public class MissingResourceException extends RuntimeException {
 
@@ -61,7 +62,7 @@ public class MissingResourceException extends RuntimeException {
      * @param className the name of the resource class
      * @param key the key for the missing resource.
      */
-    public MissingResourceException(String s, String className, String key) {
+    public MissingResourceException(@Nullable String s, String className, String key) {
         super(s);
         this.className = className;
         this.key = key;
@@ -85,7 +86,7 @@ public class MissingResourceException extends RuntimeException {
      *        permitted, and indicates that the cause is nonexistent
      *        or unknown.)
      */
-    MissingResourceException(String message, String className, String key, @ReceiverDependentMutable Throwable cause) {
+    MissingResourceException(@Nullable String message, String className, String key, @Nullable @ReceiverDependentMutable Throwable cause) {
         super(message, cause);
         this.className = className;
         this.key = key;

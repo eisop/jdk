@@ -25,6 +25,9 @@
 
 package java.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 import java.io.NotSerializableException;
 import java.io.IOException;
 
@@ -42,6 +45,7 @@ import java.io.IOException;
  * @since   1.5
  * @serial exclude
  */
+@AnnotatedFor({"nullness"})
 @SuppressWarnings("mutability") // Not interesting class, fix later
 public class InvalidPropertiesFormatException extends IOException {
 
@@ -55,7 +59,7 @@ public class InvalidPropertiesFormatException extends IOException {
      * @param  cause the cause (which is saved for later retrieval by the
      *         {@link Throwable#getCause()} method).
      */
-    public InvalidPropertiesFormatException(Throwable cause) {
+    public InvalidPropertiesFormatException(@Nullable Throwable cause) {
         super(cause==null ? null : cause.toString());
         this.initCause(cause);
     }
@@ -67,7 +71,7 @@ public class InvalidPropertiesFormatException extends IOException {
     * @param   message   the detail message. The detail message is saved for
     *          later retrieval by the {@link Throwable#getMessage()} method.
     */
-    public InvalidPropertiesFormatException(String message) {
+    public InvalidPropertiesFormatException(@Nullable String message) {
         super(message);
     }
 

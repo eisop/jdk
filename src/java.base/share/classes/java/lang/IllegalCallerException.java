@@ -25,6 +25,7 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -33,7 +34,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 9
  * @see StackWalker#getCallerClass
  */
-@AnnotatedFor("mutability")
+@AnnotatedFor({"nullness", "mutability"})
 public class IllegalCallerException extends RuntimeException {
     /**
      * Constructs an IllegalCallerException with no detail message.
@@ -48,7 +49,7 @@ public class IllegalCallerException extends RuntimeException {
      *
      * @param s the String that contains a detailed message (can be null)
      */
-    public IllegalCallerException(String s) {
+    public IllegalCallerException(@Nullable String s) {
         super(s);
     }
 
@@ -59,7 +60,7 @@ public class IllegalCallerException extends RuntimeException {
      * @param  message the detail message (can be null)
      * @param  cause the cause (can be null)
      */
-    public IllegalCallerException(String message, Throwable cause) {
+    public IllegalCallerException(@Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
     }
 
@@ -70,7 +71,7 @@ public class IllegalCallerException extends RuntimeException {
      *
      * @param  cause the cause (can be null)
      */
-    public IllegalCallerException(Throwable cause) {
+    public IllegalCallerException(@Nullable Throwable cause) {
         super(cause);
     }
 

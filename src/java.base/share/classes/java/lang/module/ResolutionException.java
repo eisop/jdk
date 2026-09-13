@@ -25,6 +25,9 @@
 
 package java.lang.module;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown when resolving a set of modules, or resolving a set of modules with
  * service binding, fails.
@@ -32,6 +35,7 @@ package java.lang.module;
  * @see Configuration
  * @since 9
  */
+@AnnotatedFor({"nullness"})
 public class ResolutionException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = -1031186845316729450L;
@@ -48,7 +52,7 @@ public class ResolutionException extends RuntimeException {
      * @param msg
      *        The detail message; can be {@code null}
      */
-    public ResolutionException(String msg) {
+    public ResolutionException(@Nullable String msg) {
         super(msg);
     }
 
@@ -58,7 +62,7 @@ public class ResolutionException extends RuntimeException {
      * @param cause
      *        The cause; can be {@code null}
      */
-    public ResolutionException(Throwable cause) {
+    public ResolutionException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -71,7 +75,7 @@ public class ResolutionException extends RuntimeException {
      * @param cause
      *        The cause; can be {@code null}
      */
-    public ResolutionException(String msg, Throwable cause) {
+    public ResolutionException(@Nullable String msg, @Nullable Throwable cause) {
         super(msg, cause);
     }
 
