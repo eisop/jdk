@@ -24,6 +24,7 @@
  */
 package java.util;
 
+import org.checkerframework.checker.mutability.qual.Mutable;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -67,6 +68,7 @@ import java.util.stream.DoubleStream;
  * @since 1.8
  */
 @AnnotatedFor({"lock", "nullness"})
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class DoubleSummaryStatistics implements DoubleConsumer {
     private long count;
     private double sum;

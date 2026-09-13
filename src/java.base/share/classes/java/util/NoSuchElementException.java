@@ -25,6 +25,7 @@
 
 package java.util;
 
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -36,7 +37,8 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.util.Iterator#next()
  * @since   1.0
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"nullness", "mutability"})
+@ReceiverDependentMutable
 public class NoSuchElementException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = 6769829250639411880L;
@@ -58,7 +60,7 @@ public class NoSuchElementException extends RuntimeException {
      *              {@link #getCause()} method), or null
      * @since 15
      */
-    public NoSuchElementException(@Nullable String s, @Nullable Throwable cause) {
+    public NoSuchElementException(@Nullable String s, @Nullable @ReceiverDependentMutable Throwable cause) {
         super(s, cause);
     }
 
@@ -72,7 +74,7 @@ public class NoSuchElementException extends RuntimeException {
      *              {@link #getCause()} method)
      * @since 15
      */
-    public NoSuchElementException(@Nullable Throwable cause) {
+    public NoSuchElementException(@Nullable @ReceiverDependentMutable Throwable cause) {
         super(cause);
     }
 

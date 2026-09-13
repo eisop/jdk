@@ -45,8 +45,8 @@ import java.io.IOException;
  * @since   1.5
  * @serial exclude
  */
-
 @AnnotatedFor({"nullness"})
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class InvalidPropertiesFormatException extends IOException {
 
     @java.io.Serial

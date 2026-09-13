@@ -25,6 +25,7 @@
 
 package java.lang;
 
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 /**
@@ -51,6 +52,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     java.lang.Object#clone()
  * @since   1.0
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"nullness", "mutability"})
+@ReceiverDependentMutable
 public interface Cloneable {
 }

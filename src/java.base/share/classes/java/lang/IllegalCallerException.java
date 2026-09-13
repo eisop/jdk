@@ -34,7 +34,7 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 9
  * @see StackWalker#getCallerClass
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"nullness", "mutability"})
 public class IllegalCallerException extends RuntimeException {
     /**
      * Constructs an IllegalCallerException with no detail message.
