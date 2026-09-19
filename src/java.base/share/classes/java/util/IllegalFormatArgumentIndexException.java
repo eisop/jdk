@@ -25,6 +25,9 @@
 
 package java.util;
 
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Unchecked exception thrown when the argument index is not within the valid
  * range of supported argument index values. If an index value isn't
@@ -33,6 +36,8 @@ package java.util;
  *
  * @since 16
  */
+@AnnotatedFor("mutability")
+@ReceiverDependentMutable
 class IllegalFormatArgumentIndexException extends IllegalFormatException {
 
     @java.io.Serial
