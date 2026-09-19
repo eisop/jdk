@@ -32,7 +32,6 @@ import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
 import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.PolySigned;
@@ -103,7 +102,7 @@ import jdk.internal.util.ArraysSupport;
 @CFComment({"lock/nullness: This class doesn't permits null elements"})
 @AnnotatedFor({"lock", "nullness", "index"})
 @SuppressWarnings("unchecked")
-public class PriorityQueue<E extends @NonNull Object> extends AbstractQueue<E>
+public class PriorityQueue<E extends Object> extends AbstractQueue<E>
     implements java.io.Serializable {
 
     @java.io.Serial

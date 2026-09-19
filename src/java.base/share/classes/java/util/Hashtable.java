@@ -33,7 +33,6 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyFor;
 import org.checkerframework.checker.nullness.qual.EnsuresKeyForIf;
 import org.checkerframework.checker.nullness.qual.KeyFor;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
@@ -151,7 +150,7 @@ import jdk.internal.access.SharedSecrets;
  */
 @CFComment({"lock: This collection can only contain nonnull values"})
 @AnnotatedFor({"lock", "nullness", "index"})
-public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
+public class Hashtable<K extends Object,V extends Object>
     extends Dictionary<K,V>
     implements Map<K,V>, Cloneable, java.io.Serializable {
 
