@@ -1,6 +1,7 @@
 package org.checkerframework.common.value.qual;
 
 import org.checkerframework.framework.qual.InvisibleQualifier;
+import org.checkerframework.framework.qual.ProgrammaticDefaultLocations;
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TargetLocations;
 import org.checkerframework.framework.qual.TypeUseLocation;
@@ -21,6 +22,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @TargetLocations({TypeUseLocation.UPPER_BOUND, TypeUseLocation.LOWER_BOUND})
+@ProgrammaticDefaultLocations
 @SubtypeOf({
     ArrayLen.class,
     BoolVal.class,

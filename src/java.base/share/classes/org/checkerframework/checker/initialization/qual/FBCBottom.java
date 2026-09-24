@@ -1,6 +1,7 @@
 package org.checkerframework.checker.initialization.qual;
 
 import org.checkerframework.framework.qual.LiteralKind;
+import org.checkerframework.framework.qual.ProgrammaticDefaultLocations;
 import org.checkerframework.framework.qual.QualifierForLiterals;
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TargetLocations;
@@ -25,6 +26,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @TargetLocations({TypeUseLocation.LOWER_BOUND, TypeUseLocation.UPPER_BOUND})
+@ProgrammaticDefaultLocations
 @SubtypeOf({UnderInitialization.class, Initialized.class})
 @QualifierForLiterals(LiteralKind.NULL)
 public @interface FBCBottom {}

@@ -1,5 +1,6 @@
 package org.checkerframework.checker.signedness.qual;
 
+import org.checkerframework.framework.qual.ProgrammaticDefaultLocations;
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TargetLocations;
 import org.checkerframework.framework.qual.TypeUseLocation;
@@ -25,5 +26,6 @@ import java.lang.annotation.Target;
     TypeUseLocation.LOWER_BOUND,
     TypeUseLocation.UPPER_BOUND,
 })
+@ProgrammaticDefaultLocations
 @SubtypeOf({SignedPositive.class})
 public @interface SignednessBottom {}
