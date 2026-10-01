@@ -133,8 +133,8 @@ jar tf checker-qual-sources.jar | grep '\.java$' | sed 's/\/[^/]*\.java/;/' | se
 The result of the command will be a list of export lines.
 Replace the existing export lines present in
 `src/java.base/share/classes/module-info.java` with the newly-generated list of
-exports. If no new packages were added, then there are likely going to be no
-changes to the `module-info.java` file.
+exports. If no new packages were added, then likely no changes are needed
+in the `module-info.java` file.
 
 Commit the changes. Do not include the top-level `checker-qual-source.jar` file,
 but include any new `.java` files in a `qual/` directory.
