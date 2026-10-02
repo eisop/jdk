@@ -41,7 +41,6 @@ import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -931,7 +930,6 @@ public class LinkedList<E>
             return nextIndex < size;
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty ListItr this) {
             checkForComodification();
             if (!hasNext())
@@ -1044,7 +1042,6 @@ public class LinkedList<E>
         public boolean hasNext() {
             return itr.hasPrevious();
         }
-        @SideEffectsOnly("this")
         public E next(@NonEmpty DescendingIterator this) {
             return itr.previous();
         }

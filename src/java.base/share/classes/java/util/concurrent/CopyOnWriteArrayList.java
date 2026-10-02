@@ -49,7 +49,6 @@ import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
@@ -1207,7 +1206,6 @@ public class CopyOnWriteArrayList<E>
         }
 
         @SuppressWarnings("unchecked")
-        @SideEffectsOnly("this")
         public E next(@NonEmpty COWIterator<E> this) {
             if (! hasNext())
                 throw new NoSuchElementException();
@@ -1215,7 +1213,6 @@ public class CopyOnWriteArrayList<E>
         }
 
         @SuppressWarnings("unchecked")
-        @SideEffectsOnly("this")
         public E previous() {
             if (! hasPrevious())
                 throw new NoSuchElementException();
@@ -1717,7 +1714,6 @@ public class CopyOnWriteArrayList<E>
             return nextIndex() < size;
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty COWSubListIterator<E> this) {
             if (hasNext())
                 return it.next();

@@ -26,7 +26,6 @@
 package sun.nio.fs;
 
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.nio.file.*;
 import java.nio.file.attribute.*;
@@ -170,7 +169,6 @@ class WindowsFileSystem
         }
 
         @Override
-        @SideEffectsOnly("this")
         public synchronized FileStore next() {
             if (next == null)
                 next = readNext();

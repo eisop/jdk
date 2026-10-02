@@ -43,7 +43,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -1353,7 +1352,6 @@ public class ScheduledThreadPoolExecutor
                 return cursor < array.length;
             }
 
-            @SideEffectsOnly("this")
             public Runnable next(@NonEmpty Itr this) {
                 if (cursor >= array.length)
                     throw new NoSuchElementException();
