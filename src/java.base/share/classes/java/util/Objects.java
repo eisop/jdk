@@ -281,6 +281,7 @@ public final @UsesObjectEquals class Objects {
     @EnsuresNonNull("#1")
     @ForceInline
     @SideEffectFree
+    @ForceInline
     public static <T> @NonNull T requireNonNull(@GuardSatisfied @NonNull @UnknownSignedness T obj, @Nullable String message) {
         if (obj == null)
             throw new NullPointerException(message);

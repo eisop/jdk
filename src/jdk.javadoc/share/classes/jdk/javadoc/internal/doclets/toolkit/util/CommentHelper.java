@@ -113,6 +113,7 @@ public class CommentHelper {
         };
     }
 
+    @Pure
     public String getParameterName(ParamTree p) {
         return p.getName().getName().toString();
     }

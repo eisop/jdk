@@ -534,7 +534,7 @@ public @UsesObjectEquals class Runtime {
      *
      * @see     ProcessBuilder
      */
-    public Process exec(@Untainted String [] cmdarray) throws IOException {
+    public Process exec(@Untainted String[] cmdarray) throws IOException {
         return exec(cmdarray, null, null);
     }
 

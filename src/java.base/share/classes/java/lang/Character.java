@@ -9103,9 +9103,9 @@ class Character implements java.io.Serializable, Comparable<Character>, Constabl
      *
      * @return  a string representation of this object.
      */
-    @Override
     @SideEffectFree
     @StaticallyExecutable
+    @Override
     public @ArrayLen(1) String toString() {
         return String.valueOf(value);
     }

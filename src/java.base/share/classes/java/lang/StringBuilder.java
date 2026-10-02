@@ -493,6 +493,7 @@ public final class StringBuilder
         return this;
     }
 
+    @SideEffectFree
     /**
      * @throws IllegalArgumentException {@inheritDoc}
      *
@@ -515,8 +516,8 @@ public final class StringBuilder
         return this;
     }
 
-    @IntrinsicCandidate
     @Override
+    @IntrinsicCandidate
     @SideEffectFree
     public @PolyRegex String toString(@GuardSatisfied @PolyRegex StringBuilder this) {
         // Create a copy, don't share the array

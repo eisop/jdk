@@ -799,8 +799,8 @@ public final @UsesObjectEquals class Math {
      * @see     java.lang.Integer#MAX_VALUE
      * @see     java.lang.Integer#MIN_VALUE
      */
-    @IntrinsicCandidate
     @Pure
+    @IntrinsicCandidate
     public static int round(float a) {
         int intBits = Float.floatToRawIntBits(a);
         int biasedExp = (intBits & FloatConsts.EXP_BIT_MASK)
@@ -850,8 +850,8 @@ public final @UsesObjectEquals class Math {
      * @see     java.lang.Long#MAX_VALUE
      * @see     java.lang.Long#MIN_VALUE
      */
-    @IntrinsicCandidate
     @Pure
+    @IntrinsicCandidate
     public static long round(double a) {
         long longBits = Double.doubleToRawLongBits(a);
         long biasedExp = (longBits & DoubleConsts.EXP_BIT_MASK)

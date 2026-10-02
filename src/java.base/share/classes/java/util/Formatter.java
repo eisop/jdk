@@ -4665,6 +4665,8 @@ public final class Formatter implements Closeable, Flushable {
             return (flags & f) != 0;
         }
 
+        @Pure
+        @EnsuresNonEmptyIf(result = true, expression = "this")
         private static int add(int flags, int f) {
             return flags | f;
         }

@@ -105,7 +105,7 @@ import sun.security.action.GetPropertyAction;
  * @author  Xueming Shen
  * @since   1.6
  */
-@AnnotatedFor({"formatter", "index",  "initialization", "interning", "nullness"})
+@AnnotatedFor({"formatter", "index", "initialization", "interning", "nullness"})
 public sealed @UsesObjectEquals class Console implements Flushable permits ProxyingConsole {
     /**
      * Package private no-arg constructor.
@@ -365,7 +365,6 @@ public sealed @UsesObjectEquals class Console implements Flushable permits Proxy
     }
 
     private static native String encoding();
-
     static final Charset CHARSET;
     static {
         Charset cs = null;

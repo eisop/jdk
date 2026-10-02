@@ -1980,6 +1980,7 @@ public final class Collectors {
         }
 
         @Override
+        @SideEffectFree
         public int size() {
             return 2;
         }

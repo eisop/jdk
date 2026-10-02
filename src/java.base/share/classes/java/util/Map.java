@@ -933,7 +933,7 @@ public interface Map<K, V> {
      */
     @CFComment("nullness: key and value are not @Nullable because this map might not permit null values")
     default boolean remove(@GuardSatisfied @UnknownSignedness Object key, @GuardSatisfied @UnknownSignedness Object value) {
-        Object curValue = (key);
+        Object curValue = get(key);
         if (!Objects.equals(curValue, value) ||
             (curValue == null && !containsKey(key))) {
             return false;
@@ -1189,8 +1189,8 @@ public interface Map<K, V> {
      *         ({@linkplain Collection##optional-restrictions optional})
      * @since 1.8
      */
-    default @PolyNull V computeIfPresent(K key,
-            BiFunction<? super K, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
+    default @Nullable V computeIfPresent(K key,
+            BiFunction<? super K, ? super V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue;
         if ((oldValue = get(key)) != null) {
@@ -1275,8 +1275,8 @@ public interface Map<K, V> {
      *         ({@linkplain Collection##optional-restrictions optional})
      * @since 1.8
      */
-    default @PolyNull V compute(K key,
-            BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
+    default @Nullable V compute(K key,
+            BiFunction<? super K, ? super @Nullable V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue = get(key);
 
@@ -1373,8 +1373,8 @@ public interface Map<K, V> {
      *         null
      * @since 1.8
      */
-    default @PolyNull V merge(K key, @NonNull V value,
-            BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @PolyNull V> remappingFunction) {
+    default @Nullable V merge(K key, @NonNull V value,
+            BiFunction<? super V, ? super V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         Objects.requireNonNull(value);
         V oldValue = get(key);

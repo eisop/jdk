@@ -111,6 +111,7 @@ public class LocalVariableGen implements InstructionTargeter, NamedAndTyped, Clo
      * We consider to local variables to be equal, if the use the same index and are valid in the same range.
      */
     @Override
+    @Pure
     public boolean equals(final Object o) {
         if (!(o instanceof LocalVariableGen)) {
             return false;

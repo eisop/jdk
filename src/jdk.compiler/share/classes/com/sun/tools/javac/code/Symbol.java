@@ -25,10 +25,11 @@
 
 package com.sun.tools.javac.code;
 
-import org.checkerframework.checker.signature.qual.BinaryName;
-import org.checkerframework.checker.signature.qual.CanonicalName;
 import org.checkerframework.checker.interning.qual.InternedDistinct;
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
+import org.checkerframework.checker.signature.qual.BinaryName;
+import org.checkerframework.checker.signature.qual.CanonicalName;
+import org.checkerframework.checker.signature.qual.Identifier;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
@@ -1379,7 +1380,7 @@ public abstract class Symbol extends AnnoConstruct implements PoolConstant, Elem
          }
 
          @Override @DefinedBy(Api.LANGUAGE_MODEL)
-         public @CanonicalName Name getSimpleName() {
+         public @Identifier Name getSimpleName() {
              return name;
          }
 

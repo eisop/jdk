@@ -120,8 +120,7 @@ public class PrintWriter extends Writer {
      *                    {@code printf}, or {@code format} methods will
      *                    flush the output buffer
      */
-    public @MustCallAlias PrintWriter(@MustCallAlias Writer out,
-                       boolean autoFlush) {
+    public @MustCallAlias PrintWriter(@MustCallAlias Writer out, boolean autoFlush) {
         super(out);
         this.out = out;
         this.autoFlush = autoFlush;

@@ -490,9 +490,9 @@ public final class Short extends Number implements Comparable<Short>, Constable 
      * @return  a string representation of the value of this object in
      *          base&nbsp;10.
      */
-    @Override
     @SideEffectFree
     @StaticallyExecutable
+    @Override
     public @ArrayLen({1, 2, 3, 4, 5, 6}) String toString() {
         return Integer.toString(value);
     }

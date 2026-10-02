@@ -36,7 +36,7 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
-import org.checkerframework.framework.qual.CFComment;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -1826,7 +1826,7 @@ public final @UsesObjectEquals class Files {
      *          the attribute view type is not available
      */
     @ReleasesNoLocks
-    public static <V extends FileAttributeView> @Nullable V getFileAttributeView(Path path,
+    public static <V extends @Nullable FileAttributeView> V getFileAttributeView(Path path,
                                                                        Class<V> type,
                                                                        LinkOption... options)
     {

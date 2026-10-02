@@ -4672,7 +4672,7 @@ public final class Arrays {
      * @since 1.5
      */
     @Pure
-    public static int hashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable [] a) {
+    public static int hashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied  @Nullable [] a) {
         if (a == null)
             return 0;
 
@@ -4714,7 +4714,7 @@ public final class Arrays {
      * @since 1.5
      */
     @Pure
-    public static int deepHashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable [] a) {
+    public static int deepHashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied  @Nullable [] a) {
         if (a == null)
             return 0;
 

@@ -13,6 +13,12 @@ import java.lang.annotation.Target;
  * their subtypes. If a checker is not annotated with this annotation, then the checker's qualifiers
  * may appear on any type.
  *
+ * <p>In order for this annotation to have an effect, it must be placed on the declaration of a
+ * class that extends {@code org.checkerframework.framework.source.SourceChecker}. {@code
+ * org.checkerframework.framework.source.SourceChecker#getRelevantJavaTypes} collects these
+ * annotations from the checker's class hierarchy, so a subclass inherits and combines the relevant
+ * Java types of its superclasses.
+ *
  * <p>This restriction is coarse-grained in that it applies to all type annotations for a given
  * checker. To have different restrictions for different Java types, override {@code
  * org.checkerframework.common.basetype.BaseTypeVisitor#visitAnnotatedType(List, Tree)}.
@@ -27,17 +33,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface RelevantJavaTypes {
-  /**
-   * Classes where a type annotation supported by this checker may be written.
-   *
-   * <p>{@code Object[].class} means that the checker processes all array types. No distinction
-   * among array types is currently made, and no other array class should be supplied to
-   * {@code @RelevantJavaTypes}.
-   *
-   * <p>If a checker processes both primitive and boxed types, both must be specified separately,
-   * for example as {@code int.class} and {@code Integer.class}.
-   *
-   * @return classes where a type annotation supported by this checker may be written
-   */
-  Class<?>[] value();
+    /**
+     * Classes where a type annotation supported by this checker may be written.
+     *
+     * <p>{@code Object[].class} means that the checker processes all array types. No distinction
+     * among array types is currently made, and no other array class should be supplied to
+     * {@code @RelevantJavaTypes}.
+     *
+     * <p>If a checker processes both primitive and boxed types, both must be specified separately,
+     * for example as {@code int.class} and {@code Integer.class}.
+     *
+     * @return classes where a type annotation supported by this checker may be written
+     */
+    Class<?>[] value();
 }

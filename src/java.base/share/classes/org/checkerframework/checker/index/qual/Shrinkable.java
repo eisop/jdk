@@ -1,4 +1,4 @@
-package org.checkerframework.checker.optional.qual;
+package org.checkerframework.checker.index.qual;
 
 import org.checkerframework.framework.qual.SubtypeOf;
 
@@ -9,13 +9,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The bottom type qualifier for the Optional Checker. The only value of this type is {@code null}.
- * Programmers rarely write this annotation.
- *
- * @checker_framework.manual #optional-checker Optional Checker
+ * An expression of type {@code @Shrinkable} may be used to remove elements, e.g., by calling {@code
+ * remove()} or {@code clear()} on it.
  */
+// Reinstate when lists are supported:
+//  * @checker_framework.manual #growonly-checker Grow-only Checker
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@SubtypeOf({Present.class})
-public @interface OptionalBottom {}
+@SubtypeOf({UnshrinkableRef.class})
+public @interface Shrinkable {}

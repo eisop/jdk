@@ -647,6 +647,7 @@ public class VisibleMemberTable {
         }
     }
 
+    @Pure
     private static <K, V> boolean putAllIsNonReplacing(Map<K, V> dst, Map<K, V> src) {
         for (var e : src.entrySet()) {
             if (dst.containsKey(e.getKey())

@@ -228,12 +228,14 @@ public class Utils {
         return e.getKind() == ANNOTATION_TYPE;
     }
 
+    @Pure
     // Note that e.getKind().isClass() is not the same as e.getKind() == CLASS
     @Pure
     public boolean isClass(Element e) {
         return e.getKind().isClass();
     }
 
+    @Pure
     // Note that e.getKind().isInterface() is not the same as e.getKind() == INTERFACE
     // See Also: isPlainInterface(Element)
     @Pure
@@ -291,6 +293,7 @@ public class Utils {
         return e.getModifiers().contains(Modifier.FINAL);
     }
 
+    @Pure
     /*
      * A contemporary JLS term for "package private" or "default access" is
      * "package access". For example: "a member is declared with package
@@ -2127,6 +2130,7 @@ public class Utils {
 
     private final CommentHelperCache commentHelperCache = new CommentHelperCache(this);
 
+    @Pure
     public CommentHelper getCommentHelper(Element element) {
         return commentHelperCache.computeIfAbsent(element);
     }

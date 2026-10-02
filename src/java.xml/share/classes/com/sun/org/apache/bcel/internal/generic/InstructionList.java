@@ -405,6 +405,7 @@ public class InstructionList implements Iterable<InstructionHandle> {
         return false;
     }
 
+    @Pure
     /**
      * @return complete, i.e., deep copy of this list
      */

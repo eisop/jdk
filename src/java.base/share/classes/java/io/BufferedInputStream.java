@@ -402,8 +402,7 @@ public class BufferedInputStream extends FilterInputStream {
      *                          or an I/O error occurs.
      * @throws     IndexOutOfBoundsException {@inheritDoc}
      */
-    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len)
-        throws IOException {
+    public @GTENegativeOne @LTEqLengthOf({"#1"}) int read(byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         if (lock != null) {
             lock.lock();
             try {

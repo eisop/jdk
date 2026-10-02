@@ -983,8 +983,8 @@ public class Date
      * @since   1.2
      * @throws    NullPointerException if {@code anotherDate} is null.
      */
-    @Override
     @Pure
+    @Override
     public int compareTo(@GuardSatisfied Date this, @GuardSatisfied Date anotherDate) {
         return Long.compare(getMillisOf(this), getMillisOf(anotherDate));
     }

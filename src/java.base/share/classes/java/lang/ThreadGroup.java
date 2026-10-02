@@ -85,18 +85,6 @@ import jdk.internal.misc.VM;
  *
  * @since   1.0
  */
-
-/* The locking strategy for this code is to try to lock only one level of the
- * tree wherever possible, but otherwise to lock from the bottom up.
- * That is, from child thread groups to parents.
- * This has the advantage of limiting the number of locks that need to be held
- * and in particular avoids having to grab the lock for the root thread group,
- * (or a global lock) which would be a source of contention on a
- * multi-processor system with many thread groups.
- * This policy often leads to taking a snapshot of the state of a thread group
- * and working off of that snapshot, rather than holding the thread group locked
- * while we work on the children.
- */
 @AnnotatedFor({"index", "interning", "lock", "nullness"})
 public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHandler {
     /**
@@ -263,7 +251,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      */
     @Pure
     @Deprecated(since="16", forRemoval=true)
-    public synchronized boolean isDestroyed(@GuardSatisfied ThreadGroup this) {
+    public boolean isDestroyed(@GuardSatisfied ThreadGroup this) {
         return false;
     }
 
@@ -323,8 +311,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * @see        java.lang.SecurityException
      * @see        java.lang.ThreadGroup#checkAccess()
      */
-    @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
-                "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @SuppressWarnings("index:array.access.unsafe.high")
     public final void setMaxPriority(int pri) {
         checkAccess();
@@ -401,8 +387,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *          group and in any other thread group that has this thread
      *          group as an ancestor
      */
-    @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
-                "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @SuppressWarnings("index:array.access.unsafe.high")
     public @NonNegative int activeCount() {
         int n = 0;
@@ -436,7 +420,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      */
-    public @NonNegative int enumerate(@PolyNull Thread[] list) {
+    public @NonNegative int enumerate(Thread[] list) {
         return enumerate(list, true);
     }
 
@@ -471,7 +455,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      */
-    public @NonNegative int enumerate(@PolyNull Thread[] list, boolean recurse) {
+    public @NonNegative int enumerate(Thread[] list, boolean recurse) {
         Objects.requireNonNull(list);
         checkAccess();
         int n = 0;
@@ -502,10 +486,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * @return  the number of thread groups with this thread group as
      *          an ancestor
      */
-    @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1", 
-                "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @SuppressWarnings("index:array.access.unsafe.high")
-    public @NonNegative int activeGroupCount() {
+    public int activeGroupCount() {
         int n = 0;
         for (ThreadGroup group : synchronizedSubgroups()) {
             n = n + group.activeGroupCount() + 1;
@@ -533,7 +515,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      */
-    public @NonNegative int enumerate(@PolyNull ThreadGroup[] list) {
+    public @NonNegative int enumerate(ThreadGroup[] list) {
         return enumerate(list, true);
     }
 
@@ -567,9 +549,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *          if {@linkplain #checkAccess checkAccess} determines that
      *          the current thread cannot access this thread group
      */
-    public @NonNegative int enumerate(@PolyNull ThreadGroup[] list, boolean recurse) {
-        Objects.requireNonNull(list);
-        checkAccess();
+    public @NonNegative int enumerate(ThreadGroup[] list, boolean recurse) {
+        Objects.requireNonNull(list);        checkAccess();
         return enumerate(list, 0, recurse);
     }
 
@@ -577,9 +558,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * Add a reference to each subgroup to the given array, starting at
      * the given index. Returns the new index.
      */
-    @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
-                "for the else case ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
-    @SuppressWarnings("index:array.access.unsafe.high")
     private @NonNegative int enumerate(ThreadGroup[] list, @NonNegative int i, boolean recurse) {
         List<ThreadGroup> subgroups = synchronizedSubgroups();
         for (int j = 0; j < subgroups.size() && i < list.length; j++) {
@@ -615,8 +593,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * @see        java.lang.ThreadGroup#checkAccess()
      * @since      1.2
      */
-    @CFComment({" groupSnapshot.length = ngroupsSnapshot by #0.1",
-                "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @SuppressWarnings("index:array.access.unsafe.high")
     public final void interrupt() {
         checkAccess();
@@ -645,9 +621,8 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * @deprecated This method was originally specified to resume all threads
      *             in the thread group.
      */
-    @CFComment({"index:  // groupSnapshot.length = ngroupsSnapshot by #0.1",
-                "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @Deprecated(since="1.2", forRemoval=true)
+    @SuppressWarnings({"removal", "index:array.access.unsafe.high"})
     public final void resume() {
         throw new UnsupportedOperationException();
     }
@@ -661,6 +636,7 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      *             there are no live threads in the group and it is otherwise
      *             unreachable.
      */
+    @SuppressWarnings("index:array.access.unsafe.high")
     @Deprecated(since="16", forRemoval=true)
     public final void destroy() {
     }
@@ -669,8 +645,6 @@ public @UsesObjectEquals class ThreadGroup implements Thread.UncaughtExceptionHa
      * Prints information about this thread group to the standard
      * output. This method is useful only for debugging.
      */
-    @CFComment({"index: groupSnapshot.length = ngroupsSnapshot by #0.1",
-                "for the else case, ngroupsSnapshot will be null and it will never enter the group as nGroups will be 0"})
     @SuppressWarnings("index:array.access.unsafe.high")
     public void list() {
         Map<ThreadGroup, List<Thread>> map = new HashMap<>();
