@@ -291,7 +291,6 @@ public class Utils {
         return e.getModifiers().contains(Modifier.FINAL);
     }
 
-    @Pure
     /*
      * A contemporary JLS term for "package private" or "default access" is
      * "package access". For example: "a member is declared with package
