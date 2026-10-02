@@ -1309,14 +1309,14 @@ public class LinkedTransferQueue<E extends Object> extends AbstractQueue<E>
         throw new InterruptedException();
     }
 
-    public E poll(@GuardSatisfied @Shrinkable LinkedTransferQueue<E> this, long timeout, TimeUnit unit) throws InterruptedException {
+    public @Nullable E poll(@GuardSatisfied @Shrinkable LinkedTransferQueue<E> this, long timeout, TimeUnit unit) throws InterruptedException {
         E e = xfer(null, false, TIMED, unit.toNanos(timeout));
         if (e != null || !Thread.interrupted())
             return e;
         throw new InterruptedException();
     }
 
-    public E poll(@GuardSatisfied @Shrinkable LinkedTransferQueue<E> this) {
+    public @Nullable E poll(@GuardSatisfied @Shrinkable LinkedTransferQueue<E> this) {
         return xfer(null, false, NOW, 0L);
     }
 

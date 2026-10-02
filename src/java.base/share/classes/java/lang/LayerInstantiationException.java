@@ -25,12 +25,16 @@
 
 package java.lang;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * Thrown when creating a {@linkplain ModuleLayer module layer} fails.
  *
  * @see ModuleLayer
  * @since 9
  */
+@AnnotatedFor({"nullness"})
 public class LayerInstantiationException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = -906239691613568347L;
@@ -48,7 +52,7 @@ public class LayerInstantiationException extends RuntimeException {
      * @param msg
      *        The detail message; can be {@code null}
      */
-    public LayerInstantiationException(String msg) {
+    public LayerInstantiationException(@Nullable String msg) {
         super(msg);
     }
 
@@ -58,7 +62,7 @@ public class LayerInstantiationException extends RuntimeException {
      * @param cause
      *        The cause; can be {@code null}
      */
-    public LayerInstantiationException(Throwable cause) {
+    public LayerInstantiationException(@Nullable Throwable cause) {
         super(cause);
     }
 
@@ -71,7 +75,7 @@ public class LayerInstantiationException extends RuntimeException {
      * @param cause
      *        The cause; can be {@code null}
      */
-    public LayerInstantiationException(String msg, Throwable cause) {
+    public LayerInstantiationException(@Nullable String msg, @Nullable Throwable cause) {
         super(msg, cause);
     }
 }

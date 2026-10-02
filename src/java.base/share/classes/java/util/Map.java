@@ -1190,7 +1190,7 @@ public interface Map<K, V> {
      * @since 1.8
      */
     default @Nullable V computeIfPresent(K key,
-            BiFunction<? super K, ? super V, ? extends @Nullable V> remappingFunction) {
+            BiFunction<? super K, ? super @NonNull V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         V oldValue;
         if ((oldValue = get(key)) != null) {
@@ -1374,7 +1374,7 @@ public interface Map<K, V> {
      * @since 1.8
      */
     default @Nullable V merge(K key, @NonNull V value,
-            BiFunction<? super V, ? super V, ? extends @Nullable V> remappingFunction) {
+            BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @Nullable V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         Objects.requireNonNull(value);
         V oldValue = get(key);

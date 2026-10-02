@@ -914,7 +914,7 @@ public class SynchronousQueue<E extends @NonNull Object> extends AbstractQueue<E
      *         specified waiting time elapses before an element is present
      * @throws InterruptedException {@inheritDoc}
      */
-    public E poll(@GuardSatisfied @Shrinkable SynchronousQueue<E> this, long timeout, TimeUnit unit) throws InterruptedException {
+    public @Nullable E poll(@GuardSatisfied @Shrinkable SynchronousQueue<E> this, long timeout, TimeUnit unit) throws InterruptedException {
         E e = transferer.transfer(null, true, unit.toNanos(timeout));
         if (e != null || !Thread.interrupted())
             return e;
@@ -928,7 +928,7 @@ public class SynchronousQueue<E extends @NonNull Object> extends AbstractQueue<E
      * @return the head of this queue, or {@code null} if no
      *         element is available
      */
-    public E poll(@GuardSatisfied @Shrinkable SynchronousQueue<E> this) {
+    public @Nullable E poll(@GuardSatisfied @Shrinkable SynchronousQueue<E> this) {
         return transferer.transfer(null, true, 0);
     }
 

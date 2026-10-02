@@ -99,7 +99,7 @@ import java.io.StreamCorruptedException;
  * @see         java.lang.String
  * @since       1.5
  */
-@AnnotatedFor({"lock", "nullness", "index", "regex", "sideeffectsonly"})
+@AnnotatedFor({"lock", "nullness", "index", "regex"})
 public final class StringBuilder
     extends AbstractStringBuilder
     implements Appendable, java.io.Serializable, Comparable<StringBuilder>, CharSequence
