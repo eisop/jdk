@@ -228,14 +228,12 @@ public class Utils {
         return e.getKind() == ANNOTATION_TYPE;
     }
 
-    @Pure
     // Note that e.getKind().isClass() is not the same as e.getKind() == CLASS
     @Pure
     public boolean isClass(Element e) {
         return e.getKind().isClass();
     }
 
-    @Pure
     // Note that e.getKind().isInterface() is not the same as e.getKind() == INTERFACE
     // See Also: isPlainInterface(Element)
     @Pure
