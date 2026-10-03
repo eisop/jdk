@@ -25,9 +25,9 @@
 
 package java.security;
 
-import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 
 import jdk.internal.event.SecurityProviderServiceEvent;
 

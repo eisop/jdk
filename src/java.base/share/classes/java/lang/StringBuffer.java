@@ -30,12 +30,12 @@ import org.checkerframework.checker.index.qual.IndexOrHigh;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.aliasing.qual.LeakedToResult;
+import org.checkerframework.common.aliasing.qual.NonLeaked;
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
-import org.checkerframework.common.aliasing.qual.Unique;
-import org.checkerframework.common.aliasing.qual.LeakedToResult;
-import org.checkerframework.common.aliasing.qual.NonLeaked;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -726,6 +726,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
         return this;
     }
 
+    @SideEffectFree
     /**
      * @throws IllegalArgumentException {@inheritDoc}
      *
@@ -748,8 +749,8 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
         return this;
     }
 
-    @IntrinsicCandidate
     @Override
+    @IntrinsicCandidate
     @SideEffectFree
     public synchronized String toString(@GuardSatisfied StringBuffer this) {
         if (toStringCache == null) {

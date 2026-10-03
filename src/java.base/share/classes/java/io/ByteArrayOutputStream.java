@@ -227,8 +227,8 @@ public class ByteArrayOutputStream extends OutputStream {
      * @return String decoded from the buffer's contents.
      * @since  1.1
      */
-    @Override
     @SideEffectFree
+    @Override
     public synchronized String toString(@GuardSatisfied ByteArrayOutputStream this) {
         return new String(buf, 0, count);
     }

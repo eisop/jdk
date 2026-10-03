@@ -2127,6 +2127,7 @@ public class Utils {
 
     private final CommentHelperCache commentHelperCache = new CommentHelperCache(this);
 
+    @Pure
     public CommentHelper getCommentHelper(Element element) {
         return commentHelperCache.computeIfAbsent(element);
     }

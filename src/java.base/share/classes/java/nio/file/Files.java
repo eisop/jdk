@@ -34,7 +34,6 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -1826,7 +1825,7 @@ public final @UsesObjectEquals class Files {
      *          the attribute view type is not available
      */
     @ReleasesNoLocks
-    public static <V extends FileAttributeView> @Nullable V getFileAttributeView(Path path,
+    public static <V extends @Nullable FileAttributeView> V getFileAttributeView(Path path,
                                                                        Class<V> type,
                                                                        LinkOption... options)
     {
@@ -3868,7 +3867,6 @@ public final @UsesObjectEquals class Files {
                         throw new UncheckedIOException(e.getCause());
                     }
                 }
-                @SideEffectsOnly("this")
                 @Override
                 public Path next(/*@NonEmpty Iterator<Path> this*/) {
                     try {

@@ -340,9 +340,7 @@ public class ClientCodeWrapper {
             }
         }
 
-        @Override @DefinedBy(Api.COMPILER)
-        @Pure
-        public boolean contains(Location location, FileObject file) throws IOException {
+        @Override @DefinedBy(Api.COMPILER)        public boolean contains(Location location, FileObject file) throws IOException {
             try {
                 return clientJavaFileManager.contains(location, unwrap(file));
             } catch (ClientCodeException e) {

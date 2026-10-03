@@ -484,8 +484,8 @@ public final class Byte extends Number implements Comparable<Byte>, Constable {
      * @return  a string representation of the value of this object in
      *          base&nbsp;10.
      */
-    @Override
     @SideEffectFree
+    @Override
     public @ArrayLen({1,2,3,4}) String toString() {
         return Integer.toString(value);
     }

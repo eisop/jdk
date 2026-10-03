@@ -44,7 +44,6 @@ import org.checkerframework.checker.signedness.qual.Unsigned;
 import org.checkerframework.common.value.qual.MinLen;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -3522,6 +3521,8 @@ public final class Arrays {
      */
     @SideEffectFree
     @SuppressWarnings("unchecked")
+    @CFComment("The return type is refined when safe. See " +
+            "https://github.com/eisop/checker-framework/blob/17991582bc3a35509f15065b051d8e4c45c3e9ae/checker/src/main/java/org/checkerframework/checker/nullness/NullnessNoInitAnnotatedTypeFactory.java#L756")
     public static <T> @Nullable T[] copyOf(T[] original, @NonNegative int newLength) {
         return (T[]) copyOf(original, newLength, original.getClass());
     }
@@ -3552,6 +3553,8 @@ public final class Arrays {
      */
     @SideEffectFree
     @IntrinsicCandidate
+    @CFComment("The return type is refined when safe. See " +
+            "https://github.com/eisop/checker-framework/blob/17991582bc3a35509f15065b051d8e4c45c3e9ae/checker/src/main/java/org/checkerframework/checker/nullness/NullnessNoInitAnnotatedTypeFactory.java#L756")
     public static <T,U> @Nullable T[] copyOf(U[] original, @NonNegative int newLength, Class<? extends T[]> newType) {
         @SuppressWarnings("unchecked")
         T[] copy = ((Object)newType == (Object)Object[].class)
@@ -4413,7 +4416,6 @@ public final class Arrays {
         }
 
         @Override
-        @SideEffectsOnly("this")
         public E next(@NonEmpty ArrayItr<E> this) {
             int i = cursor;
             if (i >= a.length) {
@@ -4672,7 +4674,7 @@ public final class Arrays {
      * @since 1.5
      */
     @Pure
-    public static int hashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable [] a) {
+    public static int hashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied  @Nullable [] a) {
         if (a == null)
             return 0;
 
@@ -4714,7 +4716,7 @@ public final class Arrays {
      * @since 1.5
      */
     @Pure
-    public static int deepHashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied @Nullable [] a) {
+    public static int deepHashCode(@PolyInterned @PolyNull @PolySigned Object @GuardSatisfied  @Nullable [] a) {
         if (a == null)
             return 0;
 

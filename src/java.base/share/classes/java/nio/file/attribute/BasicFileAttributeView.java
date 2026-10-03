@@ -30,6 +30,9 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.IOException;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 /**
  * A file attribute view that provides a view of a <em>basic set</em> of file
  * attributes common to many file systems. The basic set of file attributes
@@ -103,7 +106,7 @@ import java.io.IOException;
  *
  * @since 1.7
  */
-@AnnotatedFor("nullness")
+@AnnotatedFor({"nullness"})
 public interface BasicFileAttributeView
     extends FileAttributeView
 {

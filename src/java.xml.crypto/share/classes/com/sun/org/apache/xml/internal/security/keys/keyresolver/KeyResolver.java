@@ -32,7 +32,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -302,7 +301,6 @@ public class KeyResolver {
             return it.hasNext();
         }
 
-        @SideEffectsOnly("this")
         public KeyResolverSpi next() {
             KeyResolverSpi resolver = it.next();
             if (resolver == null) {

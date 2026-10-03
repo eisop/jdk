@@ -241,9 +241,9 @@ public final class Boolean implements java.io.Serializable,
      *
      * @return  a string representation of this object.
      */
-    @Override
     @StaticallyExecutable
     @SideEffectFree
+    @Override
     public @StringVal({"true", "false"}) String toString() {
         return String.valueOf(value);
     }

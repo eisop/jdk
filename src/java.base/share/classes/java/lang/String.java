@@ -571,7 +571,6 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    @SuppressWarnings("removal")
     public @Unique String(@PolySigned byte @GuardSatisfied [] bytes, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length, Charset charset) {
         this(Objects.requireNonNull(charset), bytes, checkBoundsOffCount(offset, length, bytes.length), length);
     }
@@ -583,7 +582,7 @@ public final class String
      * disambiguate it against other similar methods of this class.
      */
     @SuppressWarnings("removal")
-    private String(Charset charset, byte[] bytes, int offset, int length) {
+    private @Unique String(Charset charset, @PolySigned byte @GuardSatisfied [] bytes, @IndexOrHigh({"#1"}) int offset, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int length) {
         if (length == 0) {
             this.value = "".value;
             this.coder = "".coder;
@@ -3479,8 +3478,7 @@ public final class String
         return split(regex, limit, true);
     }
 
-    private String[] split(String regex, int limit, boolean withDelimiters) {
-        /* fastpath if the regex is a
+    private String[] split(String regex, int limit, boolean withDelimiters) {        /* fastpath if the regex is a
          * (1) one-char String and this character is not one of the
          *     RegEx's meta characters ".$|()[{^?*+\\", or
          * (2) two-char String and the first char is the backslash and
@@ -3627,7 +3625,7 @@ public final class String
      */
     @SideEffectFree
     @StaticallyExecutable
-    public static String join(CharSequence delimiter, CharSequence... elements) {
+    public static String join(CharSequence delimiter, @Nullable CharSequence... elements) {
         var delim = delimiter.toString();
         var elems = new String[elements.length];
         for (int i = 0; i < elements.length; i++) {
@@ -3723,7 +3721,7 @@ public final class String
     @SideEffectFree
     @StaticallyExecutable
     public static String join(CharSequence delimiter,
-            Iterable<? extends CharSequence> elements) {
+            Iterable<? extends @Nullable CharSequence> elements) {
         Objects.requireNonNull(delimiter);
         Objects.requireNonNull(elements);
         var delim = delimiter.toString();
@@ -4640,7 +4638,7 @@ public final class String
      *
      */
     @SideEffectFree
-    public String formatted(Object... args) {
+    public String formatted(@Nullable Object... args) {
         return new Formatter().format(this, args).toString();
     }
 

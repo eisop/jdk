@@ -606,9 +606,9 @@ public final class Float extends Number
      * @return  {@code true} if the argument is positive infinity or
      *          negative infinity; {@code false} otherwise.
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static boolean isInfinite(float v) {
         return Math.abs(v) > MAX_VALUE;
     }
@@ -628,8 +628,8 @@ public final class Float extends Number
      * floating-point value, {@code false} otherwise.
      * @since 1.8
      */
-    @IntrinsicCandidate
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static boolean isFinite(float f) {
         return Math.abs(f) <= Float.MAX_VALUE;
     }

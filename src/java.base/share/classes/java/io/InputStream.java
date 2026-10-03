@@ -25,12 +25,12 @@
 
 package java.io;
 
-import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.index.qual.IndexOrHigh;
 import org.checkerframework.checker.index.qual.LTEqLengthOf;
 import org.checkerframework.checker.index.qual.LTLengthOf;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.ArrayList;

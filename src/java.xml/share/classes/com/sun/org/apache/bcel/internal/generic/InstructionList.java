@@ -20,7 +20,6 @@
 package com.sun.org.apache.bcel.internal.generic;
 
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -405,6 +404,7 @@ public class InstructionList implements Iterable<InstructionHandle> {
         return false;
     }
 
+    @Pure
     /**
      * @return complete, i.e., deep copy of this list
      */

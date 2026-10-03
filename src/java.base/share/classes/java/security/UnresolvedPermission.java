@@ -341,9 +341,9 @@ implements java.io.Serializable
      * and has the same type (class) name, permission name, actions, and
      * certificates as this object.
      */
-    @Override
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
+    @Override
     public boolean equals(@Nullable Object obj) {
         if (obj == this)
             return true;

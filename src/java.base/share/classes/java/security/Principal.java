@@ -58,7 +58,7 @@ public interface Principal {
      */
     @Pure
     @EnsuresNonNullIf(expression="#1", result=true)
-    boolean equals(@Nullable Object another);
+    boolean equals(Object another);
 
     /**
      * Returns a string representation of this {@code Principal}.

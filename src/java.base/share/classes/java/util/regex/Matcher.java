@@ -35,7 +35,6 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.IOException;
@@ -1355,7 +1354,6 @@ public final @UsesObjectEquals class Matcher implements MatchResult {
             int expectedCount = -1;
 
             @Override
-            @SideEffectsOnly("this")
             public MatchResult next(@NonEmpty MatchResultIterator this) {
                 if (expectedCount >= 0 && expectedCount != modCount)
                     throw new ConcurrentModificationException();

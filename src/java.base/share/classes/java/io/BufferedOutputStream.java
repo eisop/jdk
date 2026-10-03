@@ -202,7 +202,7 @@ public class BufferedOutputStream extends FilterOutputStream {
      * @throws     IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    public synchronized void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
+    public void write(@PolySigned byte[] b, @IndexOrHigh({"#1"}) int off, @LTLengthOf(value={"#1"}, offset={"#2 - 1"}) @NonNegative int len) throws IOException {
         if (lock != null) {
             lock.lock();
             try {

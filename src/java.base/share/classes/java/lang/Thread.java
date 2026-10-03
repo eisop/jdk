@@ -1419,8 +1419,7 @@ public @UsesObjectEquals class Thread implements Runnable {
      * @since 1.4
      * @see <a href="#inheritance">Inheritance when creating threads</a>
      */
-    public Thread(@Nullable ThreadGroup group, @Nullable Runnable task, String name,
-                  long stackSize) {
+    public Thread(@Nullable ThreadGroup group, @Nullable Runnable task, String name, long stackSize) {
         this(group, checkName(name), 0, task, stackSize, null);
     }
 

@@ -1732,9 +1732,9 @@ public final class Long extends Number
      *         unsigned values
      * @since 1.8
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static int compareUnsigned(@Unsigned long x, @Unsigned long y) {
         return compare(x + MIN_VALUE, y + MIN_VALUE);
     }
@@ -1758,9 +1758,9 @@ public final class Long extends Number
      * @see #remainderUnsigned
      * @since 1.8
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static @Unsigned long divideUnsigned(@Unsigned long dividend, @Unsigned long divisor) {
         /* See Hacker's Delight (2nd ed), section 9.3 */
         if (divisor >= 0) {
@@ -1783,9 +1783,9 @@ public final class Long extends Number
      * @see #divideUnsigned
      * @since 1.8
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static @Unsigned long remainderUnsigned(@Unsigned long dividend, @Unsigned long divisor) {
         /* See Hacker's Delight (2nd ed), section 9.3 */
         if (divisor >= 0) {
@@ -2012,9 +2012,9 @@ public final class Long extends Number
      *     specified {@code long} value.
      * @since 1.5
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static @SignednessGlb long reverse(@PolySigned long i) {
         // HD, Figure 7-1
         i = (i & 0x5555555555555555L) << 1 | (i >>> 1) & 0x5555555555555555L;

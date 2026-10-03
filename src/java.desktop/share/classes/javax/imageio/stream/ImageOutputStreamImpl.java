@@ -31,6 +31,8 @@ import org.checkerframework.framework.qual.AnnotatedFor;
 import jdk.internal.util.ByteArray;
 import jdk.internal.util.ByteArrayLittleEndian;
 
+import jdk.internal.util.ByteArray;
+import jdk.internal.util.ByteArrayLittleEndian;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.nio.ByteOrder;
