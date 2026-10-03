@@ -28,6 +28,7 @@ package java.lang;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signature.qual.FullyQualifiedName;
+import org.checkerframework.checker.signature.qual.Identifier;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
@@ -37,6 +38,7 @@ import jdk.internal.misc.VM;
 import jdk.internal.module.ModuleHashes;
 import jdk.internal.module.ModuleReferenceImpl;
 
+import java.lang.constant.ConstantDescs;
 import java.lang.module.ModuleReference;
 import java.lang.module.ResolvedModule;
 import java.util.HashSet;
@@ -126,7 +128,7 @@ public final class StackTraceElement implements java.io.Serializable {
      * @since 1.5
      * @revised 9
      */
-    public StackTraceElement(@FullyQualifiedName String declaringClass, String methodName,
+    public StackTraceElement(@FullyQualifiedName String declaringClass, @Identifier String methodName,
                              @Nullable String fileName, int lineNumber) {
         this(null, null, null, declaringClass, methodName, fileName, lineNumber);
     }
@@ -164,7 +166,7 @@ public final class StackTraceElement implements java.io.Serializable {
      */
     public StackTraceElement(String classLoaderName,
                              String moduleName, String moduleVersion,
-                             String declaringClass, String methodName,
+                             String declaringClass, @Identifier String methodName,
                              String fileName, int lineNumber) {
         this.classLoaderName = classLoaderName;
         this.moduleName      = moduleName;
@@ -270,14 +272,14 @@ public final class StackTraceElement implements java.io.Serializable {
      * Returns the name of the method containing the execution point
      * represented by this stack trace element.  If the execution point is
      * contained in an instance or class initializer, this method will return
-     * the appropriate <i>special method name</i>, {@code <init>} or
-     * {@code <clinit>}, as per Section {@jvms 3.9} of <cite>The Java Virtual
-     * Machine Specification</cite>.
+     * the appropriate <i>special method name</i>, {@value ConstantDescs#INIT_NAME}
+     * or {@value ConstantDescs#CLASS_INIT_NAME}, as per Section {@jvms 3.9}
+     * of <cite>The Java Virtual Machine Specification</cite>.
      *
      * @return the name of the method containing the execution point
      *         represented by this stack trace element.
      */
-    public String getMethodName(@GuardSatisfied StackTraceElement this) {
+    public @Identifier String getMethodName(@GuardSatisfied StackTraceElement this) {
         return methodName;
     }
 
@@ -366,8 +368,8 @@ public final class StackTraceElement implements java.io.Serializable {
      * @revised 9
      * @see    Throwable#printStackTrace()
      */
-    @Override
     @SideEffectFree
+    @Override
     public String toString(@GuardSatisfied StackTraceElement this) {
         int estimatedLength = length(classLoaderName) + 1
                 + length(moduleName) + 1

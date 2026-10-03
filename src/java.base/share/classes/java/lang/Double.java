@@ -843,9 +843,9 @@ public final class Double extends Number
      * @return  {@code true} if the value of the argument is positive
      *          infinity or negative infinity; {@code false} otherwise.
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static boolean isInfinite(double v) {
         return Math.abs(v) > MAX_VALUE;
     }
@@ -864,9 +864,9 @@ public final class Double extends Number
      * floating-point value, {@code false} otherwise.
      * @since 1.8
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static boolean isFinite(double d) {
         return Math.abs(d) <= Double.MAX_VALUE;
     }

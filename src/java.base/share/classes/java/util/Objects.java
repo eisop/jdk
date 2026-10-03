@@ -279,8 +279,8 @@ public final @UsesObjectEquals class Objects {
      * @throws NullPointerException if {@code obj} is {@code null}
      */
     @EnsuresNonNull("#1")
-    @ForceInline
     @SideEffectFree
+    @ForceInline
     public static <T> @NonNull T requireNonNull(@GuardSatisfied @NonNull @UnknownSignedness T obj, @Nullable String message) {
         if (obj == null)
             throw new NullPointerException(message);

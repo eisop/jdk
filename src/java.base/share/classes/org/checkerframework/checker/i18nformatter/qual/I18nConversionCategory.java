@@ -1,7 +1,6 @@
 package org.checkerframework.checker.i18nformatter.qual;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -22,7 +21,6 @@ import java.util.StringJoiner;
  *
  * @checker_framework.manual #i18n-formatter-checker Internationalization Format String Checker
  */
-@AnnotatedFor({"initialization", "nullness"})
 public enum I18nConversionCategory {
 
     /**
@@ -96,7 +94,7 @@ public enum I18nConversionCategory {
     }
 
     /**
-     * Return true if a is a subset of b.
+     * Returns true if a is a subset of b.
      *
      * @return true if a is a subset of b
      */

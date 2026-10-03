@@ -41,6 +41,7 @@ public class UncheckedDocletException extends Error {
         super(de);
     }
 
+    @Override
     public Throwable initCause(Throwable cause) {
         throw new UnsupportedOperationException();
     }

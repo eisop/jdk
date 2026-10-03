@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -39,7 +39,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
 
@@ -1321,7 +1320,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
         float lf = fields.get("loadFactor", 0.75f);
         if (lf <= 0 || Float.isNaN(lf))
             throw new StreamCorruptedException("Illegal load factor: " + lf);
-        lf = Math.min(Math.max(0.25f, lf), 4.0f);
+        lf = Math.clamp(lf, 0.25f, 4.0f);
 
         // Read the original length of the array and number of elements
         int origlength = s.readInt();
@@ -1548,7 +1547,6 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
             return hasMoreElements();
         }
 
-        @SideEffectsOnly("this")
         public T next(@NonEmpty Enumerator<T> this) {
             if (Hashtable.this.modCount != expectedModCount)
                 throw new ConcurrentModificationException();

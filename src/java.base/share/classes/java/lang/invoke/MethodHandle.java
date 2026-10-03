@@ -25,6 +25,9 @@
 
 package java.lang.invoke;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
+
 
 import jdk.internal.loader.ClassLoaders;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
@@ -440,6 +443,7 @@ mh.invokeExact(System.out, "Hello, world.");
  * @author John Rose, JSR 292 EG
  * @since 1.7
  */
+@AnnotatedFor({"nullness"})
 public abstract sealed class MethodHandle implements Constable
     permits NativeMethodHandle, DirectMethodHandle,
             DelegatingMethodHandle, BoundMethodHandle {
@@ -500,7 +504,8 @@ public abstract sealed class MethodHandle implements Constable
      * @throws Throwable anything thrown by the underlying method propagates unchanged through the method handle call
      */
     @IntrinsicCandidate
-    public final native @PolymorphicSignature Object invokeExact(Object... args) throws Throwable;
+    public final native @PolymorphicSignature @Nullable Object invokeExact(Object... args)
+            throws Throwable;
 
     /**
      * Invokes the method handle, allowing any caller type descriptor,
@@ -538,7 +543,8 @@ public abstract sealed class MethodHandle implements Constable
      * @throws Throwable anything thrown by the underlying method propagates unchanged through the method handle call
      */
     @IntrinsicCandidate
-    public final native @PolymorphicSignature Object invoke(Object... args) throws Throwable;
+    public final native @PolymorphicSignature @Nullable Object invoke(Object... args)
+            throws Throwable;
 
     /**
      * Private method for trusted invocation of a method handle respecting simplified signatures.
@@ -727,7 +733,7 @@ public abstract sealed class MethodHandle implements Constable
      * @throws Throwable anything thrown by the target method invocation
      * @see MethodHandles#spreadInvoker
      */
-    public Object invokeWithArguments(Object... arguments) throws Throwable {
+    public @Nullable Object invokeWithArguments(Object @Nullable ... arguments) throws Throwable {
         // Note: Jumbo argument lists are handled in the variable-arity subclass.
         MethodType invocationType = MethodType.genericMethodType(arguments == null ? 0 : arguments.length);
         return invocationType.invokers().spreadInvoker(0).invokeExact(asType(invocationType), arguments);
@@ -754,7 +760,7 @@ public abstract sealed class MethodHandle implements Constable
      * @throws WrongMethodTypeException if the target's type cannot be adjusted to take the given number of {@code Object} arguments
      * @throws Throwable anything thrown by the target method invocation
      */
-    public Object invokeWithArguments(java.util.List<?> arguments) throws Throwable {
+    public @Nullable Object invokeWithArguments(java.util.List<?> arguments) throws Throwable {
         return invokeWithArguments(arguments.toArray());
     }
 

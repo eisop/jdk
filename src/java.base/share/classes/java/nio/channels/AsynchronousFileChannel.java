@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -272,10 +272,10 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      *
      * <p> An invocation of this method behaves in exactly the same way as the
      * invocation
-     * <pre>
-     *     ch.{@link #open(Path,Set,ExecutorService,FileAttribute[])
-     *       open}(file, opts, null, new FileAttribute&lt;?&gt;[0]);
-     * </pre>
+     * {@snippet lang=java :
+     *     // @link substring="open" target="#open(Path,Set,ExecutorService,FileAttribute[])" :
+     *     ch.open(file, opts, null, new FileAttribute<?>[0]);
+     * }
      * where {@code opts} is a {@code Set} containing the options specified to
      * this method.
      *
@@ -503,9 +503,10 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      *
      * <p> An invocation of this method of the form {@code ch.lock(att,handler)}
      * behaves in exactly the same way as the invocation
-     * <pre>
-     *     ch.{@link #lock(long,long,boolean,Object,CompletionHandler) lock}(0L, Long.MAX_VALUE, false, att, handler)
-     * </pre>
+     * {@snippet lang=java :
+     *     // @link substring="lock" target="#lock(long,long,boolean,Object,CompletionHandler)" :
+     *     ch.lock(0L, Long.MAX_VALUE, false, att, handler)
+     * }
      *
      * @param   <A>
      *          The type of the attachment
@@ -576,9 +577,10 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      *
      * <p> An invocation of this method behaves in exactly the same way as the
      * invocation
-     * <pre>
-     *     ch.{@link #lock(long,long,boolean) lock}(0L, Long.MAX_VALUE, false)
-     * </pre>
+     * {@snippet lang=java :
+     *     // @link substring="lock" target="#lock(long,long,boolean)" :
+     *     ch.lock(0L, Long.MAX_VALUE, false)
+     * }
      *
      * @return  a {@code Future} object representing the pending result
      *
@@ -652,8 +654,10 @@ public abstract @UsesObjectEquals class AsynchronousFileChannel
      * <p> An invocation of this method of the form {@code ch.tryLock()}
      * behaves in exactly the same way as the invocation
      *
-     * <pre>
-     *     ch.{@link #tryLock(long,long,boolean) tryLock}(0L, Long.MAX_VALUE, false) </pre>
+     * {@snippet lang=java :
+     *     // @link substring="tryLock" target="#tryLock(long,long,boolean)" :
+     *     ch.tryLock(0L, Long.MAX_VALUE, false)
+     * }
      *
      * @return  A lock object representing the newly-acquired lock,
      *          or {@code null} if the lock could not be acquired

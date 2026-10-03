@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -34,7 +34,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -179,10 +178,12 @@ class ImmutableCollections {
      */
     @SuppressWarnings("unchecked")
     static <E> List<E> listCopy(Collection<? extends E> coll) {
-        if (coll instanceof List12 || (coll instanceof ListN && ! ((ListN<?>)coll).allowNulls)) {
+        if (coll instanceof List12 || (coll instanceof ListN<?> c && !c.allowNulls)) {
             return (List<E>)coll;
+        } else if (coll.isEmpty()) { // implicit nullcheck of coll
+            return List.of();
         } else {
-            return (List<E>)List.of(coll.toArray()); // implicit nullcheck of coll
+            return (List<E>)List.of(coll.toArray());
         }
     }
 
@@ -344,6 +345,11 @@ class ImmutableCollections {
             return indexOf(o) >= 0;
         }
 
+        @Override
+        public List<E> reversed() {
+            return ReverseOrderListView.of(this, false);
+        }
+
         IndexOutOfBoundsException outOfBounds(int index) {
             return new IndexOutOfBoundsException("Index: " + index + " Size: " + size());
         }
@@ -382,7 +388,6 @@ class ImmutableCollections {
             return cursor != size;
         }
 
-        @SideEffectsOnly("this")
         public E next(@NonEmpty ListItr<E> this) {
             try {
                 int i = cursor;
@@ -845,7 +850,7 @@ class ImmutableCollections {
 
         @Override
         public Iterator<E> iterator() {
-            return new Iterator<E>() {
+            return new Iterator<>() {
                 private int idx = (e1 == EMPTY) ? 1 : 2;
 
                 @Override
@@ -856,7 +861,6 @@ class ImmutableCollections {
                 }
 
                 @Override
-                @SideEffectsOnly("this")
                 @SuppressWarnings("unchecked")
                 public E next(/*@NonEmpty Iterator<E> this*/) {
                     if (idx == 1) {
@@ -994,7 +998,6 @@ class ImmutableCollections {
             }
 
             @Override
-            @SideEffectsOnly("this")
             public E next(@NonEmpty SetNIterator this) {
                 if (remaining > 0) {
                     E element;
@@ -1316,7 +1319,6 @@ class ImmutableCollections {
                 return remaining > 0;
             }
 
-            @SideEffectsOnly("this")
             private int nextIndex() {
                 int idx = this.idx;
                 if (REVERSE) {

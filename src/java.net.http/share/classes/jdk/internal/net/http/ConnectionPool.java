@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -41,6 +41,7 @@ import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Flow;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import jdk.internal.net.http.common.FlowTube;
 import jdk.internal.net.http.common.Logger;
@@ -58,11 +59,12 @@ final class ConnectionPool {
 
     // Pools of idle connections
 
+    private final ReentrantLock stateLock = new ReentrantLock();
     private final HashMap<CacheKey,LinkedList<HttpConnection>> plainPool;
     private final HashMap<CacheKey,LinkedList<HttpConnection>> sslPool;
     private final ExpiryList expiryList;
     private final String dbgTag; // used for debug
-    boolean stopped;
+    volatile boolean stopped;
 
     /**
      * Entries in connection pool are keyed by destination address and/or
@@ -140,7 +142,7 @@ final class ConnectionPool {
         return dbgTag;
     }
 
-    synchronized void start() {
+    void start() {
         assert !stopped : "Already stopped";
     }
 
@@ -150,9 +152,21 @@ final class ConnectionPool {
         return new CacheKey(secure, destination, proxy);
     }
 
-    synchronized HttpConnection getConnection(boolean secure,
-                                              InetSocketAddress addr,
-                                              InetSocketAddress proxy) {
+    HttpConnection getConnection(boolean secure,
+                                 InetSocketAddress addr,
+                                 InetSocketAddress proxy) {
+        if (stopped) return null;
+        stateLock.lock();
+        try {
+            return getConnection0(secure, addr, proxy);
+        } finally {
+            stateLock.unlock();
+        }
+    }
+
+    private HttpConnection getConnection0(boolean secure,
+                                          InetSocketAddress addr,
+                                          InetSocketAddress proxy) {
         if (stopped) return null;
         // for plain (unsecure) proxy connection the destination address is irrelevant.
         addr = secure || proxy == null ? addr : null;
@@ -186,7 +200,8 @@ final class ConnectionPool {
 
         // it's possible that cleanup may have been called.
         HttpConnection toClose = null;
-        synchronized(this) {
+        stateLock.lock();
+        try {
             if (cleanup.isDone()) {
                 return;
             } else if (stopped) {
@@ -204,6 +219,8 @@ final class ConnectionPool {
                 putConnection(conn, sslPool);
             }
             expiryList.add(conn, now, keepAlive);
+        } finally {
+            stateLock.unlock();
         }
         if (toClose != null) {
             if (debug.on()) {
@@ -244,7 +261,7 @@ final class ConnectionPool {
     removeFromPool(HttpConnection c,
                    HashMap<CacheKey,LinkedList<HttpConnection>> pool) {
         //System.out.println("cacheCleaner removing: " + c);
-        assert Thread.holdsLock(this);
+        assert stateLock.isHeldByCurrentThread();
         CacheKey k = c.cacheKey();
         List<HttpConnection> l = pool.get(k);
         if (l == null || l.isEmpty()) {
@@ -289,7 +306,8 @@ final class ConnectionPool {
         if (!expiryList.purgeMaybeRequired()) return nextPurge;
 
         List<HttpConnection> closelist;
-        synchronized (this) {
+        stateLock.lock();
+        try {
             closelist = expiryList.purgeUntil(now);
             for (HttpConnection c : closelist) {
                 if (c instanceof PlainHttpConnection) {
@@ -303,6 +321,8 @@ final class ConnectionPool {
             nextPurge = now.until(
                     expiryList.nextExpiryDeadline().orElse(now),
                     ChronoUnit.MILLIS);
+        } finally {
+            stateLock.unlock();
         }
         closelist.forEach(this::close);
         return nextPurge;
@@ -317,7 +337,8 @@ final class ConnectionPool {
     void stop() {
         List<HttpConnection> closelist = Collections.emptyList();
         try {
-            synchronized (this) {
+            stateLock.lock();
+            try {
                 stopped = true;
                 closelist = expiryList.stream()
                     .map(e -> e.connection)
@@ -325,6 +346,8 @@ final class ConnectionPool {
                 expiryList.clear();
                 plainPool.clear();
                 sslPool.clear();
+            } finally {
+                stateLock.unlock();
             }
         } finally {
             closelist.forEach(this::close);
@@ -355,28 +378,25 @@ final class ConnectionPool {
 
         // A loosely accurate boolean whose value is computed
         // at the end of each operation performed on ExpiryList;
-        // Does not require synchronizing on the ConnectionPool.
+        // Does not require holding the ConnectionPool stateLock.
         boolean purgeMaybeRequired() {
             return mayContainEntries;
         }
 
         // Returns the next expiry deadline
-        // should only be called while holding a synchronization
-        // lock on the ConnectionPool
+        // should only be called while holding the ConnectionPool stateLock.
         Optional<Instant> nextExpiryDeadline() {
             if (list.isEmpty()) return Optional.empty();
             else return Optional.of(list.getLast().expiry);
         }
 
-        // should only be called while holding a synchronization
-        // lock on the ConnectionPool
+        // should only be called while holding the ConnectionPool stateLock.
         HttpConnection removeOldest() {
             ExpiryEntry entry = list.pollLast();
             return entry == null ? null : entry.connection;
         }
 
-        // should only be called while holding a synchronization
-        // lock on the ConnectionPool
+        // should only be called while holding the ConnectionPool stateLock.
         void add(HttpConnection conn) {
             add(conn, Instant.now(), KEEP_ALIVE_TIMEOUT);
         }
@@ -409,8 +429,7 @@ final class ConnectionPool {
             mayContainEntries = true;
         }
 
-        // should only be called while holding a synchronization
-        // lock on the ConnectionPool
+        // should only be called while holding the ConnectionPool stateLock.
         void remove(HttpConnection c) {
             if (c == null || list.isEmpty()) return;
             ListIterator<ExpiryEntry> li = list.listIterator();
@@ -424,8 +443,7 @@ final class ConnectionPool {
             }
         }
 
-        // should only be called while holding a synchronization
-        // lock on the ConnectionPool.
+        // should only be called while holding the ConnectionPool stateLock.
         // Purge all elements whose deadline is before now (now included).
         List<HttpConnection> purgeUntil(Instant now) {
             if (list.isEmpty()) return Collections.emptyList();
@@ -451,14 +469,12 @@ final class ConnectionPool {
             return closelist;
         }
 
-        // should only be called while holding a synchronization
-        // lock on the ConnectionPool
+        // should only be called while holding the ConnectionPool stateLock.
         java.util.stream.Stream<ExpiryEntry> stream() {
             return list.stream();
         }
 
-        // should only be called while holding a synchronization
-        // lock on the ConnectionPool
+        // should only be called while holding the ConnectionPool stateLock.
         void clear() {
             list.clear();
             mayContainEntries = false;
@@ -466,10 +482,9 @@ final class ConnectionPool {
     }
 
     // Remove a connection from the pool.
-    // should only be called while holding a synchronization
-    // lock on the ConnectionPool
+    // should only be called while holding the ConnectionPool stateLock.
     private void removeFromPool(HttpConnection c) {
-        assert Thread.holdsLock(this);
+        assert stateLock.isHeldByCurrentThread();
         if (c instanceof PlainHttpConnection) {
             removeFromPool(c, plainPool);
         } else {
@@ -480,7 +495,16 @@ final class ConnectionPool {
 
     // Used by tests
     @Pure
-    synchronized boolean contains(HttpConnection c) {
+    boolean contains(HttpConnection c) {
+        stateLock.lock();
+        try {
+            return contains0(c);
+        } finally {
+            stateLock.unlock();
+        }
+    }
+
+    private boolean contains0(HttpConnection c) {
         final CacheKey key = c.cacheKey();
         List<HttpConnection> list;
         if ((list = plainPool.get(key)) != null) {
@@ -496,9 +520,12 @@ final class ConnectionPool {
         if (debug.on())
             debug.log("%s : ConnectionPool.cleanup(%s)",
                     String.valueOf(c.getConnectionFlow()), error);
-        synchronized(this) {
+        stateLock.lock();
+        try {
             removeFromPool(c);
             expiryList.remove(c);
+        } finally {
+            stateLock.unlock();
         }
         c.close();
     }

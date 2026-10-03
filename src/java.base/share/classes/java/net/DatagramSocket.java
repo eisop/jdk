@@ -1355,7 +1355,6 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
         delegate().leaveGroup(mcastaddr, netIf);
     }
 
-    // Temporary solution until JDK-8237352 is addressed
     private static final SocketAddress NO_DELEGATE = new SocketAddress() {};
 
     /**
@@ -1398,7 +1397,6 @@ public @UsesObjectEquals class DatagramSocket implements java.io.Closeable {
     static <T extends DatagramSocket> T createDelegate(SocketAddress bindaddr, Class<T> type)
             throws SocketException {
 
-        // Temporary solution until JDK-8237352 is addressed
         if (bindaddr == NO_DELEGATE) return null;
 
         assert type == DatagramSocket.class || type == MulticastSocket.class;

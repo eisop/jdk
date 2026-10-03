@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -120,7 +120,7 @@ import sun.util.locale.provider.LocaleServiceProviderPool;
  * <strong>Examples</strong>:<P>
  * Creating and using text boundaries:
  * <blockquote>
- * <pre>
+ * {@snippet lang=java :
  * public static void main(String args[]) {
  *      if (args.length == 1) {
  *          String stringToExamine = args[0];
@@ -136,12 +136,12 @@ import sun.util.locale.provider.LocaleServiceProviderPool;
  *          printLast(boundary, stringToExamine);
  *      }
  * }
- * </pre>
+ * }
  * </blockquote>
  *
  * Print each element in order:
  * <blockquote>
- * <pre>
+ * {@snippet lang=java :
  * public static void printEachForward(BreakIterator boundary, String source) {
  *     int start = boundary.first();
  *     for (int end = boundary.next();
@@ -150,12 +150,12 @@ import sun.util.locale.provider.LocaleServiceProviderPool;
  *          System.out.println(source.substring(start,end));
  *     }
  * }
- * </pre>
+ * }
  * </blockquote>
  *
  * Print each element in reverse order:
  * <blockquote>
- * <pre>
+ * {@snippet lang=java :
  * public static void printEachBackward(BreakIterator boundary, String source) {
  *     int end = boundary.last();
  *     for (int start = boundary.previous();
@@ -164,45 +164,45 @@ import sun.util.locale.provider.LocaleServiceProviderPool;
  *         System.out.println(source.substring(start,end));
  *     }
  * }
- * </pre>
+ * }
  * </blockquote>
  *
  * Print first element:
  * <blockquote>
- * <pre>
+ * {@snippet lang=java :
  * public static void printFirst(BreakIterator boundary, String source) {
  *     int start = boundary.first();
  *     int end = boundary.next();
  *     System.out.println(source.substring(start,end));
  * }
- * </pre>
+ * }
  * </blockquote>
  *
  * Print last element:
  * <blockquote>
- * <pre>
+ * {@snippet lang=java :
  * public static void printLast(BreakIterator boundary, String source) {
  *     int end = boundary.last();
  *     int start = boundary.previous();
  *     System.out.println(source.substring(start,end));
  * }
- * </pre>
+ * }
  * </blockquote>
  *
  * Print the element at a specified position:
  * <blockquote>
- * <pre>
+ *{@snippet lang=java :
  * public static void printAt(BreakIterator boundary, int pos, String source) {
  *     int end = boundary.following(pos);
  *     int start = boundary.previous();
  *     System.out.println(source.substring(start,end));
  * }
- * </pre>
+ * }
  * </blockquote>
  *
  * Find the next word:
  * <blockquote>
- * <pre>{@code
+ * {@snippet lang=java :
  * public static int nextWordStartAfter(int pos, String text) {
  *     BreakIterator wb = BreakIterator.getWordInstance();
  *     wb.setText(text);
@@ -218,7 +218,7 @@ import sun.util.locale.provider.LocaleServiceProviderPool;
  *     }
  *     return BreakIterator.DONE;
  * }
- * }</pre>
+ * }
  * (The iterator returned by BreakIterator.getWordInstance() is unique in that
  * the break positions it returns don't represent both the start and end of the
  * thing being iterated over.  That is, a sentence-break iterator returns breaks

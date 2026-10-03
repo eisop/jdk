@@ -422,7 +422,6 @@ public @UsesObjectEquals class MediaTracker implements java.io.Serializable {
      * @return      {@code true} if all images were successfully
      *                       loaded; {@code false} otherwise
      * @see         java.awt.MediaTracker#waitForID(int)
-     * @see         java.awt.MediaTracker#waitForAll(long)
      * @see         java.awt.MediaTracker#isErrorAny
      * @see         java.awt.MediaTracker#isErrorID
      * @throws   InterruptedException  if any thread has
@@ -531,7 +530,7 @@ public @UsesObjectEquals class MediaTracker implements java.io.Serializable {
      * @return      {@code true} if all images have finished loading,
      *                       have been aborted, or have encountered
      *                       an error; {@code false} otherwise
-     * @see         java.awt.MediaTracker#checkID(int, boolean)
+     * @see         java.awt.MediaTracker#checkID(int)
      * @see         java.awt.MediaTracker#checkAll()
      * @see         java.awt.MediaTracker#isErrorAny()
      * @see         java.awt.MediaTracker#isErrorID(int)

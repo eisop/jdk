@@ -11,6 +11,13 @@ import java.lang.annotation.Target;
  * Deterministic}. The more important of these, when performing pluggable type-checking, is usually
  * {@link SideEffectFree}.
  *
+ * <p>For pluggable type-checking, {@link SideEffectFree} lets flow-sensitive type refinement keep
+ * facts about the heap across a call to the method, and {@link Deterministic} lets it assume that a
+ * later invocation of the method, with the same arguments and in the same environment, returns the
+ * same value as an earlier one. Because a deterministic method that is not side-effect-free can
+ * change the environment itself, both are needed for a fact learned about the result of one
+ * invocation to hold for the result of the next; see {@link Deterministic} for an example.
+ *
  * <p>For a discussion of the meaning of {@code Pure} on a constructor, see the documentation of
  * {@link Deterministic}.
  *
@@ -26,12 +33,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface Pure {
-  /** The type of purity. */
-  public static enum Kind {
-    /** The method has no visible side effects. */
-    SIDE_EFFECT_FREE,
+    /** The type of purity. */
+    enum Kind {
+        /** The method has no visible side effects. */
+        SIDE_EFFECT_FREE,
 
-    /** The method returns exactly the same value when called in the same environment. */
-    DETERMINISTIC
-  }
+        /** The method returns exactly the same value when called in the same environment. */
+        DETERMINISTIC
+    }
 }

@@ -570,10 +570,6 @@ public final class Integer extends Number
         return charPos;
     }
 
-    // Left here for compatibility reasons, see JDK-8143900.
-    static final int [] sizeTable = { 9, 99, 999, 9999, 99999, 999999, 9999999,
-                                      99999999, 999999999, Integer.MAX_VALUE };
-
     /**
      * Returns the string representation size for a given int value.
      *
@@ -1595,9 +1591,9 @@ public final class Integer extends Number
      *         unsigned values
      * @since 1.8
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static int compareUnsigned(@Unsigned int x, @Unsigned int y) {
         return compare(x + MIN_VALUE, y + MIN_VALUE);
     }
@@ -1643,9 +1639,9 @@ public final class Integer extends Number
      * @see #remainderUnsigned
      * @since 1.8
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static @Unsigned int divideUnsigned(@Unsigned int dividend, @Unsigned int divisor) {
         // In lieu of tricky code, for now just use long arithmetic.
         return (int)(toUnsignedLong(dividend) / toUnsignedLong(divisor));
@@ -1663,9 +1659,9 @@ public final class Integer extends Number
      * @see #divideUnsigned
      * @since 1.8
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static @Unsigned int remainderUnsigned(@Unsigned int dividend, @Unsigned int divisor) {
         // In lieu of tricky code, for now just use long arithmetic.
         return (int)(toUnsignedLong(dividend) % toUnsignedLong(divisor));
@@ -1879,9 +1875,9 @@ public final class Integer extends Number
      *     specified {@code int} value.
      * @since 1.5
      */
-    @IntrinsicCandidate
     @Pure
     @StaticallyExecutable
+    @IntrinsicCandidate
     public static @SignednessGlb int reverse(@PolySigned int i) {
         // HD, Figure 7-1
         i = (i & 0x55555555) << 1 | (i >>> 1) & 0x55555555;

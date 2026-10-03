@@ -497,6 +497,17 @@ import sun.nio.cs.UTF_8;
  * @author Mark Reinhold
  * @since 1.4
  *
+ * @spec https://www.rfc-editor.org/info/rfc2279
+ *      RFC 2279: UTF-8, a transformation format of ISO 10646
+ * @spec https://www.rfc-editor.org/info/rfc2373
+ *      RFC 2373: IP Version 6 Addressing Architecture
+ * @spec https://www.rfc-editor.org/info/rfc2396
+ *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
+ * @spec https://www.rfc-editor.org/info/rfc2732
+ *      RFC 2732: Format for Literal IPv6 Addresses in URL's
+ * @spec https://www.rfc-editor.org/info/rfc3986
+ *      RFC 3986: Uniform Resource Identifier (URI): Generic Syntax
+ *
  * @see <a href="http://www.ietf.org/rfc/rfc2279.txt"><i>RFC&nbsp;2279: UTF-8, a
  * transformation format of ISO 10646</i></a>
  * @see <a href="http://www.ietf.org/rfc/rfc2373.txt"><i>RFC&nbsp;2373: IPv6 Addressing
@@ -631,6 +642,12 @@ public final class URI
      * @throws  URISyntaxException
      *          If the given string violates RFC&nbsp;2396, as augmented
      *          by the above deviations
+     * @spec https://www.rfc-editor.org/info/rfc2373
+     *      RFC 2373: IP Version 6 Addressing Architecture
+     * @spec https://www.rfc-editor.org/info/rfc2396
+     *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
+     * @spec https://www.rfc-editor.org/info/rfc2732
+     *      RFC 2732: Format for Literal IPv6 Addresses in URL's
      */
     public URI(String str) throws URISyntaxException {
         new Parser(str).parse(false);
@@ -708,6 +725,8 @@ public final class URI
      *         if the URI string constructed from the given components violates
      *         RFC&nbsp;2396, or if the authority component of the string is
      *         present but cannot be parsed as a server-based authority
+     * @spec https://www.rfc-editor.org/info/rfc2396
+     *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
      */
     public URI(@Nullable String scheme,
                @Nullable String userInfo, @Nullable String host, int port,
@@ -781,6 +800,8 @@ public final class URI
      *         if the URI string constructed from the given components violates
      *         RFC&nbsp;2396, or if the authority component of the string is
      *         present but cannot be parsed as a server-based authority
+     * @spec https://www.rfc-editor.org/info/rfc2396
+     *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
      */
     public URI(@Nullable String scheme,
                @Nullable String authority,
@@ -969,6 +990,9 @@ public final class URI
      *          If the authority component of this URI is defined
      *          but cannot be parsed as a server-based authority
      *          according to RFC&nbsp;2396
+     *
+     * @spec https://www.rfc-editor.org/info/rfc2396
+     *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
      */
     public URI parseServerAuthority()
         throws URISyntaxException
@@ -1018,6 +1042,8 @@ public final class URI
      *
      * @return  A URI equivalent to this URI,
      *          but whose path is in normal form
+     * @spec https://www.rfc-editor.org/info/rfc2396
+     *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
      */
     public URI normalize() {
         return normalize(this);
@@ -1076,6 +1102,8 @@ public final class URI
      *
      * @throws  NullPointerException
      *          If {@code uri} is {@code null}
+     * @spec https://www.rfc-editor.org/info/rfc2396
+     *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
      */
     public URI resolve(URI uri) {
         return resolve(this, uri);
@@ -1358,6 +1386,8 @@ public final class URI
      *
      * @return  The host component of this URI,
      *          or {@code null} if the host is undefined
+     * @spec https://www.rfc-editor.org/info/rfc2373
+     *      RFC 2373: IP Version 6 Addressing Architecture
      */
     public @Nullable String getHost() {
         return host;
@@ -1704,6 +1734,8 @@ public final class URI
      * section&nbsp;5.2, step&nbsp;7. </p>
      *
      * @return  The string form of this URI
+     * @spec https://www.rfc-editor.org/info/rfc2396
+     *      RFC 2396: Uniform Resource Identifiers (URI): Generic Syntax
      */
     public String toString() {
         String s = string;
@@ -3254,6 +3286,7 @@ public final class URI
 
             boolean serverChars;
             boolean regChars;
+            boolean skipParseException;
 
             if (scan(p, n, "]") > p) {
                 // contains a literal IPv6 address, therefore % is allowed
@@ -3269,15 +3302,28 @@ public final class URI
                 return n;
             }
 
+            // When parsing a URI, skip creating exception objects if the server-based
+            // authority is not required and the registry parse is successful.
+            //
+            skipParseException = (!requireServerAuthority && regChars);
             if (serverChars) {
                 // Might be (probably is) a server-based authority, so attempt
                 // to parse it as such.  If the attempt fails, try to treat it
                 // as a registry-based authority.
                 try {
-                    q = parseServer(p, n);
-                    if (q < n)
-                        failExpecting("end of authority", q);
-                    authority = input.substring(p, n);
+                    q = parseServer(p, n, skipParseException);
+                    if (q < n) {
+                        if (skipParseException) {
+                            userInfo = null;
+                            host = null;
+                            port = -1;
+                            q = p;
+                        } else {
+                            failExpecting("end of authority", q);
+                        }
+                    } else {
+                        authority = input.substring(p, n);
+                    }
                 } catch (URISyntaxException x) {
                     // Undo results of failed parse
                     userInfo = null;
@@ -3315,7 +3361,7 @@ public final class URI
 
         // [<userinfo>@]<host>[:<port>]
         //
-        private int parseServer(int start, int n)
+        private int parseServer(int start, int n, boolean skipParseException)
             throws URISyntaxException
         {
             int p = start;
@@ -3355,7 +3401,7 @@ public final class URI
             } else {
                 q = parseIPv4Address(p, n);
                 if (q <= p)
-                    q = parseHostname(p, n);
+                    q = parseHostname(p, n, skipParseException);
                 p = q;
             }
 
@@ -3372,7 +3418,10 @@ public final class URI
                     }
                     p = q;
                 }
+            } else if (p < n && skipParseException) {
+                return p;
             }
+
             if (p < n)
                 failExpecting("port number", p);
 
@@ -3475,7 +3524,7 @@ public final class URI
         // domainlabel   = alphanum | alphanum *( alphanum | "-" ) alphanum
         // toplabel      = alpha | alpha *( alphanum | "-" ) alphanum
         //
-        private int parseHostname(int start, int n)
+        private int parseHostname(int start, int n, boolean skipParseException)
             throws URISyntaxException
         {
             int p = start;
@@ -3501,9 +3550,12 @@ public final class URI
                 p = q;
             } while (p < n);
 
-            if ((p < n) && !at(p, n, ':'))
+            if ((p < n) && !at(p, n, ':')) {
+                if (skipParseException) {
+                    return p;
+                }
                 fail("Illegal character in hostname", p);
-
+            }
             if (l < 0)
                 failExpecting("hostname", start);
 

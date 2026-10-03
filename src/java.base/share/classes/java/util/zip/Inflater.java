@@ -161,7 +161,7 @@ public @UsesObjectEquals class Inflater {
      * @see Inflater#needsInput
      */
     public void setInput(byte[] input, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len) {
-        Preconditions.checkFromIndexSize(len, off, input.length, Preconditions.AIOOBE_FORMATTER);
+        Preconditions.checkFromIndexSize(off, len, input.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             this.input = null;
             this.inputArray = input;
@@ -226,7 +226,7 @@ public @UsesObjectEquals class Inflater {
      * @see Inflater#getAdler
      */
     public void setDictionary(byte[] dictionary, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len) {
-        Preconditions.checkFromIndexSize(len, off, dictionary.length, Preconditions.AIOOBE_FORMATTER);
+        Preconditions.checkFromIndexSize(off, len, dictionary.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             ensureOpen();
             setDictionary(zsRef.address(), dictionary, off, len);
@@ -370,7 +370,7 @@ public @UsesObjectEquals class Inflater {
     public @GTENegativeOne int inflate(byte[] output, @IndexOrHigh({"#1"}) int off, @IndexOrHigh({"#1"}) int len)
         throws DataFormatException
     {
-        Preconditions.checkFromIndexSize(len, off, output.length, Preconditions.AIOOBE_FORMATTER);
+        Preconditions.checkFromIndexSize(off, len, output.length, Preconditions.AIOOBE_FORMATTER);
         synchronized (zsRef) {
             ensureOpen();
             ByteBuffer input = this.input;

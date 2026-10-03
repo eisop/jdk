@@ -842,9 +842,9 @@ Java_sun_awt_windows_WPrinterJob_getDefaultPage(JNIEnv *env, jobject self,
 
           // set margins to 1"
           margins.left = convertFromPoints(72, units);
-          margins.top = convertFromPoints(72, units);;
-          margins.right = convertFromPoints(72, units);;
-          margins.bottom = convertFromPoints(72, units);;
+          margins.top = convertFromPoints(72, units);
+          margins.right = convertFromPoints(72, units);
+          margins.bottom = convertFromPoints(72, units);
 
           jobject paper = getPaper(env, page);
           if (paper == NULL) {
@@ -2637,7 +2637,7 @@ JNIEXPORT jint JNICALL Java_sun_awt_windows_WPrinterJob_getGDIAdvance
  */
 JNIEXPORT void JNICALL Java_sun_awt_windows_WPrinterJob_textOut
 (JNIEnv *env, jobject self, jlong printDC, jstring text, jint strLen,
-     boolean glyphCodes, jfloat x, jfloat y, jfloatArray positions)
+     jboolean glyphCodes, jfloat x, jfloat y, jfloatArray positions)
 {
 
     long posX = ROUND_TO_LONG(x);
@@ -4298,7 +4298,7 @@ Java_sun_awt_windows_WPrinterJob_setNativePrintService(JNIEnv *env,
       hDevMode = NULL;
     }
 
-    HANDLE hDevNames = AwtPrintControl::getPrintHDName(env, name);;
+    HANDLE hDevNames = AwtPrintControl::getPrintHDName(env, name);
     if (hDevNames != NULL) {
       ::GlobalFree(hDevNames);
       hDevNames = NULL;
