@@ -36,7 +36,7 @@
 package java.util.concurrent;
 
 import org.checkerframework.checker.index.qual.PolyGrowShrink;
-import org.checkerframework.checker.index.qual.Shrinkable;
+import org.checkerframework.checker.index.qual.CanShrink;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -930,7 +930,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
         return screenNullResult(peekLast());
     }
 
-    public @Nullable E pollFirst(@GuardSatisfied @Shrinkable ConcurrentLinkedDeque<E> this) {
+    public @Nullable E pollFirst(@GuardSatisfied @CanShrink ConcurrentLinkedDeque<E> this) {
         restart: for (;;) {
             for (Node<E> first = first(), p = first;;) {
                 final E item;
@@ -951,7 +951,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
         }
     }
 
-    public @Nullable E pollLast(@GuardSatisfied @Shrinkable ConcurrentLinkedDeque<E> this) {
+    public @Nullable E pollLast(@GuardSatisfied @CanShrink ConcurrentLinkedDeque<E> this) {
         restart: for (;;) {
             for (Node<E> last = last(), p = last;;) {
                 final E item;
@@ -975,14 +975,14 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E removeFirst(@GuardSatisfied @NonEmpty @Shrinkable ConcurrentLinkedDeque<E> this) {
+    public E removeFirst(@GuardSatisfied @NonEmpty @CanShrink ConcurrentLinkedDeque<E> this) {
         return screenNullResult(pollFirst());
     }
 
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E removeLast(@GuardSatisfied @NonEmpty @Shrinkable ConcurrentLinkedDeque<E> this) {
+    public E removeLast(@GuardSatisfied @NonEmpty @CanShrink ConcurrentLinkedDeque<E> this) {
         return screenNullResult(pollLast());
     }
 
@@ -1012,19 +1012,19 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
         return offerLast(e);
     }
 
-    public @Nullable E poll(@Shrinkable ConcurrentLinkedDeque<E> this)           { return pollFirst(); }
+    public @Nullable E poll(@CanShrink ConcurrentLinkedDeque<E> this)           { return pollFirst(); }
     @Pure
     public @Nullable E peek()           { return peekFirst(); }
 
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E remove(@NonEmpty @Shrinkable ConcurrentLinkedDeque<E> this)         { return removeFirst(); }
+    public E remove(@NonEmpty @CanShrink ConcurrentLinkedDeque<E> this)         { return removeFirst(); }
 
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E pop(@GuardSatisfied @NonEmpty @Shrinkable ConcurrentLinkedDeque<E> this)            { return removeFirst(); }
+    public E pop(@GuardSatisfied @NonEmpty @CanShrink ConcurrentLinkedDeque<E> this)            { return removeFirst(); }
 
     /**
      * @throws NoSuchElementException {@inheritDoc}
@@ -1048,7 +1048,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
      * @return {@code true} if the deque contained the specified element
      * @throws NullPointerException if the specified element is null
      */
-    public boolean removeFirstOccurrence(@Shrinkable ConcurrentLinkedDeque<E> this, Object o) {
+    public boolean removeFirstOccurrence(@CanShrink ConcurrentLinkedDeque<E> this, Object o) {
         Objects.requireNonNull(o);
         for (Node<E> p = first(); p != null; p = succ(p)) {
             final E item;
@@ -1074,7 +1074,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
      * @return {@code true} if the deque contained the specified element
      * @throws NullPointerException if the specified element is null
      */
-    public boolean removeLastOccurrence(@Shrinkable ConcurrentLinkedDeque<E> this, Object o) {
+    public boolean removeLastOccurrence(@CanShrink ConcurrentLinkedDeque<E> this, Object o) {
         Objects.requireNonNull(o);
         for (Node<E> p = last(); p != null; p = pred(p)) {
             final E item;
@@ -1166,7 +1166,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
      * @return {@code true} if the deque contained the specified element
      * @throws NullPointerException if the specified element is null
      */
-    public boolean remove(@Shrinkable ConcurrentLinkedDeque<E> this, @GuardSatisfied @UnknownSignedness Object o) {
+    public boolean remove(@CanShrink ConcurrentLinkedDeque<E> this, @GuardSatisfied @UnknownSignedness Object o) {
         return removeFirstOccurrence(o);
     }
 
@@ -1236,7 +1236,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
     /**
      * Removes all of the elements from this deque.
      */
-    public void clear(@GuardSatisfied @Shrinkable ConcurrentLinkedDeque<E> this) {
+    public void clear(@GuardSatisfied @CanShrink ConcurrentLinkedDeque<E> this) {
         while (pollFirst() != null)
             ;
     }
@@ -1636,7 +1636,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean removeIf(@Shrinkable ConcurrentLinkedDeque<E> this, Predicate<? super E> filter) {
+    public boolean removeIf(@CanShrink ConcurrentLinkedDeque<E> this, Predicate<? super E> filter) {
         Objects.requireNonNull(filter);
         return bulkRemove(filter);
     }
@@ -1644,7 +1644,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean removeAll(@Shrinkable ConcurrentLinkedDeque<E> this, Collection<? extends @NonNull @UnknownSignedness Object> c) {
+    public boolean removeAll(@CanShrink ConcurrentLinkedDeque<E> this, Collection<? extends @NonNull @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> c.contains(e));
     }
@@ -1652,7 +1652,7 @@ public class ConcurrentLinkedDeque<E extends @NonNull Object>
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean retainAll(@GuardSatisfied @Shrinkable ConcurrentLinkedDeque<E> this, Collection<? extends @NonNull @UnknownSignedness Object> c) {
+    public boolean retainAll(@GuardSatisfied @CanShrink ConcurrentLinkedDeque<E> this, Collection<? extends @NonNull @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> !c.contains(e));
     }
