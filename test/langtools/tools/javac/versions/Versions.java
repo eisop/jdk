@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -71,24 +71,25 @@ public class Versions {
 
     public static final Set<String> VALID_SOURCES =
         Set.of("1.8", "1.9", "1.10", "11", "12", "13", "14",
-               "15", "16", "17", "18", "19", "20");
+               "15", "16", "17", "18", "19", "20", "21");
 
-    public static final String LATEST_MAJOR_VERSION = "64.0";
+    public static final String LATEST_MAJOR_VERSION = "65.0";
 
     static enum SourceTarget {
-        EIGHT(true,   "52.0",  "8", Versions::checksrc8),
-        NINE(true,    "53.0",  "9", Versions::checksrc9),
-        TEN(true,     "54.0", "10", Versions::checksrc10),
-        ELEVEN(false, "55.0", "11", Versions::checksrc11),
-        TWELVE(false, "56.0", "12", Versions::checksrc12),
-        THIRTEEN(false, "57.0", "13", Versions::checksrc13),
-        FOURTEEN(false, "58.0", "14", Versions::checksrc14),
-        FIFTEEN(false,  "59.0", "15", Versions::checksrc15),
-        SIXTEEN(false,  "60.0", "16", Versions::checksrc16),
+        EIGHT(true,      "52.0",  "8", Versions::checksrc8),
+        NINE(true,       "53.0",  "9", Versions::checksrc9),
+        TEN(true,        "54.0", "10", Versions::checksrc10),
+        ELEVEN(false,    "55.0", "11", Versions::checksrc11),
+        TWELVE(false,    "56.0", "12", Versions::checksrc12),
+        THIRTEEN(false,  "57.0", "13", Versions::checksrc13),
+        FOURTEEN(false,  "58.0", "14", Versions::checksrc14),
+        FIFTEEN(false,   "59.0", "15", Versions::checksrc15),
+        SIXTEEN(false,   "60.0", "16", Versions::checksrc16),
         SEVENTEEN(false, "61.0", "17", Versions::checksrc17),
         EIGHTEEN(false,  "62.0", "18", Versions::checksrc18),
         NINETEEN(false,  "63.0", "19", Versions::checksrc19),
-        TWENTY(false,  "64.0", "20", Versions::checksrc20);
+        TWENTY(false,    "64.0", "20", Versions::checksrc20),
+        TWENTY_ONE(false,"65.0", "21", Versions::checksrc21);
 
         private final boolean dotOne;
         private final String classFileVer;
@@ -247,85 +248,97 @@ public class Versions {
     protected void checksrc8(List<String> args) {
         printargs("checksrc8", args);
         expectedPass(args, List.of("New7.java", "New8.java"));
-        expectedFail(args, List.of("New10.java"));
+        expectedFail(args, List.of("New10.java", "New11.java", "New14.java", "New15.java",
+                                   "New16.java", "New17.java", "New21.java"));
+
     }
 
     protected void checksrc9(List<String> args) {
         printargs("checksrc9", args);
         expectedPass(args, List.of("New7.java", "New8.java"));
-        expectedFail(args, List.of("New10.java"));
+        expectedFail(args, List.of("New10.java", "New11.java", "New14.java", "New15.java",
+                                   "New16.java", "New17.java", "New21.java"));
     }
 
     protected void checksrc10(List<String> args) {
         printargs("checksrc10", args);
         expectedPass(args, List.of("New7.java", "New8.java", "New10.java"));
-        expectedFail(args, List.of("New11.java"));
+        expectedFail(args, List.of("New11.java", "New14.java", "New15.java",
+                                   "New16.java", "New17.java", "New21.java"));
     }
 
     protected void checksrc11(List<String> args) {
         printargs("checksrc11", args);
         expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java"));
-        expectedFail(args, List.of("New14.java"));
+        expectedFail(args, List.of("New14.java", "New15.java", "New16.java", "New17.java", "New21.java"));
     }
 
     protected void checksrc12(List<String> args) {
         printargs("checksrc12", args);
         expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java"));
-        expectedFail(args, List.of("New14.java"));
+        expectedFail(args, List.of("New14.java", "New15.java", "New16.java", "New17.java", "New21.java"));
     }
 
     protected void checksrc13(List<String> args) {
         printargs("checksrc13", args);
         expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java"));
-        expectedFail(args, List.of("New14.java"));
+        expectedFail(args, List.of("New14.java", "New15.java", "New16.java", "New17.java", "New21.java"));
     }
 
     protected void checksrc14(List<String> args) {
         printargs("checksrc14", args);
         expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
                                    "New14.java"));
-        expectedFail(args, List.of("New15.java"));
+        expectedFail(args, List.of("New15.java", "New16.java", "New17.java", "New21.java"));
     }
 
    protected void checksrc15(List<String> args) {
        printargs("checksrc15", args);
        expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
                                   "New14.java", "New15.java"));
-        expectedFail(args, List.of("New16.java"));
+       expectedFail(args, List.of("New16.java", "New17.java", "New21.java"));
     }
 
    protected void checksrc16(List<String> args) {
        printargs("checksrc16", args);
        expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
                                   "New14.java", "New15.java", "New16.java"));
-        expectedFail(args, List.of("New17.java"));
+       expectedFail(args, List.of("New17.java", "New21.java"));
     }
 
    protected void checksrc17(List<String> args) {
        printargs("checksrc17", args);
        expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
                                   "New14.java", "New15.java", "New16.java", "New17.java"));
-       // Add expectedFail after new language features added in a later release.
+       expectedFail(args, List.of("New21.java"));
     }
 
    protected void checksrc18(List<String> args) {
        printargs("checksrc18", args);
        expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
                                   "New14.java", "New15.java", "New16.java", "New17.java"));
-       // Add expectedFail after new language features added in a later release.
+       expectedFail(args, List.of("New21.java"));
     }
 
    protected void checksrc19(List<String> args) {
        printargs("checksrc19", args);
        expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
                                   "New14.java", "New15.java", "New16.java", "New17.java"));
-       // Add expectedFail after new language features added in a later release.
+       expectedFail(args, List.of("New21.java"));
     }
 
    protected void checksrc20(List<String> args) {
        printargs("checksrc20", args);
        expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
                                   "New14.java", "New15.java", "New16.java", "New17.java"));
+       expectedFail(args, List.of("New21.java"));
+    }
+
+   protected void checksrc21(List<String> args) {
+       printargs("checksrc21", args);
+       expectedPass(args, List.of("New7.java", "New8.java", "New10.java", "New11.java",
+                                  "New14.java", "New15.java", "New16.java", "New17.java",
+                                  "New21.java"));
        // Add expectedFail after new language features added in a later release.
     }
 
@@ -383,7 +396,6 @@ public class Versions {
             failedCases++;
 
         }
-
     }
 
     protected void fail(List<String> args) {
@@ -565,6 +577,24 @@ public class Versions {
                 public static final class Pinniped extends Seal {}
                 public static final class TaperedThread extends Seal {}
                 public static final class Wax extends Seal {}
+            }
+            """
+        );
+
+        /*
+         * Create a file with a new feature in 21, not in 20 : pattern matching for switch
+         */
+        writeSourceFile("New21.java",
+            """
+            public class New21 {
+                public static void main(String... args) {
+                    Object o = new Object(){};
+
+                    System.out.println(switch (o) {
+                                       case Integer i -> String.format("%d", i);
+                                       default        -> o.toString();
+                                       });
+                }
             }
             """
         );

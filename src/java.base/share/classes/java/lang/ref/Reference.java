@@ -52,6 +52,7 @@ import jdk.internal.ref.Cleaner;
  */
 
 @AnnotatedFor({"lock", "nullness"})
+@SuppressWarnings({"rawtypes"})
 public abstract sealed class Reference<T>
     permits PhantomReference, SoftReference, WeakReference, FinalReference {
 

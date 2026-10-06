@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,6 +26,7 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.index.qual.PolyGrowShrink;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -36,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.io.InvalidObjectException;
@@ -109,10 +109,10 @@ public class HashSet<E>
     @java.io.Serial
     static final long serialVersionUID = -5024744406713321676L;
 
-    private transient HashMap<E,Object> map;
+    transient HashMap<E,Object> map;
 
     // Dummy value to associate with an Object in the backing Map
-    private static final Object PRESENT = new Object();
+    static final Object PRESENT = new Object();
 
     /**
      * Constructs a new, empty set; the backing {@code HashMap} instance has
@@ -194,7 +194,7 @@ public class HashSet<E>
      * @see ConcurrentModificationException
      */
     @SideEffectFree
-    public @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty HashSet<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty HashSet<E> this) {
         return map.keySet().iterator();
     }
 
@@ -246,7 +246,6 @@ public class HashSet<E>
      * @return {@code true} if this set did not already contain the specified
      * element
      */
-    @SideEffectsOnly("this")
     @EnsuresNonEmpty("this")
     public boolean add(@GuardSatisfied HashSet<E> this, E e) {
         return map.put(e, PRESENT)==null;
@@ -264,7 +263,6 @@ public class HashSet<E>
      * @param o object to be removed from this set, if present
      * @return {@code true} if the set contained the specified element
      */
-    @SideEffectsOnly("this")
     public boolean remove(@GuardSatisfied HashSet<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return map.remove(o)==PRESENT;
     }
@@ -273,7 +271,6 @@ public class HashSet<E>
      * Removes all of the elements from this set.
      * The set will be empty after this call returns.
      */
-    @SideEffectsOnly("this")
     public void clear(@GuardSatisfied HashSet<E> this) {
         map.clear();
     }
@@ -348,7 +345,7 @@ public class HashSet<E>
                                              loadFactor);
         }
         // Clamp load factor to range of 0.25...4.0.
-        loadFactor = Math.min(Math.max(0.25f, loadFactor), 4.0f);
+        loadFactor = Math.clamp(loadFactor, 0.25f, 4.0f);
 
         // Read size and verify non-negative.
         int size = s.readInt();

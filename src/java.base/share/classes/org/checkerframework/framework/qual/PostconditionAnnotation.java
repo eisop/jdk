@@ -31,8 +31,8 @@ import java.lang.annotation.Target;
  * org.checkerframework.common.value.qual.MinLen} qualifier:
  *
  * <pre><code>
- * {@literal @}PostconditionAnnotation(qualifier = MinLen.class)
- * {@literal @}Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
+ *  {@literal @}PostconditionAnnotation(qualifier = MinLen.class)
+ *  {@literal @}Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
  *  public {@literal @}interface EnsuresMinLen {
  *    String[] value();
  *    {@literal @}QualifierArgument("value")
@@ -47,7 +47,7 @@ import java.lang.annotation.Target;
  * {@code @MinLen(2)} upon return.
  *
  * <pre><code>
- * {@literal @}EnsuresMinLen(value = "field", targetValue = 2")
+ *  {@literal @}EnsuresMinLen(value = "field", targetValue = 2)
  *  public void setField(String argument) {
  *    field = "(" + argument + ")";
  *  }
@@ -60,10 +60,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE})
 public @interface PostconditionAnnotation {
-  /**
-   * The qualifier that will be established as a postcondition.
-   *
-   * <p>This element is analogous to {@link EnsuresQualifier#qualifier()}.
-   */
-  Class<? extends Annotation> qualifier();
+    /**
+     * The qualifier that will be established as a postcondition.
+     *
+     * <p>This element is analogous to {@link EnsuresQualifier#qualifier()}.
+     */
+    Class<? extends Annotation> qualifier();
 }

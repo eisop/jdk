@@ -36,7 +36,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "JAVA" "1" "2023" "JDK 20" "JDK Commands"
+.TH "JAVA" "1" "2023" "JDK 21" "JDK Commands"
 .hy
 .SH NAME
 .PP
@@ -187,7 +187,7 @@ with new values added and old values removed.
 You\[aq]ll get an error message if you use a value of \f[I]N\f[R] that
 is no longer supported.
 The supported values of \f[I]N\f[R] are the current Java SE release
-(\f[V]20\f[R]) and a limited number of previous releases, detailed in
+(\f[V]21\f[R]) and a limited number of previous releases, detailed in
 the command-line help for \f[V]javac\f[R], under the \f[V]--source\f[R]
 and \f[V]--release\f[R] options.
 .RE
@@ -530,21 +530,27 @@ The value \[dq]disabled\[dq] disables finalization, so that no
 finalizers are invoked.
 .TP
 \f[V]--module-path\f[R] \f[I]modulepath\f[R]... or \f[V]-p\f[R] \f[I]modulepath\f[R]
-Specifies a list of directories in which each directory is a directory
-of modules.
+Specifies where to find application modules with a list of path
+elements.
+The elements of a module path can be a file path to a module or a
+directory containing modules.
+Each module is either a modular JAR or an exploded-module directory.
 .RS
 .PP
-On Windows, semicolons (\f[V];\f[R]) separate directories in this list;
-on other platforms it is a colon (\f[V]:\f[R]).
+On Windows, semicolons (\f[V];\f[R]) separate path elements in this
+list; on other platforms it is a colon (\f[V]:\f[R]).
 .RE
 .TP
 \f[V]--upgrade-module-path\f[R] \f[I]modulepath\f[R]...
-Specifies a list of directories in which each directory is a directory
-of modules that replace upgradeable modules in the runtime image.
+Specifies where to find module replacements of upgradeable modules in
+the runtime image with a list of path elements.
+The elements of a module path can be a file path to a module or a
+directory containing modules.
+Each module is either a modular JAR or an exploded-module directory.
 .RS
 .PP
-On Windows, semicolons (\f[V];\f[R]) separate directories in this list;
-on other platforms it is a colon (\f[V]:\f[R]).
+On Windows, semicolons (\f[V];\f[R]) separate path elements in this
+list; on other platforms it is a colon (\f[V]:\f[R]).
 .RE
 .TP
 \f[V]--add-modules\f[R] \f[I]module\f[R][\f[V],\f[R]\f[I]module\f[R]...]
@@ -1300,6 +1306,7 @@ By default this option is disabled.
 .TP
 \f[V]-XX:FlightRecorderOptions=\f[R]\f[I]parameter\f[R]\f[V]=\f[R]\f[I]value\f[R] (or) \f[V]-XX:FlightRecorderOptions:\f[R]\f[I]parameter\f[R]\f[V]=\f[R]\f[I]value\f[R]
 Sets the parameters that control the behavior of JFR.
+Multiple parameters can be specified by separating them with a comma.
 .RS
 .PP
 The following list contains the available JFR
@@ -1337,6 +1344,12 @@ buffers.
 Maximum number of old objects to track.
 By default, the number of objects is set to 256.
 .TP
+\f[V]preserve-repository=\f[R]{\f[V]true\f[R]|\f[V]false\f[R]}
+Specifies whether files stored in the disk repository should be kept
+after the JVM has exited.
+If false, files are deleted.
+By default, this parameter is disabled.
+.TP
 \f[V]repository=\f[R]\f[I]path\f[R]
 Specifies the repository (a directory) for temporary disk storage.
 By default, the system\[aq]s temporary directory is used.
@@ -1359,9 +1372,6 @@ By default, the local buffer size is set to 8 kilobytes, with a minimum
 value of 4 kilobytes.
 Overriding this parameter could reduce performance and is not
 recommended.
-.PP
-You can specify values for multiple parameters by separating them with a
-comma.
 .RE
 .TP
 \f[V]-XX:LargePageSizeInBytes=\f[R]\f[I]size\f[R]
@@ -1648,6 +1658,9 @@ written when the recording is stopped, for example:
 \f[V]/home/user/recordings/recording.jfr\f[R]
 .IP \[bu] 2
 \f[V]c:\[rs]recordings\[rs]recording.jfr\f[R]
+.PP
+If %p and/or %t is specified in the filename, it expands to the
+JVM\[aq]s PID and the current timestamp, respectively.
 .RE
 .TP
 \f[V]name=\f[R]\f[I]identifier\f[R]
@@ -3805,6 +3818,14 @@ Controlled \f[I]relaxed strong encapsulation\f[R], as defined in
 This option was deprecated in JDK 16 by \f[B]JEP 396\f[R]
 [https://openjdk.org/jeps/396] and made obsolete in JDK 17 by \f[B]JEP
 403\f[R] [https://openjdk.org/jeps/403].
+.SH REMOVED JAVA OPTIONS
+.PP
+These \f[V]java\f[R] options have been removed in JDK 21 and using them
+results in an error of:
+.RS
+.PP
+\f[V]Unrecognized VM option\f[R] \f[I]option-name\f[R]
+.RE
 .TP
 \f[V]-XX:+ExtendedDTraceProbes\f[R]
 \f[B]Linux and macOS:\f[R] Enables additional \f[V]dtrace\f[R] tool
@@ -3814,12 +3835,12 @@ standard probes.
 Use the combination of these flags instead:
 \f[V]-XX:+DTraceMethodProbes\f[R], \f[V]-XX:+DTraceAllocProbes\f[R],
 \f[V]-XX:+DTraceMonitorProbes\f[R].
-.SH REMOVED JAVA OPTIONS
-.PP
-No documented java options have been removed in JDK 20.
 .PP
 For the lists and descriptions of options removed in previous releases
 see the \f[I]Removed Java Options\f[R] section in:
+.IP \[bu] 2
+\f[B]The \f[VB]java\f[B] Command, Release 20\f[R]
+[https://docs.oracle.com/en/java/javase/20/docs/specs/man/java.html]
 .IP \[bu] 2
 \f[B]The \f[VB]java\f[B] Command, Release 19\f[R]
 [https://docs.oracle.com/en/java/javase/19/docs/specs/man/java.html]

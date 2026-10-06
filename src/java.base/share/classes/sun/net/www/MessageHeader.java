@@ -30,7 +30,6 @@
 package sun.net.www;
 
 import org.checkerframework.dataflow.qual.Pure;
-import org.checkerframework.dataflow.qual.SideEffectsOnly;
 
 import java.io.*;
 import java.util.Collections;
@@ -211,7 +210,6 @@ class MessageHeader {
                 return false;
             }
         }
-        @SideEffectsOnly("this")
         public String next() {
             synchronized (lock) {
                 if (haveNext) {

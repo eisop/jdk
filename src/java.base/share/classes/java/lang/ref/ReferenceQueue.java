@@ -62,6 +62,7 @@ public @UsesObjectEquals class ReferenceQueue<T> {
     private volatile Reference<? extends T> head;
     private long queueLength = 0;
 
+    @SuppressWarnings({"unchecked"})
     private final ReentrantLock lock;
     private final Condition notEmpty;
 
@@ -69,6 +70,7 @@ public @UsesObjectEquals class ReferenceQueue<T> {
         notEmpty.signalAll();
     }
 
+    @SuppressWarnings({"unchecked"})
     void await() throws InterruptedException {
         notEmpty.await();
     }

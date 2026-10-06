@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1994, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -30,12 +30,12 @@ import org.checkerframework.checker.index.qual.IndexOrHigh;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.aliasing.qual.LeakedToResult;
+import org.checkerframework.common.aliasing.qual.NonLeaked;
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
-import org.checkerframework.common.aliasing.qual.Unique;
-import org.checkerframework.common.aliasing.qual.LeakedToResult;
-import org.checkerframework.common.aliasing.qual.NonLeaked;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -124,7 +124,7 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
 @AnnotatedFor({"aliasing", "lock", "nullness", "index"})
  public final class StringBuffer
     extends AbstractStringBuilder
-    implements Serializable, Comparable<StringBuffer>, CharSequence
+    implements Appendable, Serializable, Comparable<StringBuffer>, CharSequence
 {
 
     /**
@@ -727,8 +727,31 @@ import jdk.internal.vm.annotation.IntrinsicCandidate;
     }
 
     @SideEffectFree
+    /**
+     * @throws IllegalArgumentException {@inheritDoc}
+     *
+     * @since 21
+     */
+    @Override
+    public synchronized StringBuffer repeat(int codePoint, int count) {
+        super.repeat(codePoint, count);
+        return this;
+    }
+
+    /**
+     * @throws IllegalArgumentException {@inheritDoc}
+     *
+     * @since 21
+     */
+    @Override
+    public synchronized StringBuffer repeat(CharSequence cs, int count) {
+        super.repeat(cs, count);
+        return this;
+    }
+
     @Override
     @IntrinsicCandidate
+    @SideEffectFree
     public synchronized String toString(@GuardSatisfied StringBuffer this) {
         if (toStringCache == null) {
             return toStringCache = new String(this, null);

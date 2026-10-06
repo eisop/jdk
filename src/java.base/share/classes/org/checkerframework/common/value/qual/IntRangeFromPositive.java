@@ -1,10 +1,11 @@
 package org.checkerframework.common.value.qual;
 
+import org.checkerframework.framework.qual.SubtypeOf;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.checkerframework.framework.qual.SubtypeOf;
 
 /**
  * An expression with this type is exactly the same as an {@link IntRange} annotation whose {@code
@@ -13,10 +14,10 @@ import org.checkerframework.framework.qual.SubtypeOf;
  * annotation.
  *
  * <p>IntRangeFromPositive annotations derived from Positive annotations are used to create IntRange
- * annotations, but IntRangeFromPositive annotations are not checked when they appear on the left
- * hand side of expressions. Therefore, the Index Checker MUST be run on any code with @Positive
- * annotations on the left-hand side of expressions, since the Value Checker will derive information
- * from them but not check them.
+ * annotations, but IntRangeFromPositive annotations are not checked when they appear on the
+ * left-hand side of expressions. Therefore, the Index Checker MUST be run on any code
+ * with @Positive annotations on the left-hand side of expressions, since the Value Checker will
+ * derive information from them but not check them.
  *
  * <p>It is an error to write this annotation directly. {@code @Positive} or {@code IntRange(from =
  * 1, to = Integer.MAX_VALUE)} should always be written instead. This annotation is not retained in
@@ -27,6 +28,8 @@ import org.checkerframework.framework.qual.SubtypeOf;
  * @checker_framework.manual #constant-value-checker Constant Value Checker
  */
 @Documented
+// Do not store in class file: this is only an internal alias of an Index Checker qualifier, such as
+// @Positive, which is stored instead.
 @Retention(RetentionPolicy.SOURCE)
 @Target({})
 @SubtypeOf(UnknownVal.class)

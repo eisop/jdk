@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,6 +24,9 @@
  */
 
 package java.lang.invoke;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.lang.constant.ClassDesc;
 import java.lang.constant.Constable;
@@ -471,6 +474,7 @@ import static java.lang.invoke.MethodHandleStatics.UNSAFE;
  * @see MethodType
  * @since 9
  */
+@AnnotatedFor({"nullness"})
 public abstract sealed class VarHandle implements Constable
      permits IndirectVarHandle, VarHandleSegmentViewBase,
              VarHandleByteArrayAsChars.ByteArrayViewVarHandle,
@@ -526,8 +530,6 @@ public abstract sealed class VarHandle implements Constable
         return this;
     }
 
-    VarHandle target() { return null; }
-
     /**
      * Returns {@code true} if this VarHandle has <a href="#invoke-exact-behavior"><em>invoke-exact behavior</em></a>.
      *
@@ -570,7 +572,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object get(Object... args);
+    @Nullable Object get(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, with memory
@@ -628,7 +630,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getVolatile(Object... args);
+    @Nullable Object getVolatile(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, with memory
@@ -688,7 +690,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getOpaque(Object... args);
+    @Nullable Object getOpaque(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, in program order,
@@ -752,7 +754,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAcquire(Object... args);
+    @Nullable Object getAcquire(Object... args);
 
     /**
      * Sets the value of a variable to the {@code newValue}, and ensures that
@@ -806,7 +808,7 @@ public abstract sealed class VarHandle implements Constable
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
      * @return {@code true} if successful, otherwise {@code false} if the
-     * witness value was not the same as the {@code expectedValue}.
+     * <em>witness value</em> was not the same as the {@code expectedValue}.
      * @throws UnsupportedOperationException if the access mode is unsupported
      * for this VarHandle.
      * @throws WrongMethodTypeException if the access mode type does not
@@ -839,7 +841,7 @@ public abstract sealed class VarHandle implements Constable
      * @param args the signature-polymorphic parameter list of the form
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
-     * @return the signature-polymorphic result that is the witness value, which
+     * @return the signature-polymorphic result that is the <em>witness value</em>, which
      * will be the same as the {@code expectedValue} if successful
      * , statically represented using {@code Object}.
      * @throws UnsupportedOperationException if the access mode is unsupported
@@ -854,7 +856,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object compareAndExchange(Object... args);
+    @Nullable Object compareAndExchange(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -874,7 +876,7 @@ public abstract sealed class VarHandle implements Constable
      * @param args the signature-polymorphic parameter list of the form
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
-     * @return the signature-polymorphic result that is the witness value, which
+     * @return the signature-polymorphic result that is the <em>witness value</em>, which
      * will be the same as the {@code expectedValue} if successful
      * , statically represented using {@code Object}.
      * @throws UnsupportedOperationException if the access mode is unsupported
@@ -889,7 +891,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object compareAndExchangeAcquire(Object... args);
+    @Nullable Object compareAndExchangeAcquire(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -909,7 +911,7 @@ public abstract sealed class VarHandle implements Constable
      * @param args the signature-polymorphic parameter list of the form
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
-     * @return the signature-polymorphic result that is the witness value, which
+     * @return the signature-polymorphic result that is the <em>witness value</em>, which
      * will be the same as the {@code expectedValue} if successful
      * , statically represented using {@code Object}.
      * @throws UnsupportedOperationException if the access mode is unsupported
@@ -924,7 +926,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object compareAndExchangeRelease(Object... args);
+    @Nullable Object compareAndExchangeRelease(Object... args);
 
     // Weak (spurious failures allowed)
 
@@ -936,7 +938,7 @@ public abstract sealed class VarHandle implements Constable
      * {@link #get}.
      *
      * <p>This operation may fail spuriously (typically, due to memory
-     * contention) even if the witness value does match the expected value.
+     * contention) even if the <em>witness value</em> does match the expected value.
      *
      * <p>The method signature is of the form {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)boolean}.
      *
@@ -949,7 +951,7 @@ public abstract sealed class VarHandle implements Constable
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
      * @return {@code true} if successful, otherwise {@code false} if the
-     * witness value was not the same as the {@code expectedValue} or if this
+     * <em>witness value</em> was not the same as the {@code expectedValue} or if this
      * operation spuriously failed.
      * @throws UnsupportedOperationException if the access mode is unsupported
      * for this VarHandle.
@@ -973,7 +975,7 @@ public abstract sealed class VarHandle implements Constable
      * {@link #getVolatile}.
      *
      * <p>This operation may fail spuriously (typically, due to memory
-     * contention) even if the witness value does match the expected value.
+     * contention) even if the <em>witness value</em> does match the expected value.
      *
      * <p>The method signature is of the form {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)boolean}.
      *
@@ -986,7 +988,7 @@ public abstract sealed class VarHandle implements Constable
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
      * @return {@code true} if successful, otherwise {@code false} if the
-     * witness value was not the same as the {@code expectedValue} or if this
+     * <em>witness value</em> was not the same as the {@code expectedValue} or if this
      * operation spuriously failed.
      * @throws UnsupportedOperationException if the access mode is unsupported
      * for this VarHandle.
@@ -1010,7 +1012,7 @@ public abstract sealed class VarHandle implements Constable
      * {@link #getAcquire}.
      *
      * <p>This operation may fail spuriously (typically, due to memory
-     * contention) even if the witness value does match the expected value.
+     * contention) even if the <em>witness value</em> does match the expected value.
      *
      * <p>The method signature is of the form {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)boolean}.
      *
@@ -1024,7 +1026,7 @@ public abstract sealed class VarHandle implements Constable
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
      * @return {@code true} if successful, otherwise {@code false} if the
-     * witness value was not the same as the {@code expectedValue} or if this
+     * <em>witness value</em> was not the same as the {@code expectedValue} or if this
      * operation spuriously failed.
      * @throws UnsupportedOperationException if the access mode is unsupported
      * for this VarHandle.
@@ -1048,7 +1050,7 @@ public abstract sealed class VarHandle implements Constable
      * {@link #get}.
      *
      * <p>This operation may fail spuriously (typically, due to memory
-     * contention) even if the witness value does match the expected value.
+     * contention) even if the <em>witness value</em> does match the expected value.
      *
      * <p>The method signature is of the form {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)boolean}.
      *
@@ -1062,7 +1064,7 @@ public abstract sealed class VarHandle implements Constable
      * {@code (CT1 ct1, ..., CTn ctn, T expectedValue, T newValue)}
      * , statically represented using varargs.
      * @return {@code true} if successful, otherwise {@code false} if the
-     * witness value was not the same as the {@code expectedValue} or if this
+     * <em>witness value</em> was not the same as the {@code expectedValue} or if this
      * operation spuriously failed.
      * @throws UnsupportedOperationException if the access mode is unsupported
      * for this VarHandle.
@@ -1109,7 +1111,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAndSet(Object... args);
+    @Nullable Object getAndSet(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -1142,7 +1144,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAndSetAcquire(Object... args);
+    @Nullable Object getAndSetAcquire(Object... args);
 
     /**
      * Atomically sets the value of a variable to the {@code newValue} with the
@@ -1175,7 +1177,7 @@ public abstract sealed class VarHandle implements Constable
     public final native
     @MethodHandle.PolymorphicSignature
     @IntrinsicCandidate
-    Object getAndSetRelease(Object... args);
+    @Nullable Object getAndSetRelease(Object... args);
 
     // Primitive adders
     // Throw UnsupportedOperationException for refs
@@ -2083,8 +2085,8 @@ public abstract sealed class VarHandle implements Constable
 
     @DontInline
     private final void throwWrongMethodTypeException(VarHandle.AccessDescriptor ad) {
-        throw new WrongMethodTypeException("expected " + accessModeType(ad.type) + " but found "
-                + ad.symbolicMethodTypeExact);
+        throw new WrongMethodTypeException("handle's method type " + accessModeType(ad.type)
+                + " but found " + ad.symbolicMethodTypeExact);
     }
 
     @ForceInline
@@ -2120,7 +2122,7 @@ public abstract sealed class VarHandle implements Constable
      * @return {@code true} if the given access mode is supported, otherwise
      * {@code false}.
      */
-    public final boolean isAccessModeSupported(AccessMode accessMode) {
+    public boolean isAccessModeSupported(AccessMode accessMode) {
         return vform.getMemberNameOrNull(accessMode.ordinal()) != null;
     }
 
@@ -2176,7 +2178,7 @@ public abstract sealed class VarHandle implements Constable
     MethodHandle[] methodHandleTable;
 
     @ForceInline
-    MethodHandle getMethodHandle(int mode) {
+    final MethodHandle getMethodHandle(int mode) {
         MethodHandle[] mhTable = methodHandleTable;
         if (mhTable == null) {
             mhTable = methodHandleTable = new MethodHandle[AccessMode.COUNT];
@@ -2188,7 +2190,7 @@ public abstract sealed class VarHandle implements Constable
         return mh;
     }
 
-    private final MethodHandle getMethodHandleUncached(int mode) {
+    MethodHandle getMethodHandleUncached(int mode) {
         MethodType mt = accessModeType(AccessMode.values()[mode]).
                 insertParameterTypes(0, VarHandle.class);
         MemberName mn = vform.getMemberName(mode);
