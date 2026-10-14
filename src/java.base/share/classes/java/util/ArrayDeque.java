@@ -35,6 +35,8 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.index.qual.PolyGrowShrink;
+import org.checkerframework.checker.index.qual.CanShrink;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -380,7 +382,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E removeFirst(@GuardSatisfied @NonEmpty @Mutable ArrayDeque<E> this) {
+    public E removeFirst(@GuardSatisfied @NonEmpty @Mutable @CanShrink ArrayDeque<E> this) {
         E e = pollFirst();
         if (e == null)
             throw new NoSuchElementException();
@@ -390,14 +392,14 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
     /**
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E removeLast(@GuardSatisfied @NonEmpty @Mutable ArrayDeque<E> this) {
+    public E removeLast(@GuardSatisfied @NonEmpty @Mutable @CanShrink ArrayDeque<E> this) {
         E e = pollLast();
         if (e == null)
             throw new NoSuchElementException();
         return e;
     }
 
-    public @Nullable E pollFirst(@GuardSatisfied @Mutable ArrayDeque<E> this) {
+    public @Nullable E pollFirst(@GuardSatisfied @Mutable @CanShrink ArrayDeque<E> this) {
         final @Readonly Object[] es;
         final int h;
         E e = elementAt(es = elements, h = head);
@@ -408,7 +410,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
         return e;
     }
 
-    public @Nullable E pollLast(@GuardSatisfied @Mutable ArrayDeque<E> this) {
+    public @Nullable E pollLast(@GuardSatisfied @Mutable @CanShrink ArrayDeque<E> this) {
         final @Readonly Object[] es;
         final int t;
         E e = elementAt(es = elements, t = dec(tail, es.length));
@@ -461,7 +463,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      * @param o element to be removed from this deque, if present
      * @return {@code true} if the deque contained the specified element
      */
-    public boolean removeFirstOccurrence(@GuardSatisfied @Mutable ArrayDeque<E> this, @Nullable @Readonly Object o) {
+    public boolean removeFirstOccurrence(@GuardSatisfied @Mutable @CanShrink ArrayDeque<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         if (o != null) {
             final @Readonly Object[] es = elements;
             for (int i = head, end = tail, to = (i <= end) ? end : es.length;
@@ -489,7 +491,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      * @param o element to be removed from this deque, if present
      * @return {@code true} if the deque contained the specified element
      */
-    public boolean removeLastOccurrence(@GuardSatisfied @Mutable ArrayDeque<E> this, @Nullable @Readonly Object o) {
+    public boolean removeLastOccurrence(@GuardSatisfied @Mutable @CanShrink ArrayDeque<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         if (o != null) {
             final @Readonly Object[] es = elements;
             for (int i = tail, end = head, to = (i >= end) ? end : 0;
@@ -546,7 +548,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      * @return the head of the queue represented by this deque
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E remove(@GuardSatisfied @NonEmpty @Mutable ArrayDeque<E> this) {
+    public E remove(@GuardSatisfied @NonEmpty @Mutable @CanShrink ArrayDeque<E> this) {
         return removeFirst();
     }
 
@@ -560,7 +562,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      * @return the head of the queue represented by this deque, or
      *         {@code null} if this deque is empty
      */
-    public @Nullable E poll(@GuardSatisfied @Mutable ArrayDeque<E> this) {
+    public @Nullable E poll(@GuardSatisfied @Mutable @CanShrink ArrayDeque<E> this) {
         return pollFirst();
     }
 
@@ -617,7 +619,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      *         of the stack represented by this deque)
      * @throws NoSuchElementException {@inheritDoc}
      */
-    public E pop(@GuardSatisfied @NonEmpty @Mutable ArrayDeque<E> this) {
+    public E pop(@GuardSatisfied @NonEmpty @Mutable @CanShrink ArrayDeque<E> this) {
         return removeFirst();
     }
 
@@ -699,11 +701,11 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      * @return an iterator over the elements in this deque
      */
     @SideEffectFree
-    public @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty @Readonly ArrayDeque<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty @Readonly ArrayDeque<E> this) {
         return new DeqIterator();
     }
 
-    public @PolyNonEmpty Iterator<E> descendingIterator(@PolyNonEmpty @Readonly ArrayDeque<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> descendingIterator(@PolyGrowShrink @PolyNonEmpty @Readonly ArrayDeque<E> this) {
         return new DescendingIterator();
     }
 
@@ -931,7 +933,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean removeIf(@Mutable ArrayDeque<E> this, Predicate<? super E> filter) {
+    public boolean removeIf(@Mutable @CanShrink ArrayDeque<E> this, Predicate<? super E> filter) {
         Objects.requireNonNull(filter);
         return bulkRemove(filter);
     }
@@ -939,7 +941,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean removeAll(@Mutable ArrayDeque<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c) {
+    public boolean removeAll(@Mutable @CanShrink ArrayDeque<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> c.contains(e));
     }
@@ -947,7 +949,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
     /**
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean retainAll(@Mutable ArrayDeque<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c) {
+    public boolean retainAll(@Mutable @GuardSatisfied @CanShrink ArrayDeque<E> this, @Readonly Collection<? extends @UnknownSignedness Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> !c.contains(e));
     }
@@ -1064,7 +1066,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      * @param o element to be removed from this deque, if present
      * @return {@code true} if this deque contained the specified element
      */
-    public boolean remove(@GuardSatisfied @Mutable ArrayDeque<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
+    public boolean remove(@GuardSatisfied @Mutable @CanShrink ArrayDeque<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         return removeFirstOccurrence(o);
     }
 
@@ -1072,7 +1074,7 @@ public class ArrayDeque<E extends @NonNull @Readonly Object> extends AbstractCol
      * Removes all of the elements from this deque.
      * The deque will be empty after this call returns.
      */
-    public void clear(@GuardSatisfied @Mutable ArrayDeque<E> this) {
+    public void clear(@GuardSatisfied @Mutable @CanShrink ArrayDeque<E> this) {
         circularClear(elements, head, tail);
         head = tail = 0;
     }

@@ -26,6 +26,7 @@
 package java.util;
 
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.index.qual.PolyGrowShrink;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -203,7 +204,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      */
     @SideEffectFree
     @SuppressWarnings("mutability:method.invocation.invalid") // lost can not invoke poly method.
-    public @PolyNonEmpty Iterator<E> iterator(@PolyNonEmpty @Readonly TreeSet<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty @Readonly TreeSet<E> this) {
         return m.navigableKeySet().iterator();
     }
 
@@ -214,7 +215,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      * @since 1.6
      */
     @SuppressWarnings("mutability:method.invocation.invalid") // lost can not invoke poly method.
-    public @PolyNonEmpty Iterator<E> descendingIterator(@PolyNonEmpty @Readonly TreeSet<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> descendingIterator(@PolyGrowShrink @PolyNonEmpty @Readonly TreeSet<E> this) {
         return m.descendingKeySet().iterator();
     }
 
@@ -352,7 +353,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      * @since 1.6
      */
     @SideEffectFree
-    public @PolyMutable NavigableSet<E> subSet(@GuardSatisfied @PolyMutable TreeSet<E> this, @GuardSatisfied E fromElement, boolean fromInclusive,
+    public @PolyMutable @PolyGrowShrink NavigableSet<E> subSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, boolean fromInclusive,
                                   @GuardSatisfied E toElement,   boolean toInclusive) {
         return new @PolyMutable TreeSet<>(m.subMap(fromElement, fromInclusive,
                                        toElement,   toInclusive));
@@ -367,7 +368,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      * @since 1.6
      */
     @SideEffectFree
-    public @PolyMutable NavigableSet<E> headSet(@GuardSatisfied @PolyMutable TreeSet<E> this, @GuardSatisfied E toElement, boolean inclusive) {
+    public @PolyMutable @PolyGrowShrink NavigableSet<E> headSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E toElement, boolean inclusive) {
         return new @PolyMutable TreeSet<>(m.headMap(toElement, inclusive));
     }
 
@@ -380,7 +381,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      * @since 1.6
      */
     @SideEffectFree
-    public @PolyMutable NavigableSet<E> tailSet(@GuardSatisfied @PolyMutable TreeSet<E> this, @GuardSatisfied E fromElement, boolean inclusive) {
+    public @PolyMutable @PolyGrowShrink NavigableSet<E> tailSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, boolean inclusive) {
         return new @PolyMutable TreeSet<>(m.tailMap(fromElement, inclusive));
     }
 
@@ -392,7 +393,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    public @PolyMutable SortedSet<E> subSet(@GuardSatisfied @PolyMutable TreeSet<E> this, @GuardSatisfied E fromElement, @GuardSatisfied E toElement) {
+    public @PolyMutable @PolyGrowShrink SortedSet<E> subSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, @GuardSatisfied E toElement) {
         return subSet(fromElement, true, toElement, false);
     }
 
@@ -404,7 +405,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    public @PolyMutable SortedSet<E> headSet(@GuardSatisfied @PolyMutable TreeSet<E> this, E toElement) {
+    public @PolyMutable @PolyGrowShrink SortedSet<E> headSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, E toElement) {
         return headSet(toElement, false);
     }
 
@@ -416,7 +417,7 @@ public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    public @PolyMutable SortedSet<E> tailSet(@GuardSatisfied @PolyMutable TreeSet<E> this, E fromElement) {
+    public @PolyMutable @PolyGrowShrink SortedSet<E> tailSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, E fromElement) {
         return tailSet(fromElement, true);
     }
 

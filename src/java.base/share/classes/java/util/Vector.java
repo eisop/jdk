@@ -27,6 +27,8 @@ package java.util;
 
 import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.index.qual.PolyGrowShrink;
+import org.checkerframework.checker.index.qual.CanShrink;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmpty;
 import org.checkerframework.checker.nonempty.qual.EnsuresNonEmptyIf;
@@ -301,7 +303,7 @@ public class Vector<E>
      * @param  newSize   the new size of this vector
      * @throws ArrayIndexOutOfBoundsException if the new size is negative
      */
-    public synchronized void setSize(@GuardSatisfied @Mutable Vector<E> this, @NonNegative int newSize) {
+    public synchronized void setSize(@GuardSatisfied @Mutable @CanShrink Vector<E> this, @NonNegative int newSize) {
         modCount++;
         if (newSize > elementData.length)
             grow(newSize);
@@ -356,7 +358,7 @@ public class Vector<E>
      * @return  an enumeration of the components of this vector
      * @see     Iterator
      */
-    public Enumeration<E> elements(@Readonly Vector<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Enumeration<E> elements(@Readonly @PolyGrowShrink @PolyNonEmpty Vector<E> this) {
         return new Enumeration<E>() {
             int count = 0;
 
@@ -580,7 +582,7 @@ public class Vector<E>
      * @throws ArrayIndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index >= size()})
      */
-    public synchronized void removeElementAt(@Mutable @GuardSatisfied Vector<E> this, @NonNegative int index) {
+    public synchronized void removeElementAt(@Mutable @GuardSatisfied @CanShrink Vector<E> this, @NonNegative int index) {
         if (index >= elementCount) {
             throw new ArrayIndexOutOfBoundsException(index + " >= " +
                                                      elementCount);
@@ -668,7 +670,7 @@ public class Vector<E>
      * @return  {@code true} if the argument was a component of this
      *          vector; {@code false} otherwise.
      */
-    public synchronized boolean removeElement(@Mutable @GuardSatisfied Vector<E> this, @Readonly Object obj) {
+    public synchronized boolean removeElement(@Mutable @GuardSatisfied @CanShrink Vector<E> this, @Readonly Object obj) {
         modCount++;
         int i = indexOf(obj);
         if (i >= 0) {
@@ -684,7 +686,7 @@ public class Vector<E>
      * <p>This method is identical in functionality to the {@link #clear}
      * method (which is part of the {@link List} interface).
      */
-    public synchronized void removeAllElements(@Mutable @GuardSatisfied Vector<E> this) {
+    public synchronized void removeAllElements(@Mutable @GuardSatisfied @CanShrink Vector<E> this) {
         final @Readonly Object[] es = elementData;
         for (int to = elementCount, i = elementCount = 0; i < to; i++)
             es[i] = null;
@@ -849,7 +851,7 @@ public class Vector<E>
      * @return true if the Vector contained the specified element
      * @since 1.2
      */
-    public boolean remove(@Mutable @GuardSatisfied Vector<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
+    public boolean remove(@Mutable @GuardSatisfied @CanShrink Vector<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         return removeElement(o);
     }
 
@@ -879,7 +881,7 @@ public class Vector<E>
      *         ({@code index < 0 || index >= size()})
      * @since 1.2
      */
-    public synchronized E remove(@Mutable @GuardSatisfied Vector<E> this, @NonNegative int index) {
+    public synchronized E remove(@Mutable @GuardSatisfied @CanShrink Vector<E> this, @NonNegative int index) {
         modCount++;
         if (index >= elementCount)
             throw new ArrayIndexOutOfBoundsException(index);
@@ -900,7 +902,7 @@ public class Vector<E>
      *
      * @since 1.2
      */
-    public void clear(@Mutable @GuardSatisfied Vector<E> this) {
+    public void clear(@Mutable @GuardSatisfied @CanShrink Vector<E> this) {
         removeAllElements();
     }
 
@@ -968,7 +970,7 @@ public class Vector<E>
      *         or if the specified collection is null
      * @since 1.2
      */
-    public boolean removeAll(@Mutable @GuardSatisfied Vector<E> this, @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c) {
+    public boolean removeAll(@Mutable @GuardSatisfied @CanShrink Vector<E> this, @Readonly Collection<? extends @UnknownSignedness @Readonly Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> c.contains(e));
     }
@@ -992,7 +994,7 @@ public class Vector<E>
      *         or if the specified collection is null
      * @since 1.2
      */
-    public boolean retainAll(@Mutable @GuardSatisfied Vector<E> this, Collection<? extends @UnknownSignedness @Readonly Object> c) {
+    public boolean retainAll(@Mutable @GuardSatisfied @CanShrink Vector<E> this, Collection<? extends @UnknownSignedness @Readonly Object> c) {
         Objects.requireNonNull(c);
         return bulkRemove(e -> !c.contains(e));
     }
@@ -1002,7 +1004,7 @@ public class Vector<E>
      */
     @SuppressWarnings({"unchecked"})
     @Override
-    public boolean removeIf(@Mutable Vector<E> this, Predicate<? super E> filter) {
+    public boolean removeIf(@Mutable @CanShrink Vector<E> this, Predicate<? super E> filter) {
         Objects.requireNonNull(filter);
         return bulkRemove(filter);
     }
@@ -1164,7 +1166,7 @@ public class Vector<E>
      *         {@code (fromIndex > toIndex)}
      */
     @SideEffectFree
-    public synchronized @PolyMutable List<E> subList(@GuardSatisfied @PolyMutable Vector<E> this, int fromIndex, int toIndex) {
+    public synchronized @PolyMutable @PolyGrowShrink List<E> subList(@GuardSatisfied @PolyMutable @PolyGrowShrink Vector<E> this, int fromIndex, int toIndex) {
         return Collections.synchronizedList(super.subList(fromIndex, toIndex),
                                             this);
     }
@@ -1176,7 +1178,7 @@ public class Vector<E>
      * This call shortens the list by {@code (toIndex - fromIndex)} elements.
      * (If {@code toIndex==fromIndex}, this operation has no effect.)
      */
-    protected synchronized void removeRange(@Mutable Vector<E> this, int fromIndex, int toIndex) {
+    protected synchronized void removeRange(@Mutable @GuardSatisfied @CanShrink Vector<E> this, int fromIndex, int toIndex) {
         modCount++;
         shiftTailOverGap(elementData, fromIndex, toIndex);
     }
@@ -1247,7 +1249,7 @@ public class Vector<E>
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized ListIterator<E> listIterator(@NonNegative int index) {
+    public synchronized @PolyGrowShrink ListIterator<E> listIterator(@PolyGrowShrink Vector<E> this, @NonNegative int index) {
         if (index < 0 || index > elementCount)
             throw new IndexOutOfBoundsException("Index: "+index);
         return new ListItr(index);
@@ -1261,7 +1263,7 @@ public class Vector<E>
      *
      * @see #listIterator(int)
      */
-    public synchronized ListIterator<E> listIterator() {
+    public synchronized @PolyGrowShrink @PolyNonEmpty ListIterator<E> listIterator(@PolyGrowShrink Vector<E> this) {
         return new ListItr(0);
     }
 
@@ -1273,7 +1275,7 @@ public class Vector<E>
      * @return an iterator over the elements in this list in proper sequence
      */
     @SideEffectFree
-    public synchronized Iterator<E> iterator(@Readonly Vector<E> this) {
+    public synchronized @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@Readonly @PolyGrowShrink @PolyNonEmpty Vector<E> this) {
         return new Itr();
     }
 
