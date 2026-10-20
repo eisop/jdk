@@ -27,7 +27,7 @@ package java.security;
 
 import org.checkerframework.checker.interning.qual.UsesObjectEquals;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
 import java.util.ArrayList;
@@ -247,7 +247,7 @@ public @UsesObjectEquals class ProtectionDomain {
      * @return the CodeSource of this domain which may be null.
      * @since 1.2
      */
-    @Deterministic
+    @Pure
     public final @Nullable CodeSource getCodeSource() {
         return this.codesource;
     }
