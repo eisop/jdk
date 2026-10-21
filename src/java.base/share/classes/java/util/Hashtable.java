@@ -1151,7 +1151,7 @@ public class Hashtable<K extends @NonNull Object,V extends @NonNull Object>
      * remapping function modified this map
      */
     @Override
-    public synchronized @PolyNull V compute(K key, BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+    public synchronized @PolyNull V compute(K key, BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
 
         Entry<?,?> tab[] = table;

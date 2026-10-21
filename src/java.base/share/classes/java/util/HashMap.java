@@ -1331,7 +1331,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      */
     @Override
     public @PolyNull V compute(K key,
-                     BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                     BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
         if (remappingFunction == null)
             throw new NullPointerException();
         int hash = hash(key);

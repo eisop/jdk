@@ -142,7 +142,7 @@ public class DelegatingIteratorForEachRemaining {
         @Override public V replace(K key, V value) { return delegate.replace(key, value); }
         @Override public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) { return delegate.computeIfAbsent(key, mappingFunction); }
         @Override public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) { return delegate.computeIfPresent(key, remappingFunction); }
-        @Override public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) { return delegate.compute(key, remappingFunction); }
+        @Override public V compute(K key, BiFunction<? super K, ? super @Nullable V, ? extends V> remappingFunction) { return delegate.compute(key, remappingFunction); }
         @Override public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) { return delegate.merge(key, value, remappingFunction); }
     }
 

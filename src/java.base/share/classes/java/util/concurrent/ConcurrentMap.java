@@ -424,7 +424,7 @@ public interface ConcurrentMap<K extends @NonNull Object,V extends @NonNull Obje
      */
     @Override
     default @PolyNull V compute(K key,
-                      BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                      BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
         retry: for (;;) {
             V oldValue = get(key);
             // if putIfAbsent fails, opportunistically use its return value

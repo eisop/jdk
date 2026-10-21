@@ -1654,7 +1654,7 @@ public class Collections {
 
         @Override
         public @PolyNull V compute(K key,
-                BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
             throw new UnsupportedOperationException();
         }
 
@@ -2864,7 +2864,7 @@ public class Collections {
         }
         @Override
         public @PolyNull V compute(K key,
-                BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
             synchronized (mutex) {return m.compute(key, remappingFunction);}
         }
         @Override
@@ -3958,7 +3958,7 @@ public class Collections {
 
         @Override
         public @PolyNull V compute(K key,
-                BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
             return m.compute(key, typeCheck(remappingFunction));
         }
 
@@ -4972,7 +4972,7 @@ public class Collections {
 
         @Override
         public @PolyNull V compute(K key,
-                BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
             throw new UnsupportedOperationException();
         }
 
@@ -5323,7 +5323,7 @@ public class Collections {
 
         @Override
         public @PolyNull V compute(K key,
-                BiFunction<? super K, ? super V, ? extends @PolyNull V> remappingFunction) {
+                BiFunction<? super K, ? super @Nullable V, ? extends @PolyNull V> remappingFunction) {
             throw new UnsupportedOperationException();
         }
 
