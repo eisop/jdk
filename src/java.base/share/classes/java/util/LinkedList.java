@@ -37,6 +37,11 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.checkerframework.checker.mutability.qual.Assignable;
+import org.checkerframework.checker.mutability.qual.Mutable;
+import org.checkerframework.checker.mutability.qual.PolyMutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.PolySigned;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
@@ -100,7 +105,8 @@ import java.util.function.Consumer;
  */
 
 @CFComment({"lock/nullness: This class permits null elements"})
-@AnnotatedFor({"lock", "nullness", "index"})
+@AnnotatedFor({"lock", "nullness", "index", "mutability"})
+@ReceiverDependentMutable
 public class LinkedList<E>
     extends AbstractSequentialList<E>
     implements List<E>, Deque<E>, Cloneable, java.io.Serializable
@@ -128,6 +134,7 @@ public class LinkedList<E>
     /**
      * Constructs an empty list.
      */
+    // @SuppressWarnings("mutability:initialization.fields.uninitialized") // Conservative
     public LinkedList() {
     }
 
@@ -139,7 +146,8 @@ public class LinkedList<E>
      * @param  c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
      */
-    public @PolyNonEmpty LinkedList(@PolyNonEmpty Collection<? extends E> c) {
+    @SuppressWarnings("mutability:method.invocation.invalid") // PICO constructor fix
+    public @PolyNonEmpty LinkedList(@PolyNonEmpty @Readonly Collection<? extends E> c) {
         this();
         addAll(c);
     }
@@ -147,9 +155,9 @@ public class LinkedList<E>
     /**
      * Links e as first element.
      */
-    private void linkFirst(E e) {
+    private void linkFirst(@Mutable LinkedList<E> this, E e) {
         final Node<E> f = first;
-        final Node<E> newNode = new Node<>(null, e, f);
+        final Node<E> newNode = new @Mutable Node<>(null, e, f);
         first = newNode;
         if (f == null)
             last = newNode;
@@ -162,9 +170,9 @@ public class LinkedList<E>
     /**
      * Links e as last element.
      */
-    void linkLast(E e) {
+    void linkLast(@Mutable LinkedList<E> this, E e) {
         final Node<E> l = last;
-        final Node<E> newNode = new Node<>(l, e, null);
+        final Node<E> newNode = new @Mutable Node<>(l, e, null);
         last = newNode;
         if (l == null)
             first = newNode;
@@ -177,10 +185,10 @@ public class LinkedList<E>
     /**
      * Inserts element e before non-null Node succ.
      */
-    void linkBefore(E e, Node<E> succ) {
+    void linkBefore(@Mutable LinkedList<E> this, E e, @Mutable Node<E> succ) {
         // assert succ != null;
         final Node<E> pred = succ.prev;
-        final Node<E> newNode = new Node<>(pred, e, succ);
+        final Node<E> newNode = new @Mutable Node<>(pred, e, succ);
         succ.prev = newNode;
         if (pred == null)
             first = newNode;
@@ -193,7 +201,7 @@ public class LinkedList<E>
     /**
      * Unlinks non-null first node f.
      */
-    private E unlinkFirst(Node<E> f) {
+    private E unlinkFirst(@Mutable LinkedList<E> this, @Mutable Node<E> f) {
         // assert f == first && f != null;
         final E element = f.item;
         final Node<E> next = f.next;
@@ -212,7 +220,7 @@ public class LinkedList<E>
     /**
      * Unlinks non-null last node l.
      */
-    private E unlinkLast(Node<E> l) {
+    private E unlinkLast(@Mutable LinkedList<E> this, @Mutable Node<E> l) {
         // assert l == last && l != null;
         final E element = l.item;
         final Node<E> prev = l.prev;
@@ -231,7 +239,7 @@ public class LinkedList<E>
     /**
      * Unlinks non-null node x.
      */
-    E unlink(Node<E> x) {
+    E unlink(@Mutable LinkedList<E> this, @Mutable Node<E> x) {
         // assert x != null;
         final E element = x.item;
         final Node<E> next = x.next;
@@ -263,7 +271,7 @@ public class LinkedList<E>
      * @return the first element in this list
      * @throws NoSuchElementException if this list is empty
      */
-    public E getFirst(@GuardSatisfied @NonEmpty LinkedList<E> this) {
+    public E getFirst(@GuardSatisfied @NonEmpty @Readonly LinkedList<E> this) {
         final Node<E> f = first;
         if (f == null)
             throw new NoSuchElementException();
@@ -276,7 +284,7 @@ public class LinkedList<E>
      * @return the last element in this list
      * @throws NoSuchElementException if this list is empty
      */
-    public E getLast(@GuardSatisfied @NonEmpty LinkedList<E> this) {
+    public E getLast(@GuardSatisfied @NonEmpty @Readonly LinkedList<E> this) {
         final Node<E> l = last;
         if (l == null)
             throw new NoSuchElementException();
@@ -289,7 +297,7 @@ public class LinkedList<E>
      * @return the first element from this list
      * @throws NoSuchElementException if this list is empty
      */
-    public E removeFirst(@GuardSatisfied @NonEmpty @CanShrink LinkedList<E> this) {
+    public E removeFirst(@GuardSatisfied @Mutable @NonEmpty @CanShrink LinkedList<E> this) {
         final Node<E> f = first;
         if (f == null)
             throw new NoSuchElementException();
@@ -302,7 +310,7 @@ public class LinkedList<E>
      * @return the last element from this list
      * @throws NoSuchElementException if this list is empty
      */
-    public E removeLast(@GuardSatisfied @NonEmpty @CanShrink LinkedList<E> this) {
+    public E removeLast(@GuardSatisfied @Mutable @NonEmpty @CanShrink LinkedList<E> this) {
         final Node<E> l = last;
         if (l == null)
             throw new NoSuchElementException();
@@ -314,7 +322,7 @@ public class LinkedList<E>
      *
      * @param e the element to add
      */
-    public void addFirst(@GuardSatisfied LinkedList<E> this, E e) {
+    public void addFirst(@GuardSatisfied @Mutable LinkedList<E> this, E e) {
         linkFirst(e);
     }
 
@@ -325,7 +333,7 @@ public class LinkedList<E>
      *
      * @param e the element to add
      */
-    public void addLast(@GuardSatisfied LinkedList<E> this, E e) {
+    public void addLast(@GuardSatisfied @Mutable LinkedList<E> this, E e) {
         linkLast(e);
     }
 
@@ -340,7 +348,7 @@ public class LinkedList<E>
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(@GuardSatisfied LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean contains(@GuardSatisfied @Readonly LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         return indexOf(o) >= 0;
     }
 
@@ -350,7 +358,7 @@ public class LinkedList<E>
      * @return the number of elements in this list
      */
     @Pure
-    public @NonNegative int size(@GuardSatisfied LinkedList<E> this) {
+    public @NonNegative int size(@GuardSatisfied @Readonly LinkedList<E> this) {
         return size;
     }
 
@@ -364,7 +372,7 @@ public class LinkedList<E>
      */
     @ReleasesNoLocks
     @EnsuresNonEmpty("this")
-    public boolean add(@GuardSatisfied LinkedList<E> this, E e) {
+    public boolean add(@GuardSatisfied @Mutable LinkedList<E> this, E e) {
         linkLast(e);
         return true;
     }
@@ -383,7 +391,7 @@ public class LinkedList<E>
      * @return {@code true} if this list contained the specified element
      */
     @ReleasesNoLocks
-    public boolean remove(@GuardSatisfied @CanShrink LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean remove(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         if (o == null) {
             for (Node<E> x = first; x != null; x = x.next) {
                 if (x.item == null) {
@@ -414,7 +422,7 @@ public class LinkedList<E>
      * @return {@code true} if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null
      */
-    public boolean addAll(@GuardSatisfied LinkedList<E> this, Collection<? extends E> c) {
+    public boolean addAll(@GuardSatisfied @Mutable LinkedList<E> this, @Readonly Collection<? extends E> c) {
         return addAll(size, c);
     }
 
@@ -433,10 +441,10 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @throws NullPointerException if the specified collection is null
      */
-    public boolean addAll(@GuardSatisfied LinkedList<E> this, @NonNegative int index, Collection<? extends E> c) {
+    public boolean addAll(@GuardSatisfied @Mutable LinkedList<E> this, @NonNegative int index, @Readonly Collection<? extends E> c) {
         checkPositionIndex(index);
 
-        Object[] a = c.toArray();
+        @Readonly Object[] a = c.toArray();
         int numNew = a.length;
         if (numNew == 0)
             return false;
@@ -476,7 +484,7 @@ public class LinkedList<E>
      * Removes all of the elements from this list.
      * The list will be empty after this call returns.
      */
-    public void clear(@GuardSatisfied @CanShrink LinkedList<E> this) {
+    public void clear(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this) {
         // Clearing all of the links between nodes is "unnecessary", but:
         // - helps a generational GC if the discarded nodes inhabit
         //   more than one generation
@@ -504,7 +512,7 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Pure
-    public E get(@GuardSatisfied LinkedList<E> this, @NonNegative int index) {
+    public E get(@GuardSatisfied @Readonly LinkedList<E> this, @NonNegative int index) {
         checkElementIndex(index);
         return node(index).item;
     }
@@ -518,7 +526,7 @@ public class LinkedList<E>
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public E set(@GuardSatisfied LinkedList<E> this, @NonNegative int index, E element) {
+    public E set(@GuardSatisfied @Mutable LinkedList<E> this, @NonNegative int index, E element) {
         checkElementIndex(index);
         Node<E> x = node(index);
         E oldVal = x.item;
@@ -535,7 +543,7 @@ public class LinkedList<E>
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public void add(@GuardSatisfied LinkedList<E> this, @NonNegative int index, E element) {
+    public void add(@GuardSatisfied @Mutable LinkedList<E> this, @NonNegative int index, E element) {
         checkPositionIndex(index);
 
         if (index == size)
@@ -553,7 +561,7 @@ public class LinkedList<E>
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public E remove(@GuardSatisfied @CanShrink LinkedList<E> this, @NonNegative int index) {
+    public E remove(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this, @NonNegative int index) {
         checkElementIndex(index);
         return unlink(node(index));
     }
@@ -561,7 +569,7 @@ public class LinkedList<E>
     /**
      * Tells if the argument is the index of an existing element.
      */
-    private boolean isElementIndex(@NonNegative int index) {
+    private boolean isElementIndex(@Readonly LinkedList<E> this, @NonNegative int index) {
         return index >= 0 && index < size;
     }
 
@@ -569,7 +577,7 @@ public class LinkedList<E>
      * Tells if the argument is the index of a valid position for an
      * iterator or an add operation.
      */
-    private boolean isPositionIndex(@NonNegative int index) {
+    private boolean isPositionIndex(@Readonly LinkedList<E> this, @NonNegative int index) {
         return index >= 0 && index <= size;
     }
 
@@ -578,16 +586,16 @@ public class LinkedList<E>
      * Of the many possible refactorings of the error handling code,
      * this "outlining" performs best with both server and client VMs.
      */
-    private String outOfBoundsMsg(@NonNegative int index) {
+    private String outOfBoundsMsg(@Readonly LinkedList<E> this, @NonNegative int index) {
         return "Index: "+index+", Size: "+size;
     }
 
-    private void checkElementIndex(@NonNegative int index) {
+    private void checkElementIndex(@Readonly LinkedList<E> this, @NonNegative int index) {
         if (!isElementIndex(index))
             throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
 
-    private void checkPositionIndex(@NonNegative int index) {
+    private void checkPositionIndex(@Readonly LinkedList<E> this, @NonNegative int index) {
         if (!isPositionIndex(index))
             throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
@@ -595,7 +603,7 @@ public class LinkedList<E>
     /**
      * Returns the (non-null) Node at the specified element index.
      */
-    Node<E> node(@NonNegative int index) {
+    @PolyMutable Node<E> node(@PolyMutable LinkedList<E> this, @NonNegative int index) {
         // assert isElementIndex(index);
 
         if (index < (size >> 1)) {
@@ -625,7 +633,7 @@ public class LinkedList<E>
      *         this list, or -1 if this list does not contain the element
      */
     @Pure
-    public @GTENegativeOne int indexOf(@GuardSatisfied LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public @GTENegativeOne int indexOf(@GuardSatisfied @Readonly LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         int index = 0;
         if (o == null) {
             for (Node<E> x = first; x != null; x = x.next) {
@@ -655,7 +663,7 @@ public class LinkedList<E>
      *         this list, or -1 if this list does not contain the element
      */
     @Pure
-    public @GTENegativeOne int lastIndexOf(@GuardSatisfied LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public @GTENegativeOne int lastIndexOf(@GuardSatisfied @Readonly LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness @Readonly Object o) {
         int index = size;
         if (o == null) {
             for (Node<E> x = last; x != null; x = x.prev) {
@@ -682,7 +690,7 @@ public class LinkedList<E>
      * @since 1.5
      */
     @Pure
-    public @Nullable E peek() {
+    public @Nullable E peek(@Readonly LinkedList<E> this) {
         final Node<E> f = first;
         return (f == null) ? null : f.item;
     }
@@ -694,7 +702,7 @@ public class LinkedList<E>
      * @throws NoSuchElementException if this list is empty
      * @since 1.5
      */
-    public E element(@GuardSatisfied @NonEmpty LinkedList<E> this) {
+    public E element(@GuardSatisfied @NonEmpty @Readonly LinkedList<E> this) {
         return getFirst();
     }
 
@@ -704,7 +712,7 @@ public class LinkedList<E>
      * @return the head of this list, or {@code null} if this list is empty
      * @since 1.5
      */
-    public @Nullable E poll(@GuardSatisfied @CanShrink LinkedList<E> this) {
+    public @Nullable E poll(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this) {
         final Node<E> f = first;
         return (f == null) ? null : unlinkFirst(f);
     }
@@ -716,7 +724,7 @@ public class LinkedList<E>
      * @throws NoSuchElementException if this list is empty
      * @since 1.5
      */
-    public E remove(@GuardSatisfied @NonEmpty @CanShrink LinkedList<E> this) {
+    public E remove(@GuardSatisfied @Mutable @NonEmpty @CanShrink LinkedList<E> this) {
         return removeFirst();
     }
 
@@ -727,7 +735,7 @@ public class LinkedList<E>
      * @return {@code true} (as specified by {@link Queue#offer})
      * @since 1.5
      */
-    public boolean offer(E e) {
+    public boolean offer(@Mutable LinkedList<E> this, E e) {
         return add(e);
     }
 
@@ -739,7 +747,7 @@ public class LinkedList<E>
      * @return {@code true} (as specified by {@link Deque#offerFirst})
      * @since 1.6
      */
-    public boolean offerFirst(E e) {
+    public boolean offerFirst(@Mutable LinkedList<E> this, E e) {
         addFirst(e);
         return true;
     }
@@ -751,7 +759,7 @@ public class LinkedList<E>
      * @return {@code true} (as specified by {@link Deque#offerLast})
      * @since 1.6
      */
-    public boolean offerLast(E e) {
+    public boolean offerLast(@Mutable LinkedList<E> this, E e) {
         addLast(e);
         return true;
     }
@@ -765,7 +773,7 @@ public class LinkedList<E>
      * @since 1.6
      */
     @Pure
-    public @Nullable E peekFirst() {
+    public @Nullable E peekFirst(@Readonly LinkedList<E> this) {
         final Node<E> f = first;
         return (f == null) ? null : f.item;
      }
@@ -779,7 +787,7 @@ public class LinkedList<E>
      * @since 1.6
      */
     @Pure
-    public @Nullable E peekLast() {
+    public @Nullable E peekLast(@Readonly LinkedList<E> this) {
         final Node<E> l = last;
         return (l == null) ? null : l.item;
     }
@@ -792,7 +800,7 @@ public class LinkedList<E>
      *     this list is empty
      * @since 1.6
      */
-    public @Nullable E pollFirst(@GuardSatisfied @CanShrink LinkedList<E> this) {
+    public @Nullable E pollFirst(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this) {
         final Node<E> f = first;
         return (f == null) ? null : unlinkFirst(f);
     }
@@ -805,7 +813,7 @@ public class LinkedList<E>
      *     this list is empty
      * @since 1.6
      */
-    public @Nullable E pollLast(@GuardSatisfied @CanShrink LinkedList<E> this) {
+    public @Nullable E pollLast(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this) {
         final Node<E> l = last;
         return (l == null) ? null : unlinkLast(l);
     }
@@ -819,7 +827,7 @@ public class LinkedList<E>
      * @param e the element to push
      * @since 1.6
      */
-    public void push(@GuardSatisfied LinkedList<E> this, E e) {
+    public void push(@GuardSatisfied @Mutable LinkedList<E> this, E e) {
         addFirst(e);
     }
 
@@ -834,7 +842,7 @@ public class LinkedList<E>
      * @throws NoSuchElementException if this list is empty
      * @since 1.6
      */
-    public E pop(@GuardSatisfied @NonEmpty @CanShrink LinkedList<E> this) {
+    public E pop(@GuardSatisfied @Mutable @NonEmpty @CanShrink LinkedList<E> this) {
         return removeFirst();
     }
 
@@ -847,7 +855,7 @@ public class LinkedList<E>
      * @return {@code true} if the list contained the specified element
      * @since 1.6
      */
-    public boolean removeFirstOccurrence(@GuardSatisfied @CanShrink LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean removeFirstOccurrence(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         return remove(o);
     }
 
@@ -860,7 +868,7 @@ public class LinkedList<E>
      * @return {@code true} if the list contained the specified element
      * @since 1.6
      */
-    public boolean removeLastOccurrence(@GuardSatisfied @CanShrink LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
+    public boolean removeLastOccurrence(@GuardSatisfied @Mutable @CanShrink LinkedList<E> this, @GuardSatisfied @Nullable @UnknownSignedness Object o) {
         if (o == null) {
             for (Node<E> x = last; x != null; x = x.prev) {
                 if (x.item == null) {
@@ -900,17 +908,19 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @see List#listIterator(int)
      */
-    public @PolyGrowShrink @PolyNonEmpty ListIterator<E> listIterator(@PolyGrowShrink @PolyNonEmpty LinkedList<E> this, @NonNegative int index) {
+    public @PolyGrowShrink @PolyNonEmpty ListIterator<E> listIterator(@Readonly @PolyGrowShrink @PolyNonEmpty LinkedList<E> this, @NonNegative int index) {
         checkPositionIndex(index);
         return new ListItr(index);
     }
 
+    @ReceiverDependentMutable
     private class ListItr implements ListIterator<E> {
-        private Node<E> lastReturned;
-        private Node<E> next;
+        private @Readonly Node<E> lastReturned;
+        private @Readonly Node<E> next;
         private int nextIndex;
         private int expectedModCount = modCount;
 
+        // @SuppressWarnings("mutability:initialization.fields.uninitialized") // Lazy
         ListItr(int index) {
             // assert isPositionIndex(index);
             next = (index == size) ? null : node(index);
@@ -919,11 +929,11 @@ public class LinkedList<E>
 
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean hasNext() {
+        public boolean hasNext(@Readonly ListItr this) {
             return nextIndex < size;
         }
 
-        public E next(@NonEmpty ListItr this) {
+        public E next(@NonEmpty @Mutable ListItr this) {
             checkForComodification();
             if (!hasNext())
                 throw new NoSuchElementException();
@@ -934,11 +944,11 @@ public class LinkedList<E>
             return lastReturned.item;
         }
 
-        public boolean hasPrevious() {
+        public boolean hasPrevious(@Readonly ListItr this) {
             return nextIndex > 0;
         }
 
-        public E previous() {
+        public E previous(@Mutable ListItr this) {
             checkForComodification();
             if (!hasPrevious())
                 throw new NoSuchElementException();
@@ -948,15 +958,16 @@ public class LinkedList<E>
             return lastReturned.item;
         }
 
-        public int nextIndex() {
+        public int nextIndex(@Readonly ListItr this) {
             return nextIndex;
         }
 
-        public int previousIndex() {
+        public int previousIndex(@Readonly ListItr this) {
             return nextIndex - 1;
         }
 
-        public void remove() {
+        @SuppressWarnings("mutability") // Outter receiver dependence
+        public void remove(@Mutable LinkedList<E>.@Mutable ListItr this) {
             checkForComodification();
             if (lastReturned == null)
                 throw new IllegalStateException();
@@ -971,14 +982,16 @@ public class LinkedList<E>
             expectedModCount++;
         }
 
-        public void set(E e) {
+        @SuppressWarnings("mutability") // Outter receiver dependence
+        public void set(@Mutable LinkedList<E>.@Mutable ListItr this, E e) {
             if (lastReturned == null)
                 throw new IllegalStateException();
             checkForComodification();
             lastReturned.item = e;
         }
 
-        public void add(E e) {
+        @SuppressWarnings("mutability") // Outter receiver dependence
+        public void add(@Mutable LinkedList<E>.@Mutable ListItr this, E e) {
             checkForComodification();
             lastReturned = null;
             if (next == null)
@@ -989,7 +1002,7 @@ public class LinkedList<E>
             expectedModCount++;
         }
 
-        public void forEachRemaining(Consumer<? super E> action) {
+        public void forEachRemaining(@Mutable ListItr this, Consumer<? super E> action) {
             Objects.requireNonNull(action);
             while (modCount == expectedModCount && nextIndex < size) {
                 action.accept(next.item);
@@ -1000,18 +1013,19 @@ public class LinkedList<E>
             checkForComodification();
         }
 
-        final void checkForComodification() {
+        final void checkForComodification(@Readonly ListItr this) {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
         }
     }
 
+    @ReceiverDependentMutable
     private static class Node<E> {
         E item;
         Node<E> next;
         Node<E> prev;
 
-        Node(Node<E> prev, E element, Node<E> next) {
+        Node(@ReceiverDependentMutable Node<E> prev, E element, @ReceiverDependentMutable Node<E> next) {
             this.item = element;
             this.next = next;
             this.prev = prev;
@@ -1021,30 +1035,31 @@ public class LinkedList<E>
     /**
      * @since 1.6
      */
-    public @PolyGrowShrink @PolyNonEmpty Iterator<E> descendingIterator(@PolyGrowShrink @PolyNonEmpty LinkedList<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> descendingIterator(@Readonly @PolyGrowShrink @PolyNonEmpty LinkedList<E> this) {
         return new DescendingIterator();
     }
 
     /**
      * Adapter to provide descending iterators via ListItr.previous
      */
+    @ReceiverDependentMutable
     private class DescendingIterator implements Iterator<E> {
-        private final ListItr itr = new ListItr(size());
+        private final ListItr itr = new @ReceiverDependentMutable ListItr(size());
         @Pure
         @EnsuresNonEmptyIf(result = true, expression = "this")
-        public boolean hasNext() {
+        public boolean hasNext(@Readonly DescendingIterator this) {
             return itr.hasPrevious();
         }
-        public E next(@NonEmpty DescendingIterator this) {
+        public E next(@NonEmpty @Mutable DescendingIterator this) {
             return itr.previous();
         }
-        public void remove() {
+        public void remove(@Mutable LinkedList<E> . @Mutable DescendingIterator this) {
             itr.remove();
         }
     }
 
     @SuppressWarnings("unchecked")
-    private LinkedList<E> superClone() {
+    private LinkedList<E> superClone(@Mutable LinkedList<E> this) {
         try {
             return (LinkedList<E>) super.clone();
         } catch (CloneNotSupportedException e) {
@@ -1059,7 +1074,7 @@ public class LinkedList<E>
      * @return a shallow copy of this {@code LinkedList} instance
      */
     @SideEffectFree
-    public Object clone(@GuardSatisfied LinkedList<E> this) {
+    public Object clone(@GuardSatisfied @Mutable LinkedList<E> this) {
         LinkedList<E> clone = superClone();
 
         // Put clone into "virgin" state
@@ -1089,8 +1104,9 @@ public class LinkedList<E>
      *         in proper sequence
      */
     @SideEffectFree
-    public @PolyNull @PolySigned Object[] toArray(LinkedList<@PolyNull @PolySigned E> this) {
-        Object[] result = new Object[size];
+    @SuppressWarnings("mutability") // multiple polymorphic qualifiers
+    public @PolyNull @PolySigned @PolyMutable Object[] toArray(LinkedList<@PolyNull @PolySigned @PolyMutable E> this) {
+        @PolyMutable Object[] result = new @PolyMutable Object[size];
         int i = 0;
         for (Node<E> x = first; x != null; x = x.next)
             result[i++] = x.item;
@@ -1142,7 +1158,7 @@ public class LinkedList<E>
             a = (T[])java.lang.reflect.Array.newInstance(
                                 a.getClass().getComponentType(), size);
         int i = 0;
-        Object[] result = a;
+        @Readonly Object[] result = a;
         for (Node<E> x = first; x != null; x = x.next)
             result[i++] = x.item;
 
@@ -1164,7 +1180,7 @@ public class LinkedList<E>
      *             elements (each an Object) in the proper order.
      */
     @java.io.Serial
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject(@Mutable LinkedList<E> this, java.io.ObjectOutputStream s)
         throws java.io.IOException {
         // Write out any hidden serialization magic
         s.defaultWriteObject();
@@ -1183,7 +1199,7 @@ public class LinkedList<E>
      */
     @SuppressWarnings("unchecked")
     @java.io.Serial
-    private void readObject(java.io.ObjectInputStream s)
+    private void readObject(@Mutable LinkedList<E> this, java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException {
         // Read in any hidden serialization magic
         s.defaultReadObject();
@@ -1214,27 +1230,28 @@ public class LinkedList<E>
      */
     @SideEffectFree
     @Override
-    public Spliterator<E> spliterator() {
+    public Spliterator<E> spliterator(@Readonly LinkedList<E> this) {
         return new LLSpliterator<>(this, -1, 0);
     }
 
     /** A customized variant of Spliterators.IteratorSpliterator */
+    @ReceiverDependentMutable
     static final class LLSpliterator<E> implements Spliterator<E> {
         static final int BATCH_UNIT = 1 << 10;  // batch array size increment
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
-        final LinkedList<E> list; // null OK unless traversed
-        Node<E> current;      // current node; null until initialized
-        int est;              // size estimate; -1 until first needed
-        int expectedModCount; // initialized when est set
+        final @Readonly LinkedList<E> list; // null OK unless traversed
+        @Assignable /* should be @LazyFinal */ @Readonly Node<E> current;      // current node; null until initialized
+        @Assignable /* should be @LazyFinal */ int est;              // size estimate; -1 until first needed
+        @Assignable /* should be @LazyFinal */ int expectedModCount; // initialized when est set
         int batch;            // batch size for splits
 
-        LLSpliterator(LinkedList<E> list, int est, int expectedModCount) {
+        LLSpliterator(@Readonly LinkedList<E> list, int est, int expectedModCount) {
             this.list = list;
             this.est = est;
             this.expectedModCount = expectedModCount;
         }
 
-        final int getEst() {
+        final int getEst(@Readonly LLSpliterator<E> this) {
             int s; // force initialization
             final LinkedList<E> lst;
             if ((s = est) < 0) {
@@ -1249,9 +1266,9 @@ public class LinkedList<E>
             return s;
         }
 
-        public long estimateSize() { return (long) getEst(); }
-
-        public Spliterator<E> trySplit() {
+        public long estimateSize(@Readonly LLSpliterator<E> this) { return (long) getEst(); }
+        @SuppressWarnings("mutability:return.type.incompatible") // covariant type parameter
+        public Spliterator<E> trySplit(@Mutable LLSpliterator<E> this) {
             Node<E> p;
             int s = getEst();
             if (s > 1 && (p = current) != null) {
@@ -1260,7 +1277,7 @@ public class LinkedList<E>
                     n = s;
                 if (n > MAX_BATCH)
                     n = MAX_BATCH;
-                Object[] a = new Object[n];
+                @Readonly Object[] a = new Object[n];
                 int j = 0;
                 do { a[j++] = p.item; } while ((p = p.next) != null && j < n);
                 current = p;
@@ -1271,7 +1288,7 @@ public class LinkedList<E>
             return null;
         }
 
-        public void forEachRemaining(Consumer<? super E> action) {
+        public void forEachRemaining(@Mutable LLSpliterator<E> this, Consumer<? super E> action) {
             Node<E> p; int n;
             if (action == null) throw new NullPointerException();
             if ((n = getEst()) > 0 && (p = current) != null) {
@@ -1287,7 +1304,7 @@ public class LinkedList<E>
                 throw new ConcurrentModificationException();
         }
 
-        public boolean tryAdvance(Consumer<? super E> action) {
+        public boolean tryAdvance(@Mutable LLSpliterator<E> this, Consumer<? super E> action) {
             Node<E> p;
             if (action == null) throw new NullPointerException();
             if (getEst() > 0 && (p = current) != null) {
@@ -1302,7 +1319,7 @@ public class LinkedList<E>
             return false;
         }
 
-        public int characteristics() {
+        public int characteristics(@Readonly LLSpliterator<E> this) {
             return Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED;
         }
     }

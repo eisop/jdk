@@ -34,6 +34,11 @@ import org.checkerframework.checker.nonempty.qual.NonEmpty;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.mutability.qual.Immutable;
+import org.checkerframework.checker.mutability.qual.Mutable;
+import org.checkerframework.checker.mutability.qual.PolyMutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.signedness.qual.UnknownSignedness;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -106,13 +111,14 @@ import org.checkerframework.framework.qual.CFComment;
 
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
 @AnnotatedFor({"lock", "nullness"})
-public class TreeSet<E> extends AbstractSet<E>
+@ReceiverDependentMutable
+public class TreeSet<E extends @Immutable Object> extends AbstractSet<E>
     implements NavigableSet<E>, Cloneable, java.io.Serializable
 {
     /**
      * The backing map.
      */
-    private transient NavigableMap<E,Object> m;
+    private transient NavigableMap<E, @Readonly Object> m;
 
     // Dummy value to associate with an Object in the backing Map
     private static final Object PRESENT = new Object();
@@ -120,7 +126,7 @@ public class TreeSet<E> extends AbstractSet<E>
     /**
      * Constructs a set backed by the specified navigable map.
      */
-    TreeSet(NavigableMap<E,Object> m) {
+    TreeSet(@ReceiverDependentMutable NavigableMap<E, @Readonly Object> m) {
         this.m = m;
     }
 
@@ -138,7 +144,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * {@code ClassCastException}.
      */
     public TreeSet() {
-        this(new TreeMap<>());
+        this(new @ReceiverDependentMutable TreeMap<E, @Readonly Object>());
     }
 
     /**
@@ -155,7 +161,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *        ordering} of the elements will be used.
      */
     public TreeSet(@Nullable Comparator<? super E> comparator) {
-        this(new TreeMap<>(comparator));
+        this(new @ReceiverDependentMutable TreeMap<E, @Readonly Object>(comparator));
     }
 
     /**
@@ -172,6 +178,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         not {@link Comparable}, or are not mutually comparable
      * @throws NullPointerException if the specified collection is null
      */
+    @SuppressWarnings("mutability:method.invocation.invalid") // PICO constructor fix
     public @PolyNonEmpty TreeSet(@PolyNonEmpty Collection<? extends E> c) {
         this();
         addAll(c);
@@ -184,6 +191,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @param s sorted set whose elements will comprise the new set
      * @throws NullPointerException if the specified sorted set is null
      */
+    @SuppressWarnings("mutability:method.invocation.invalid") // PICO constructor fix
     public @PolyNonEmpty TreeSet(@PolyNonEmpty SortedSet<E> s) {
         this(s.comparator());
         addAll(s);
@@ -195,7 +203,8 @@ public class TreeSet<E> extends AbstractSet<E>
      * @return an iterator over the elements in this set in ascending order
      */
     @SideEffectFree
-    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty TreeSet<E> this) {
+    @SuppressWarnings("mutability:method.invocation.invalid") // lost can not invoke poly method.
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty @Readonly TreeSet<E> this) {
         return m.navigableKeySet().iterator();
     }
 
@@ -205,15 +214,16 @@ public class TreeSet<E> extends AbstractSet<E>
      * @return an iterator over the elements in this set in descending order
      * @since 1.6
      */
-    public @PolyGrowShrink @PolyNonEmpty Iterator<E> descendingIterator(@PolyGrowShrink @PolyNonEmpty TreeSet<E> this) {
+    @SuppressWarnings("mutability:method.invocation.invalid") // lost can not invoke poly method.
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> descendingIterator(@PolyGrowShrink @PolyNonEmpty @Readonly TreeSet<E> this) {
         return m.descendingKeySet().iterator();
     }
 
     /**
      * @since 1.6
      */
-    public NavigableSet<E> descendingSet() {
-        return new TreeSet<>(m.descendingMap());
+    public @PolyMutable NavigableSet<E> descendingSet(@PolyMutable TreeSet<E> this) {
+        return new @PolyMutable TreeSet<>(m.descendingMap());
     }
 
     /**
@@ -222,7 +232,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @return the number of elements in this set (its cardinality)
      */
     @Pure
-    public @NonNegative int size(@GuardSatisfied TreeSet<E> this) {
+    public @NonNegative int size(@GuardSatisfied @Readonly TreeSet<E> this) {
         return m.size();
     }
 
@@ -234,7 +244,7 @@ public class TreeSet<E> extends AbstractSet<E>
     @EnsuresNonNullIf(expression={"pollFirst()", "pollLast()"}, result=false)
     @Pure
     @EnsuresNonEmptyIf(result = false, expression = "this")
-    public boolean isEmpty(@GuardSatisfied TreeSet<E> this) {
+    public boolean isEmpty(@GuardSatisfied @Readonly TreeSet<E> this) {
         return m.isEmpty();
     }
 
@@ -254,7 +264,7 @@ public class TreeSet<E> extends AbstractSet<E>
      */
     @Pure
     @EnsuresNonEmptyIf(result = true, expression = "this")
-    public boolean contains(@GuardSatisfied TreeSet<E> this, @GuardSatisfied @UnknownSignedness Object o) {
+    public boolean contains(@GuardSatisfied @Readonly TreeSet<E> this, @GuardSatisfied @UnknownSignedness @Readonly Object o) {
         return m.containsKey(o);
     }
 
@@ -276,7 +286,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         does not permit null elements
      */
     @EnsuresNonEmpty("this")
-    public boolean add(@GuardSatisfied TreeSet<E> this, E e) {
+    public boolean add(@GuardSatisfied @Mutable TreeSet<E> this, E e) {
         return m.put(e, PRESENT)==null;
     }
 
@@ -297,7 +307,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         and this set uses natural ordering, or its comparator
      *         does not permit null elements
      */
-    public boolean remove(@GuardSatisfied TreeSet<E> this, @GuardSatisfied @UnknownSignedness Object o) {
+    public boolean remove(@GuardSatisfied @Mutable TreeSet<E> this, @GuardSatisfied @UnknownSignedness @Readonly Object o) {
         return m.remove(o)==PRESENT;
     }
 
@@ -305,7 +315,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * Removes all of the elements from this set.
      * The set will be empty after this call returns.
      */
-    public void clear(@GuardSatisfied TreeSet<E> this) {
+    public void clear(@GuardSatisfied @Mutable TreeSet<E> this) {
         m.clear();
     }
 
@@ -320,7 +330,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         if any element is null and this set uses natural ordering, or
      *         its comparator does not permit null elements
      */
-    public  boolean addAll(@GuardSatisfied TreeSet<E> this, Collection<? extends E> c) {
+    public  boolean addAll(@GuardSatisfied @Mutable TreeSet<E> this, @Readonly Collection<? extends E> c) {
         // Use linear-time version if applicable
         if (m.size()==0 && c.size() > 0 &&
             c instanceof SortedSet &&
@@ -343,9 +353,9 @@ public class TreeSet<E> extends AbstractSet<E>
      * @since 1.6
      */
     @SideEffectFree
-    public @PolyGrowShrink NavigableSet<E> subSet(@GuardSatisfied @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, boolean fromInclusive,
+    public @PolyMutable @PolyGrowShrink NavigableSet<E> subSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, boolean fromInclusive,
                                   @GuardSatisfied E toElement,   boolean toInclusive) {
-        return new TreeSet<>(m.subMap(fromElement, fromInclusive,
+        return new @PolyMutable TreeSet<>(m.subMap(fromElement, fromInclusive,
                                        toElement,   toInclusive));
     }
 
@@ -358,8 +368,8 @@ public class TreeSet<E> extends AbstractSet<E>
      * @since 1.6
      */
     @SideEffectFree
-    public @PolyGrowShrink NavigableSet<E> headSet(@GuardSatisfied @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E toElement, boolean inclusive) {
-        return new TreeSet<>(m.headMap(toElement, inclusive));
+    public @PolyMutable @PolyGrowShrink NavigableSet<E> headSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E toElement, boolean inclusive) {
+        return new @PolyMutable TreeSet<>(m.headMap(toElement, inclusive));
     }
 
     /**
@@ -371,8 +381,8 @@ public class TreeSet<E> extends AbstractSet<E>
      * @since 1.6
      */
     @SideEffectFree
-    public @PolyGrowShrink NavigableSet<E> tailSet(@GuardSatisfied @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, boolean inclusive) {
-        return new TreeSet<>(m.tailMap(fromElement, inclusive));
+    public @PolyMutable @PolyGrowShrink NavigableSet<E> tailSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, boolean inclusive) {
+        return new @PolyMutable TreeSet<>(m.tailMap(fromElement, inclusive));
     }
 
     /**
@@ -383,7 +393,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    public @PolyGrowShrink SortedSet<E> subSet(@GuardSatisfied @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, @GuardSatisfied E toElement) {
+    public @PolyMutable @PolyGrowShrink SortedSet<E> subSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, @GuardSatisfied E fromElement, @GuardSatisfied E toElement) {
         return subSet(fromElement, true, toElement, false);
     }
 
@@ -395,7 +405,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    public @PolyGrowShrink SortedSet<E> headSet(@GuardSatisfied @PolyGrowShrink TreeSet<E> this, E toElement) {
+    public @PolyMutable @PolyGrowShrink SortedSet<E> headSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, E toElement) {
         return headSet(toElement, false);
     }
 
@@ -407,12 +417,12 @@ public class TreeSet<E> extends AbstractSet<E>
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    public @PolyGrowShrink SortedSet<E> tailSet(@GuardSatisfied @PolyGrowShrink TreeSet<E> this, E fromElement) {
+    public @PolyMutable @PolyGrowShrink SortedSet<E> tailSet(@GuardSatisfied @PolyMutable @PolyGrowShrink TreeSet<E> this, E fromElement) {
         return tailSet(fromElement, true);
     }
 
     @Pure
-    public @Nullable Comparator<? super E> comparator(@GuardSatisfied TreeSet<E> this) {
+    public @Nullable Comparator<? super E> comparator(@GuardSatisfied @Readonly TreeSet<E> this) {
         return m.comparator();
     }
 
@@ -420,7 +430,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @throws NoSuchElementException {@inheritDoc}
      */
     @SideEffectFree
-    public E first(@GuardSatisfied @NonEmpty TreeSet<E> this) {
+    public E first(@GuardSatisfied @NonEmpty @Readonly TreeSet<E> this) {
         return m.firstKey();
     }
 
@@ -428,7 +438,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @throws NoSuchElementException {@inheritDoc}
      */
     @SideEffectFree
-    public E last(@GuardSatisfied @NonEmpty TreeSet<E> this) {
+    public E last(@GuardSatisfied @NonEmpty @Readonly TreeSet<E> this) {
         return m.lastKey();
     }
 
@@ -441,7 +451,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         does not permit null elements
      * @since 1.6
      */
-    public @Nullable E lower(E e) {
+    public @Nullable E lower(@Readonly TreeSet<E> this, E e) {
         return m.lowerKey(e);
     }
 
@@ -452,7 +462,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         does not permit null elements
      * @since 1.6
      */
-    public @Nullable E floor(E e) {
+    public @Nullable E floor(@Readonly TreeSet<E> this, E e) {
         return m.floorKey(e);
     }
 
@@ -463,7 +473,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         does not permit null elements
      * @since 1.6
      */
-    public @Nullable E ceiling(E e) {
+    public @Nullable E ceiling(@Readonly TreeSet<E> this, E e) {
         return m.ceilingKey(e);
     }
 
@@ -474,14 +484,14 @@ public class TreeSet<E> extends AbstractSet<E>
      *         does not permit null elements
      * @since 1.6
      */
-    public @Nullable E higher(E e) {
+    public @Nullable E higher(@Readonly TreeSet<E> this, E e) {
         return m.higherKey(e);
     }
 
     /**
      * @since 1.6
      */
-    public @Nullable E pollFirst(@GuardSatisfied TreeSet<E> this) {
+    public @Nullable E pollFirst(@GuardSatisfied @Mutable TreeSet<E> this) {
         Map.Entry<E,?> e = m.pollFirstEntry();
         return (e == null) ? null : e.getKey();
     }
@@ -489,7 +499,7 @@ public class TreeSet<E> extends AbstractSet<E>
     /**
      * @since 1.6
      */
-    public @Nullable E pollLast(@GuardSatisfied TreeSet<E> this) {
+    public @Nullable E pollLast(@GuardSatisfied @Mutable TreeSet<E> this) {
         Map.Entry<E,?> e = m.pollLastEntry();
         return (e == null) ? null : e.getKey();
     }
@@ -502,7 +512,7 @@ public class TreeSet<E> extends AbstractSet<E>
      */
     @SideEffectFree
     @SuppressWarnings("unchecked")
-    public Object clone(@GuardSatisfied TreeSet<E> this) {
+    public Object clone(@GuardSatisfied @Mutable TreeSet<E> this) {
         TreeSet<E> clone;
         try {
             clone = (TreeSet<E>) super.clone();
@@ -510,7 +520,7 @@ public class TreeSet<E> extends AbstractSet<E>
             throw new InternalError(e);
         }
 
-        clone.m = new TreeMap<>(m);
+        clone.m = new TreeMap<E, @Readonly Object>(m);
         return clone;
     }
 
@@ -527,7 +537,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *             the set has no Comparator).
      */
     @java.io.Serial
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject(@Mutable TreeSet<E> this, java.io.ObjectOutputStream s)
         throws java.io.IOException {
         // Write out any hidden stuff
         s.defaultWriteObject();
@@ -548,7 +558,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * deserialize it).
      */
     @java.io.Serial
-    private void readObject(java.io.ObjectInputStream s)
+    private void readObject(@Mutable TreeSet<E> this, java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException {
         // Read in any hidden stuff
         s.defaultReadObject();
@@ -558,7 +568,7 @@ public class TreeSet<E> extends AbstractSet<E>
             Comparator<? super E> c = (Comparator<? super E>) s.readObject();
 
         // Create backing TreeMap
-        TreeMap<E,Object> tm = new TreeMap<>(c);
+        TreeMap<E, @Readonly Object> tm = new TreeMap<E, @Readonly Object>(c);
         m = tm;
 
         // Read in size

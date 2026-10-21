@@ -399,6 +399,7 @@ import jdk.internal.reflect.Reflection;
  */
 
 @AnnotatedFor({"interning", "lock", "nullness"})
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final @UsesObjectEquals class ServiceLoader<S>
     implements Iterable<S>
 {

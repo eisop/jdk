@@ -36,8 +36,8 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @since 1.6
  * @see ServiceLoader
  */
-
 @AnnotatedFor({"nullness"})
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public class ServiceConfigurationError
     extends Error
 {

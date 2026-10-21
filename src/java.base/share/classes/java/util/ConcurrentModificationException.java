@@ -25,6 +25,7 @@
 
 package java.util;
 
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.AnnotatedFor;
 
@@ -70,7 +71,8 @@ import org.checkerframework.framework.qual.AnnotatedFor;
  * @see     AbstractList
  * @since   1.2
  */
-@AnnotatedFor({"nullness"})
+@AnnotatedFor({"nullness", "mutability"})
+@ReceiverDependentMutable
 public class ConcurrentModificationException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = -3666751008965953603L;
@@ -103,7 +105,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since  1.7
      */
-    public ConcurrentModificationException(@Nullable Throwable cause) {
+    public ConcurrentModificationException(@Nullable @ReceiverDependentMutable Throwable cause) {
         super(cause);
     }
 
@@ -123,7 +125,7 @@ public class ConcurrentModificationException extends RuntimeException {
      *         unknown.)
      * @since 1.7
      */
-    public ConcurrentModificationException(@Nullable String message, @Nullable Throwable cause) {
+    public ConcurrentModificationException(@Nullable String message, @Nullable @ReceiverDependentMutable Throwable cause) {
         super(message, cause);
     }
 }

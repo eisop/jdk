@@ -93,6 +93,7 @@ import jdk.internal.util.random.RandomSupport.RandomGeneratorProperties;
         i = 64, j = 0, k = 0,
         equidistribution = 1
 )
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final class SplittableRandom implements RandomGenerator, SplittableGenerator {
 
     /*

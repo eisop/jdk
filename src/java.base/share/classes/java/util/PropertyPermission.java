@@ -91,6 +91,7 @@ import sun.security.util.SecurityConstants;
  */
 
 @AnnotatedFor({"lock", "nullness", "index"})
+@SuppressWarnings("mutability") // Not interesting class, fix later
 public final class PropertyPermission extends BasicPermission {
 
     /**

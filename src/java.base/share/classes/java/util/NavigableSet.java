@@ -39,6 +39,10 @@ import org.checkerframework.checker.index.qual.PolyGrowShrink;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.checker.nonempty.qual.PolyNonEmpty;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.mutability.qual.Mutable;
+import org.checkerframework.checker.mutability.qual.PolyMutable;
+import org.checkerframework.checker.mutability.qual.Readonly;
+import org.checkerframework.checker.mutability.qual.ReceiverDependentMutable;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.framework.qual.AnnotatedFor;
 import org.checkerframework.framework.qual.CFComment;
@@ -96,7 +100,8 @@ import org.checkerframework.framework.qual.CFComment;
  * @since 1.6
  */
 @CFComment({"lock/nullness: Subclasses of this interface/class may opt to prohibit null elements"})
-@AnnotatedFor({"lock", "nullness"})
+@AnnotatedFor({"lock", "nullness", "mutability"})
+@ReceiverDependentMutable
 public interface NavigableSet<E> extends SortedSet<E> {
     /**
      * Returns the greatest element in this set strictly less than the
@@ -110,7 +115,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws NullPointerException if the specified element is null
      *         and this set does not permit null elements
      */
-    @Nullable E lower(E e);
+    @Nullable E lower(@Readonly NavigableSet<E> this, E e);
 
     /**
      * Returns the greatest element in this set less than or equal to
@@ -124,7 +129,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws NullPointerException if the specified element is null
      *         and this set does not permit null elements
      */
-    @Nullable E floor(E e);
+    @Nullable E floor(@Readonly NavigableSet<E> this, E e);
 
     /**
      * Returns the least element in this set greater than or equal to
@@ -138,7 +143,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws NullPointerException if the specified element is null
      *         and this set does not permit null elements
      */
-    @Nullable E ceiling(E e);
+    @Nullable E ceiling(@Readonly NavigableSet<E> this, E e);
 
     /**
      * Returns the least element in this set strictly greater than the
@@ -152,7 +157,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws NullPointerException if the specified element is null
      *         and this set does not permit null elements
      */
-    @Nullable E higher(E e);
+    @Nullable E higher(@Readonly NavigableSet<E> this, E e);
 
     /**
      * Retrieves and removes the first (lowest) element,
@@ -160,7 +165,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      *
      * @return the first element, or {@code null} if this set is empty
      */
-    @Nullable E pollFirst(@GuardSatisfied NavigableSet<E> this);
+    @Nullable E pollFirst(@GuardSatisfied @Mutable NavigableSet<E> this);
 
     /**
      * Retrieves and removes the last (highest) element,
@@ -168,7 +173,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      *
      * @return the last element, or {@code null} if this set is empty
      */
-    @Nullable E pollLast(@GuardSatisfied NavigableSet<E> this);
+    @Nullable E pollLast(@GuardSatisfied @Mutable NavigableSet<E> this);
 
     /**
      * Returns an iterator over the elements in this set, in ascending order.
@@ -176,7 +181,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @return an iterator over the elements in this set, in ascending order
      */
     @SideEffectFree
-    @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty NavigableSet<E> this);
+    @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@Readonly @PolyGrowShrink @PolyNonEmpty NavigableSet<E> this);
 
     /**
      * Returns a reverse order view of the elements contained in this set.
@@ -193,7 +198,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      *
      * @return a reverse order view of this set
      */
-    NavigableSet<E> descendingSet();
+    @PolyMutable NavigableSet<E> descendingSet(@PolyMutable NavigableSet<E> this);
 
     /**
      * Returns an iterator over the elements in this set, in descending order.
@@ -201,7 +206,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      *
      * @return an iterator over the elements in this set, in descending order
      */
-    Iterator<E> descendingIterator();
+    Iterator<E> descendingIterator(@Readonly NavigableSet<E> this);
 
     /**
      * Returns a view of the portion of this set whose elements range from
@@ -239,7 +244,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      *         {@code toElement} lies outside the bounds of the range.
      */
     @SideEffectFree
-    NavigableSet<E> subSet(@GuardSatisfied NavigableSet<E> this, @GuardSatisfied E fromElement, boolean fromInclusive,
+    @PolyMutable NavigableSet<E> subSet(@GuardSatisfied @PolyMutable NavigableSet<E> this, @GuardSatisfied E fromElement, boolean fromInclusive,
                            @GuardSatisfied E toElement,   boolean toInclusive);
 
     /**
@@ -270,7 +275,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      *         bounds of the range
      */
     @SideEffectFree
-    NavigableSet<E> headSet(@GuardSatisfied NavigableSet<E> this, @GuardSatisfied E toElement, boolean inclusive);
+    @PolyMutable NavigableSet<E> headSet(@GuardSatisfied @PolyMutable NavigableSet<E> this, @GuardSatisfied E toElement, boolean inclusive);
 
     /**
      * Returns a view of the portion of this set whose elements are greater
@@ -300,7 +305,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      *         bounds of the range
      */
     @SideEffectFree
-    NavigableSet<E> tailSet(@GuardSatisfied NavigableSet<E> this, @GuardSatisfied E fromElement, boolean inclusive);
+    @PolyMutable NavigableSet<E> tailSet(@GuardSatisfied @PolyMutable NavigableSet<E> this, @GuardSatisfied E fromElement, boolean inclusive);
 
     /**
      * {@inheritDoc}
@@ -312,7 +317,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    SortedSet<E> subSet(@GuardSatisfied NavigableSet<E> this, @GuardSatisfied E fromElement, @GuardSatisfied E toElement);
+    @PolyMutable SortedSet<E> subSet(@GuardSatisfied @PolyMutable NavigableSet<E> this, @GuardSatisfied E fromElement, @GuardSatisfied E toElement);
 
     /**
      * {@inheritDoc}
@@ -324,7 +329,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    SortedSet<E> headSet(@GuardSatisfied NavigableSet<E> this, E toElement);
+    @PolyMutable SortedSet<E> headSet(@GuardSatisfied @PolyMutable NavigableSet<E> this, E toElement);
 
     /**
      * {@inheritDoc}
@@ -336,5 +341,5 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws IllegalArgumentException {@inheritDoc}
      */
     @SideEffectFree
-    SortedSet<E> tailSet(@GuardSatisfied NavigableSet<E> this, E fromElement);
+    @PolyMutable SortedSet<E> tailSet(@GuardSatisfied @PolyMutable NavigableSet<E> this, E fromElement);
 }
