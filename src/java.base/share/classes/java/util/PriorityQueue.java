@@ -492,7 +492,7 @@ public class PriorityQueue<E extends @NonNull Object> extends AbstractQueue<E>
      * @return an iterator over the elements in this queue
      */
     @SideEffectFree
-    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty PriorityQueue<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@GuardSatisfied @PolyGrowShrink @PolyNonEmpty PriorityQueue<E> this) {
         return new Itr();
     }
 

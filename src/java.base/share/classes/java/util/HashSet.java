@@ -186,7 +186,7 @@ public class HashSet<E>
      * @see ConcurrentModificationException
      */
     @SideEffectFree
-    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty HashSet<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@GuardSatisfied @PolyGrowShrink @PolyNonEmpty HashSet<E> this) {
         return map.keySet().iterator();
     }
 

@@ -983,7 +983,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @return an iterator over the elements in this list in proper sequence
      */
     @SideEffectFree
-    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty ArrayList<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@GuardSatisfied @PolyGrowShrink @PolyNonEmpty ArrayList<E> this) {
         return new Itr();
     }
 

@@ -1267,7 +1267,7 @@ public class Vector<E>
      * @return an iterator over the elements in this list in proper sequence
      */
     @SideEffectFree
-    public synchronized @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty Vector<E> this) {
+    public synchronized @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@GuardSatisfied @PolyGrowShrink @PolyNonEmpty Vector<E> this) {
         return new Itr();
     }
 

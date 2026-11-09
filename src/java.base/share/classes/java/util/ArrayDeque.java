@@ -695,7 +695,7 @@ public class ArrayDeque<E extends @NonNull Object> extends AbstractCollection<E>
      * @return an iterator over the elements in this deque
      */
     @SideEffectFree
-    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@PolyGrowShrink @PolyNonEmpty ArrayDeque<E> this) {
+    public @PolyGrowShrink @PolyNonEmpty Iterator<E> iterator(@GuardSatisfied @PolyGrowShrink @PolyNonEmpty ArrayDeque<E> this) {
         return new DeqIterator();
     }
 
